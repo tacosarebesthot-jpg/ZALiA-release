@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"dev_automate_tile_layer_data",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"dev_automate_tile_layer_data",
+  "parent":{
+    "name":"tile",
+    "path":"folders/Scripts/debug/tile.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

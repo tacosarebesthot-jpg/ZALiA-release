@@ -1,0 +1,70 @@
+/// @description  SwitchB_update()
+function SwitchB_update() {
+
+
+	if (complete) pressed = true;
+
+
+	update_EF11();
+
+
+	if (complete) exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+
+	// ------------------------------------------------------------------
+	update_body_hb_2a();
+
+	// *** yt is 8 ABOVE the ground.
+
+
+	var _qualifies = false;
+	if (global.dg_solid[# xl>>3,    yt>>3]&$FF==TID_SOLID1  // if solid tile on top
+	||  global.dg_solid[#(xl>>3)+1, yt>>3]&$FF==TID_SOLID1  // if solid tile on top
+	||  collide_solid_inst(x,y-1) 
+	|| (global.pc.cs&CS_BTM && pointInRect(global.pc.cp1X,global.pc.cp1Y, BodyHB_xl,BodyHB_yt,BodyHB_w,BodyHB_h)) ) // if PC on top
+	{
+	    _qualifies = true;
+	}
+	else if (other_objects_can_press)
+	{
+	    with(GameObjectB)
+	    {
+	        if (cs&$4 
+	        &&  pointInRect(x,yb, other.BodyHB_xl,other.BodyHB_yt,other.BodyHB_w,other.BodyHB_h) )
+	        {
+	            _qualifies = true;
+	            break;//with(GameObject)
+	        }
+	    }//with(GameObject)
+	}
+
+
+
+	if (_qualifies)
+	{
+	    if(!pressed)
+	    {
+	        pressed_count++;
+	        aud_play_sound(snd_press);
+	    }
+    
+	    pressed = true;
+	}
+	else
+	{
+	    if (pressed)
+	    {
+	        aud_play_sound(snd_press);
+	    }
+    
+	    pressed = false;
+	}
+
+
+
+
+
+
+
+}

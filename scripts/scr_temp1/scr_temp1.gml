@@ -1,0 +1,6 @@
+function scr_temp1() {
+	// TESTING SYNCING REPOSITORY FORK WITH ITS MASTER(THIS REPO)
+
+
+
+}

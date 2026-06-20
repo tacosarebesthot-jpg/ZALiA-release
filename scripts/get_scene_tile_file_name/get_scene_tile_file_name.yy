@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"get_scene_tile_file_name",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"get_scene_tile_file_name",
+  "parent":{
+    "name":"room",
+    "path":"folders/Scripts/room.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

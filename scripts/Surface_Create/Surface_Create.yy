@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Surface_Create",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Surface_Create",
+  "parent":{
+    "name":"surface",
+    "path":"folders/Scripts/surface.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"update_non_empty_tiles_data",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"update_non_empty_tiles_data",
+  "parent":{
+    "name":"tile",
+    "path":"folders/Scripts/tile.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

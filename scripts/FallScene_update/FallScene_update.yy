@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"FallScene_update",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"FallScene_update",
+  "parent":{
+    "name":"FallScene",
+    "path":"folders/Scripts/game_object/gof/cutscene/FallScene.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

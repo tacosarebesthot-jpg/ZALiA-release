@@ -1,0 +1,125 @@
+/// @description  set_go_can_draw_self(can_draw_self)
+/// @param can_draw_self
+function set_go_can_draw_self(argument0) {
+
+
+	// D250
+
+	var _i;
+	// GMS2: cache list refs so [|i] accessor works; use instance_exists() instead of +1 trick
+	var _dl_gob1 = g.go_mgr.dl_gob1;
+	var _dl_goc1 = g.go_mgr.dl_goc1;
+	var _dl_goc2 = g.go_mgr.dl_goc2;
+	var _inst;
+
+
+	// PC ----------------------------------------------------
+	with(global.pc)
+	{
+	    if (state) can_draw_self = argument0;
+	    else       can_draw_self = false;
+
+	    SwordHB_can_draw  = false;
+	    SwordHB2_can_draw = false;
+	    SCS_can_draw      = false;
+	}
+
+
+
+
+	// Enemy, ------------------------------------------------
+	for(_i=0; _i<MAX_GOB1; _i++)
+	{
+	    _inst = _dl_gob1[|_i];
+	    if (instance_exists(_inst))
+	    {
+	        with(_inst)
+	        {
+	            if(!state)                        can_draw_self = false;
+	            else if(!can_draw_self_exception) can_draw_self = argument0;
+	        }
+	    }
+	}
+
+
+
+
+	// Projectile Hostile -----------------------------------
+	for(_i=0; _i<MAX_GOC1; _i++)
+	{
+	    _inst = _dl_goc1[|_i];
+	    if (instance_exists(_inst))
+	    {
+	        with(_inst)
+	        {
+	            if(!state)                        can_draw_self = false;
+	            else if(!can_draw_self_exception) can_draw_self = argument0;
+	        }
+	    }
+	}
+
+
+
+
+	// Projectile Friendly ----------------------------------
+	for(_i=0; _i<MAX_GOC2; _i++)
+	{
+	    _inst = _dl_goc2[|_i];
+	    if (instance_exists(_inst))
+	    {
+	        with(_inst)
+	        {
+	            if(!state)                        can_draw_self = false;
+	            else if(!can_draw_self_exception) can_draw_self = argument0;
+	        }
+	    }
+	}
+
+
+
+
+	// GOB2 -------------------------------------------------
+	for(_i=ds_list_size(g.go_mgr.dl_gob2)-1; _i>=0; _i--)
+	{
+	    if(!is_undefined(   g.go_mgr.dl_gob2[|_i]) 
+	    &&  instance_exists(g.go_mgr.dl_gob2[|_i]) )
+	    {
+	        with(g.go_mgr.dl_gob2[|_i])
+	        {
+	            if(!state)                        can_draw_self = false;
+	            else if(!can_draw_self_exception) can_draw_self = argument0;
+	            /*
+	            if(!can_draw_self_exception)
+	            {
+	                if (argument0 
+	                || !state )
+	                //|| !is_ancestor_(object_index,Elevator,LoDoA,BarrA,Barrier2,Torch,Zelda,NPC_0,BlckB,Switch,PushA,ArenaGate) ) // Allow certain GO to continue drawing
+	                {
+	                    if (state) can_draw_self = argument0;
+	                    else       can_draw_self = false;
+	                }
+	            }
+	            */
+	        }
+	    }
+	}
+
+
+
+
+	with(GameObject)
+	{
+	    if (variable_instance_exists(id,"BodyHB_can_draw"))   BodyHB_can_draw   = false;
+	    if (variable_instance_exists(id,"SwordHB_can_draw"))  SwordHB_can_draw  = false;
+	    if (variable_instance_exists(id,"ShieldHB_can_draw")) ShieldHB_can_draw = false;
+	    if (variable_instance_exists(id,"canDrawCSHB"))       canDrawCSHB       = false;
+	    //if(!can_draw_self_exception)
+	}
+
+
+
+
+
+
+
+}

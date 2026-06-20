@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"PaletteEditor_initiate_pal_edit_mode",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"PaletteEditor_initiate_pal_edit_mode",
+  "parent":{
+    "name":"Dev_Palette",
+    "path":"folders/Scripts/dev/Dev_Palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"HostileFire_udp_1",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"HostileFire_udp_1",
+  "parent":{
+    "name":"projectile_hostile",
+    "path":"folders/Scripts/game_object/goc/projectile_hostile.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

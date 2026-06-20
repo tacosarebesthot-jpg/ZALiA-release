@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Surface_Step",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Surface_Step",
+  "parent":{
+    "name":"surface",
+    "path":"folders/Scripts/surface.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

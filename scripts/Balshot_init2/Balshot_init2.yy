@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Balshot_init2",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Balshot_init2",
+  "parent":{
+    "name":"balshot",
+    "path":"folders/Scripts/game_object/gob/gob1/enemy/balshot.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

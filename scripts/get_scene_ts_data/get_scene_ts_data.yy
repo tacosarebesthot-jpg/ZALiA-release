@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"get_scene_ts_data",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"get_scene_ts_data",
+  "parent":{
+    "name":"tile",
+    "path":"folders/Scripts/tile.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

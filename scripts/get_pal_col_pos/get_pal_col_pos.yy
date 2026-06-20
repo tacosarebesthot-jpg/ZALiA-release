@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"get_pal_col_pos",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"get_pal_col_pos",
+  "parent":{
+    "name":"palette",
+    "path":"folders/Scripts/palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

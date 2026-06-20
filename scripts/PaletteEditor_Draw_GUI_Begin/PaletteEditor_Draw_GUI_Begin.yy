@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"PaletteEditor_Draw_GUI_Begin",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"PaletteEditor_Draw_GUI_Begin",
+  "parent":{
+    "name":"Dev_Palette",
+    "path":"folders/Scripts/dev/Dev_Palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

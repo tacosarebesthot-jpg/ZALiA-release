@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"DungeonLayoutRando_testing_1",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"DungeonLayoutRando_testing_1",
+  "parent":{
+    "name":"dev",
+    "path":"folders/Scripts/dev.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

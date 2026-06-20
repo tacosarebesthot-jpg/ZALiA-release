@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"init_tile_layer_data",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"init_tile_layer_data",
+  "parent":{
+    "name":"tile",
+    "path":"folders/Scripts/tile.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

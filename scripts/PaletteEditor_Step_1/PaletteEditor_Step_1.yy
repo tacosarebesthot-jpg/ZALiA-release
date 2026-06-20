@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"PaletteEditor_Step_1",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"PaletteEditor_Step_1",
+  "parent":{
+    "name":"Dev_Palette",
+    "path":"folders/Scripts/dev/Dev_Palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

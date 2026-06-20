@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SmasherTrapManager_udp",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SmasherTrapManager_udp",
+  "parent":{
+    "name":"various",
+    "path":"folders/Scripts/game_object/gob/gob1/various.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

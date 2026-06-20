@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SpikeTrapD_end",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SpikeTrapD_end",
+  "parent":{
+    "name":"spike_trap_d",
+    "path":"folders/Scripts/game_object/gob/gob1/spike_trap/spike_trap_d.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

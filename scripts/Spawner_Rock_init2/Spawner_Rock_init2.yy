@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Spawner_Rock_init2",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Spawner_Rock_init2",
+  "parent":{
+    "name":"rock_spawner",
+    "path":"folders/Scripts/game_object/gob/gob1/spawner/rock_spawner.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

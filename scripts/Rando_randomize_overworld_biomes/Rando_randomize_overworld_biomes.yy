@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Rando_randomize_overworld_biomes",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Rando_randomize_overworld_biomes",
+  "parent":{
+    "name":"rando",
+    "path":"folders/Scripts/rando.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

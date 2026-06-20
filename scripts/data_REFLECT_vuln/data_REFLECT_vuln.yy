@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"data_REFLECT_vuln",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"data_REFLECT_vuln",
+  "parent":{
+    "name":"game_object_data",
+    "path":"folders/Scripts/game_object/game_object_data.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

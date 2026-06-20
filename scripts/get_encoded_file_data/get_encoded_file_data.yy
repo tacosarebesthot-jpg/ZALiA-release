@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"get_encoded_file_data",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"get_encoded_file_data",
+  "parent":{
+    "name":"file",
+    "path":"folders/Scripts/file.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

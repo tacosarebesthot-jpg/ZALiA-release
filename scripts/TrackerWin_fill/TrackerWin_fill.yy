@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"TrackerWin_fill",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"TrackerWin_fill",
+  "parent":{
+    "name":"TrackerWindow",
+    "path":"folders/Scripts/TrackerWindow.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

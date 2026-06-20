@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"add_pi_permut",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"add_pi_permut",
+  "parent":{
+    "name":"palette",
+    "path":"folders/Scripts/palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

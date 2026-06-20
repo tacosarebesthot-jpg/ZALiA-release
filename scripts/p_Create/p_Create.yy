@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"p_Create",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"p_Create",
+  "parent":{
+    "name":"palette",
+    "path":"folders/Scripts/palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

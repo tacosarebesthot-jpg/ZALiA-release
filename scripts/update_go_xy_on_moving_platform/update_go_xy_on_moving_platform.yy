@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"update_go_xy_on_moving_platform",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"update_go_xy_on_moving_platform",
+  "parent":{
+    "name":"go",
+    "path":"folders/Scripts/game_object/go.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

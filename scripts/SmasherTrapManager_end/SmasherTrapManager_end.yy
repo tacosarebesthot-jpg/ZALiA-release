@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"SmasherTrapManager_end",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"SmasherTrapManager_end",
+  "parent":{
+    "name":"various",
+    "path":"folders/Scripts/game_object/gob/gob1/various.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Spawner_Boggnipp_update",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Spawner_Boggnipp_update",
+  "parent":{
+    "name":"spawner_boggnipp",
+    "path":"folders/Scripts/game_object/gob/gob1/spawner/spawner_boggnipp.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

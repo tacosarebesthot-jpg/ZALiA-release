@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"TrackerWin_extern",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"TrackerWin_extern",
+  "parent":{
+    "name":"TrackerWindow",
+    "path":"folders/Scripts/TrackerWindow.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

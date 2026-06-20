@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"CamZoom_test1",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"CamZoom_test1",
+  "parent":{
+    "name":"view",
+    "path":"folders/Scripts/view.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

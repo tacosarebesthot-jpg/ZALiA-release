@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"get_color_brightness",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"get_color_brightness",
+  "parent":{
+    "name":"palette",
+    "path":"folders/Scripts/palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

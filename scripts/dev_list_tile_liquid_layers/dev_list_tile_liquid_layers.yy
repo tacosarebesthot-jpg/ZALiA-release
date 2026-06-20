@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"dev_list_tile_liquid_layers",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"dev_list_tile_liquid_layers",
+  "parent":{
+    "name":"tile",
+    "path":"folders/Scripts/debug/tile.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

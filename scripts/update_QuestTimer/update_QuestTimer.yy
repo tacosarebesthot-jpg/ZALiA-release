@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"update_QuestTimer",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"update_QuestTimer",
+  "parent":{
+    "name":"file",
+    "path":"folders/Scripts/file.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

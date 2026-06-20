@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"update_scene_palette",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"update_scene_palette",
+  "parent":{
+    "name":"palette",
+    "path":"folders/Scripts/palette.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}
