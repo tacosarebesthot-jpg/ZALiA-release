@@ -420,8 +420,17 @@ function Overworld_Step() {
 
 	// --------------------------------------------------------------------------------
 	// UPDATE ENCOUNTER OBJS --------------------------------------------------
-	Overworld_enc_spawn_update();
-	Overworld_enc_inst_update();
+	// DEV SWEEP: freeze the encounter sim so the page sweep gets clean static tile shots
+	// (no roaming mobs in the frame, no collision -> battle room change, no PC death).
+	if (variable_global_exists("dev_ow_sweep_active") && global.dev_ow_sweep_active)
+	{
+	    ds_grid_clear(dg_enc_inst, 0); // drop any already-spawned encounter instances
+	}
+	else
+	{
+	    Overworld_enc_spawn_update();
+	    Overworld_enc_inst_update();
+	}
 
 
 

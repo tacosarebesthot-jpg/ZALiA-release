@@ -33,6 +33,7 @@ function g_Create() {
 	global.autosweep_t          = 0;
 	global.autosweep_boot       = 0;
 	global.autosweep_last_crash = "";
+	global.dev_ow_sweep_active  = false; // true only while the dev overworld page-sweep runs (freezes the OW encounter sim)
 	global.dev_inject_pause     = false;
 	global.sweep_note_active    = false; // true while the sweep note overlay is capturing typed input
 	if (global.autosweep)

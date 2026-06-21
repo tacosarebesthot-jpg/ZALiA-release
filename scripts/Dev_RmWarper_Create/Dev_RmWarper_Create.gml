@@ -233,6 +233,7 @@ function Dev_RmWarper_Create() {
 	// the room has actually loaded.
 	sweep_start_ow = function() {
 	    sweep_mode = "OW";
+	    global.dev_ow_sweep_active = true;  // freeze overworld encounter sim (no mob spawns / battles / death) during the page sweep
 	    var _n = sweep_build_list_ow();
 	    show_debug_message("[SWEEP-OW] start. "+string(_n)+" pages.");
 	    if (_n <= 0) { sweep_stop(); return; } // nothing populated -> finalize via sweep_stop's OW branch
@@ -247,6 +248,7 @@ function Dev_RmWarper_Create() {
 	// Manual entry: F9 while already standing in the Overworld (no room change needed).
 	sweep_start_ow_manual = function() {
 	    sweep_mode = "OW";
+	    global.dev_ow_sweep_active = true;  // freeze overworld encounter sim (no mob spawns / battles / death) during the page sweep
 	    var _n = sweep_build_list_ow();
 	    if (_n <= 0) { sweep_active = false; return; }
 	    sweep_idx      = 0;
@@ -315,6 +317,7 @@ function Dev_RmWarper_Create() {
 	    g.dev_invState            = 0;
 
 	    sweep_mode = "RM";
+	    global.dev_ow_sweep_active = false;
 	    var _n = sweep_build_list();
 	    show_debug_message("[SWEEP] start. "+string(_n)+" scenes. saving under: "+working_directory+SWEEP_DIR);
 	    if (_n <= 0) { sweep_active = false; return; }
@@ -400,6 +403,7 @@ function Dev_RmWarper_Create() {
 
 	sweep_stop = function() {
 	    sweep_active   = false;
+	    global.dev_ow_sweep_active = false;
 	    sweep_substate = 0;
 	    show_debug_message("[SWEEP] stopped ("+sweep_mode+") at "+string(sweep_idx)+"/"+string(ds_list_size(sweep_list)));
 	    // Unattended run: chain RM (towns/dungeons) -> OW (overworld), then mark done + quit.
