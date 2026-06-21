@@ -18,8 +18,9 @@ function Cutscene_MagicalKeyHouse_init() {
 	ROW = yt>>3; // grow source row
 
 
-	if(!is_undefined(dk_spawn) 
-	&& !is_undefined(g.dm_spawn[?dk_spawn+STR_Data+"01"]) )
+	if(!is_undefined(dk_spawn)
+	&& !is_undefined(g.dm_spawn[?dk_spawn+STR_Data+"01"])
+	&&  is_real(     g.dm_spawn[?dk_spawn+STR_Data+"01"]) ) // GMS2 port: Data01 can be a string; GM1.4 coerced, GMS2 throws
 	{    depth =     g.dm_spawn[?dk_spawn+STR_Data+"01"];  }
 	else depth =     DEPTH_BG4;
 

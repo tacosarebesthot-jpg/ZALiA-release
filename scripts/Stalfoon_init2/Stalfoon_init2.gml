@@ -17,7 +17,8 @@ function Stalfoon_init2() {
 	// if hspd was inc or maintained for the frame
 	hspd_impel = 0; 
 	HSPD_TO_HOME = 6; // 6
-	HSPD_MAX_TWRD = global.pc.HSPD_MAX - 2;
+	// GMS2 port: global.pc.HSPD_MAX is undeclared on the PC (GM1.4 auto-zeroed it to 0).
+	HSPD_MAX_TWRD = (variable_instance_exists(global.pc, "HSPD_MAX") ? global.pc.HSPD_MAX : 0) - 2;
 	HSPD_MAX_AWAY = HSPD_MAX_TWRD - 2;
 	// HSPD_MAX_AWAY = global.pc.HSPD_MAX - max(1, global.pc.HSPD_MAX >>3);
 	// HSPD_MAX_TWRD = (global.pc.HSPD_MAX - (global.pc.HSPD_MAX >>2)) + 2;

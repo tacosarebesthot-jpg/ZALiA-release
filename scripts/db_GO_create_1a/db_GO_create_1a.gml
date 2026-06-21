@@ -31,7 +31,7 @@ function db_GO_create_1a(argument0) {
 	        {
 	            _gob = g.go_mgr.dl_gob1[|_i];
 	            _val = !is_undefined(_gob) 
-	                && (_gob+1)>0 
+	                && true /* GMS2 port: was GMS1 id-validity idiom, threw "Malformed variable" */ 
 	                && instance_exists(_gob) 
 	                && _gob.state;
 	            //_val = defined(_gob) && _gob && _gob.state;
