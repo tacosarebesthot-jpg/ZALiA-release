@@ -36,7 +36,15 @@ function Dev_RmWarper_Room_Start() {
 	    exit_idx    =  bitNum((ExitID&$FF)>>4);     // 0,1,2,3,4
 	    exit_idx    = (exit_idx<<4) | (ExitID&$F); // $00-4F
 	}
-	//                                           // 
+	//                                           //
+
+	// DEV SCREEN-CHECK: room finished loading; settle a moment before the shot.
+	if (sweep_active && sweep_substate == SWEEP_WAITROOM)
+	{
+	    sweep_settle   = SWEEP_SETTLE_FRAMES;
+	    sweep_substate = SWEEP_SETTLE;
+	    sweep_watchdog = 0; // fresh room loaded OK -> reset the stuck timer
+	}
 
 
 

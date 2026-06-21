@@ -2,6 +2,31 @@
 function Dev_RmWarper_Draw() {
 
 
+	// DEV SCREEN-CHECK: click-to-note overlay takes over the screen when active.
+	if (sweep_note_active)
+	{
+	    var _nbx = viewXL()+16, _nby = viewYT()+40, _ndy = 14;
+	    draw_rect_(c_black, viewXL(),viewYT(),viewW(),viewH(), .85);
+	    draw_text_(_nbx, viewYT()+16, "PROBLEM @ " + sweep_note_scene);
+	    for(var _ci=0; _ci<array_length(sweep_cats); _ci++)
+	    {
+	        var _cy = _nby + _ci*_ndy;
+	        var _mk = (sweep_note_cat == sweep_cats[_ci]) ? "> " : "  ";
+	        draw_text_(_nbx, _cy, _mk + sweep_cats[_ci]);
+	    }
+	    var _ny = _nby + array_length(sweep_cats)*_ndy;
+	    draw_text_(_nbx, _ny+8,  "Note: " + string(keyboard_string) + "_");
+	    draw_text_(_nbx, _ny+24, "Click a tag, type a note, ENTER = save, ESC = cancel");
+	    exit; // !!! note UI replaces everything else
+	}
+	if (sweep_flag_timer > 0) draw_text_(viewXL()+8, viewYT()+24, "SAVED");
+	if (sweep_active && sweep_substate != SWEEP_SHOOT)
+	{
+	    draw_text_(viewXL()+8, viewYT()+8, "SWEEP " + string(sweep_idx+1) + "/" + string(ds_list_size(sweep_list)));
+	}
+
+
+
 	if (isVal(state, STATE_IDLE,STATE_GOTO)) exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 

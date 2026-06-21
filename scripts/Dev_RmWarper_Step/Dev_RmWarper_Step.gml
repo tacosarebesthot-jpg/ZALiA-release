@@ -2,6 +2,52 @@
 function Dev_RmWarper_Step() {
 
 
+	// ============================================================
+	// DEV SCREEN-CHECK: note-taking + hotkeys + auto-sweep driver.
+	// Runs even while unpaused; note mode swallows input.
+	// ============================================================
+	if (sweep_note_active) {
+	    var _nbx = viewXL()+16, _nby = viewYT()+40, _ndy = 14, _nbw = 260;
+	    if (mouse_check_button_pressed(mb_left)) {
+	        for(var _ci=0; _ci<array_length(sweep_cats); _ci++) {
+	            var _cy = _nby + _ci*_ndy;
+	            if (mouse_x>=_nbx && mouse_x<=_nbx+_nbw && mouse_y>=_cy && mouse_y<=_cy+_ndy) {
+	                sweep_note_cat = sweep_cats[_ci];
+	                break;
+	            }
+	        }
+	    }
+	    if (keyboard_check_pressed(vk_enter))  sweep_note_commit();
+	    if (keyboard_check_pressed(vk_escape)) sweep_note_active = false;
+	    exit; // !!! swallow input while taking a note
+	}
+
+	if (DEV && g.room_type == "A") { // dev-only QA hotkeys; compiled out of final builds
+	    if (keyboard_check_pressed(vk_f9))  { if (sweep_active) sweep_stop(); else sweep_start(); }
+	    if (keyboard_check_pressed(vk_f8))  sweep_stop();
+	    if (keyboard_check_pressed(vk_f10)) sweep_flag();
+	}
+	if (sweep_flag_timer > 0) sweep_flag_timer--;
+	if (sweep_active) {
+	    // Watchdog: if a scene hangs or crash-loops on load, log it and skip on.
+	    if (++sweep_watchdog > SWEEP_WATCHDOG) { sweep_advance("STUCK"); }
+	    else switch(sweep_substate) {
+	        case SWEEP_WAITROOM: break; // advanced by Room Start
+	        case SWEEP_SETTLE:
+	            // Snap the camera onto the PC so the warped-to scene actually renders into the shot.
+	            if (instance_exists(global.pc)) set_view_xy_on_pc();
+	            if (--sweep_settle <= 0) sweep_substate = SWEEP_SHOOT;
+	            break;
+	        case SWEEP_SHOOT:
+	            sweep_scene_check(); // programmatic load check -> scene_report.txt
+	            screen_save(SWEEP_DIR + sweep_list[|sweep_idx] + ".png");
+	            sweep_advance(""); // checked + shot -> next scene
+	            break;
+	    }
+	}
+
+
+
 	// 2024/09/12. Anyone can use. This is useful if the player is making custom content and needs to get somewhere fast.
 	//if(!DEV 
 	//|| !g.DevTools_state 

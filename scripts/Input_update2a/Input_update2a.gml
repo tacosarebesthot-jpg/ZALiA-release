@@ -51,6 +51,13 @@ function Input_update2a() {
 	Attack_pressed = B * (_B_NEW && !Attack_held); // $40
 	Jump_pressed   = A * (_A_NEW && !Jump_held);   // $80
 
+	// DEV AUTOSWEEP: let the boot auto-pilot inject a virtual START/confirm press.
+	if (variable_global_exists("dev_inject_pause") && global.dev_inject_pause)
+	{
+	    Pause_pressed = true;
+	    global.dev_inject_pause = false;
+	}
+
 
 	// Released
 	Right_released  = R * (!_R_NEW && Right_held); // $01

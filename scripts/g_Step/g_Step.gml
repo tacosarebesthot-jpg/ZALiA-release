@@ -19,6 +19,43 @@ function g_Step() {
 	global.App_frame_count++;
 
 
+	// ── DEV AUTOSWEEP auto-pilot: boot -> file select -> load save 1 -> start sweep ──
+	// Sets dev_inject_pause BEFORE Input_update2() (line below) so the virtual press
+	// lands the same frame the menus read it.
+	if (global.autosweep && !global.autosweep_started)
+	{
+	    if (room != global.autosweep_room) { global.autosweep_room = room; global.autosweep_t = 0; }
+	    global.autosweep_t++;
+	    global.autosweep_boot++;
+
+	    if (global.autosweep_boot > 1800) // ~60s with no gameplay reached: bail so the run returns
+	    {
+	        directory_create(working_directory + "screen_check");
+	        var _sf = file_text_open_append(working_directory + "screen_check/crashes.txt");
+	        file_text_write_string(_sf, "AUTOPILOT_STALL room=" + string(room_get_name(room)));
+	        file_text_writeln(_sf); file_text_close(_sf);
+	        game_end();
+	    }
+	    else if (room_type == "A")
+	    {
+	        if (instance_exists(Dev_RmWarper))
+	        {
+	            with(Dev_RmWarper) sweep_start();
+	            global.autosweep_started = true;
+	        }
+	    }
+	    else if (room == rmB_Title)
+	    {
+	        if (global.autosweep_t == 40) global.dev_inject_pause = true; // -> File Select
+	    }
+	    else if (room == rmB_FileSelect)
+	    {
+	        with(FileSelect) Main_cursor = 0;                            // force cursor onto save file 1
+	        if (global.autosweep_t == 90) global.dev_inject_pause = true; // confirm -> load + enter game
+	    }
+	}
+
+
 	// --------------------------------------------------------------------
 	with(Input) Input_update1(); // Gamepad input checks. gp1,2,3,4, bumpers, triggers, fpb: frame pause buttons, keypressed_prev, keypressed_curr
 	with(Input) Input_GameTesting();

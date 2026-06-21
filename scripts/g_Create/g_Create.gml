@@ -8,8 +8,37 @@ function g_Create() {
 	    show_debug_message("## EXCEPTION ## " + e.message);
 	    show_debug_message("  at " + e.script + " line " + string(e.line));
 	    show_debug_message("  longMessage: " + e.longMessage);
+	    // DEV AUTOSWEEP: log the crashing scene so one unattended run finds every crash.
+	    if (variable_global_exists("autosweep") && global.autosweep)
+	    {
+	        var _scene = "?";
+	        if (instance_exists(g)) _scene = string(g.rm_name);
+	        if (_scene != global.autosweep_last_crash)
+	        {
+	            global.autosweep_last_crash = _scene;
+	            directory_create(working_directory + "screen_check");
+	            var _f = file_text_open_append(working_directory + "screen_check/crashes.txt");
+	            file_text_write_string(_f, _scene + "  ##  " + string(e.message) + "  @ " + string(e.script) + ":" + string(e.line));
+	            file_text_writeln(_f);
+	            file_text_close(_f);
+	        }
+	    }
 	    return true; // true = handled, suppresses the built-in error popup
 	});
+
+	// DEV AUTOSWEEP harness state. Enabled by presence of "_autosweep.flag" in working_directory.
+	global.autosweep            = DEV && file_exists(working_directory + "_autosweep.flag"); // dev-only: forced false in final builds
+	global.autosweep_started    = false;
+	global.autosweep_room       = noone;
+	global.autosweep_t          = 0;
+	global.autosweep_boot       = 0;
+	global.autosweep_last_crash = "";
+	global.dev_inject_pause     = false;
+	if (global.autosweep)
+	{
+	    directory_create(working_directory + "screen_check");
+	    show_debug_message("[SWEEP] AUTOSWEEP ENABLED (found _autosweep.flag)");
+	}
 
 	var _START_TIME = 0;
 	if (DEV)
