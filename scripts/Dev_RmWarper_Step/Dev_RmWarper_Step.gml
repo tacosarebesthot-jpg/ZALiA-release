@@ -40,6 +40,10 @@ function Dev_RmWarper_Step() {
 	            sweep_flag();
 	    }
 	}
+	if (DEV && g.room_type == "C") { // overworld sweep hotkeys (manual entry; no room change needed)
+	    if (keyboard_check_pressed(vk_f9)) { if (sweep_active) sweep_stop(); else sweep_start_ow_manual(); }
+	    if (keyboard_check_pressed(vk_f8)) sweep_stop();
+	}
 	if (sweep_flag_timer > 0) sweep_flag_timer--;
 	if (sweep_active) {
 	    // Watchdog only in auto mode (manual can dwell on a scene as long as the user wants).
@@ -47,12 +51,20 @@ function Dev_RmWarper_Step() {
 	    else switch(sweep_substate) {
 	        case SWEEP_WAITROOM: break; // advanced by Room Start
 	        case SWEEP_SETTLE:
-	            if (instance_exists(global.pc)) set_view_xy_on_pc(); // snap camera onto the scene
-	            if (--sweep_settle <= 0) {
-	                sweep_scene_check(); // load check -> scene_report.txt
-	                if (SWEEP_CAPTURE) screen_save(SWEEP_DIR + sweep_list[|sweep_idx] + ".png");
-	                if (SWEEP_MANUAL) sweep_substate = SWEEP_HOLD; // wait for user to step
-	                else              sweep_advance("");           // auto: next scene
+	            if (sweep_mode == "OW") {
+	                // Overworld pages don't follow the PC; the page IS the view.
+	                if (--sweep_settle <= 0) {
+	                    if (SWEEP_CAPTURE) screen_save(SWEEP_DIR + "_OW_" + hex_str(sweep_list[|sweep_idx]) + ".png");
+	                    sweep_advance(""); // auto: next page (OW mode has no manual-hold step)
+	                }
+	            } else {
+	                if (instance_exists(global.pc)) set_view_xy_on_pc(); // snap camera onto the scene
+	                if (--sweep_settle <= 0) {
+	                    sweep_scene_check(); // load check -> scene_report.txt
+	                    if (SWEEP_CAPTURE) screen_save(SWEEP_DIR + sweep_list[|sweep_idx] + ".png");
+	                    if (SWEEP_MANUAL) sweep_substate = SWEEP_HOLD; // wait for user to step
+	                    else              sweep_advance("");           // auto: next scene
+	                }
 	            }
 	            break;
 	        case SWEEP_HOLD: // manual: keep camera on scene, wait for PageDown/PageUp

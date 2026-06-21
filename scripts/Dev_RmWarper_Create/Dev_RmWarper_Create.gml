@@ -121,6 +121,7 @@ function Dev_RmWarper_Create() {
 	sweep_watchdog      = 0;
 	SWEEP_WATCHDOG      = 360;           // frames stuck on one scene before we log + skip it
 	sweep_list          = ds_list_create(); // full goto-names: AREA + rmHex + exitHex
+	sweep_mode          = "RM";           // "RM": action-room scene sweep (towns/dungeons). "OW": overworld page sweep.
 
 	// Click-to-note state.
 	sweep_note_active   = false;
@@ -158,6 +159,97 @@ function Dev_RmWarper_Create() {
 	        }
 	    }
 	    return ds_list_size(sweep_list);
+	}
+
+	// ============================================================
+	// OVERWORLD PAGE SWEEP (added 2026-06-21).
+	//   The overworld is one continuous 256x256-tile grid (room_type=="C"),
+	//   unlike the discrete named scenes above (room_type=="A"). There's no
+	//   goto-name list to walk; instead we tile the populated region of
+	//   global.OVERWORLD.dg_tsrc into non-overlapping viewport-sized pages
+	//   and warp by directly setting pcrc + redrawing tiles (no room change
+	//   needed page-to-page since we never leave the Overworld room).
+	// ============================================================
+
+	// Scan dg_tsrc for the populated bounding box, then build a flat list of
+	// page anchors (packed (row<<8)|clm of each page's TOP-LEFT tile).
+	sweep_build_list_ow = function() {
+	    ds_list_clear(sweep_list);
+	    var _minC, _maxC, _minR, _maxR, _c, _r, _t;
+	    _minC =  9999; _maxC = -1;
+	    _minR =  9999; _maxR = -1;
+	    with (global.OVERWORLD) {
+	        for (_r=0; _r<OW_ROWS; _r++) {
+	            for (_c=0; _c<OW_CLMS; _c++) {
+	                _t = dg_tsrc[#_c,_r];
+	                if (_t != 0) {
+	                    if (_c<_minC) _minC=_c;
+	                    if (_c>_maxC) _maxC=_c;
+	                    if (_r<_minR) _minR=_r;
+	                    if (_r>_maxR) _maxR=_r;
+	                }
+	            }
+	        }
+	    }
+	    if (_maxC<0) return 0; // nothing populated yet
+	    with (global.OVERWORLD) {
+	        for (_r=_minR; _r<=_maxR; _r+=DRAW_ROWS) {
+	            for (_c=_minC; _c<=_maxC; _c+=DRAW_CLMS) {
+	                ds_list_add(other.sweep_list, (_r<<8)|_c);
+	            }
+	        }
+	    }
+	    return ds_list_size(sweep_list);
+	}
+
+	// Directly reposition inside the (already-loaded) Overworld room: set pcrc
+	// to the page center and redraw the DRAW_CLMS x DRAW_ROWS tile viewport.
+	sweep_warp_to_ow = function(_anchor) {
+	    var _c = _anchor & $FF;
+	    var _r = (_anchor>>8) & $FF;
+	    show_debug_message("[SWEEP-OW] page -> clm $"+hex_str(_c)+" row $"+hex_str(_r)+"  ("+string(sweep_idx+1)+"/"+string(ds_list_size(sweep_list))+")");
+	    var _f = file_text_open_append(SWEEP_DIR+"_progress.txt");
+	    file_text_write_string(_f, "try OW_"+hex_str(_anchor)); file_text_writeln(_f); file_text_close(_f);
+	    with (global.OVERWORLD) {
+	        var _ow_x = _c << SHIFT;
+	        var _ow_y = _r << SHIFT;
+	        var _pcC  = clamp(_c + (DRAW_CLMS>>1), 0, OW_CLMS-1);
+	        var _pcR  = clamp(_r + (DRAW_ROWS>>1), 0, OW_ROWS-1);
+	        pcrc     = (_pcR<<8) | _pcC;
+	        pc_ow_x  = (_pcC<<SHIFT) + (T_SIZE>>1);
+	        pc_ow_y  = (_pcR<<SHIFT) + (T_SIZE>>1);
+	        Overworld_refresh_tiles(_ow_x, _ow_y);
+	    }
+	}
+
+	// Autosweep-chained entry: trigger the room transition out of the current
+	// Action room into the Overworld (any "Ovrw"-bearing exit name routes
+	// there per area_is_ow()); Dev_RmWarper_Room_Start positions page 0 once
+	// the room has actually loaded.
+	sweep_start_ow = function() {
+	    sweep_mode = "OW";
+	    var _n = sweep_build_list_ow();
+	    show_debug_message("[SWEEP-OW] start. "+string(_n)+" pages.");
+	    if (_n <= 0) { sweep_stop(); return; } // nothing populated -> finalize via sweep_stop's OW branch
+	    sweep_idx      = 0;
+	    sweep_watchdog = 0;
+	    sweep_active   = true;
+	    sweep_substate = SWEEP_WAITROOM;
+	    g.exit_leave = Exit_construct(EXIT_NAME_GAME_START);
+	    with (g.exit_leave) { goToExitName = Area_OvrwA + hex_str($0000); } // any name containing "Ovrw" routes to rmC_Overworld_A
+	}
+
+	// Manual entry: F9 while already standing in the Overworld (no room change needed).
+	sweep_start_ow_manual = function() {
+	    sweep_mode = "OW";
+	    var _n = sweep_build_list_ow();
+	    if (_n <= 0) { sweep_active = false; return; }
+	    sweep_idx      = 0;
+	    sweep_watchdog = 0;
+	    sweep_active   = true;
+	    sweep_settle   = SWEEP_SETTLE_FRAMES;
+	    sweep_substate = SWEEP_SETTLE;
+	    sweep_warp_to_ow(sweep_list[|0]);
 	}
 
 	// Warp to a goto-name (AREA + rmHex + exitHex). Async room change.
@@ -217,6 +309,7 @@ function Dev_RmWarper_Create() {
 	    g.can_draw_og_cam_outline = false;
 	    g.dev_invState            = 0;
 
+	    sweep_mode = "RM";
 	    var _n = sweep_build_list();
 	    show_debug_message("[SWEEP] start. "+string(_n)+" scenes. saving under: "+working_directory+SWEEP_DIR);
 	    if (_n <= 0) { sweep_active = false; return; }
@@ -227,17 +320,24 @@ function Dev_RmWarper_Create() {
 	    sweep_warp_to(sweep_list[|0]);
 	}
 
-	// Advance to the next scene (or finish). _tag != "" logs the current scene to crashes.txt first.
+	// Advance to the next scene/page (or finish). _tag != "" logs the current spot to crashes.txt first.
 	sweep_advance = function(_tag) {
 	    if (_tag != "") {
+	        var _label = (sweep_mode=="OW") ? ("OW_"+hex_str(sweep_list[|sweep_idx])) : string(sweep_list[|sweep_idx]);
 	        var _f = file_text_open_append(SWEEP_DIR+"crashes.txt");
-	        file_text_write_string(_f, _tag+"  "+sweep_list[|sweep_idx]); file_text_writeln(_f); file_text_close(_f);
+	        file_text_write_string(_f, _tag+"  "+_label); file_text_writeln(_f); file_text_close(_f);
 	    }
 	    sweep_idx++;
 	    sweep_watchdog = 0;
 	    if (sweep_idx >= ds_list_size(sweep_list)) { sweep_stop(); return; }
-	    sweep_substate = SWEEP_WAITROOM;
-	    sweep_warp_to(sweep_list[|sweep_idx]);
+	    if (sweep_mode == "OW") {
+	        sweep_settle   = SWEEP_SETTLE_FRAMES;
+	        sweep_substate = SWEEP_SETTLE;
+	        sweep_warp_to_ow(sweep_list[|sweep_idx]);
+	    } else {
+	        sweep_substate = SWEEP_WAITROOM;
+	        sweep_warp_to(sweep_list[|sweep_idx]);
+	    }
 	}
 
 	// Programmatic per-scene load check: did the content that SHOULD load actually load?
@@ -296,11 +396,15 @@ function Dev_RmWarper_Create() {
 	sweep_stop = function() {
 	    sweep_active   = false;
 	    sweep_substate = 0;
-	    show_debug_message("[SWEEP] stopped at "+string(sweep_idx)+"/"+string(ds_list_size(sweep_list)));
-	    // Unattended run: mark done + quit so the Igor process returns.
+	    show_debug_message("[SWEEP] stopped ("+sweep_mode+") at "+string(sweep_idx)+"/"+string(ds_list_size(sweep_list)));
+	    // Unattended run: chain RM (towns/dungeons) -> OW (overworld), then mark done + quit.
 	    if (variable_global_exists("autosweep") && global.autosweep) {
+	        if (sweep_mode == "RM") {
+	            sweep_start_ow();
+	            return;
+	        }
 	        var _f = file_text_open_append(SWEEP_DIR+"_DONE.txt");
-	        file_text_write_string(_f, "DONE "+string(sweep_idx)+"/"+string(ds_list_size(sweep_list))); file_text_writeln(_f); file_text_close(_f);
+	        file_text_write_string(_f, "DONE OW "+string(sweep_idx)+"/"+string(ds_list_size(sweep_list))); file_text_writeln(_f); file_text_close(_f);
 	        game_end();
 	    }
 	}

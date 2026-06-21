@@ -44,6 +44,9 @@ function Dev_RmWarper_Room_Start() {
 	    sweep_settle   = SWEEP_SETTLE_FRAMES;
 	    sweep_substate = SWEEP_SETTLE;
 	    sweep_watchdog = 0; // fresh room loaded OK -> reset the stuck timer
+	    // OW sweep: this WAITROOM was the one-time RM->Overworld transition (sweep_start_ow).
+	    // Position page 0 now that the Overworld room has actually loaded.
+	    if (sweep_mode == "OW") sweep_warp_to_ow(sweep_list[|sweep_idx]);
 	}
 
 
