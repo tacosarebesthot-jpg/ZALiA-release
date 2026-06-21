@@ -54,7 +54,10 @@ function Dev_RmWarper_Draw() {
 	    var _by = viewYT()+viewH();
 
 	    // Live scene label.
-	    var _lbl = "[" + string(sweep_idx+1) + "/" + string(ds_list_size(sweep_list)) + "]  " + sweep_list[|min(sweep_idx, ds_list_size(sweep_list)-1)];
+	    var _sv  = sweep_list[|min(sweep_idx, ds_list_size(sweep_list)-1)];
+	    // OW mode stores integer page anchors; RM mode stores scene-name strings. Format per mode (raw concat of an int throws DoAdd).
+	    var _slbl = (sweep_mode == "OW") ? "OW_"+hex_str(_sv) : string(_sv);
+	    var _lbl = "[" + string(sweep_idx+1) + "/" + string(ds_list_size(sweep_list)) + "]  " + _slbl;
 	    draw_set_colour(c_black); draw_text(_bx+1, _by-19, _lbl); // shadow
 	    draw_set_colour(c_white); draw_text(_bx,   _by-20, _lbl);
 

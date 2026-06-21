@@ -211,10 +211,15 @@ function Dev_RmWarper_Create() {
 	    var _f = file_text_open_append(SWEEP_DIR+"_progress.txt");
 	    file_text_write_string(_f, "try OW_"+hex_str(_anchor)); file_text_writeln(_f); file_text_close(_f);
 	    with (global.OVERWORLD) {
-	        var _ow_x = _c << SHIFT;
-	        var _ow_y = _r << SHIFT;
-	        var _pcC  = clamp(_c + (DRAW_CLMS>>1), 0, OW_CLMS-1);
-	        var _pcR  = clamp(_r + (DRAW_ROWS>>1), 0, OW_ROWS-1);
+	        // Clamp the page origin so the DRAW_CLMS x DRAW_ROWS viewport never reads past the
+	        // tile grid. Off-grid dg_tsrc reads return undefined -> crash in Overworld_refresh_tiles.
+	        // (Normal play never hits this: the camera is clamped; only the edge-tiling sweep does.)
+	        var _cc = clamp(_c, 0, max(0, OW_CLMS - DRAW_CLMS));
+	        var _rr = clamp(_r, 0, max(0, OW_ROWS - DRAW_ROWS));
+	        var _ow_x = _cc << SHIFT;
+	        var _ow_y = _rr << SHIFT;
+	        var _pcC  = clamp(_cc + (DRAW_CLMS>>1), 0, OW_CLMS-1);
+	        var _pcR  = clamp(_rr + (DRAW_ROWS>>1), 0, OW_ROWS-1);
 	        pcrc     = (_pcR<<8) | _pcC;
 	        pc_ow_x  = (_pcC<<SHIFT) + (T_SIZE>>1);
 	        pc_ow_y  = (_pcR<<SHIFT) + (T_SIZE>>1);
