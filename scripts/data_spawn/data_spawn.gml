@@ -359,9 +359,15 @@ function data_spawn() {
 	{
 	    _val = argument[_i];
     
-	    _datakey = STR_Data+hex_str(_data_num++);
-	                  g.dm_spawn[?_SPAWN_DATAKEY+_datakey] = _val;
-	    if (_IS_ITEM) g.dm_spawn[?_ITEM_ID      +_datakey] = _val;
+	    // GMS2 port fix: only NUMERIC args occupy DataNN slots. String args are modifiers
+	    // (handled by the special checks below) and must NOT consume a numeric data slot,
+	    // else enemy inits read a modifier string as a number (e.g. clamp("_Strong_Encounter")).
+	    if (!is_string(_val))
+	    {
+	        _datakey = STR_Data+hex_str(_data_num++);
+	                      g.dm_spawn[?_SPAWN_DATAKEY+_datakey] = _val;
+	        if (_IS_ITEM) g.dm_spawn[?_ITEM_ID      +_datakey] = _val;
+	    }
     
     
     
@@ -382,12 +388,12 @@ function data_spawn() {
     
     
 	    _datakey = STR_Depth;
-	    if (is_string(          _val) 
+	    if (is_string(          _val)
 	    &&  string_pos(_datakey,_val) )
 	    {
-	        _len  = string_length(_datakey);
-	        _val1 = string_copy(_val, _len+1, string_length(_val)-_len);
-	        _val1 = real(_val1);
+	        _val1 = _val;
+	        while (string_pos(_datakey, _val1) == 1) _val1 = string_delete(_val1, 1, string_length(_datakey)); // strip repeated "_Depth" prefixes
+	        try { _val1 = real(_val1); } catch (_e) { _val1 = 0; } // GMS2 port: real() throws on non-numeric (GM1.4 returned 0)
 	        g.dm_spawn[?_SPAWN_DATAKEY+_datakey] = _val1;
 	        continue;//_i
 	    }

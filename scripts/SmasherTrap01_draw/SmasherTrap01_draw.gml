@@ -34,7 +34,7 @@ function SmasherTrap01_draw() {
 	        }
         
 	        // Create surface
-	        Trigger_surf = surface_create(_CLMS<<3, _ROWS<<3);
+	        Trigger_surf = surface_create(max(1,_CLMS<<3), max(1,_ROWS<<3)); // GMS2 port: surface_create rejects <=0 dims (GM1.4 allowed)
 	        surface_set_target(Trigger_surf);
 	        draw_clear_alpha(c_black,0);
         
@@ -101,7 +101,7 @@ function SmasherTrap01_draw() {
 	            }
             
 	            // Create surface
-	            Wall_surf = surface_create(_CLMS<<3, _ROWS<<3);
+	            Wall_surf = surface_create(max(1,_CLMS<<3), max(1,_ROWS<<3)); // GMS2 port: surface_create rejects <=0 dims (GM1.4 allowed)
 	            surface_set_target(Wall_surf);
 	            draw_clear_alpha(c_black,0);
             

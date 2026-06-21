@@ -3,7 +3,9 @@ function PC_update_death() {
 
 
 	// C2D5: JSR D385, C2E9: JSR D385, D3CC
-	if (global.pc.is_dead 
+	if (!instance_exists(global.pc)) return false; // GMS2 port: PC absent in cutscene scenes
+
+	if (global.pc.is_dead
 	&& !global.pc.stun_timer )
 	{
 	    global.BackgroundColor_at_death = __background_get_colour( );

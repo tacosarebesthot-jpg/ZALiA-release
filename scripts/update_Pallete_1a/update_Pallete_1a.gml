@@ -5,6 +5,8 @@ function update_Pallete_1a() {
 	var _idx, _num, _count, _dk;
 	var _color, _pi;
 
+	if (!instance_exists(global.pc)) exit; // GMS2 port: PC absent in cutscene scenes (global.pc == noone)
+
 
 	// 8E23: JSR 9235.  Update Link's palette
 	// 0: Green, 1: Red(SHIELD active || have RING), 2: Blue(SHIELD active && have RING)

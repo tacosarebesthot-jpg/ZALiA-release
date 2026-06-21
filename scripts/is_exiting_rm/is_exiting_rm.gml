@@ -2,7 +2,9 @@
 function is_exiting_rm() {
 
 
-	return  g.room_type=="A" 
+	if (!instance_exists(global.pc)) return false; // GMS2 port: PC absent in cutscene scenes
+
+	return  g.room_type=="A"
 	    &&  g.exit_leave          // setting this to an Exit instance triggers a rm change
 	    && !global.pc.pipe_sink_timer; // if pc is not going down a pipe(Darunia chimney to UPTHRUST). Because g.exit_leave is set at the moment global.pc.pipe_sink_timer is set.
 	//

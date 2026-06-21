@@ -7,8 +7,9 @@ function Tyell_update() {
 
 	if (isVal(sub_state, SUB_STATE_IDLE1,SUB_STATE_LAUNCH_COUNTDOWN))
 	{
-	    if (g.dg_RmTile_Break[#xl>>3,yt>>3]&$FF != UNIQUE)
-	    {   // PC broke block before attack.
+	    if (!is_in_grid(xl>>3,yt>>3, ds_grid_width(g.dg_RmTile_Break),ds_grid_height(g.dg_RmTile_Break))
+	    ||  g.dg_RmTile_Break[#xl>>3,yt>>3]&$FF != UNIQUE)
+	    {   // PC broke block before attack. GMS2 port: out-of-grid read is undefined, &$FF throws (GM1.4 allowed)
 	        timer = 0;
 	        sub_state = SUB_STATE_DONE1;
 	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

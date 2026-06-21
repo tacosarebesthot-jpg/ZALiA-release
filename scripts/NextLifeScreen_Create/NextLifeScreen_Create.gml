@@ -20,6 +20,7 @@ function NextLifeScreen_Create() {
 	ROOM_CHANGE_CUE = $79; // $79 == 121
 
 	save_name  = f.dl_save_names[|f.file_num-1];
+	if (is_undefined(save_name)) save_name = ""; // GMS2 port: guards wrong-object spawn reaching here without save context
 	save_name += string_repeat(".", SAVE_NAME_CHAR_LIMIT - string_length(save_name));
 
 

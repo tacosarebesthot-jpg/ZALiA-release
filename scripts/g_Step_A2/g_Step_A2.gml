@@ -7,6 +7,10 @@ function g_Step_A2() {
 	// C1A2: JSR D250       - set all GO.canDrawSelf = false
 	set_go_can_draw_self(false);
 
+	// GMS2 port: no PC in cutscene-only scenes (e.g. _MazIs_FB) -> skip the PC/gameplay update.
+	// In normal action rooms the PC always exists, so this never triggers there.
+	if (!instance_exists(global.pc)) exit;
+
 	// --------------------------------------------------------------------
 	// C2D5: JSR D385, C2E9: JSR D385, D3CC
 	if (PC_update_death()) // goes to rmB_Death if PC dead

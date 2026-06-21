@@ -8,6 +8,9 @@ function dir_to_pc_1() {
 	// This script simulates OG, keeping PC xy set to PC spawn xy
 
 
+	// GMS2 port: PC may not be spawned yet in some scenes (global.pc == noone -> crash). Default facing.
+	if (!instance_exists(global.pc)) return 1;
+
 	if(!global.pc.state)
 	{
 	    var _PC_X = global.pc.x;

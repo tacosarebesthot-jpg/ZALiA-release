@@ -130,7 +130,7 @@ function GameObject_create() {
 	        GO_sprite_init(_SPRITE);
         
 	        // object_index example: ItmK8, ItmC0
-	        ITEM_BIT     = val(g.dm_ITEM[?_OBJ_NAME+STR_Bit], ITEM_BIT);
+	        ITEM_BIT     = val(g.dm_ITEM[?_OBJ_NAME+STR_Bit], 0) /* GMS2 port: ITEM_BIT read unset as its own default (GM1.4 auto-zero) */;
 	        ITEM_TYPE    = val(g.dm_ITEM[?object_get_name(object_index)+STR_Item+STR_Type], "undefined");
 	        IS_HOLD_ITEM = val(g.dm_ITEM[?_OBJ_NAME+STR_Hold+STR_Item]);
         
@@ -138,7 +138,7 @@ function GameObject_create() {
 	        xScale     = facing_dir;
 	        hspd       = 0;
         
-	        if(!IS_HOLD_ITEM) global.pc.Disguise_enabled = false; // So pc can stab item.
+	        if(!IS_HOLD_ITEM && instance_exists(global.pc)) global.pc.Disguise_enabled = false; // So pc can stab item.
 	    }
 	    else if (is_ancestor(object_index,Boss))
 	    {
@@ -188,7 +188,7 @@ function GameObject_create() {
         
 	        g.go_mgr.uIdxSwap_gob = UIDX_NULL;
         
-	        if (global.pc.Disguise_enabled)
+	        if (instance_exists(global.pc) && global.pc.Disguise_enabled) // GMS2 port: PC absent in cutscene scenes (was noone -> crash)
 	        {
 	            if (is_ancestor(object_index,NPC_B)  // NPC_B: Minigame
 	            ||  is_ancestor(object_index,NPC_D) )// NPC_D: Shop
@@ -263,7 +263,7 @@ function GameObject_create() {
     
     
 	    if (g.town_name==STR_Bulblin 
-	    &&  global.pc.Disguise_enabled 
+	    &&  instance_exists(global.pc) && global.pc.Disguise_enabled 
 	    //&&  f.items&ITM_MASK 
 	    &&  is_ancestor(object_index,GOB1) )
 	    {

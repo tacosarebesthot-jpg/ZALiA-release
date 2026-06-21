@@ -25,7 +25,7 @@ function RoomData_Create() {
 
 
 	QUICK_REINITIALIZE = false;
-	var _REINITIALIZING = false; // *** SET true WHEN ANY OF THIS DATA HAS CHANGED. BUT UPDATE OVERWORLD DATA FIRST IF IT NEEDS TO BE UPDATED ***
+	var _REINITIALIZING = true; // GMS2 PORT FIX: bundled SceneData01.txt has stale GMS1.4 object indices (TorchA->NPC_D, enemies->LoDoA). Force rebuild from rm_data_init_* code (correct GMS2 name->index).
 	if(!_REINITIALIZING 
 	&& !QUICK_REINITIALIZE )
 	{
