@@ -1,6 +1,8 @@
 /// @description  Input_GameTesting()
 function Input_GameTesting() {
 
+	// Sweep note tool: while typing a note, swallow ALL debug hotkeys so typing can't toggle them.
+	if (variable_global_exists("sweep_note_active") && global.sweep_note_active) exit;
 
 	var _i, _idx, _val, _name;
 

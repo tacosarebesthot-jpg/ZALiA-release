@@ -106,10 +106,13 @@ function Dev_RmWarper_Create() {
 	// ============================================================
 	SWEEP_DIR           = "screen_check/";
 	SWEEP_PROB_DIR      = "problems/";
-	SWEEP_SETTLE_FRAMES = 12;            // low: the programmatic scene-check is timing-independent; just enough for spawns to populate
+	SWEEP_CAPTURE       = true;          // autonomous run: capture screenshots for Claude to inspect
+	SWEEP_SETTLE_FRAMES = 40;            // render pass: enough frames for the world to draw into the screenshot (with camera-snap)
 	SWEEP_WAITROOM      = 1;
 	SWEEP_SETTLE        = 2;
 	SWEEP_SHOOT         = 3;
+	SWEEP_HOLD          = 4;             // manual mode: hold on the scene until the user steps
+	SWEEP_MANUAL        = false;         // auto-run (full object report); F7 -> manual step (LEFT/RIGHT, 1=mark, click NOTE)
 	sweep_active        = false;
 	sweep_substate      = 0;
 	sweep_idx           = 0;
@@ -124,13 +127,14 @@ function Dev_RmWarper_Create() {
 	sweep_note_scene    = "";
 	sweep_note_cat      = "";
 	sweep_cats = [
-	    "Palette / wrong colors",
-	    "Sprite missing / garbled",
-	    "Tile / layout corruption",
-	    "Crash / freeze",
-	    "Wrong / empty room",
+	    "Palette",
+	    "Sprite",
+	    "Tiles",
+	    "WrongObj",
+	    "Empty",
 	    "Other"
 	];
+	sweep_note_pins = ds_list_create(); // view-relative "x,y" of each flagged spot in the current note
 
 	directory_create(SWEEP_DIR);
 	directory_create(SWEEP_PROB_DIR);
@@ -172,24 +176,47 @@ function Dev_RmWarper_Create() {
 	// F10: snapshot the current scene + open the click-to-note overlay.
 	sweep_flag = function() {
 	    sweep_note_scene  = g.rm_name;
-	    screen_save(SWEEP_PROB_DIR + sweep_note_scene + ".png");
+	    screen_save(SWEEP_PROB_DIR + sweep_note_scene + ".png"); // clean shot of the scene (before overlay)
 	    sweep_note_cat    = "";
 	    keyboard_string   = "";
+	    ds_list_clear(sweep_note_pins);
 	    sweep_note_active = true;
+	    global.sweep_note_active = true; // freeze gameplay + swallow debug hotkeys while typing
 	    show_debug_message("[SWEEP] flag (note mode): "+sweep_note_scene);
 	}
 
-	// ENTER: write "scene | tag | note" to the problem log, close the overlay.
+	sweep_note_close = function() { // shared cancel/commit cleanup
+	    sweep_note_active = false;
+	    global.sweep_note_active = false;
+	}
+
+	// ENTER: write "scene | tag | pins | note" to the problem log, close the overlay.
 	sweep_note_commit = function() {
-	    var _line = sweep_note_scene + "  |  " + sweep_note_cat + "  |  " + string(keyboard_string);
+	    var _pins = "";
+	    for (var _i=0; _i<ds_list_size(sweep_note_pins); _i++) _pins += "(" + sweep_note_pins[|_i] + ")";
+	    var _line = sweep_note_scene + "  |  " + sweep_note_cat + "  |  pins:" + _pins + "  |  " + string(keyboard_string);
 	    var _f = file_text_open_append(SWEEP_PROB_DIR+"problems.txt");
 	    file_text_write_string(_f, _line); file_text_writeln(_f); file_text_close(_f);
-	    sweep_note_active = false;
 	    sweep_flag_timer  = 90;
+	    sweep_note_close();
 	    show_debug_message("[SWEEP] saved problem: "+_line);
 	}
 
 	sweep_start = function() {
+	    // Force ALL dev overlays OFF. The debug overlay captures mouse/keyboard (blocks the note tool);
+	    // the others clutter the view. (g.can_show_debug_overlay was saved into prefs by the "U" toggle.)
+	    show_debug_overlay(false);
+	    g.can_show_debug_overlay  = false;
+	    g.can_draw_hb             = false;
+	    g.can_draw_Exit_hb        = false;
+	    g.can_draw_hp             = false;
+	    g.can_draw_cs             = false;
+	    g.can_show_t_solid        = false;
+	    g.canDrawSprOutline       = 0;
+	    g.canDraw_ogXY            = false;
+	    g.can_draw_og_cam_outline = false;
+	    g.dev_invState            = 0;
+
 	    var _n = sweep_build_list();
 	    show_debug_message("[SWEEP] start. "+string(_n)+" scenes. saving under: "+working_directory+SWEEP_DIR);
 	    if (_n <= 0) { sweep_active = false; return; }
@@ -222,6 +249,18 @@ function Dev_RmWarper_Create() {
 	    var _prxm = val(g.dm_spawn[?get_spawn_datakey(g.rm_name, STR_PRXM, -1)]);
 	    var _gob  = instance_number(GameObject); // actual game objects alive (all GO descendants)
 	    var _hud  = instance_number(HUD);
+
+	    // Tally the distinct object types actually present -> spot wrong-object spawns.
+	    var _dm = ds_map_create();
+	    with (GameObject) {
+	        var _n = object_get_name(object_index);
+	        _dm[?_n] = val(_dm[?_n]) + 1;
+	    }
+	    var _objs = "";
+	    var _k = ds_map_find_first(_dm);
+	    while (!is_undefined(_k)) { _objs += _k + "x" + string(_dm[?_k]) + " "; _k = ds_map_find_next(_dm, _k); }
+	    ds_map_destroy(_dm);
+
 	    var _flag = "";
 	    if (!_pc)                  _flag += "NO_PC ";
 	    if (_prio > 0 && _gob <= 0) _flag += "NO_GOB ";   // scene expects PRIO spawns but none exist
@@ -231,10 +270,27 @@ function Dev_RmWarper_Create() {
 	        + "  prioExp=" + string(_prio)
 	        + "  prxmExp=" + string(_prxm)
 	        + "  gob="     + string(_gob)
-	        + "  hud="     + string(_hud);
+	        + "  hud="     + string(_hud)
+	        + "  objs=[ "  + _objs + "]";
 	    if (_flag != "") _line += "   <<< " + _flag;
 	    var _f = file_text_open_append(SWEEP_DIR + "scene_report.txt");
 	    file_text_write_string(_f, _line); file_text_writeln(_f); file_text_close(_f);
+	}
+
+	// Manual mode: quick-mark the current scene as a problem (no overlay; instant log).
+	sweep_mark = function() {
+	    var _f = file_text_open_append(SWEEP_PROB_DIR + "marked.txt");
+	    file_text_write_string(_f, sweep_list[|sweep_idx]); file_text_writeln(_f); file_text_close(_f);
+	    sweep_flag_timer = 60;
+	    show_debug_message("[SWEEP] MARKED problem: " + sweep_list[|sweep_idx]);
+	}
+
+	// Manual mode: step back to the previous scene.
+	sweep_back = function() {
+	    sweep_idx      = max(0, sweep_idx - 1);
+	    sweep_watchdog = 0;
+	    sweep_substate = SWEEP_WAITROOM;
+	    sweep_warp_to(sweep_list[|sweep_idx]);
 	}
 
 	sweep_stop = function() {

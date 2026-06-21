@@ -2,27 +2,76 @@
 function Dev_RmWarper_Draw() {
 
 
-	// DEV SCREEN-CHECK: click-to-note overlay takes over the screen when active.
+	// DEV SCREEN-CHECK: click-to-note overlay. Scene stays VISIBLE so spots can be pinned.
 	if (sweep_note_active)
 	{
-	    var _nbx = viewXL()+16, _nby = viewYT()+40, _ndy = 14;
-	    draw_rect_(c_black, viewXL(),viewYT(),viewW(),viewH(), .85);
-	    draw_text_(_nbx, viewYT()+16, "PROBLEM @ " + sweep_note_scene);
-	    for(var _ci=0; _ci<array_length(sweep_cats); _ci++)
+	    var _f = draw_get_font(), _c = draw_get_colour(), _ha = draw_get_halign();
+	    draw_set_font(-1);
+	    draw_set_halign(fa_left);
+
+	    var _vx = viewXL(), _vy = viewYT(), _vw = viewW(), _vh = viewH();
+
+	    // Header strip.
+	    draw_set_colour(c_black);  draw_rectangle(_vx, _vy, _vx+_vw, _vy+12, false);
+	    draw_set_colour(c_yellow); draw_text(_vx+4, _vy+2, "NOTE " + sweep_note_scene + "   click=pin spot   click tag   type desc   ENTER=save  ESC=cancel  (Bksp on empty=undo pin)");
+
+	    // Pins drawn on the scene (view-relative "x,y").
+	    for (var _pi=0; _pi<ds_list_size(sweep_note_pins); _pi++)
 	    {
-	        var _cy = _nby + _ci*_ndy;
-	        var _mk = (sweep_note_cat == sweep_cats[_ci]) ? "> " : "  ";
-	        draw_text_(_nbx, _cy, _mk + sweep_cats[_ci]);
+	        var _p  = sweep_note_pins[|_pi];
+	        var _cm = string_pos(",", _p);
+	        var _px = _vx + real(string_copy(_p,1,_cm-1));
+	        var _py = _vy + real(string_delete(_p,1,_cm));
+	        draw_set_colour(c_red);   draw_circle(_px, _py, 5, true); draw_circle(_px, _py, 4, true);
+	        draw_set_colour(c_white); draw_text(_px+6, _py-6, string(_pi+1));
 	    }
-	    var _ny = _nby + array_length(sweep_cats)*_ndy;
-	    draw_text_(_nbx, _ny+8,  "Note: " + string(keyboard_string) + "_");
-	    draw_text_(_nbx, _ny+24, "Click a tag, type a note, ENTER = save, ESC = cancel");
-	    exit; // !!! note UI replaces everything else
+
+	    // Bottom UI: wrapped note text above a clickable tag bar.
+	    var _tagY = _vy+_vh-16, _tagH = 14, _tagW = 70, _tagX = _vx+4;
+	    draw_set_colour(c_black); draw_rectangle(_vx, _tagY-28, _vx+_vw, _vy+_vh, false);
+	    draw_set_colour(c_white); draw_text_ext(_vx+4, _tagY-27, "> " + string(keyboard_string) + "_", 10, _vw-8);
+	    for (var _ti=0; _ti<array_length(sweep_cats); _ti++)
+	    {
+	        var _bx  = _tagX + _ti*_tagW;
+	        var _sel = (sweep_note_cat == sweep_cats[_ti]);
+	        draw_set_colour(_sel ? c_lime : c_gray); draw_rectangle(_bx, _tagY, _bx+_tagW-2, _tagY+_tagH, false);
+	        draw_set_colour(c_black);                draw_rectangle(_bx, _tagY, _bx+_tagW-2, _tagY+_tagH, true);
+	        draw_set_colour(_sel ? c_black : c_white); draw_text(_bx+4, _tagY+1, sweep_cats[_ti]);
+	    }
+
+	    draw_set_font(_f); draw_set_colour(_c); draw_set_halign(_ha);
+	    exit; // !!! note UI handled
 	}
-	if (sweep_flag_timer > 0) draw_text_(viewXL()+8, viewYT()+24, "SAVED");
-	if (sweep_active && sweep_substate != SWEEP_SHOOT)
+	if (sweep_active)
 	{
-	    draw_text_(viewXL()+8, viewYT()+8, "SWEEP " + string(sweep_idx+1) + "/" + string(ds_list_size(sweep_list)));
+	    var _f = draw_get_font();
+	    var _c = draw_get_colour();
+	    var _ha = draw_get_halign();
+	    draw_set_font(-1);            // built-in font (game's font lacks lowercase/underscore -> squares)
+	    draw_set_halign(fa_left);
+
+	    var _bx = viewXL()+8;
+	    var _by = viewYT()+viewH();
+
+	    // Live scene label.
+	    var _lbl = "[" + string(sweep_idx+1) + "/" + string(ds_list_size(sweep_list)) + "]  " + sweep_list[|min(sweep_idx, ds_list_size(sweep_list)-1)];
+	    draw_set_colour(c_black); draw_text(_bx+1, _by-19, _lbl); // shadow
+	    draw_set_colour(c_white); draw_text(_bx,   _by-20, _lbl);
+
+	    if (sweep_substate == SWEEP_HOLD) // manual mode: controls + clickable NOTE button
+	    {
+	        draw_set_colour(c_black); draw_rectangle(_bx, _by-44, _bx+82, _by-30, false);
+	        draw_set_colour(c_white); draw_rectangle(_bx, _by-44, _bx+82, _by-30, true);
+	        draw_text(_bx+8, _by-43, "[ NOTE ]");
+	        draw_set_colour(c_black);  draw_text(_bx+97, _by-43, "<-/-> change   1=mark   click NOTE");
+	        draw_set_colour(c_yellow); draw_text(_bx+96, _by-44, "<-/-> change   1=mark   click NOTE");
+	    }
+
+	    if (sweep_flag_timer > 0) { draw_set_colour(c_lime); draw_text(_bx, _by-60, "** MARKED **"); }
+
+	    draw_set_font(_f);
+	    draw_set_colour(_c);
+	    draw_set_halign(_ha);
 	}
 
 

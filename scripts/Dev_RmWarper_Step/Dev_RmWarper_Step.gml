@@ -7,18 +7,21 @@ function Dev_RmWarper_Step() {
 	// Runs even while unpaused; note mode swallows input.
 	// ============================================================
 	if (sweep_note_active) {
-	    var _nbx = viewXL()+16, _nby = viewYT()+40, _ndy = 14, _nbw = 260;
+	    // Layout: tag bar along the very bottom; everything above it is the scene (click = drop a pin).
+	    var _tagY = viewYT()+viewH()-16, _tagH = 14, _tagW = 70, _tagX = viewXL()+4;
 	    if (mouse_check_button_pressed(mb_left)) {
-	        for(var _ci=0; _ci<array_length(sweep_cats); _ci++) {
-	            var _cy = _nby + _ci*_ndy;
-	            if (mouse_x>=_nbx && mouse_x<=_nbx+_nbw && mouse_y>=_cy && mouse_y<=_cy+_ndy) {
-	                sweep_note_cat = sweep_cats[_ci];
-	                break;
-	            }
+	        if (mouse_y >= _tagY && mouse_y <= _tagY+_tagH) {
+	            var _ti = (mouse_x - _tagX) div _tagW; // clicked the tag bar
+	            if (_ti >= 0 && _ti < array_length(sweep_cats)) sweep_note_cat = sweep_cats[_ti];
+	        } else if (mouse_y < _tagY-2) {            // clicked the scene -> pin the spot
+	            ds_list_add(sweep_note_pins, string(round(mouse_x-viewXL())) + "," + string(round(mouse_y-viewYT())));
 	        }
 	    }
+	    if (keyboard_check_pressed(vk_backspace) && ds_list_size(sweep_note_pins) > 0
+	    &&  string_length(keyboard_string) == 0)
+	        ds_list_delete(sweep_note_pins, ds_list_size(sweep_note_pins)-1); // backspace with empty text undoes last pin
 	    if (keyboard_check_pressed(vk_enter))  sweep_note_commit();
-	    if (keyboard_check_pressed(vk_escape)) sweep_note_active = false;
+	    if (keyboard_check_pressed(vk_escape)) sweep_note_close();
 	    exit; // !!! swallow input while taking a note
 	}
 
@@ -26,22 +29,35 @@ function Dev_RmWarper_Step() {
 	    if (keyboard_check_pressed(vk_f9))  { if (sweep_active) sweep_stop(); else sweep_start(); }
 	    if (keyboard_check_pressed(vk_f8))  sweep_stop();
 	    if (keyboard_check_pressed(vk_f10)) sweep_flag();
+	    if (keyboard_check_pressed(vk_f7))  SWEEP_MANUAL = !SWEEP_MANUAL; // toggle manual-step / auto
+	    if (sweep_active && sweep_substate == SWEEP_HOLD) {
+	        if (keyboard_check_pressed(vk_right)) sweep_advance(""); // RIGHT = next scene
+	        if (keyboard_check_pressed(vk_left))  sweep_back();      // LEFT  = prev scene
+	        if (keyboard_check_pressed(ord("1"))) sweep_mark();      // 1 = quick-mark this scene as a problem
+	        // click the on-screen [NOTE] box (bottom-left) to open the detailed click-to-note overlay
+	        if (mouse_check_button_pressed(mb_left)
+	        &&  point_in_rectangle(mouse_x, mouse_y, viewXL()+8, viewYT()+viewH()-44, viewXL()+90, viewYT()+viewH()-30))
+	            sweep_flag();
+	    }
 	}
 	if (sweep_flag_timer > 0) sweep_flag_timer--;
 	if (sweep_active) {
-	    // Watchdog: if a scene hangs or crash-loops on load, log it and skip on.
-	    if (++sweep_watchdog > SWEEP_WATCHDOG) { sweep_advance("STUCK"); }
+	    // Watchdog only in auto mode (manual can dwell on a scene as long as the user wants).
+	    if (!SWEEP_MANUAL && ++sweep_watchdog > SWEEP_WATCHDOG) { sweep_advance("STUCK"); }
 	    else switch(sweep_substate) {
 	        case SWEEP_WAITROOM: break; // advanced by Room Start
 	        case SWEEP_SETTLE:
-	            // Snap the camera onto the PC so the warped-to scene actually renders into the shot.
-	            if (instance_exists(global.pc)) set_view_xy_on_pc();
-	            if (--sweep_settle <= 0) sweep_substate = SWEEP_SHOOT;
+	            if (instance_exists(global.pc)) set_view_xy_on_pc(); // snap camera onto the scene
+	            if (--sweep_settle <= 0) {
+	                sweep_scene_check(); // load check -> scene_report.txt
+	                if (SWEEP_CAPTURE) screen_save(SWEEP_DIR + sweep_list[|sweep_idx] + ".png");
+	                if (SWEEP_MANUAL) sweep_substate = SWEEP_HOLD; // wait for user to step
+	                else              sweep_advance("");           // auto: next scene
+	            }
 	            break;
-	        case SWEEP_SHOOT:
-	            sweep_scene_check(); // programmatic load check -> scene_report.txt
-	            screen_save(SWEEP_DIR + sweep_list[|sweep_idx] + ".png");
-	            sweep_advance(""); // checked + shot -> next scene
+	        case SWEEP_HOLD: // manual: keep camera on scene, wait for PageDown/PageUp
+	            if (instance_exists(global.pc)) set_view_xy_on_pc();
+	            if (!SWEEP_MANUAL) sweep_advance(""); // toggled back to auto
 	            break;
 	    }
 	}

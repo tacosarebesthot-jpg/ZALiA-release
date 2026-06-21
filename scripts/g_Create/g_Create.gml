@@ -34,6 +34,7 @@ function g_Create() {
 	global.autosweep_boot       = 0;
 	global.autosweep_last_crash = "";
 	global.dev_inject_pause     = false;
+	global.sweep_note_active    = false; // true while the sweep note overlay is capturing typed input
 	if (global.autosweep)
 	{
 	    directory_create(working_directory + "screen_check");
