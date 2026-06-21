@@ -61,6 +61,7 @@ function GameObject_create() {
 	        && !string_pos(hex_str(f.quest_num),_val) )
 	        {
 	            state = 0;
+	            instance_destroy(id, false); // GMS2 port: instance_create runs first; a bail that returns noone must not leave a half-init (init2-skipped) zombie that the draw pipeline still renders -> crash on unset draw vars
 	            return noone;
 	        }
 	    }
@@ -155,6 +156,7 @@ function GameObject_create() {
 	        {
 	            state = 0;
 	            //if (g.mod_destroy_go_on_death && !state) GO_destroy_1a();
+	            instance_destroy(id, false); // GMS2 port: instance_create runs first; a bail that returns noone must not leave a half-init (init2-skipped) zombie that the draw pipeline still renders -> crash on unset draw vars
 	            return noone;
 	        }
         
