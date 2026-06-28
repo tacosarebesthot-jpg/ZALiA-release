@@ -752,6 +752,16 @@ function FileSelect_Create_Rando() {
 	//dg_RandoOTHER_Options[#_idx,4]  = "- WHICH TILESET IS ASSIGNED TO A DUNGEON IS RANDOMIZED";
 	dg_RandoOTHER_Options[#_idx,5]  = "- INCLUDES ALL ORIGINAL, AND CUSTOM DUNGEON GRAPHICS IN THE SHUFFLE";
 	//                                                          //
+	RandoOTHER_MAIN_START_REFLECT = ++_idx; // Vanilla (non-rando) start-with-Reflect. Backed by persistent global.start_with_reflect.
+	ds_grid_resize(dg_RandoOTHER_Options, _idx+1,RandoGrid_H);
+	dg_RandoOTHER_Options[#_idx,0]  = _X;       // 0: x
+	dg_RandoOTHER_Options[#_idx,1]  = _Y+(_idx*_dist1); // 1: y
+	dg_RandoOTHER_Options[#_idx,2]  = global.start_with_reflect; // 2: state (persistent, non-rando start option)
+	dg_RandoOTHER_Options[#_idx,3]  = "START WITH REFLECT";  // 3: text
+	dg_RandoOTHER_Options[#_idx,4]  = "START A NON-RANDO GAME WITH THE REFLECT SPELL.";
+	dg_RandoOTHER_Options[#_idx,4] += g.CHAR_END_LINE3+g.CHAR_END_LINE3+"THIS SETTING IS REMEMBERED. TURN IT OFF FOR A STANDARD VANILLA RUN.";
+	dg_RandoOTHER_Options[#_idx,5]  = "NOTE: IN A RANDO GAME, USE THE RANDO START SPELL OPTIONS INSTEAD.";
+	//                                                          //
 	RandoOTHER_MAIN_cursor_QUEST = ++_idx;
 	ds_grid_resize(dg_RandoOTHER_Options, _idx+1, RandoGrid_H);
 	dg_RandoOTHER_Options[#_idx,0] = _X;       // 0: x

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"spawn_fairy_proj",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"spawn_fairy_proj",
+  "parent":{
+    "name":"pc_projectile",
+    "path":"folders/Scripts/game_object/goc/pc_projectile.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

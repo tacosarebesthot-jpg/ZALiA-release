@@ -389,7 +389,7 @@ function data_spawn() {
     
 	    _datakey = STR_Depth;
 	    if (is_string(          _val)
-	    &&  string_pos(_datakey,_val) )
+	    &&  string_pos(_datakey,_val) == 1 )
 	    {
 	        _val1 = _val;
 	        while (string_pos(_datakey, _val1) == 1) _val1 = string_delete(_val1, 1, string_length(_datakey)); // strip repeated "_Depth" prefixes
@@ -451,7 +451,7 @@ function data_spawn() {
     
 	    _datakey = STR_Direction;
 	    if (is_string(          _val) 
-	    &&  string_pos(_datakey,_val) )
+	    &&  string_pos(_datakey,_val) == 1 )
 	    {
 	        _len  = string_length(_datakey);
 	        _val1 = string_copy(_val, _len+1, string_length(_val)-_len);
@@ -477,7 +477,7 @@ function data_spawn() {
     
 	    _datakey = STR_Duration;
 	    if (is_string(          _val) 
-	    &&  string_pos(_datakey,_val) )
+	    &&  string_pos(_datakey,_val) == 1 )
 	    {
 	        _len  = string_length(_datakey);
 	        _val1 = string_copy(_val, _len+1, string_length(_val)-_len);
@@ -554,7 +554,7 @@ function data_spawn() {
     
 	    _datakey = STR_Palette;
 	    if (is_string(          _val) 
-	    &&  string_pos(_datakey,_val) )
+	    &&  string_pos(_datakey,_val) == 1 )
 	    {
 	        _val1 = strR(_val, string_length(_datakey)+1);
 	        g.dm_spawn[?_SPAWN_DATAKEY+_datakey] = _val1;
@@ -699,6 +699,39 @@ function data_spawn() {
 	        g.dm_spawn[?_SPAWN_DATAKEY+STR_Sequence] = _val1;
 	        continue;
 	    }
+
+
+	    _datakey = STR_Side;
+	    if (is_string(          _val) 
+	    &&  string_pos(_datakey,_val) )
+	    {
+	        _len  = string_length(_datakey);
+	        _val1 = string_copy(_val, _len+1, string_length(_val)-_len);
+	        _val1 = str_hex(_val1);
+	        g.dm_spawn[?_SPAWN_DATAKEY+_datakey] = _val1;
+	        continue;//_i
+	    }
+
+
+	    _datakey = STR_Respawn;
+	    if (is_string(          _val) 
+	    &&  string_pos(_datakey,_val) )
+	    {
+	        _len  = string_length(_datakey);
+	        _val1 = string_copy(_val, _len+1, string_length(_val)-_len);
+	        _val1 = str_hex(_val1);
+	        g.dm_spawn[?_SPAWN_DATAKEY+_datakey] = _val1;
+	        continue;//_i
+	    }
+
+	        // OG-restore: an unhandled string arg falls through here -> store it in the next DataNN slot
+	        // (numeric args were already stored at the top; handled strings 'continue' before reaching here).
+	        if (is_string(_val))
+	        {
+	            _datakey = STR_Data+hex_str(_data_num++);
+	            g.dm_spawn[?_SPAWN_DATAKEY+_datakey] = _val;
+	            if (_IS_ITEM) g.dm_spawn[?_ITEM_ID+_datakey] = _val;
+	        }
 	}
 
 

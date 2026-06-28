@@ -53,6 +53,51 @@ function Surface_Draw_End() {
             
 	            surface_free(_SURF);
 	        }
+
+
+	        // TWITCH "flip": mirror the frame HORIZONTALLY for the duration. Mirrors the
+	        // screenshake present above (temp-surface copy -> redraw transformed), changing
+	        // only the transform from a translate to a NEGATIVE x-scale. Draw-time only;
+	        // the timed flag (global.tw_flip) is cleared on revert in twitch_tick.
+	        if (variable_global_exists("tw_flip") && global.tw_flip)
+	        {
+	            var          _FSURF = surface_create(application_surface_w,application_surface_h);
+	            surface_copy(_FSURF, 0,0, application_surface);
+
+	            if (global.application_surface_draw_enable_state)
+	            {
+	                draw_clear_alpha(c_black,0);
+	                draw_surface_ext(_FSURF, application_surface_w,0, -1,1, 0, c_white,1);
+	            }
+	            else
+	            {
+	                surface_set_target(_FSURF);
+	                draw_clear_alpha(c_black,0);
+	                draw_surface_ext(application_surface, application_surface_w,0, -1,1, 0, c_white,1);
+	                surface_reset_target();
+	                surface_copy(application_surface, 0,0, _FSURF);
+	            }
+
+	            surface_free(_FSURF);
+	        }
+
+
+	        // TWITCH "disco": brief HSV-cycling translucent overlay over the view. Draw-time
+	        // ONLY (no palette/brightness state touched -> cannot corrupt the scene palette);
+	        // the timed flag (global.tw_disco) is cleared on revert in twitch_tick, so it
+	        // stops drawing on its own. Saves/restores colour+alpha to avoid leaking state.
+	        if (variable_global_exists("tw_disco") && global.tw_disco)
+	        {
+	            var _disco_hue = (current_time div 24) mod 256;
+	            var _disco_col = make_colour_hsv(_disco_hue, 200, 255);
+	            var _disco_pa  = draw_get_alpha();
+	            var _disco_pc  = draw_get_colour();
+	            draw_set_alpha(0.30);
+	            draw_set_colour(_disco_col);
+	            draw_rectangle(viewXL(),viewYT(), viewXL()+viewW(),viewYT()+viewH(), false);
+	            draw_set_colour(_disco_pc);
+	            draw_set_alpha(_disco_pa);
+	        }
 	    }
 	}
 

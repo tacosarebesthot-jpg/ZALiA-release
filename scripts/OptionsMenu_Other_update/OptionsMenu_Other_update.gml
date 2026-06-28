@@ -260,6 +260,7 @@ function OptionsMenu_Other_update() {
 	    }
 	    break;}
 
+	    /*
 	    // -------------------------------------------------
 	    case Other_CHRISTMAS1:{
 	    if (timer) break;
@@ -272,6 +273,7 @@ function OptionsMenu_Other_update() {
 	        timer = DURATION1;
 	    }
 	    break;}
+	    */
 
 	    /*
 	    // -------------------------------------------------

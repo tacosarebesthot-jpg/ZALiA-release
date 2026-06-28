@@ -62,7 +62,7 @@ function Spawner_Drop_init2() {
 	        case  7:{_tileset=ts_DungeonG01; break;}
 	        }//switch(_DUNGEON_NUM)
         
-	        if (global.RandoDungeonTilesets_enabled)
+	        if (global.RandoDungeonTilesets_enabled && val(global.dm_save_file_settings[?STR_Randomize+STR_Dungeon+STR_Tileset]))
 	        {
 	            _tileset = val(f.dm_rando[?STR_Rando+STR_Tileset+background_get_name(_tileset)], _tileset)
 	        }

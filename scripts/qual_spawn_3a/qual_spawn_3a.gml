@@ -7,7 +7,7 @@
 function qual_spawn_3a() {
 
 
-	if (g.view_lock&$F==$F)
+	if ((g.view_lock & $F) == $F)
 	{
 	    return false;
 	}

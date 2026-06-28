@@ -100,9 +100,10 @@ function ContinueSaveScreen_step() {
             
 	            if (counter>=TITLE_SCREEN_CUE1)
 	            {
+	                dev_bugprobe_quit_sink_log("ContinueSaveScreen_step_Option_SAVE_goto_title_rm");
 	                goto_title_rm();
 	            }
-            
+
 	            if (counter&$7==$4) SaveFlash_count++;
 	            break;}
             
@@ -114,6 +115,7 @@ function ContinueSaveScreen_step() {
             
 	            if (counter>=TITLE_SCREEN_CUE2)
 	            {
+	                dev_bugprobe_quit_sink_log("ContinueSaveScreen_step_Option_QUIT_goto_title_rm");
 	                goto_title_rm();
 	            }
 	            break;}

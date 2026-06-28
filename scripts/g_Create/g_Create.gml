@@ -8,8 +8,37 @@ function g_Create() {
 	    show_debug_message("## EXCEPTION ## " + e.message);
 	    show_debug_message("  at " + e.script + " line " + string(e.line));
 	    show_debug_message("  longMessage: " + e.longMessage);
-	    // DEV AUTOSWEEP: log the crashing scene so one unattended run finds every crash.
-	    if (variable_global_exists("autosweep") && global.autosweep)
+	    // PLAYLOG: record unhandled exceptions during a watched play session too.
+	    // Guarded the same way every other playlog call site is (variable_global_exists
+	    // first, since this handler can in theory fire before g_Create finishes setting
+	    // global.playlog_active up -- though in practice this assignment happens early).
+	    if (variable_global_exists("playlog_active") && global.playlog_active)
+	    {
+	        playlog_write("EXCEPTION t=" + string(global.playlog_frame)
+	              + " msg=" + string(e.message)
+	              + " script=" + string(e.script)
+	              + " line=" + string(e.line)
+	              + " longMessage=" + string(e.longMessage));
+	    }
+	    // CRASH LOG: unconditional, regardless of playlog_active or DEV -- so any
+	    // crash in any build (play or dev, F3 pressed or not) is captured to disk.
+	    try
+	    {
+	        var _cf = file_text_open_append(working_directory + "crash.txt");
+	        file_text_write_string(_cf,
+	              "CRASH ts=" + date_datetime_string(date_current_datetime())
+	            + " msg=" + string(e.message)
+	            + " script=" + string(e.script)
+	            + " line=" + string(e.line)
+	            + " long=" + string(e.longMessage));
+	        file_text_writeln(_cf);
+	        file_text_close(_cf);
+	    }
+	    catch (_e) { }
+	    // DEV AUTOSWEEP / single-category sweep: log the crashing scene so one unattended
+	    // run finds every crash (same screen_check/crashes.txt the filtered RM sweeps use).
+	    if ((variable_global_exists("autosweep")    && global.autosweep)
+	    ||  (variable_global_exists("sweep_single") && global.sweep_single))
 	    {
 	        var _scene = "?";
 	        if (instance_exists(g)) _scene = string(g.rm_name);
@@ -36,6 +65,200 @@ function g_Create() {
 	global.dev_ow_sweep_active  = false; // true only while the dev overworld page-sweep runs (freezes the OW encounter sim)
 	global.dev_inject_pause     = false;
 	global.sweep_note_active    = false; // true while the sweep note overlay is capturing typed input
+
+
+	// DEV GRANULAR SWEEP flags (Phase 1). Each runs ONE room-category sweep instead of the
+	// full RM->OW autosweep above, so a change to e.g. one palace can run ONLY the palace
+	// sweep. Mirrors the autosweep flag exactly (DEV-gated, file_exists in working_directory).
+	// Each single-category run finalizes itself with its own _DONE.txt + game_end() (so a
+	// headless Igor run terminates) -- see sweep_start_category / sweep_start_other / sweep_stop.
+	// Flag files (drop the matching empty file into the build's working_directory):
+	//   _sweep_ow.flag          overworld page sweep only
+	//   _sweep_pal.flag         palaces only         (area_is_dungeon)
+	//   _sweep_town.flag        towns only           (area_is_town)
+	//   _sweep_cave.flag        all caves/connectors (NOT ow/dungeon/town)
+	//   _sweep_cave_west.flag   caves whose area starts _WestA_
+	//   _sweep_cave_east.flag   caves whose area starts _EastA_
+	//   _sweep_cave_dthmt.flag  caves whose area starts _DthMt_
+	//   _sweep_cave_mazis.flag  caves whose area starts _MazIs_
+	//   _sweep_other.flag       the 8 system rmB_* rooms (Title/FileSelect/Start/Start_Wide/ContinueSave/Death/GameOver/NextLife)
+	global.sweep_ow         = DEV && file_exists(working_directory + "_sweep_ow.flag");        // dev-only: forced false in final builds
+	global.sweep_pal        = DEV && file_exists(working_directory + "_sweep_pal.flag");
+	global.sweep_town       = DEV && file_exists(working_directory + "_sweep_town.flag");
+	global.sweep_cave       = DEV && file_exists(working_directory + "_sweep_cave.flag");
+	global.sweep_cave_west  = DEV && file_exists(working_directory + "_sweep_cave_west.flag");
+	global.sweep_cave_east  = DEV && file_exists(working_directory + "_sweep_cave_east.flag");
+	global.sweep_cave_dthmt = DEV && file_exists(working_directory + "_sweep_cave_dthmt.flag");
+	global.sweep_cave_mazis = DEV && file_exists(working_directory + "_sweep_cave_mazis.flag");
+	global.sweep_other      = DEV && file_exists(working_directory + "_sweep_other.flag");
+	// True if ANY single-category flag is set. Drives the boot autopilot (g_Step) the same way
+	// autosweep does, and tells sweep_stop to finalize (DONE+quit) instead of chaining RM->OW.
+	global.sweep_single     = global.sweep_ow || global.sweep_pal || global.sweep_town
+	                       || global.sweep_cave || global.sweep_cave_west || global.sweep_cave_east
+	                       || global.sweep_cave_dthmt || global.sweep_cave_mazis || global.sweep_other;
+	// LIVE menu-triggered sweep flag (set true by the AUTOMATED TEST options submenu before it
+	// calls a Dev_RmWarper sweep_start_*). Tells sweep_stop() to return to play instead of
+	// game_end(). NOT a build flag -- always starts false; only the in-game menu raises it.
+	global.sweep_from_menu  = false;
+	if (global.sweep_single)
+	{
+	    directory_create(working_directory + "screen_check");
+	    show_debug_message("[SWEEP] SINGLE-CATEGORY sweep ENABLED:"
+	        + (global.sweep_ow         ? " ow"         : "")
+	        + (global.sweep_pal        ? " pal"        : "")
+	        + (global.sweep_town       ? " town"       : "")
+	        + (global.sweep_cave       ? " cave"       : "")
+	        + (global.sweep_cave_west  ? " cave_west"  : "")
+	        + (global.sweep_cave_east  ? " cave_east"  : "")
+	        + (global.sweep_cave_dthmt ? " cave_dthmt" : "")
+	        + (global.sweep_cave_mazis ? " cave_mazis" : "")
+	        + (global.sweep_other      ? " other"      : ""));
+	}
+
+
+	// DEV BUGPROBE harness state. Enabled by presence of "_bugprobe.flag" in working_directory.
+	// Parallel to the autosweep flag above: can run alongside OR instead of autosweep -- it
+	// just needs the boot->fileselect->load-save-1 autopilot to reach gameplay so the probes
+	// have a live game to observe. See Dev_Bugprobe_Step() for the probes themselves.
+	global.bugprobe                    = DEV && file_exists(working_directory + "_bugprobe.flag"); // dev-only: forced false in final builds
+	global.bugprobe_t                  = 0;
+	global.bugprobe_started            = false;
+	global.bugprobe_done               = false;
+	global.bugprobe_palette_done       = false;
+	global.bugprobe_layering_done      = false;
+	global.bugprobe_walk_done          = false;
+	global.bugprobe_walk_us            = -1;     // filled in by Overworld_Step's one-shot timing sample
+	global.bugprobe_walk_us_logged     = false;
+	global.bugprobe_startquit_state    = 0;
+	global.bugprobe_startquit_timer    = 0;
+	// PROBE BUG6: Link-OW-walk-stutter capture (warp to overworld, hold Right ~48 frames, log per-frame).
+	global.bugprobe_bug6_state         = 0;     // 0=idle/not started, see Dev_Bugprobe_Step for state list
+	global.bugprobe_bug6_done          = false;
+	global.bugprobe_bug6_frame         = 0;     // counts the ~48 logged walk frames
+	global.bugprobe_bug6_stall_t       = 0;     // watchdog: bail if OW entry never lands, or if the OW never becomes READY (see Dev_Bugprobe_Step state 3)
+	global.dev_inject_hv               = 0;     // DEV-only virtual heldHV bits, consumed once in Input_update2a (mirrors dev_inject_pause)
+	global.bugprobe_endgame_timer      = 0;     // counts down then game_end() so probe runs self-terminate
+	// EXITVERIFY (revert: delete these 11 globals + the PROBE EXITRESOLVE block in Dev_Bugprobe_Step). Verifies the
+	// direction-aware exit-selection fix (PC_update_1c). Walks a list of multi-page rooms, warps to each, and for every
+	// spawned Exit re-runs the fixed selection scan to confirm "walking toward exit E resolves to E's own target".
+	global.bugprobe_exitresolve_state   = 0;     // 0=idle (wait for stable action room), 1=warp-issued, 2=wait-spawn+test, 3=done
+	global.bugprobe_exitresolve_done    = false;
+	global.bugprobe_exitresolve_idx     = 0;     // index into the room list (built in Dev_Bugprobe_Step)
+	global.bugprobe_exitresolve_wait_t  = 0;     // per-room spawn/settle + warp-stall watchdog
+	global.bugprobe_exitresolve_tested  = false; // latch: this room's exits already tested (don't re-test every frame)
+	global.bugprobe_exitresolve_rooms   = 0;     // accumulators for the summary line
+	global.bugprobe_exitresolve_exits   = 0;
+	global.bugprobe_exitresolve_overlap = 0;     // count of exits that had >0 overlapping neighbors (where the fix matters)
+	global.bugprobe_exitresolve_fails   = 0;
+	global.bugprobe_exitresolve_skips   = 0;     // rooms that could not be reached / had no exits (logged SKIP, not silent)
+	// BLEEDVERIFY (revert: delete these 6 globals + the PROBE TILEBLEED block in Dev_Bugprobe_Step). Verifies the
+	// Overworld_Room_Start non-"C" tile clear: enter OW, let tiles populate, transition into an action room, then count
+	// leftover OW tile elements at the OW's Tile_DEPTH1 (must be 0) for >=2 action rooms.
+	global.bugprobe_tilebleed_state     = 0;     // 0=idle, 1=warp-to-OW issued, 2=wait OW tiles populate, 3=warp-to-room issued, 4=wait+count, 5=done
+	global.bugprobe_tilebleed_done      = false;
+	global.bugprobe_tilebleed_wait_t    = 0;     // settle + watchdog
+	global.bugprobe_tilebleed_rooms     = 0;     // count of action rooms successfully checked
+	global.bugprobe_tilebleed_fails     = 0;     // count of rooms with leftover OW tiles (>0)
+	global.bugprobe_tilebleed_ow_seen   = false; // latched true once OW tiles were confirmed populated (proves the OW->room sequence was established)
+	// EXITWALK (revert: delete these globals + the PROBE EXITWALK block in Dev_Bugprobe_Step). Walks EVERY
+	// real action-room exit in the whole game (not just the 9-room EXITRESOLVE sample, and not just a
+	// dictionary-existence check like debug_exit_audit_traversal) -- a real sweep_warp_to() per exit, then
+	// validates the landed global.pc position (room bounds FAIL, solid/wall best-effort, exit-side WARN).
+	// Runs AFTER EXITRESOLVE is done (same warp-pipeline serialization convention as TILEBLEED/BUG6).
+	global.bugprobe_exitwalk_state      = 0;     // 0=idle (wait for stable action room), 1=enumerate (run once), 2=warp-issued for current exit, 3=wait-land+check, 4=done
+	global.bugprobe_exitwalk_done       = false;
+	global.bugprobe_exitwalk_list       = noone; // ds_list of "room|exitName|gotoName" strings, built once in state 1
+	global.bugprobe_exitwalk_idx        = 0;     // index into the list
+	global.bugprobe_exitwalk_wait_t     = 0;     // per-exit settle + warp-stall watchdog
+	global.bugprobe_exitwalk_cur_room   = "";    // source room of the exit currently being tested (warp target)
+	global.bugprobe_exitwalk_rooms      = 0;     // distinct source rooms warped into (accumulator for summary)
+	global.bugprobe_exitwalk_exits      = 0;     // exits actually landed+checked (accumulator for summary)
+	global.bugprobe_exitwalk_fails      = 0;
+	global.bugprobe_exitwalk_warns      = 0;
+	global.bugprobe_exitwalk_skips      = 0;     // exits whose warp never landed (logged SKIP, not silent)
+	global.bugprobe_exitwalk_max_exits  = 99999; // safety valve: harness can read this to cap a run; default effectively unlimited
+	if (global.bugprobe)
+	{
+	    directory_create(working_directory + "bugprobe");
+	    show_debug_message("[BUGPROBE] ENABLED (found _bugprobe.flag)");
+	}
+
+
+	// DEV CO-OP TEST harness state. Enabled by presence of "_cooptest.flag" in
+	// working_directory (mirrors the autosweep/bugprobe flags above). Drives the SAME
+	// boot->fileselect->load-save-1 autopilot (see g_Step) to reach an action room, then
+	// cooptest_start() runs the co-op fairy (obj_fairy_p2) through all its behaviours with
+	// synthetic Input.p2_* and verifies no crash. Logs [COOPTEST] lines to
+	// working_directory + "cooptest/cooptest_report.txt" and game_end()s at the end.
+	// Only the flag is DEV-gated here; the rest are plain run-state defaults so the live
+	// menu row (DEV TOOLS > TEST/CAPTURE > COOP TEST) can raise them too. See Dev_CoopTest_Step.
+	global.cooptest           = DEV && file_exists(working_directory + "_cooptest.flag"); // dev-only: forced false in final builds
+	global.cooptest_run       = false; // state machine actively running (set true by cooptest_start)
+	global.cooptest_from_menu = false; // live menu run -> return to play instead of game_end at FINISH
+	global.cooptest_phase     = 0;
+	global.cooptest_t         = 0;
+	if (global.cooptest)
+	{
+	    directory_create(working_directory + "cooptest");
+	    show_debug_message("[COOPTEST] ENABLED (found _cooptest.flag)");
+	}
+
+
+	// PLAYLOG "watch-me-play" session logger. Default OFF; near-zero cost when off
+	// (every call site is gated on this single bool, see playlog_write.gml). Enabled
+	// either by the presence of "_playlog.flag" in working_directory (checked once,
+	// here) or at runtime via the F3 key (Surface_Draw_GUI_End.gml). UNLIKE bugprobe/
+	// autosweep, this is NOT gated on DEV -- it must work in a PLAY build (DEV==false)
+	// while the user plays normally, so a friend's session can be "watched" after the
+	// fact without screenshots.
+	global.playlog_active       = false;
+	global.playlog_frame        = 0;
+	global.playlog_audio_logged = false; // MUSIC-STATE diag: set true after the one-shot AUDIO boot line fires
+	if (file_exists(working_directory + "_playlog.flag"))
+	{
+	    global.playlog_active = true;
+	    playlog_write("=== PLAYLOG START t=" + string(global.playlog_frame) + " ts=" + string(date_datetime_string(date_current_datetime())) + " ===");
+	}
+
+	global.tas_rec_state  = 0;
+	global.tas_pb_state   = 0;
+	global.tas_overlay_on = 0;
+
+	// ── MARK -> REPRODUCIBLE REPLAY (room-anchored) ─────────────────────────────
+	// Always-on rolling input ring: each frame Input_update2a stores this frame's
+	// packed 10-bit input word (the SAME _rec the TAS recorder writes) into a
+	// circular buffer. One array store/frame -- cheap, runs in every build. On MARK
+	// (key 3, mark_dump_replay) the ring is dumped oldest->newest to TAS_recording.txt
+	// so tas_pb_load_start replays it 1:1. The room-entry snapshot (mark_snapshot) is
+	// captured at the END of g_Room_Start, which also RESETS the ring so ring frame 0
+	// lines up with room entry. mark_replay_load restores the snapshot + arms playback.
+	global.mark_ring_n      = 60 * 30;                          // ~30s @ 60fps
+	global.mark_ring        = array_create(global.mark_ring_n, 0);
+	global.mark_ring_head   = 0;                                // next write index
+	global.mark_ring_filled = 0;                               // frames written so far (caps at n)
+	global.mark_snapshot    = undefined;                       // room-entry restore struct (see g_Room_Start)
+
+	// Controller-diagnostic overlay (AUTOMATED TEST > CONTROLLER DIAG). Default OFF.
+	// Drawn by gp_diag_overlay() in Surface_Draw_GUI_End; read unguarded there via
+	// variable_global_exists, so this just sets the default state.
+	global.gp_diag_on = 0;
+
+	// On-screen HUD death-counter overlay: default OFF (mispositioned; real death
+	// readout is moving to the 2nd tracker window). Toggled via Dev Tools (DEATH COUNTER),
+	// gated in scripts/HUD_Draw. Sits beside the other overlay-toggle globals above.
+	global.dbg_death_counter_show = false;
+
+	// Depth-layer debug overlay (Dev Tools "DEPTH OVERLAY" / F4). Default OFF.
+	// Read unguarded by OptionsMenu_Draw_DevTools' state-text switch, so it MUST be
+	// initialized here or opening Dev Tools throws "variable not set before reading".
+	global.dbg_depth_show = false;
+
+	global.tas_rec_file   = -1;
+	global.tas_rec_count  = 0;
+	global.dl_tas_pb      = -1;
+	global.tas_pb_index   = 0;
+	global.tas_pb_count   = 0;
+
 	if (global.autosweep)
 	{
 	    directory_create(working_directory + "screen_check");
@@ -250,6 +473,11 @@ function g_Create() {
 	can_show_t_unique           = false;
 
 	can_show_debug_overlay      = false;
+	debug_hud_enabled           = false; // Dev_DebugHarness_Draw() checks this; false = HUD hidden (default)
+	cheat_inf_hp                = false; // CHEAT: keep HP topped off
+	cheat_inf_mp                = false; // CHEAT: keep MP topped off
+	cheat_inf_lives             = false; // CHEAT: keep lives topped off
+	cheat_invuln                = false; // CHEAT: take no damage
 	can_draw_hb                 = false;
 	can_draw_cs                 = false;
 	can_draw_ocs                = false;
@@ -441,6 +669,82 @@ function g_Create() {
 	global.Christmas_enabled  = current_month==12 && (current_day==24 || current_day==25);
 	global.LowHPBeep_disabled = false;
 	//global.Halloween1_enabled = current_month==10 && current_day==16; // testing
+
+
+	// ============================================================
+	// WALKTUNE: live in-game overworld walk-feel tuning tool -- now a MOUSE-DRAGGABLE
+	// SLIDER PANEL (replaces the old key-based "\" / "[" / "]" text overlay).
+	// Self-contained + play-safe (NOT gated on DEV). Two sliders let the user blend
+	// the overworld smooth-walk offset (0..100%) and trim a SAFE speed multiplier
+	// live, then SAVE the dialled-in values. Wired in:
+	//   - Overworld_udp.gml          : SMOOTH-WALK offset SCALED by ow_smooth_pct/100
+	//   - Overworld_Step.gml         : safe speed multiplier (fractional move_SYS path)
+	//   - Surface_Draw_GUI_End.gml   : F9 toggle + F11 save + walktune_panel() call
+	//   - scripts/walktune_panel.gml : the slider panel (draw + mouse drag)
+	//   - scripts/walktune_save.gml  : the file export helper
+	// Reversible: delete this block + the WALKTUNE blocks in those files + the two
+	// walktune_* scripts (and their .yyp entries). DEFAULTS BELOW = FULLY FAITHFUL 1.4
+	// PORT (smoothing 0% = NES tile-snap, speed x1.00), so a normal launch plays exactly
+	// like the reverted faithful base; the user dials effects UP from there via the panel.
+	// ------------------------------------------------------------
+	global.walktune_on      = false; // is the tuning PANEL visible/active (F9 toggles)
+	// SMOOTHING is a CONTINUOUS 0..100 blend. 0 = FAITHFUL NES 16px tile-snap (DEFAULT),
+	// 100 = fully smooth; anything between blends the sub-tile offset. Default is 0 so the
+	// launched game is byte-faithful -- the Overworld_udp smoothing hook is a NO-OP at 0.
+	global.ow_smooth_pct    = 0;
+	// Derived legacy convenience for any code still reading the old bool: true when ANY smoothing.
+	global.ow_smooth_on     = (global.ow_smooth_pct > 0);
+	global.ow_speed_mult    = 1.00;  // overworld walk-speed multiplier (1.00 = shipping). SAFE range clamped below.
+	global.ow_speed_MIN     = 0.25;  // clamp floor (WIDENED 0.50 -> 0.25): slower resolves smoothly via the fractional path.
+	global.ow_speed_MAX     = 1.00;  // clamp ceiling = canonical. The tile step is a 16-frame/tile (1px/frame max)
+	                                 // quantum: a value >1.00 cannot move FASTER without the fractional accumulator
+	                                 // skipping a tile boundary (it caps at frac()), so we DON'T expose >1.00 -- it
+	                                 // would mislead. SAFELY TUNABLE = 0.25..1.00 (slow-down only). Speed is mainly
+	                                 // here for the user to CONFIRM the shipping 1.00 feel vs a slower compare.
+	global.ow_speed_STEP    = 0.01;  // slider quantisation granularity (fine -- "generous within 0.25..1.00")
+	global.walktune_drag    = -1;    // which slider is being dragged: -1 none, 0 smoothing, 1 speed
+	global.walktune_msg      = "";   // brief confirmation line ("SAVED ..." / "ERR ...")
+	global.walktune_msg_timer = 0;   // frames remaining to show walktune_msg
+	// ============================================================
+
+	// ============================================================
+	// MOVESPEED CHEAT (revert: delete this block + the MOVESPEED CHEAT blocks in
+	// Surface_Draw_GUI_End.gml [F5 hotkey + HUD], updateX.gml [action-room scale], and
+	// Overworld_Step.gml [OW multi-step loop]). Play-safe: gated on its OWN state
+	// (global.cheat_movespeed), NEVER on DEV -- it lives in the play build like the other
+	// ungated F-key tools. DEFAULT 1 = NO change (faithful). F5 cycles 1->2->3->4->1.
+	// At 1x every consumer no-ops, so a normal launch plays exactly like the faithful base.
+	// ------------------------------------------------------------
+	global.cheat_movespeed = 1; // 1 = off (faithful), 2/3/4 = walk that many times faster
+	// ============================================================
+
+	// ============================================================
+	// NOTE SYSTEM (revert: delete this block + the NOTE SYSTEM blocks in
+	// Surface_Draw_GUI_End.gml [F7 hotkey + input + draw + save] and g_Step.gml
+	// [early note-mode freeze guard]). Play-safe: gated on its OWN state
+	// (global.note_active), NEVER on DEV -- a play-build bug-annotation tool that
+	// sits alongside the ungated F-key tools above. F7 PAUSES the game, the user
+	// TYPES a bug description, ENTER saves it (NOTE line + screenshot) into the
+	// SAME problems/_playtest_log.txt the F6 flag uses, ESC cancels.
+	// note_active=false default -> a normal launch is byte-identical (the g_Step
+	// guard short-circuits on a single bool check, draw/input no-op while off).
+	// ------------------------------------------------------------
+	global.note_active     = false; // true while the user is typing a note (game frozen)
+	global.note_text       = "";    // the typed note text (mirrors keyboard_string at save time)
+	global.note_ctx        = "";    // captured F6-style "frame=... | room=... | ..." context line
+	global.note_num        = 0;     // the dev_flag mark number this note is tied to
+	global.note_shot       = "";    // screenshot filename linked to this note (e.g. "play_007.png")
+	global.note_msg        = "";    // brief confirmation line ("NOTE SAVED #NNN" / "NOTE CANCELLED")
+	global.note_msg_timer  = 0;     // frames remaining to show note_msg
+	// ============================================================
+
+	// ============================================================
+	// NES-MUSIC JUKEBOX: build the play-safe jukebox model (56 imported NES tracks).
+	// Gated on its OWN state (global.jukebox_on), NEVER on DEV. Self-contained +
+	// reversible: delete this call + the jukebox_* scripts + the JUKEBOX blocks in
+	// Surface_Draw_GUI_End.gml. See jukebox_init() for the globals it sets up.
+	jukebox_init();
+	// ============================================================
 
 	global.SloofLirpa_ENABLED = current_month==04 && current_day==01;
 	//global.SloofLirpa_ENABLED = current_month==10 && current_day==13; // testing
@@ -836,6 +1140,10 @@ function g_Create() {
 	global.RetroShaders_enabled = false;
 	global.RetroShaders_surface_scale = 2;
 	global.application_surface_draw_enable_state = !global.RetroShaders_enabled;
+
+	global.DisplayMode = DISPLAY_SMOOTH; // screen-scaling mode (Options -> DISPLAY). SMOOTH = current behavior; rendering applies it later.
+	global.DisplayMode_gui_overridden = false; // true once a takeover mode has resized the GUI layer (so SMOOTH knows to restore it)
+	global.shaders_prewarmed = false; // one-time flag: pre-warm the DisplayMode present shaders on the first draw frame so the first Sharp/CRT/Scanlines switch doesn't stall (warm pass lives in Surface_Draw_GUI_Begin)
 
 
 
@@ -3869,13 +4177,81 @@ function g_Create() {
 
 	// ── Tracker Window (Win32 second window via external_define) ─────────────
 	// Set false to skip the popup window and log to the debug console instead
-	global.TW_ENABLED = false;
+	global.TW_ENABLED = false; // 2nd-window tracker OFF — external_call DLL bridge is dead in GMS2 VM (see DIAGNOSIS_2nd_window.txt; needs companion app or DLL extension, not pure GML).
+
 	TrackerWin_extern();   // sets up all Win32 function handles
 	TrackerWin_init();     // creates the OS window (skipped if TW_ENABLED=false)
 	global.TW_tick = 0;
 	// ────────────────────────────────────────────────────────────────────────
 
 
+	// ── TWITCH integration (Phase A) globals ────────────────────────────────────
+	// File-drop chat-command queue -> existing-lever dispatcher (twitch_apply/poll/
+	// tick). All effects are non-persistent, reversible and runtime-only; nothing
+	// here ever touches the save. global.tw_enabled defaults FALSE (a Dev-Tools
+	// toggle can flip it later) so a stray drop file does nothing until enabled.
+	// Revert: delete this block + the twitch_poll()/twitch_tick() calls in g_Step,
+	// the toast block in Surface_Draw_GUI_End, and the 3 twitch_* scripts.
+	global.tw_enabled     = false; // master gate -- OFF by default
+	global.tw_active      = [];    // array of {frames, restore[, reapply], ...} timed-effect structs
+	global.tw_toast       = "";    // last applied verb feedback text
+	global.tw_toast_timer = 0;     // frames remaining to draw the toast
+	// FUN-effect timed flags (set by twitch_apply, re-asserted + cleared on revert in
+	// twitch_tick; READ each frame by Input_update2a / Surface_Draw_End). All default
+	// OFF -> pure single-bool no-ops until a verb turns one on. Reversible: delete these.
+	global.tw_flip        = false; // mirror the screen horizontally   (Surface_Draw_End)
+	global.tw_confuse     = false; // swap LEFT<->RIGHT player input    (Input_update2a)
+	global.tw_disco       = false; // HSV-cycling translucent overlay   (Surface_Draw_End)
+
+	// ── KONAMI CODE easter egg globals ──────────────────────────────────────────
+	// Detect UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A on Player 1 (konami_check in
+	// g_Step) -> harmless, runtime-only egg (full heal + a few lives + toast + SFX);
+	// nothing here touches the save. konami_seq is a rolling buffer of recent P1
+	// presses; konami_target is the sequence to match.
+	// Tokens: 1=UP 2=DOWN 3=LEFT 4=RIGHT 5=B(attack) 6=A(jump).
+	// Reversible: delete this block + the konami_check script + the konami_check()
+	// call in g_Step + the KONAMI toast block in Surface_Draw_GUI_End.
+	global.konami_target      = [1,1,2,2,3,4,3,4,5,6]; // UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A
+	global.konami_seq         = [];   // rolling buffer of recent P1 presses
+	global.konami_timer       = 0;    // frames left before an idle buffer self-resets
+	global.konami_cooldown    = 0;    // brief re-trigger lockout after firing
+	global.KONAMI_TIMEOUT     = 90;   // ~1.5s allowed between presses before the buffer resets
+	global.konami_toast       = "";   // toast text (drawn in Surface_Draw_GUI_End)
+	global.konami_toast_timer = 0;    // frames remaining to draw the toast
+
+	// ── CO-OP P2 FAIRY ── master gate, OFF by default. When true: a 2nd pad drives
+	// obj_fairy_p2 (float / shoot / heal). Toggle in DEV TOOLS > MISC > CO-OP.
+	global.coop_enabled   = false;
+	// REVIVE tokens: the co-op fairy can revive a dead P1 this many times (see
+	// PC_update_death). 1 = one free revive per run. Gated on global.coop_enabled.
+	global.coop_revive_tokens = 1;
+
+	// ── TWITCH IRC (no-bot mode) globals -- STUB, OFF/empty by default ──────────
+	// Optional alternative to the file-drop/bot path: obj_twitch_irc joins chat
+	// directly and feeds the same twitch_apply() dispatcher. Non-functional until
+	// configured (real OAuth token + user + channel) AND tw_irc_enabled flipped.
+	// The file-drop/bot path above stays the PRIMARY integration.
+	global.tw_irc_enabled = false; // master gate for the in-game IRC client -- OFF
+	global.tw_irc_token   = "";    // OAuth token (bare; "oauth:" prefix added on send), scope chat:read
+	global.tw_irc_user    = "";    // bot/login nick
+	global.tw_irc_channel = "";    // channel to join (no leading '#')
+	global.tw_irc_socket  = -1;    // live TCP socket id (-1 = not connected)
+	// Connection settings come from %LOCALAPPDATA%\ZALiA\twitch_config.txt (the user
+	// creates it: token=/user=/channel=/cooldown=) -> twitch_irc_load_config().
+	global.tw_irc_status          = "idle";    // human-readable: idle/connecting/connected/error/no config
+	global.tw_irc_status_timer    = 0;         // auto-hide countdown for the "connected" label (frames; set to ~240 on welcome 001, decremented in twitch_irc_step). 0 = expired/hidden.
+	global.tw_irc_cooldown_frames = 600;       // GLOBAL anti-spam cooldown (frames; 600 = 10s @60fps)
+	global.tw_irc_last_cmd        = -1000000;  // frame of last ACCEPTED chat command (huge -ve = ready now)
+	global.tw_irc_frame           = 0;         // monotonic frame counter (advanced by twitch_irc_step)
+	// ────────────────────────────────────────────────────────────────────────
+
+
+
+
+	// MARK -> REPLAY determinism self-test (DEV-only, one-shot at boot): proves the
+	// GML RNG can be captured + restored mid-sequence (the feature's key risk). Logs
+	// "[MARKRNG] roundtrip=PASS|FAIL". Non-destructive (saves/restores the live seed).
+	if (DEV) mark_rng_selftest();
 
 
 	if (DEV)

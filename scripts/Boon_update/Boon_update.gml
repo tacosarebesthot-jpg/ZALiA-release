@@ -2,20 +2,6 @@
 function Boon_update() {
 
 
-	// 9989
-	if ((yt&$FF) < $80 
-	// if (yt - g.camYT < $68 
-	&& !(g.counter1&$1F) 
-	&&  avail_uidx_goc(MAX_GOC1)!=UIDX_NULL )
-	{
-	    with(GOC1_create(xl,yt, facing_dir, projectile,projectile_ver))
-	    {
-	        hspd = 0;
-	        vspd = 0;
-	    }
-	}
-
-
 	facing_dir = byte_dir(hspd);
 
 
@@ -24,6 +10,20 @@ function Boon_update() {
 	{
 	    GOB_update_2();
 	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	}
+
+
+	// 9989
+	if ((yt&$FF) < $80
+	// if (yt - g.camYT < $68
+	&& !(g.counter1&$1F)
+	&&  avail_uidx_goc(MAX_GOC1)!=UIDX_NULL )
+	{
+	    with(GOC1_create(xl,yt, facing_dir, projectile,projectile_ver))
+	    {
+	        hspd = 0;
+	        vspd = 0;
+	    }
 	}
 
 

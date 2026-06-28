@@ -7,17 +7,28 @@ function p_Room_Start_palette_rando() {
 	var _pi, _pal, _color;
 	var _depth, _layer_name;
 
-	var                            _scene_used = g.rm_name;
-	if (global.SceneRando_enabled) _scene_used = val(f.dm_rando[?dk_SceneRando+STR_Scene+STR_Randomized+g.rm_name], _scene_used);
+	// DEST-TUPLE: runs before g_Room_Start; derive destination from f.reen
+	var _dest_scene       = get_exit_rm_name(f.reen);
+	var _dest_area        = string_copy(f.reen, 1, AreaID_LEN);
+	var _dest_room_nm     = room_get_name(room);
+	var _dest_room_type   = string_char_at(_dest_room_nm, string_pos("_", _dest_room_nm)-1);
+	var _dest_dungeon_num = get_dungeon_num(_dest_scene);
+	var _dest_town_num    = get_town_num(_dest_scene);
+	var _dest_town_name   = g.dm_town[?STR_Town+STR_Name+hex_str(_dest_town_num)];
+
+	var                            _scene_used = _dest_scene;
+	if (global.SceneRando_enabled) _scene_used = val(f.dm_rando[?dk_SceneRando+STR_Scene+STR_Randomized+_dest_scene], _scene_used);
 
 
-	if (room!=rmB_Title 
-	&&  room!=rmB_FileSelect 
-	&&  g.RandoPalette_state ) // 0: Off, 1: Dungeons, PC, 2: Dungeons, 2 background PI of Non-dungeon scenes, PC
+	// RANDO-LEAK FIX (revert: delete the `&& val(...)` line below). g.RandoPalette_state is a leaky GLOBAL pref that bleeds across saves; also gate on the PER-SAVE setting so vanilla saves keep OG/NES default colors.
+	if (room!=rmB_Title
+	&&  room!=rmB_FileSelect
+	&&  g.RandoPalette_state // 0: Off, 1: Dungeons, PC, 2: Dungeons, 2 background PI of Non-dungeon scenes, PC
+	&&  val(global.dm_save_file_settings[?STR_Randomize+STR_Palette]) )
 	{
-	    if (g.room_type=="A")
+	    if (_dest_room_type=="A")
 	    {
-	        if (g.dungeon_num 
+	        if (_dest_dungeon_num
 	        ||  g.RandoPalette_state==2 ) // state 1 only uses rando palettes for pc and dungeons
 	        {
 	            // `f.dm_rando[?STR_Palette+STR_Rando+g.rm_name]`: The palettes for PI_BGR1-PI_BGR4
@@ -25,8 +36,11 @@ function p_Room_Start_palette_rando() {
 	            if(!is_undefined(_pal))
 	            {
 	                pal_rm_def = strReplaceAt(pal_rm_def, get_pal_pos(global.PI_BGR1), string_length(_pal), _pal);
+	                // PALDIAG START
+	                pal_rando_applied = true;
+	                // PALDIAG END
                 
-	                if (g.dungeon_num)
+	                if (_dest_dungeon_num)
 	                {
 	                    var _solid_wall_pi_pos = get_pal_pos(global.PI_BGR1);
                     
@@ -159,6 +173,9 @@ function p_Room_Start_palette_rando() {
 	            if(!is_undefined(_pal))
 	            {
 	                pal_rm_def = strReplaceAt(pal_rm_def, get_pal_pos(global.PI_BGR1), string_length(_pal), _pal);
+	                // PALDIAG START
+	                pal_rando_applied = true;
+	                // PALDIAG END
                 
 	                if (g.dungeon_num)
 	                {

@@ -1,6 +1,7 @@
 /// @description  Goriya_update()
 function Goriya_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	attack_dist = ATK_DIST; // $60
 

@@ -16,9 +16,18 @@ function p_Room_Start() {
 	var _ci,_ci1,_ci2;
 	var _dungeon_num;
 
+	// DEST-TUPLE: p_Room_Start runs before g_Room_Start; derive destination from f.reen (mirrors g_Room_Start L67-68,124-130)
+	var _dest_scene       = get_exit_rm_name(f.reen);
+	var _dest_area        = string_copy(f.reen, 1, AreaID_LEN);
+	var _dest_room_nm     = room_get_name(room);
+	var _dest_room_type   = string_char_at(_dest_room_nm, string_pos("_", _dest_room_nm)-1);
+	var _dest_dungeon_num = get_dungeon_num(_dest_scene);
+	var _dest_town_num    = get_town_num(_dest_scene);
+	var _dest_town_name   = g.dm_town[?STR_Town+STR_Name+hex_str(_dest_town_num)];
 
-	var                            _scene_used = g.rm_name;
-	if (global.SceneRando_enabled) _scene_used = val(f.dm_rando[?dk_SceneRando+STR_Scene+STR_Randomized+g.rm_name], _scene_used);
+
+	var                            _scene_used = _dest_scene;
+	if (global.SceneRando_enabled) _scene_used = val(f.dm_rando[?dk_SceneRando+STR_Scene+STR_Randomized+_dest_scene], _scene_used);
 
 
 
@@ -38,19 +47,20 @@ function p_Room_Start() {
 
 	if (room!=rmB_Death) global.BackgroundColor_at_death = -1;
 
-	     if (g.room_type=="A")   global.BackgroundColor_scene = val(g.dm_rm[?g.rm_name+dk_BackgroundColor], C_BLK1);
+	     if (_dest_room_type=="A")   global.BackgroundColor_scene = val(g.dm_rm[?_dest_scene+dk_BackgroundColor], C_BLK1);
 	else if (room==rmB_GameOver) global.BackgroundColor_scene = GameOverScreen_BGR_COLOR;
 	else                         global.BackgroundColor_scene = C_BLK1;
 
 
-	if (g.room_type=="A" 
+	if (_dest_room_type=="A"
 	&&  global.BackgroundColor_scene!=C_BLK1 )
 	{
 	    var _qualifies = global.Halloween1_enabled;
     
-	    if(!_qualifies 
-	    &&  g.view_y_page_min==g.view_y_page_max 
-	    &&  g.RandoPalette_state ) // 0: Off, 1: Dungeons & PC, 2: Dungeons, PC, and 2 BGR PI random palette when enter room
+	    if(!_qualifies
+	    &&  g.view_y_page_min==g.view_y_page_max
+	    &&  g.RandoPalette_state // 0: Off, 1: Dungeons & PC, 2: Dungeons, PC, and 2 BGR PI random palette when enter room
+	    &&  val(global.dm_save_file_settings[?STR_Randomize+STR_Palette]) ) // RANDO-LEAK FIX (revert: delete this `&& val(...)` line). g.RandoPalette_state is a leaky GLOBAL pref; gate on the per-save setting so vanilla saves don't get the rando star-sky swap.
 	    //&&  val(f.dm_rando[?STR_Randomize+STR_Palette]) )
 	    {
 	        if (global.BackgroundColor_scene==C_VLT2   // Town sky
@@ -74,7 +84,7 @@ function p_Room_Start() {
 
 	if (global.SceneRando_enabled)
 	{
-	    if (_scene_used!=g.rm_name)
+	    if (_scene_used!=_dest_scene)
 	    {
 	        _color = val(g.dm_rm[?_scene_used+dk_BackgroundColor], global.BackgroundColor_scene);
 	        if (_color==C_BLK1) global.BackgroundColor_scene = C_BLK1;
@@ -115,10 +125,10 @@ function p_Room_Start() {
 
 	// ------------------------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------------
-	var _FILE_CLEANING = g.FileCleaning01_STATE && g.room_type=="A" && g.rm_name==g.FileCleaning01_rm_name;
-	var _dm_pal_data_datakey = g.rm_name;
+	var _FILE_CLEANING = g.FileCleaning01_STATE && _dest_room_type=="A" && _dest_scene==g.FileCleaning01_rm_name;
+	var _dm_pal_data_datakey = _dest_scene;
 
-	switch(g.room_type)
+	switch(_dest_room_type)
 	{
 	    // ------------------------
 	    case "A":{
@@ -155,7 +165,7 @@ function p_Room_Start() {
         
 	        if (is_undefined(pal_rm_file))
 	        {
-	            pal_rm_file = get_palette_via_file_data(0, g.rm_name, g.file_data_quest_num); // Get rm palette data from file
+	            pal_rm_file = get_palette_via_file_data(0, _dest_scene, g.file_data_quest_num); // Get rm palette data from file
 	        }
 	    }
 	    break;}
@@ -213,9 +223,9 @@ function p_Room_Start() {
 	        // MOB
 	        _val1 = dm_scene_palette[?_scene_used+dk_MOB];
 	             if(!is_undefined(_val1))     pal_rm_def += _val1;
-	        else if (g.area_name==Area_TownA) pal_rm_def += PAL_NPC_SET1;
-	        else if (g.area_name==Area_TownB) pal_rm_def += PAL_NPC_SET2;
-	        else if (g.dungeon_num)           pal_rm_def += PAL_MOB_SET2;
+	        else if (_dest_area==Area_TownA) pal_rm_def += PAL_NPC_SET1;
+	        else if (_dest_area==Area_TownB) pal_rm_def += PAL_NPC_SET2;
+	        else if (_dest_dungeon_num)           pal_rm_def += PAL_MOB_SET2;
 	        else                              pal_rm_def += PAL_MOB_SET1;
         
 	        // dark
@@ -235,6 +245,9 @@ function p_Room_Start() {
 
 
 
+	// PALDIAG START
+	pal_rando_applied = false;
+	// PALDIAG END
 	p_Room_Start_palette_rando();
 
 
@@ -268,7 +281,7 @@ function p_Room_Start() {
 	// ------------------------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------------
 	// pal_rm_dark_idx == -1: Means this rm is NOT a dark rm
-	pal_rm_dark_idx = val(g.dm_rm[?g.rm_name+dk_DarkRoom], -1);
+	pal_rm_dark_idx = val(g.dm_rm[?_dest_scene+dk_DarkRoom], -1);
 	pal_rm_dark_idx = clamp(pal_rm_dark_idx, -1, ds_grid_width(dg_pal_rm_dark)-1);
 
 
@@ -298,16 +311,16 @@ function p_Room_Start() {
 
 	// ------------------------------------------------------------------------------------------
 	if (global.Halloween1_enabled 
-	&&  g.room_type=="A" )
+	&&  _dest_room_type=="A" )
 	{
-	    if (g.town_name==STR_Rauru 
-	    ||  g.town_name==STR_Ruto 
-	    ||  g.town_name==STR_Saria 
-	    ||  g.town_name==STR_Mido 
-	    ||  g.town_name==STR_Nabooru 
-	    ||  g.town_name==STR_Darunia 
-	    ||  g.town_name==STR_New_Kasuto 
-	    ||  g.town_name==STR_Old_Kasuto )
+	    if (_dest_town_name==STR_Rauru
+	    ||  _dest_town_name==STR_Ruto
+	    ||  _dest_town_name==STR_Saria
+	    ||  _dest_town_name==STR_Mido
+	    ||  _dest_town_name==STR_Nabooru
+	    ||  _dest_town_name==STR_Darunia
+	    ||  _dest_town_name==STR_New_Kasuto
+	    ||  _dest_town_name==STR_Old_Kasuto )
 	    {
 	        _pal = 0;
 	        var _mob_pal  = build_pal(C_VLT1,C_VLT2,C_YLW4,C_BLK1,-2,-2,-2,-2); // MOB ORG
@@ -315,16 +328,16 @@ function p_Room_Start() {
 	            _mob_pal += build_pal(C_RED3,C_ORG4,C_BLK1,C_BLK1,-2,-2,-2,-2); // MOB BLU
 	            _mob_pal += build_pal(C_VLT1,C_PNK3,C_BLK1,C_BLK1,-2,-2,-2,-2); // MOB PUR
 	        //
-	        if (val(g.dm_rm[?g.rm_name+STR_Town+STR_House]))
+	        if (val(g.dm_rm[?_dest_scene+STR_Town+STR_House]))
 	        {
 	            _pal  = build_pal(C_BLU4,C_VLT4,C_BLK1,C_BLK1,-2,-2,-2,-2); // BG1
 	            _pal += build_pal(C_VLT3,C_BLK1,C_BLK1,C_BLK1,-2,-2,-2,-2); // BG2
 	            _pal += build_pal(C_BLU3,C_MGN4,C_YLW4,C_BLK1,-2,-2,-2,-2); // BG3
 	            _pal += build_pal(C_YLW1,C_YGR3,C_BLK1,C_BLK1,-2,-2,-2,-2); // BG4
 	        }
-	        else if (val(g.dm_rm[?g.rm_name+STR_Town+STR_Outside]))
+	        else if (val(g.dm_rm[?_dest_scene+STR_Town+STR_Outside]))
 	        {
-	            switch(g.town_name)
+	            switch(_dest_town_name)
 	            {
 	                default:{
 	                _pal = 0;
@@ -498,6 +511,25 @@ function p_Room_Start() {
 	pal_rm_def = change_pal( pal_rm_def);
 	pal_rm_def = string_copy(pal_rm_def, 1, global.PAL_CHAR_PER_SCENE);
 	// ------------------------------------------------------------------------------------------
+	// sync global.palette_image now so the first-frame Step/Draw use THIS room's palette (fixes 1-frame stale-palette on transitions)
+	palSpr_changeColors();
+	// PALDIAG START
+	if (variable_global_exists("playlog_active") && global.playlog_active)
+	{
+	    var _pd_persave = val(global.dm_save_file_settings[?STR_Randomize+STR_Palette]);
+	    var _pd_def  = string_copy(pal_rm_def, 1, 24);
+	    var _pd_file = string(pal_rm_file);
+	    if (is_string(pal_rm_file)) _pd_file = string_copy(pal_rm_file, 1, 24);
+	    var _pd_dark = string_copy(pal_rm_dark, 1, 12);
+	    playlog_write("PALDIAG rm=" + string(g.rm_name) + " dest=" + string(_dest_scene) + " roomnm=" + room_get_name(room) + " rtype=" + string(_dest_room_type) + " darkidx=" + string(pal_rm_dark_idx)
+	        + " rstate=" + string(g.RandoPalette_state)
+	        + " persave=" + string(_pd_persave)
+	        + " applied=" + string(pal_rando_applied)
+	        + " def=" + _pd_def
+	        + " file=" + _pd_file
+	        + " dark=" + _pd_dark);
+	}
+	// PALDIAG END
 
 
 

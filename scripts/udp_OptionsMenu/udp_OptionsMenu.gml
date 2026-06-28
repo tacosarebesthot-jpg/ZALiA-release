@@ -55,7 +55,7 @@ function udp_OptionsMenu() {
 
 
 
-	Info_Divider_can_draw = menu_state==menu_state_MAIN || menu_state==menu_state_DEV_TOOLS || menu_state==menu_state_RANDO || menu_state==menu_state_OTHER;
+	Info_Divider_can_draw = menu_state==menu_state_MAIN || menu_state==menu_state_DEV_TOOLS || menu_state==menu_state_AUTO_TEST || menu_state==menu_state_DISPLAY || menu_state==menu_state_RANDO || menu_state==menu_state_OTHER || menu_state==menu_state_OVERLAYS || menu_state==menu_state_CHEATS || menu_state==menu_state_COLOR || menu_state==menu_state_TEST_CAP || menu_state==menu_state_SWEEPS || menu_state==menu_state_MISC;
 	Info_Divider_row      = draw_rows_max - $6;
 	Info_Divider_yt       = drawY + (Info_Divider_row<<3);
 

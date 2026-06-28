@@ -1,6 +1,7 @@
 /// @description  FieryMoa_update()
 function FieryMoa_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	// B909
 	if (counter&$3)

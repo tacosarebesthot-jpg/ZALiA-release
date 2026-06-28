@@ -85,6 +85,19 @@ function FileSelect_RandoOTHER_MAIN_update() {
 	        aud_play_sound(get_audio_theme_track(CONFIRM_SOUND_THEME1));
 	    }
 	    break;}
+
+
+	    // ============================================================================
+	    // -------------------------------------------------------------------
+	    case RandoOTHER_MAIN_START_REFLECT:{
+	    if (_InputConfirm_pressed2)
+	    {
+	        dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2] = !dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2]; // 2: state
+	        global.start_with_reflect = dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2]; // persist non-rando start option
+	        save_game_pref();
+	        aud_play_sound(get_audio_theme_track(CONFIRM_SOUND_THEME1));
+	    }
+	    break;}
     
     
 	    // ============================================================================

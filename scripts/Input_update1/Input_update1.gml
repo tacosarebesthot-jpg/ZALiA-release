@@ -61,6 +61,14 @@ function Input_update1() {
 	GP_Shoulder2R_held     = false;
 	GP_Shoulder2R_released = false;
 	//                              //
+	GP_Jukebox_Next_pressed  = false;
+	GP_Jukebox_Next_held     = false;
+	GP_Jukebox_Next_released = false;
+	//                              //
+	GP_Jukebox_Prev_pressed  = false;
+	GP_Jukebox_Prev_held     = false;
+	GP_Jukebox_Prev_released = false;
+	//                              //
 
 
 	GP_pressed  = false;
@@ -237,6 +245,21 @@ function Input_update1() {
 	    GP_Magic_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_magic); // pressed
 	    GP_Magic_held     = gamepad_button_check(         gamepad_slot, GP_magic); // held
 	    GP_Magic_released = gamepad_button_check_released(gamepad_slot, GP_magic); // released
+
+	    // Quick spell cycle: NEXT / PREV (default Bumper R / Bumper L)
+	    GP_Spell_Next_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_spell_next);
+	    GP_Spell_Next_held     = gamepad_button_check(         gamepad_slot, GP_spell_next);
+	    GP_Spell_Next_released = gamepad_button_check_released(gamepad_slot, GP_spell_next);
+	    GP_Spell_Prev_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_spell_prev);
+	    GP_Spell_Prev_held     = gamepad_button_check(         gamepad_slot, GP_spell_prev);
+	    GP_Spell_Prev_released = gamepad_button_check_released(gamepad_slot, GP_spell_prev);
+	    // Jukebox track skip: NEXT (R2 / gp_shoulderrb) / PREV (L2 / gp_shoulderlb)
+	    GP_Jukebox_Next_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_jukebox_next);
+	    GP_Jukebox_Next_held     = gamepad_button_check(         gamepad_slot, GP_jukebox_next);
+	    GP_Jukebox_Next_released = gamepad_button_check_released(gamepad_slot, GP_jukebox_next);
+	    GP_Jukebox_Prev_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_jukebox_prev);
+	    GP_Jukebox_Prev_held     = gamepad_button_check(         gamepad_slot, GP_jukebox_prev);
+	    GP_Jukebox_Prev_released = gamepad_button_check_released(gamepad_slot, GP_jukebox_prev);
 	    // Xbox Start  button, PS4 touch-pad press
 	    GP_Pause_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_pause); // pressed
 	    GP_Pause_held     = gamepad_button_check(         gamepad_slot, GP_pause); // held

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"walktune_panel",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"walktune_panel",
+  "parent":{
+    "name":"gui",
+    "path":"folders/Scripts/gui.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -67,3 +67,17 @@ Build
 *.yydebug
 *.yymps
 *.yyp.backup*
+
+# Build artifacts & large binaries (GitHub rejects >100MB) — never commit
+output/
+dist/
+test/runs/
+test/output/
+*.win
+*.dat
+*.zip
+*.exe
+.gms2_cache/
+cache/
+tmp/
+~*

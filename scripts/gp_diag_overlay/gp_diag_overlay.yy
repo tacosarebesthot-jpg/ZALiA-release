@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"gp_diag_overlay",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"gp_diag_overlay",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

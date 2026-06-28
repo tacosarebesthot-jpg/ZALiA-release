@@ -8,9 +8,7 @@ function Overworld_refresh_tiles(argument0, argument1) {
 	var _ow_clm, _ow_row;
 	var _tile_data;
 
-
-
-	if (g.anarkhyaOverworld_MAIN 
+	if (g.anarkhyaOverworld_MAIN
 	&&  g.anarkhyaOverworld_enabled )
 	{
 	    tile_layer_delete(anarkhya_TILE_DEPTH1);
@@ -50,7 +48,25 @@ function Overworld_refresh_tiles(argument0, argument1) {
 	    var _scale_x,_scale_y;
     
 	    tile_layer_delete_(Tile_DEPTH1);
-    
+
+	    // PERF: cached layer lookup (revert: delete this block + drop the cache arg on the tile_change_2a call below).
+	    // tile_add() scans layer_get_all() once per tile; with 323 tiles that is 323 full scans = the per-tile freeze.
+	    // Resolve the Tile_DEPTH1 layer id ONCE here (same scan tile_add does), then pass it through so every add reuses it.
+	    // Valid for the whole loop: the layer at Tile_DEPTH1 persists across tile_layer_delete_ (it only clears tile
+	    // elements) and the loop only ADDS tiles (layer_tile_create) - it never creates/destroys layers. So one lookup
+	    // yields the identical layer id tile_add would have found on every one of the 323 adds. -1 = fall back to scan.
+	    var _ow_cached_layer = -1;
+	    var _ow_all_layers   = layer_get_all();
+	    var _ow_layer_i;
+	    for(_ow_layer_i=0; _ow_layer_i<array_length(_ow_all_layers); _ow_layer_i++)
+	    {
+	        if (layer_get_depth(_ow_all_layers[_ow_layer_i]) == Tile_DEPTH1)
+	        {
+	            _ow_cached_layer = _ow_all_layers[_ow_layer_i];
+	            break;
+	        }
+	    }
+
 	    for(_i=0; _i<DRAW_ROWS; _i++) // each row
 	    {
 	        for(_j=0; _j<DRAW_CLMS; _j++) // each clm

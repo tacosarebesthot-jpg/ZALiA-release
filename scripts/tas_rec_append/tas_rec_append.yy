@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"tas_rec_append",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"tas_rec_append",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

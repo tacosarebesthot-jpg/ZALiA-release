@@ -1,0 +1,27 @@
+{
+  "$GMSound":"v2",
+  "%Name":"mus_TMNT2_Arcade_Game",
+  "audioGroupId":{
+    "name":"audiogroup_mus",
+    "path":"audiogroups/audiogroup_mus",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":1,
+  "compressionQuality":6,
+  "conversionMode":0,
+  "duration":0.0,
+  "exportDir":"",
+  "name":"mus_TMNT2_Arcade_Game",
+  "parent":{
+    "name":"ExtendedJukebox",
+    "path":"folders/Sounds/ExtendedJukebox.yy",
+  },
+  "preload":true,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"mus_TMNT2_Arcade_Game",
+  "volume":1.0,
+}
+

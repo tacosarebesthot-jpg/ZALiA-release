@@ -1863,12 +1863,12 @@ function rm_data_init_MazIs_A() {
 
 
 	data_NIAO_1a(rm+STR_NIAO+"0", $0000,1, Cloud_1_init); // 
-	_val = "08"; // hspd
-	data_spawn(rm+STR_PRXM,Blooby,$1,  $27<<3,$70<<3,  STR_HSPD+STR_Direction+ "1",STR_HSPD+_val,"_XC_MIN"+hex_str($15<<3),"_XC_MAX"+hex_str($20<<3)); // Blooby 1
-	data_spawn(rm+STR_PRXM,Blooby,$1,  $2C<<3,$58<<3,  STR_HSPD+STR_Direction+"-1",STR_HSPD+_val,"_XC_MIN"+hex_str($24<<3),"_XC_MAX"+hex_str($27<<3)); // Blooby 1
-	data_spawn(rm+STR_PRXM,Blooby,$1,  $12<<3,$42<<3,  STR_HSPD+STR_Direction+ "1",STR_HSPD+_val,"_XC_MIN"+hex_str($24<<3),"_XC_MAX"+hex_str($2B<<3)); // Blooby 1
-	data_spawn(rm+STR_PRXM,Blooby,$1,  $20<<3,$2C<<3,  STR_HSPD+STR_Direction+"-1",STR_HSPD+_val,"_XC_MIN"+hex_str($15<<3),"_XC_MAX"+hex_str($2B<<3)); // Blooby 1
-	data_spawn(rm+STR_PRXM,Blooby,$1,  $15<<3,$1C<<3,  STR_HSPD+STR_Direction+ "1",STR_HSPD+_val,"_XC_MIN"+hex_str($11<<3),"_XC_MAX"+hex_str($2F<<3)); // Blooby 1
+	_val = $08; // hspd
+	data_spawn(rm+STR_PRXM,Blooby,$1, $27<<3,$70<<3,  1,_val, 0,0, $15<<3,$20<<3); // Blooby 1
+	data_spawn(rm+STR_PRXM,Blooby,$1, $2C<<3,$58<<3, -1,_val, 0,0, $24<<3,$27<<3); // Blooby 1
+	data_spawn(rm+STR_PRXM,Blooby,$1, $12<<3,$42<<3,  1,_val, 0,0, $24<<3,$2B<<3); // Blooby 1
+	data_spawn(rm+STR_PRXM,Blooby,$1, $20<<3,$2C<<3, -1,_val, 0,0, $15<<3,$2B<<3); // Blooby 1
+	data_spawn(rm+STR_PRXM,Blooby,$1, $15<<3,$1C<<3,  1,_val, 0,0, $11<<3,$2F<<3); // Blooby 1
 
 
 	row3 = -PAGE_ROWS;

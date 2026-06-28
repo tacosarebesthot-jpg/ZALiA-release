@@ -26,6 +26,15 @@ function Input_Create() {
 	gamepad_name = undefined;
 
 
+	// ── CO-OP P2 (fairy) input ── gated everywhere on global.coop_enabled (OFF by default).
+	gamepad_slot_p2   = -1;    // -1: unassigned. P2 (fairy) joins ONLY by an explicit, non-mirrored button press on a SEPARATE pad (Input_update_p2). Never auto-bound.
+	p2_moveH          = 0;     // -1..1 horizontal (read by obj_fairy_p2)
+	p2_moveV          = 0;     // -1..1 vertical
+	p2_shoot_pressed  = false; // Link's ATTACK button (GP_attack) on P2 slot -> fairy shoots
+	p2_action_pressed = false; // Link's JUMP   button (GP_jump)   on P2 slot -> heal P1
+	p2_tank_pressed   = false; // Link's B/OTHER1 button (GP_other1) on P2 slot -> shield P1 (brief iframes)
+
+
 	// ------------------------------------------------
 	// Bit values that represent NES buttons
 	R = $01; // $01 = NES d-pad  RIGHT
@@ -143,6 +152,8 @@ function Input_Create() {
 	GP_other4_DEFAULT   = gp_shoulderr;   // Bumper Right
 	GP_other5_DEFAULT   = gp_shoulderlb;  // Trigger Left
 	GP_other6_DEFAULT   = gp_shoulderrb;  // Trigger Right
+	GP_spell_next_DEFAULT = gp_shoulderr; // Bumper Right (R1)
+	GP_spell_prev_DEFAULT = gp_shoulderl; // Bumper Left  (L1)
 
 	GP_right    = GP_right_DEFAULT;
 	GP_left     = GP_left_DEFAULT;
@@ -158,6 +169,49 @@ function Input_Create() {
 	GP_other4   = GP_other4_DEFAULT; // Bumper Right
 	GP_other5   = GP_other5_DEFAULT; // Trigger Left
 	GP_other6   = GP_other6_DEFAULT; // Trigger Right
+	GP_spell_next = GP_spell_next_DEFAULT; // Bumper Right (R1)
+	GP_spell_prev = GP_spell_prev_DEFAULT; // Bumper Left  (L1)
+	GP_jukebox_next_DEFAULT = gp_shoulderrb; // Trigger Right (R2)
+	GP_jukebox_prev_DEFAULT = gp_shoulderlb; // Trigger Left  (L2)
+	GP_jukebox_next = GP_jukebox_next_DEFAULT;
+	GP_jukebox_prev = GP_jukebox_prev_DEFAULT;
+
+
+	// ------------------------------------------
+	// KEYBOARD bindings (primary + alt). Defaults = the keys previously hardcoded in
+	// Input_update2a. 0 = "unbound" sentinel. Rebindable via the controls menu; persisted
+	// in dm_UserInputConfig under "keyboard_*" (json-encoded wholesale by save_game_pref).
+	Key_right_DEFAULT  = ord("D");   Key_right_alt_DEFAULT  = vk_right;
+	Key_left_DEFAULT   = ord("A");   Key_left_alt_DEFAULT   = vk_left;
+	Key_down_DEFAULT   = ord("S");   Key_down_alt_DEFAULT   = vk_down;
+	Key_up_DEFAULT     = ord("W");   Key_up_alt_DEFAULT     = vk_up;
+	Key_pause_DEFAULT  = vk_enter;   Key_pause_alt_DEFAULT  = 0;   // NES START
+	Key_magic_DEFAULT  = ord("T");   Key_magic_alt_DEFAULT  = 0;   // NES SELECT
+	Key_attack_DEFAULT = vk_control; Key_attack_alt_DEFAULT = 0;   // NES B
+	Key_jump_DEFAULT   = vk_space;   Key_jump_alt_DEFAULT   = 0;   // NES A
+	Key_spell_next_DEFAULT = ord("Q"); Key_spell_next_alt_DEFAULT = 0; // quick spell cycle: next
+	Key_spell_prev_DEFAULT = ord("E"); Key_spell_prev_alt_DEFAULT = 0; // quick spell cycle: prev
+
+	Key_right  = Key_right_DEFAULT;   Key_right_alt  = Key_right_alt_DEFAULT;
+	Key_left   = Key_left_DEFAULT;    Key_left_alt   = Key_left_alt_DEFAULT;
+	Key_down   = Key_down_DEFAULT;    Key_down_alt   = Key_down_alt_DEFAULT;
+	Key_up     = Key_up_DEFAULT;      Key_up_alt     = Key_up_alt_DEFAULT;
+	Key_pause  = Key_pause_DEFAULT;   Key_pause_alt  = Key_pause_alt_DEFAULT;
+	Key_magic  = Key_magic_DEFAULT;   Key_magic_alt  = Key_magic_alt_DEFAULT;
+	Key_attack = Key_attack_DEFAULT;  Key_attack_alt = Key_attack_alt_DEFAULT;
+	Key_jump   = Key_jump_DEFAULT;    Key_jump_alt   = Key_jump_alt_DEFAULT;
+	Key_spell_next = Key_spell_next_DEFAULT; Key_spell_next_alt = Key_spell_next_alt_DEFAULT;
+	Key_spell_prev = Key_spell_prev_DEFAULT; Key_spell_prev_alt = Key_spell_prev_alt_DEFAULT;
+	Key_tracker_toggle_DEFAULT = vk_insert;   Key_tracker_toggle_alt_DEFAULT = 0;
+	Key_jukebox_toggle_DEFAULT = vk_home;     Key_jukebox_toggle_alt_DEFAULT = 0;
+	Key_jukebox_prev_DEFAULT   = vk_pageup;   Key_jukebox_prev_alt_DEFAULT   = 0;
+	Key_jukebox_next_DEFAULT   = vk_pagedown; Key_jukebox_next_alt_DEFAULT   = 0;
+	Key_jukebox_assign_DEFAULT = vk_end;      Key_jukebox_assign_alt_DEFAULT = 0;
+	Key_tracker_toggle = Key_tracker_toggle_DEFAULT; Key_tracker_toggle_alt = Key_tracker_toggle_alt_DEFAULT;
+	Key_jukebox_toggle = Key_jukebox_toggle_DEFAULT; Key_jukebox_toggle_alt = Key_jukebox_toggle_alt_DEFAULT;
+	Key_jukebox_prev   = Key_jukebox_prev_DEFAULT;   Key_jukebox_prev_alt   = Key_jukebox_prev_alt_DEFAULT;
+	Key_jukebox_next   = Key_jukebox_next_DEFAULT;   Key_jukebox_next_alt   = Key_jukebox_next_alt_DEFAULT;
+	Key_jukebox_assign = Key_jukebox_assign_DEFAULT; Key_jukebox_assign_alt = Key_jukebox_assign_alt_DEFAULT;
 
 	gamepad_set_default();
 
@@ -184,6 +238,22 @@ function Input_Create() {
 	GP_Magic_pressed   = false;
 	GP_Magic_held      = false;
 	GP_Magic_released  = false;
+
+	GP_Spell_Next_pressed  = false;
+	GP_Spell_Next_held     = false;
+	GP_Spell_Next_released = false;
+
+	GP_Spell_Prev_pressed  = false;
+	GP_Spell_Prev_held     = false;
+	GP_Spell_Prev_released = false;
+
+	GP_Jukebox_Next_pressed  = false;
+	GP_Jukebox_Next_held     = false;
+	GP_Jukebox_Next_released = false;
+
+	GP_Jukebox_Prev_pressed  = false;
+	GP_Jukebox_Prev_held     = false;
+	GP_Jukebox_Prev_released = false;
 
 	GP_Pause_pressed   = false;
 	GP_Pause_held      = false;
@@ -251,6 +321,20 @@ function Input_Create() {
 	Magic_pressed   = false;
 	Magic_held      = false;
 	Magic_released  = false;
+
+	Spell_Next_pressed  = false;
+	Spell_Next_held     = false;
+	Spell_Next_released = false;
+
+	Spell_Prev_pressed  = false;
+	Spell_Prev_held     = false;
+	Spell_Prev_released = false;
+
+	Tracker_Toggle_pressed = false;
+	Jukebox_Toggle_pressed = false;
+	Jukebox_Prev_pressed   = false;
+	Jukebox_Next_pressed   = false;
+	Jukebox_Assign_pressed = false;
 
 	Pause_pressed   = false;
 	Pause_held      = false;

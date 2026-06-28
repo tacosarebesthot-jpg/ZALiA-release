@@ -89,11 +89,15 @@ function Exit_construct(argument0) {
     
     
 	    _datakey = dk_FastTravel+"03";
-	    if(!open 
-	    &&  exitName==val(g.dm_rm[?_datakey+STR_Exit+STR_Name]) 
-	    //&&  exitName==g.ExitName_FAST_TRAVEL3 
+	    if(!open
+	    &&  exitName==val(g.dm_rm[?_datakey+STR_Exit+STR_Name])
+	    //&&  exitName==g.ExitName_FAST_TRAVEL3
 	    && (exitName==f.reen || val(f.dm_quests[?_datakey+STR_Open])) )
 	    {   open = true;            f.dm_quests[?_datakey+STR_Open] = open;  }
+
+
+	    // (Removed: the post-Thunderbird slot-04 fast-travel open-gate. The Great Palace
+	    // shortcut is now a one-way town-style press-Up door placed in room $3A itself.)
     
     
     

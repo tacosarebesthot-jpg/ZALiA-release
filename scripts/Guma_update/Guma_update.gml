@@ -1,6 +1,7 @@
 /// @description  Guma_update()
 function Guma_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	// BA57
 	if(!g.counter1) vspd = $D0;

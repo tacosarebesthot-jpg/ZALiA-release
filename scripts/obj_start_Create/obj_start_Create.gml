@@ -134,6 +134,7 @@ function obj_start_Create() {
 	init_save_files();
 	load_game_pref();
 	window_set_scale(g.WindowScale_scale);
+	apply_display_mode(); // apply the persisted screen-scaling DISPLAY mode at boot
 
 
 	//if (global.FileSelect_PERSISTENT)

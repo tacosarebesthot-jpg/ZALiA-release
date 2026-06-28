@@ -2,6 +2,8 @@ function PauseMenu_GameEnd() {
 	// PauseMenu_GameEnd()
 
 
+	dev_bugprobe_quit_sink_log("PauseMenu_GameEnd");
+
 	if (variable_instance_exists(id,"MenuFrame_srf_SPELL") && surface_exists(MenuFrame_srf_SPELL)) surface_free(MenuFrame_srf_SPELL);
 	if (variable_instance_exists(id,"MenuFrame_srf_ITEM")  && surface_exists(MenuFrame_srf_ITEM))  surface_free(MenuFrame_srf_ITEM);
 	if (variable_instance_exists(id,"MenuFrame_srf_MAP")   && surface_exists(MenuFrame_srf_MAP))   surface_free(MenuFrame_srf_MAP);

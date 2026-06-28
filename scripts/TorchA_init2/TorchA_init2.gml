@@ -23,13 +23,14 @@ function TorchA_init2() {
 	if(!is_undefined(dk_spawn))
 	{   is_lit = val(g.dm_spawn[?dk_spawn+STR_Lit], is_lit);  }
 
-
-	if (global.SceneRando_enabled 
-	&&  global.SceneRando_scene_brightness_control==1 
-	&&  g.rm_name!=val(f.dm_rando[?dk_SceneRando+STR_Scene+STR_Randomized+g.rm_name], g.rm_name) )
-	{
-	    is_lit = true;
-	}
+	// DISABLED: Auto-lighting for randomizer breaks vanilla torch mechanics
+	// Torches should only light via candle item + contact, or mob fireballs
+	// if (global.SceneRando_enabled
+	// &&  global.SceneRando_scene_brightness_control==1
+	// &&  g.rm_name!=val(f.dm_rando[?dk_SceneRando+STR_Scene+STR_Randomized+g.rm_name], g.rm_name) )
+	// {
+	//     is_lit = true;
+	// }
 
 
 	if (is_lit) Torch_ignite();

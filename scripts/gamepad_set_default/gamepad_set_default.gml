@@ -18,9 +18,13 @@ function gamepad_set_default() {
 	    GP_other4   = GP_other4_DEFAULT;
 	    GP_other5   = GP_other5_DEFAULT;
 	    GP_other6   = GP_other6_DEFAULT;
-    
-    
-	    if (gamepad_slot)
+	    GP_spell_next = GP_spell_next_DEFAULT;
+	    GP_spell_prev = GP_spell_prev_DEFAULT;
+	    GP_jukebox_next = GP_jukebox_next_DEFAULT;
+	    GP_jukebox_prev = GP_jukebox_prev_DEFAULT;
+
+
+	    if (gamepad_slot != -1) // FIX: was `if (gamepad_slot)` which treated slot 0 as falsy, skipping persistence for slot-0 pads
 	    {
 	        var _GP_NAME = gamepad_get_description(gamepad_slot);
 	        var _GP_NUM  = dm_UserInputConfig[?_GP_NAME+"_gamepad_num"];
@@ -45,6 +49,11 @@ function gamepad_set_default() {
 	            dm_UserInputConfig[?_DATAKEY+"other4"] = GP_other4;
 	            dm_UserInputConfig[?_DATAKEY+"other5"] = GP_other5;
 	            dm_UserInputConfig[?_DATAKEY+"other6"] = GP_other6;
+	            //                                                  //
+	            dm_UserInputConfig[?_DATAKEY+"spell_next"] = GP_spell_next;
+	            dm_UserInputConfig[?_DATAKEY+"spell_prev"] = GP_spell_prev;
+	            dm_UserInputConfig[?_DATAKEY+"jukebox_next"] = GP_jukebox_next;
+	            dm_UserInputConfig[?_DATAKEY+"jukebox_prev"] = GP_jukebox_prev;
 	            //                                                  //
 	            save_game_pref();
 	        }

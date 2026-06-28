@@ -46,7 +46,6 @@ function OptionsMenu_Draw_Main() {
 	    case MainOption_MUSIC_SET:   {_yt1+=_DIST1; break;} // extra pad
 	    case MainOption_PC_SPRITES:  {_yt1+=_DIST2; break;} // extra pad
 	    case MainOption_INPUT_CONFIG:{_yt1+=$2;     break;} // extra pad
-	    case MainOption_FULLSCREEN:  {_yt1+=_DIST1; break;} // extra pad
 	    case MainOption_CLOSE:       {_yt1+=_DIST2; break;} // extra pad
 	    }
     
@@ -186,47 +185,36 @@ function OptionsMenu_Draw_Main() {
         
         
 	        // --------------------------------------------------------------------
-	        case MainOption_FULLSCREEN:{
-	        _xl = TextArea1_xl;
-	        _yt = _yt1;
-	        if (_i==MainOption) _pi = PI_MENU1;
-	        else                _pi = PI_MENU2;
-	        draw_text_(_xl,_yt, _text, _font, _pi);
-        
-	        if (window_get_fullscreen()) _text = "FULLSCREEN";
-	        else                         _text = "WINDOWED";
-	        _xl  = TextArea2_xr;
-	        _xl -= string_length(_text)*_font_w;
-	        _yt = _yt1;
-	        draw_text_(_xl,_yt, _text, _font, _pi);
-	        break;}//case MainOption_FULLSCREEN
+	        // (MainOption_FULLSCREEN draw case removed 2026-06-27 — moved to DISPLAY submenu)
         
         
         
         
 	        // --------------------------------------------------------------------
-	        case MainOption_APP_SCALE:{
-	        _xl = TextArea1_xl;
-	        _yt = _yt1;
+	        // (MainOption_APP_SCALE draw case removed 2026-06-27 — moved to DISPLAY submenu)
+        
+        
+        
+        
+	        // --------------------------------------------------------------------
+	        // CO-OP ON/OFF toggle (player-facing). Draws the label + a right-aligned
+	        // ON/OFF state read from global.coop_enabled (mirrors the state column in
+	        // OptionsMenu_Draw_Misc: PI_DARK1 when OFF + unselected, PI_MENU1 when on cursor).
+	        case MainOption_CO_OP:{
 	        if (_i==MainOption) _pi = PI_MENU1;
 	        else                _pi = PI_MENU2;
+	        _xl = TextArea1_xl;
+	        _yt = _yt1;
 	        draw_text_(_xl,_yt, _text, _font, _pi);
-        
-	        if(!window_get_fullscreen())
-	        {
-	            _text  = "x"+string(window_get_scale());
-	            _text += " ";
-	            _text += "("+string(window_get_width())+"x"+string(window_get_height())+")";
-	            _xl  = TextArea2_xr;
-	            _xl -= string_length(_text) * _font_w;
-	            _yt = _yt1;
-	            draw_text_(_xl,_yt, _text, _font, _pi);
-	        }
-	        break;}//case MainOption_APP_SCALE
-        
-        
-        
-        
+	        var _state = global.coop_enabled ? "ON" : "OFF";
+	        _xl  = TextArea2_xr;
+	        _xl -= string_length(_state)*_font_w;
+	        if      (_i==MainOption)       _pi = PI_MENU1;
+	        else if (!global.coop_enabled) _pi = PI_DARK1;
+	        else                           _pi = PI_MENU2;
+	        draw_text_(_xl,_yt, _state, _font, _pi);
+	        break;}//case MainOption_CO_OP
+
 	        // --------------------------------------------------------------------
 	        case MainOption_RANDO:{
 	        if (_i==MainOption) _pi = PI_MENU1;
@@ -296,9 +284,8 @@ function OptionsMenu_Draw_Main() {
 	        _yt = _yt1;
 	        if (_i==2)
 	        {
-	            if (MainOption==MainOption_MUSIC_SET 
-	            ||  MainOption==MainOption_PC_SPRITES 
-	            ||  MainOption==MainOption_APP_SCALE )
+	            if (MainOption==MainOption_MUSIC_SET
+	            ||  MainOption==MainOption_PC_SPRITES )
 	            {
 	                _x  = _xl;
 	                _x += ARROW_SPRITE_W>>1; // arrow center

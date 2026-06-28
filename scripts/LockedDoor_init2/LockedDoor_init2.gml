@@ -67,6 +67,14 @@ function LockedDoor_init2() {
 	}
 	//show_debug_message("LockedDoor_init2(). respawn_type "+hex_str(respawn_type));
 
+	if(!is_undefined(dk_spawn))
+	{
+	    _val = g.dm_spawn[?dk_spawn+STR_Side];
+	    if (!is_undefined(_val)) switch_side  = _val;
+	    
+	    _val = g.dm_spawn[?dk_spawn+STR_Respawn];
+	    if (!is_undefined(_val)) respawn_type = _val;
+	}
 
 	// 0: neither, 1: right, 2: left, 3: both
 	switch_side &= $3;

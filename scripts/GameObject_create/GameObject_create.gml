@@ -220,7 +220,11 @@ function GameObject_create() {
     
 	    // --------------------------------------------------------------------------------------
 	    // set a depth specific to this spawn
-	    if(!is_undefined(             dk_spawn) 
+	    // GMS2 port: spawn-data depth (often 0) must never override the PC. The PC always
+	    // needs to keep DEPTH_PC_MAIN so it draws behind/in-front of NPCs correctly (e.g.
+	    // Zelda+TorchA in _WestA_00). Other GameObjects are unaffected by this guard.
+	    if(id!=global.pc
+	    && !is_undefined(             dk_spawn)
 	    && !is_undefined( g.dm_spawn[?dk_spawn+STR_Depth]) )
 	    {
 	        GO_depth_init(g.dm_spawn[?dk_spawn+STR_Depth]); // set a depth specific to this spawn_datakey

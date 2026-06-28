@@ -256,15 +256,39 @@ function PC_update_1c() {
 	var _H  = hh+_CARRY;
 	var _XL = x - (_W>>1);
 	var _YT = yt;
+	// EXIT-FIX (revert: delete this block + restore the original break-on-first with(Exit){ if(open && rectInRect(...)){ _exit=id; break; } })
+	// GMS2 enumerates instances in a different order than GMS1.4, so a plain
+	// break-on-first grabs the WRONG overlapping Exit at multi-page screen seams
+	// (right/left hitboxes overlap mid/other exits) -> wrong destination.
+	// Make selection DETERMINISTIC + DIRECTION-AWARE: among ALL overlapping open
+	// exits, prefer the one whose side matches the direction the player is holding.
+	// Exit.side bits (1:right 2:left 4:down 8:up) line up exactly with
+	// Input.hHeld (1:right/2:left) | Input.vHeld (4:down/8:up), set in PC_update_1
+	// before PC_update_1c runs (same convention the elevator case already trusts).
+	// _exit keeps the OLD first-overlap result as a fallback (single-exit rooms,
+	// and the case where no matching direction is held => identical to before).
+	var _exit_dir = noone;            // EXIT-FIX: best direction-matched overlap
+	var _exit_held = 0;               // EXIT-FIX: guarded read of held direction
+	if (instance_exists(Input)) _exit_held = (Input.hHeld | Input.vHeld) & $F;
 	with(Exit)
 	{
-	    if (open 
+	    if (open
 	    &&  rectInRect(BodyHB_xl,BodyHB_yt,BodyHB_w,BodyHB_h, _XL,_YT,_W,_H) )
 	    {
-	        _exit = id;
-	        break;//with(Exit)
+	        // EXIT-FIX: record first overlap (old behavior / fallback), don't break
+	        if (_exit==noone) _exit = id;
+	        // EXIT-FIX: first overlap whose side matches the held edge wins
+	        if (_exit_dir==noone
+	        &&  _exit_held
+	        && (side & _exit_held) )
+	        {
+	            _exit_dir = id;
+	        }
 	    }
 	}
+	// EXIT-FIX: prefer the direction-matched exit when one exists (resolves seam
+	// ambiguity); otherwise fall back to the original first-overlap result.
+	if (_exit_dir!=noone) _exit = _exit_dir;
 	/*
 	_exit = pc_collide_exit(_CARRY);
 

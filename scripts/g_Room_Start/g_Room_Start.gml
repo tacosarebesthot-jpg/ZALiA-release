@@ -1166,6 +1166,12 @@ function g_Room_Start() {
 
 
 
+	// CRASH FIX: g_Game_End() destroys these grids (game-over/quit path) and only g_Create recreates them.
+	// Non-type-A rooms skip scene_enter_add_tiles below, so rebuild here or PC_update_1's ds_grid_width(undefined) crashes on landing.
+	with (g) {
+	    if (is_undefined(dg_RmTile_Break_def) || !ds_exists(dg_RmTile_Break_def, ds_type_grid)) dg_RmTile_Break_def = ds_grid_create(0, 0);
+	    if (is_undefined(dg_RmTile_TempSolid) || !ds_exists(dg_RmTile_TempSolid, ds_type_grid)) dg_RmTile_TempSolid = ds_grid_create(0, 0);
+	}
 	if (_ROOM_A) scene_enter_add_tiles();
 
 
@@ -1656,6 +1662,101 @@ function g_Room_Start() {
 
 
 
+
+	// ── CO-OP P2 FAIRY (MVP) ── spawn once per action room when enabled. OFF by default,
+	// so a normal solo session never creates this. obj_fairy_p2 is non-persistent and
+	// re-spawns each action room. A proper menu toggle for global.coop_enabled comes later.
+	if (global.coop_enabled
+	&&  _ROOM_A
+	&&  instance_exists(global.pc)
+	&& !instance_exists(obj_fairy_p2) )
+	{
+	    instance_create(global.pc.x, global.pc.y, obj_fairy_p2);
+	}
+
+
+
+
+	// ── MARK -> REPRODUCIBLE REPLAY: room-anchored snapshot ─────────────────────
+	// Capture a deterministic restore point at the END of room init, and RESET the
+	// always-on input ring so ring frame 0 lines up with THIS room entry. Cheap +
+	// in-memory (no file I/O) -- mark_dump_replay (key 3) serializes it on demand.
+	// Mirrors the f.* scalars file_save serializes, plus both RNG states (the OG LFSR
+	// list g.dl_RandomOG + the GML built-in seed) and the PC's live pose. Self = g,
+	// so dl_RandomOG / RandomOG_started resolve to g's vars. Guarded so a missing
+	// global / pre-boot state can never throw into room init.
+	if (variable_global_exists("mark_ring") && instance_exists(f))
+	{
+	    // copy the OG LFSR bytes (deterministic snapshot of the 9..35-byte list).
+	    // Read g's bare instance vars into LOCALS here (outside the struct literal) so
+	    // they can't be shadowed by the struct's self-rebinding when the struct is built.
+	    var _og = [];
+	    if (variable_instance_exists(id, "dl_RandomOG")
+	    &&  ds_exists(dl_RandomOG, ds_type_list))
+	    {
+	        for (var _ri = 0; _ri < dl_RandomOG_SIZE; _ri++) _og[_ri] = dl_RandomOG[| _ri];
+	    }
+	    var _ogstarted = (variable_instance_exists(id, "RandomOG_started") ? RandomOG_started : false);
+	    var _gmlseed   = random_get_seed();
+
+	    // PC live pose (best-effort; room_goto re-places the PC, so these are archival).
+	    // x/y always exist on an instance; the rest are guarded in case a name differs.
+	    var _pc = { exists : false };
+	    if (instance_exists(global.pc))
+	    {
+	        var _p = global.pc;
+	        _pc =
+	        {
+	            exists    : true,
+	            x         : _p.x,
+	            y         : _p.y,
+	            state     : variable_instance_exists(_p, "state")     ? _p.state     : 0,
+	            facingDir : variable_instance_exists(_p, "facingDir") ? _p.facingDir : 0,
+	            hspd      : variable_instance_exists(_p, "hspd")      ? _p.hspd      : 0,
+	            vspd      : variable_instance_exists(_p, "vspd")      ? _p.vspd      : 0,
+	            hspd_sub  : variable_instance_exists(_p, "hspd_sub")  ? _p.hspd_sub  : 0,
+	            vspd_sub  : variable_instance_exists(_p, "vspd_sub")  ? _p.vspd_sub  : 0,
+	        };
+	    }
+
+	    global.mark_snapshot =
+	    {
+	        room      : room,
+	        room_name : room_get_name(room),
+	        f :
+	        {
+	            quest_num            : f.quest_num,
+	            game_completed_count : f.game_completed_count,
+	            death_count          : f.death_count,
+	            level_atk            : f.level_atk,
+	            level_mag            : f.level_mag,
+	            level_lif            : f.level_lif,
+	            cont_pieces_hp       : f.cont_pieces_hp,
+	            cont_pieces_mp       : f.cont_pieces_mp,
+	            spells               : f.spells,
+	            items                : f.items,
+	            skills               : f.skills,
+	            Cucco_skills         : f.Cucco_skills,
+	            crystals             : f.crystals,
+	            hp                   : f.hp,
+	            mp                   : f.mp,
+	            xp                   : f.xp,
+	            xpNext               : f.xpNext,
+	            xpPending            : f.xpPending,
+	            xpDrain              : f.xpDrain,
+	            key_count            : f.key_count,
+	            reen                 : f.reen,
+	        },
+	        randomOG         : _og,
+	        randomOG_started : _ogstarted,
+	        gml_seed         : _gmlseed,
+	        pc               : _pc,
+	    };
+
+	    // realign the rolling ring so frame 0 == this room entry
+	    global.mark_ring_head   = 0;
+	    global.mark_ring_filled = 0;
+	}
 
 
 

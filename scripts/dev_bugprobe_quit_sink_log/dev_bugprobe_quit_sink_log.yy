@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"dev_bugprobe_quit_sink_log",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"dev_bugprobe_quit_sink_log",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Dev_CoopTest_Step",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Dev_CoopTest_Step",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

@@ -1,6 +1,8 @@
 /// @description  Fokka_update()
 function Fokka_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
+
 	// v1 Red, v2 Blue
 
 

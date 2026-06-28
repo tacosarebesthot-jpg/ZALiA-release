@@ -51,11 +51,11 @@ function FileSelect_build_surfaces_1() {
 	    _Y1 += $01<<3; // + extra "RANDO"/"END" pad
 	    _Y1 += _DrawArea_YT;
 	// YT of "END"
-	switch(argument[0]){
-	case STR_Register: {var _Y2=_Y1+($02<<3); break;}
-	case STR_Eliminate:{var _Y2=_Y1; break;}
+	var _Y2 = _Y1; // YT of "END" (default = Eliminate). Declared before the switch so
+	switch(argument[0]){ // GMS2 block-scope doesn't drop it (the auto-port injected a
+	case STR_Register: {_Y2=_Y1+($02<<3); break;} // stray `var _Y2=0;` here that clobbered
+	case STR_Eliminate:{_Y2=_Y1; break;}          // the computed value -> broke the layout).
 	}
-	var _Y2 = 0;
 	var _Y3  = _Y2;    // YT of "END"
 	    _Y3 += $02<<3; // YT of window border
 	//

@@ -1,10 +1,19 @@
 /// @description  Overworld_Room_Start()
 function Overworld_Room_Start() {
 
+	exit_owrc = 0;
+	enc_reen  = undefined;
+
 	show_debug_message("Overworld_Room_Start()");
 
 
-	if (g.room_type!="C") exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	if (room != rmC_Overworld_A)
+	{
+	    tile_layer_delete_(Tile_DEPTH1);
+	    tile_layer_delete(anarkhya_TILE_DEPTH1);
+	    tile_layer_delete(anarkhya_TILE_DEPTH2);
+	    exit;
+	}
 
 
 
@@ -111,6 +120,11 @@ function Overworld_Room_Start() {
 
 
 	change_pal(strReplaceAt(p.pal_rm_new, get_pal_pos(ENC_PI), string_length(ENC_PAL), ENC_PAL));
+	// PURPLE-MOB FIX (real fix is now at the SOURCE: p_init OW_PAL MOB-PUR slot is built BLACK, not PAL_MOB_PUR1).
+	// These two lines are now a harmless redundant safety net (black -> black): they patch the DEFAULT buffer
+	// (pal_rm_def) and resync the palette_image so nothing can leak purple even on a mid-frame re-bake.
+	p.pal_rm_def = strReplaceAt(p.pal_rm_def, get_pal_pos(ENC_PI), string_length(ENC_PAL), ENC_PAL);
+	with (p) palSpr_changeColors();
 	/*
 	var _POS  = val(p.dm_pal_data[?hex_str(ENC_PI)+STR_Palette+STR_Position], p.PAL_POS_MOB4);
 	var _LEN  = string_length(ENC_PAL);

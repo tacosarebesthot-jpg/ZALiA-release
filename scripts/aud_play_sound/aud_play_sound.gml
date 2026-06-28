@@ -10,6 +10,12 @@ function aud_play_sound() {
 	var _inst = 0;
 
 
+	// Guard: argument[0] must be a real sound id. A non-real (e.g. the STR_Default datakey
+	// string from a failed dm[?...] lookup, or undefined) used to crash at audio_get_name()
+	// below. No-op safely instead of crashing. (Valid sound assets are reals in GML.)
+	if (is_string(argument[0]) || is_undefined(argument[0])) return _inst;
+
+
 	with(Audio)
 	{
 	    var                                      _PRIORITY = $FF;

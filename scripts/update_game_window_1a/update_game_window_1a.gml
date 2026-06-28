@@ -112,8 +112,8 @@ function update_game_window_1a() {
 	if(!_will_toggle_fullscreen)
 	{
 	    if (g.gui_state==g.gui_state_OPTIONS 
-	    &&  global.OPTIONS_MENU.menu_state==global.OPTIONS_MENU.menu_state_MAIN 
-	    &&  global.OPTIONS_MENU.MainOption==global.OPTIONS_MENU.MainOption_FULLSCREEN 
+	    &&  global.OPTIONS_MENU.menu_state==global.OPTIONS_MENU.menu_state_DISPLAY
+	    &&  global.OPTIONS_MENU.Display_cursor==Display.FULLSCREEN
 	    && !abs(bit_dir(gui_tmr_cursor_v())) )
 	    {
 	        if (Input.Jump_pressed 
@@ -160,8 +160,8 @@ function update_game_window_1a() {
 	    else
 	    {
 	        if (g.gui_state==g.gui_state_OPTIONS 
-	        &&  global.OPTIONS_MENU.menu_state==global.OPTIONS_MENU.menu_state_MAIN 
-	        &&  global.OPTIONS_MENU.MainOption==global.OPTIONS_MENU.MainOption_APP_SCALE 
+	        &&  global.OPTIONS_MENU.menu_state==global.OPTIONS_MENU.menu_state_DISPLAY
+	        &&  global.OPTIONS_MENU.Display_cursor==Display.WINDOW_SCALE
 	        && !abs(bit_dir(gui_tmr_cursor_v())) )
 	        {
 	            _SCALE_DIR = bit_dir(gui_tmr_cursor_h());
@@ -278,8 +278,8 @@ function update_game_window_1a() {
 	else
 	{
 	    if (g.gui_state==g.gui_state_OPTIONS 
-	    &&  global.OPTIONS_MENU.menu_state==global.OPTIONS_MENU.menu_state_MAIN 
-	    &&  global.OPTIONS_MENU.MainOption==global.OPTIONS_MENU.MainOption_FULLSCREEN 
+	    &&  global.OPTIONS_MENU.menu_state==global.OPTIONS_MENU.menu_state_DISPLAY
+	    &&  global.OPTIONS_MENU.Display_cursor==Display.FULLSCREEN
 	    && !abs(bit_dir(gui_tmr_cursor_v())) )
 	    {
 	        if (Input.Jump_pressed 
@@ -325,8 +325,8 @@ function update_game_window_1a() {
 	    else
 	    {
 	        if (g.gui_state==g.gui_state_OPTIONS 
-	        &&  global.OPTIONS_MENU.menu_state==global.OPTIONS_MENU.menu_state_MAIN 
-	        &&  global.OPTIONS_MENU.MainOption==global.OPTIONS_MENU.MainOption_APP_SCALE 
+	        &&  global.OPTIONS_MENU.menu_state==global.OPTIONS_MENU.menu_state_DISPLAY
+	        &&  global.OPTIONS_MENU.Display_cursor==Display.WINDOW_SCALE
 	        && !abs(bit_dir(gui_tmr_cursor_v())) )
 	        {
 	            _SCALE_DIR = bit_dir(gui_tmr_cursor_h());

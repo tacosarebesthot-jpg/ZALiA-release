@@ -23,7 +23,8 @@ function Audio_update() {
 	    // ------------------------------------------------------------------------
 	    // ------------------------------------------------------------------------
 	    if (rm_music_theme==STR_Title
-	    &&  g.ChangeRoom_timer<=0 )
+	    &&  g.ChangeRoom_timer<=0
+	    && !(variable_global_exists("jukebox_on") && global.jukebox_on) ) // JUKEBOX: don't restart title music over an auditioned track
 	    {
 	        // GMS2: audio_get_name on a non-playing instance throws — guard with audio_is_playing
 	        var _ts_playing = audio_is_playing(timing_sound_inst);

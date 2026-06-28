@@ -1,6 +1,7 @@
 /// @description  Mau_update()
 function Mau_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	// B8BB: JSR DE40
 	GOB_update_2();

@@ -134,8 +134,8 @@ function Surface_Step() {
 	&&  g.gui_state==g.gui_state_PAUSE 
 	&&  g.PAUSE_MENU.state&$3!=g.PAUSE_MENU.state_MAP )
 	{
-	    var _KEYS_REQUESTED = keyboard_check(vk_f4) || Input.GP_Other2_held; // GP_Face4_held, GP_Other2_held (xbox Y)
-	    var _HINT_REQUESTED = keyboard_check(vk_f3) || Input.GP_Other1_held; // GP_Face2_held, GP_Other1_held (xbox B)
+	    var _KEYS_REQUESTED = keyboard_check(ord("9")) || Input.GP_Other2_held; // GP_Face4_held, GP_Other2_held (xbox Y)
+	    var _HINT_REQUESTED = keyboard_check(ord("8")) || Input.GP_Other1_held; // GP_Face2_held, GP_Other1_held (xbox B)
 	    //var _KEYS_REQUESTED = keyboard_check(vk_f4) || Input.GP_Face4_held; // GP_Face4_held, GP_Other2_held (xbox Y)
 	    //var _HINT_REQUESTED = keyboard_check(vk_f3) || Input.GP_Face2_held; // GP_Face2_held, GP_Other1_held (xbox B)
     
@@ -169,7 +169,7 @@ function Surface_Step() {
 
 
 
-	AppVersion_can_draw = keyboard_check(vk_f8);
+	AppVersion_can_draw = keyboard_check(ord("0"));
 	if (AppVersion_can_draw)
 	{
 	    AppVersion_xl = viewXL()+8;

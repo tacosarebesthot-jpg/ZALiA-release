@@ -80,6 +80,43 @@ function OptionsMenu_Game_End() {
 	if (_exists) _exists = ds_exists(        DevTools_dg,ds_type_grid);
 	if (_exists)           ds_grid_destroy(  DevTools_dg);
 	if (_exists)                             DevTools_dg=undefined;
+
+	// DEV TOOLS sub-folder grids (added 2026-06-28)
+	    _exists=variable_instance_exists(id,"Overlays_dg");
+	if (_exists) _exists = !is_undefined(    Overlays_dg);
+	if (_exists) _exists = ds_exists(        Overlays_dg,ds_type_grid);
+	if (_exists)           ds_grid_destroy(  Overlays_dg);
+	if (_exists)                             Overlays_dg=undefined;
+
+	    _exists=variable_instance_exists(id,"Cheats_dg");
+	if (_exists) _exists = !is_undefined(    Cheats_dg);
+	if (_exists) _exists = ds_exists(        Cheats_dg,ds_type_grid);
+	if (_exists)           ds_grid_destroy(  Cheats_dg);
+	if (_exists)                             Cheats_dg=undefined;
+
+	    _exists=variable_instance_exists(id,"Color_dg");
+	if (_exists) _exists = !is_undefined(    Color_dg);
+	if (_exists) _exists = ds_exists(        Color_dg,ds_type_grid);
+	if (_exists)           ds_grid_destroy(  Color_dg);
+	if (_exists)                             Color_dg=undefined;
+
+	    _exists=variable_instance_exists(id,"TestCap_dg");
+	if (_exists) _exists = !is_undefined(    TestCap_dg);
+	if (_exists) _exists = ds_exists(        TestCap_dg,ds_type_grid);
+	if (_exists)           ds_grid_destroy(  TestCap_dg);
+	if (_exists)                             TestCap_dg=undefined;
+
+	    _exists=variable_instance_exists(id,"Sweeps_dg");
+	if (_exists) _exists = !is_undefined(    Sweeps_dg);
+	if (_exists) _exists = ds_exists(        Sweeps_dg,ds_type_grid);
+	if (_exists)           ds_grid_destroy(  Sweeps_dg);
+	if (_exists)                             Sweeps_dg=undefined;
+
+	    _exists=variable_instance_exists(id,"Misc_dg");
+	if (_exists) _exists = !is_undefined(    Misc_dg);
+	if (_exists) _exists = ds_exists(        Misc_dg,ds_type_grid);
+	if (_exists)           ds_grid_destroy(  Misc_dg);
+	if (_exists)                             Misc_dg=undefined;
 	/*
 	    _exists=variable_instance_exists(id,"dg_RandoOptions");
 	if (_exists) _exists = !is_undefined(    dg_RandoOptions);

@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"tas_pb_load_start",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"tas_pb_load_start",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

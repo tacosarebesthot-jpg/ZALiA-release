@@ -140,6 +140,33 @@ function file_load(argument0) {
 	}
 
 
+	// PALETTE-FIX (revert: delete this whole block). ROOT cause of vanilla saves randomizing tile palettes:
+	// g.RandoPalette_state is a LEAKY GLOBAL persisted in UserPreferences.txt (save_game_pref/load_game_pref),
+	// NOT a per-save value. After playing a palette-rando file it stays >0 and bleeds into every later VANILLA
+	// save. The downstream per-save read-gates (`val(global.dm_save_file_settings[?STR_Randomize+STR_Palette])`)
+	// are unreliable because that map is only populated when the save HAS a `_Save_File_Settings` block (vanilla
+	// saves don't) and can be left stale by FileSelect/dev-warp paths. Fix the leak at the SOURCE: whenever a
+	// save is loaded, force the live palette-rando state to match THIS save's authoritative setting. A real
+	// rando-palette save keeps its state (1/2); a vanilla save (setting off/absent) is forced to 0 -> default
+	// (vanilla/NES) colors. Guarded so it never errors if the global is missing.
+	if (variable_global_exists("dm_save_file_settings")
+	&&  variable_instance_exists(g, "RandoPalette_state") )
+	{
+	    var _PALETTE_FIX_per_save = val(global.dm_save_file_settings[?STR_Randomize+STR_Palette]);
+	    if (_PALETTE_FIX_per_save)
+	    {
+	        // Rando IS on for this save. If the leaked global was cleared to 0 by a prior vanilla load,
+	        // restore a sane non-zero state so the save's rando palettes still apply.
+	        if (g.RandoPalette_state<=0) g.RandoPalette_state = 2;
+	    }
+	    else
+	    {
+	        // Rando is OFF/absent for this save -> neutralize the leaky global so palettes stay default.
+	        g.RandoPalette_state = 0;
+	    }
+	}
+
+
 
 
 

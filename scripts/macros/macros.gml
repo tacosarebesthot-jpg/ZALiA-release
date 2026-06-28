@@ -954,6 +954,7 @@ function macros() {
 #macro dk_SteelCrescent3 "_SteelCrescent3"
 #macro dk_SteelCrescent4 "_SteelCrescent4"
 #macro dk_SteelCrescent5 "_SteelCrescent5"
+#macro dk_NESmix "_NESmix"
 #macro dk_Minigame "_Minigame"
 #macro dk_GannonLaugh "_GannonLaugh"
 #macro dk_PlaceCrystal "_PlaceCrystal"
@@ -1057,6 +1058,13 @@ function macros() {
 #macro MAP1_PRICE 2000
 #macro MAP2_PRICE 5000
 #macro UserPrefFileName "UserPreferences.txt"
+// Screen-scaling DISPLAY mode (Options -> DISPLAY submenu). SMOOTH = current behavior (default).
+#macro DISPLAY_SMOOTH 0
+#macro DISPLAY_SHARP 1
+#macro DISPLAY_PIXEL 2
+#macro DISPLAY_FILL 3
+#macro DISPLAY_CRT 4
+#macro DISPLAY_SCAN 5
 
 
 

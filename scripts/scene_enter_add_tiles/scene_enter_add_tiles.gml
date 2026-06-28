@@ -78,10 +78,13 @@ function scene_enter_add_tiles() {
 
 
 
+	// RANDO-LEAK FIX (revert: change `_RANDO_DUNGEON_TS_ON` back to `global.RandoDungeonTilesets_enabled` in the 3 uses below and delete this line). global.RandoDungeonTilesets_enabled is a leaky GLOBAL pref that bleeds across saves; gate on the PER-SAVE dungeon-tileset setting so vanilla saves never apply rando dungeon tiles.
+	var _RANDO_DUNGEON_TS_ON = global.RandoDungeonTilesets_enabled && val(global.dm_save_file_settings[?STR_Randomize+STR_Dungeon+STR_Tileset]);
+
 	var _RANDOMIZED_TILES_DUNGEON_NAME = global.dm_randomized_tiles01[?STR_Dungeon+STR_Name];
-	var _CAN_USE_RANDOMIZED_TILES = global.RandoDungeonTilesets_enabled 
-	&& g.dungeon_num 
-	&& !is_undefined(_RANDOMIZED_TILES_DUNGEON_NAME) 
+	var _CAN_USE_RANDOMIZED_TILES = _RANDO_DUNGEON_TS_ON
+	&& g.dungeon_num
+	&& !is_undefined(_RANDOMIZED_TILES_DUNGEON_NAME)
 	&& _RANDOMIZED_TILES_DUNGEON_NAME==g.dungeon_name;
 	_CAN_USE_RANDOMIZED_TILES = false; // 2025/08/11. Turning this off for now. Doesn't look good. (It's also turned off in `Rando_randomize_dungeon_tilesets()`)
 	//_CAN_USE_RANDOMIZED_TILES = g.dungeon_num!=0;//TESTING
@@ -653,10 +656,10 @@ function scene_enter_add_tiles() {
 	        */
         
         
-	        if (global.WallStyle01Tiles_MAIN 
-	        &&  global.RandoDungeonTilesets_enabled 
-	        &&  ds_grid_width(_WallStyle01_dg) 
-	        &&  _WallStyle01_dg[#_clm,_row] 
+	        if (global.WallStyle01Tiles_MAIN
+	        &&  _RANDO_DUNGEON_TS_ON  // RANDO-LEAK FIX (revert: `global.RandoDungeonTilesets_enabled`)
+	        &&  ds_grid_width(_WallStyle01_dg)
+	        &&  _WallStyle01_dg[#_clm,_row]
 	        && !is_undefined(global.dm_scene_wall_data[?dk_WallStyle+"01"+_TILE_FILE_NAME+_layer_name]) )
 	        {
 	            _data = _WallStyle01_dg[#_clm,_row];
@@ -665,10 +668,10 @@ function scene_enter_add_tiles() {
 	            _scale_x = 1;
 	            _scale_y = 1;
 	        }
-	        else if (global.WallStyle02Tiles_MAIN 
-	        &&  global.RandoDungeonTilesets_enabled 
-	        &&  ds_grid_width(_WallStyle02_dg) 
-	        &&  _WallStyle02_dg[#_clm,_row] 
+	        else if (global.WallStyle02Tiles_MAIN
+	        &&  _RANDO_DUNGEON_TS_ON  // RANDO-LEAK FIX (revert: `global.RandoDungeonTilesets_enabled`)
+	        &&  ds_grid_width(_WallStyle02_dg)
+	        &&  _WallStyle02_dg[#_clm,_row]
 	        && !is_undefined(global.dm_scene_wall_data[?dk_WallStyle+"02"+_TILE_FILE_NAME+_layer_name]) )
 	        {
 	            _data = _WallStyle02_dg[#_clm,_row];
@@ -693,7 +696,7 @@ function scene_enter_add_tiles() {
 	                }
 	            }
             
-	            if (global.RandoDungeonTilesets_enabled)
+	            if (_RANDO_DUNGEON_TS_ON) // RANDO-LEAK FIX (revert: `global.RandoDungeonTilesets_enabled`)
 	            {
 	                _ts = val(f.dm_rando_dungeon_tileset[?STR_Rando+STR_Tileset+background_get_name(_ts)], _ts);
 	            }

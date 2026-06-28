@@ -108,6 +108,14 @@ function OptionsMenu_Draw() {
 	    case   menu_state_INPUT_CONFIG: {_text=MainOptions_dg[#MainOption_INPUT_CONFIG,0]; break;}
 	    case   menu_state_AUDIO_CUSTOM: {_text="CUSTOMIZE RANDOM AUDIO"; break;}
 	    case   menu_state_DEV_TOOLS:    {_text=MainOptions_dg[#MainOption_DEV_TOOLS,0]; break;}
+	    case   menu_state_OVERLAYS:     {_text="OVERLAYS"; break;}
+	    case   menu_state_CHEATS:       {_text="CHEATS"; break;}
+	    case   menu_state_COLOR:        {_text="COLOR"; break;}
+	    case   menu_state_TEST_CAP:     {_text="TEST / CAPTURE"; break;}
+	    case   menu_state_SWEEPS:       {_text="SWEEPS"; break;}
+	    case   menu_state_MISC:         {_text="MISC"; break;}
+	    case   menu_state_AUTO_TEST:    {_text="AUTOMATED TEST"; break;} // ORPHANED (unreachable)
+	    case   menu_state_DISPLAY:      {_text=MainOptions_dg[#MainOption_DISPLAY,0]; break;}
 	    case   menu_state_RANDO:        {_text="RANDO OPTIONS"; break;} // pad
 	    case   menu_state_OTHER:        {_text="OTHER"; break;}
 	    }
@@ -132,7 +140,15 @@ function OptionsMenu_Draw() {
 	case   menu_state_MAIN:         {OptionsMenu_Draw_Main(_y+6);         break;}//case Menu_MAIN
 	case   menu_state_AUDIO_CUSTOM: {OptionsMenu_Draw_AudioCustom(_y+8);  break;}//case Menu_AUDIO_CUSTOM
 	case   menu_state_INPUT_CONFIG: {OptionsMenu_Draw_InputConfig(_y+8);  break;}//case menu_state_INPUT_CONFIG
-	case   menu_state_DEV_TOOLS:    {OptionsMenu_Draw_DevTools(_y+4);     break;}//case Menu_DEV_TOOLS
+	case   menu_state_DEV_TOOLS:    {OptionsMenu_Draw_DevTools(_y+4);     break;}//case Menu_DEV_TOOLS (launcher)
+	case   menu_state_OVERLAYS:     {OptionsMenu_Draw_Overlays(_y+4);     break;}//DEV TOOLS sub-folder
+	case   menu_state_CHEATS:       {OptionsMenu_Draw_Cheats(_y+4);       break;}//DEV TOOLS sub-folder
+	case   menu_state_COLOR:        {OptionsMenu_Draw_Color(_y+4);        break;}//DEV TOOLS sub-folder
+	case   menu_state_TEST_CAP:     {OptionsMenu_Draw_TestCap(_y+4);      break;}//DEV TOOLS sub-folder
+	case   menu_state_SWEEPS:       {OptionsMenu_Draw_Sweeps(_y+4);       break;}//DEV TOOLS sub-folder
+	case   menu_state_MISC:         {OptionsMenu_Draw_Misc(_y+4);         break;}//DEV TOOLS sub-folder
+	case   menu_state_AUTO_TEST:    {OptionsMenu_Draw_AutoTest(_y+4);     break;}//case menu_state_AUTO_TEST (ORPHANED, unreachable)
+	case   menu_state_DISPLAY:      {OptionsMenu_Draw_Display(_y+4);      break;}//case menu_state_DISPLAY
 	case   menu_state_RANDO:        {OptionsMenu_Draw_RandoOptions(_y+4); break;}//case Menu_RANDO_OPTIONS
 	case   menu_state_OTHER:        {OptionsMenu_Draw_Other(_y+4);        break;}//case menu_state_OTHER
 	}//switch(menu_state)

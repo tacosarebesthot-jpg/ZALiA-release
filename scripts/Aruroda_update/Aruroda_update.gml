@@ -1,6 +1,7 @@
 /// @description  Aruroda_update()
 function Aruroda_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	// 9AAE
 	GO_update_cs();

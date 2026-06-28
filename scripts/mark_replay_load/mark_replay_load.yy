@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"mark_replay_load",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"mark_replay_load",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

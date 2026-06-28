@@ -1438,7 +1438,8 @@ function p_init() {
 	OW_PAL += PAL_MOB_ORG1; // MOB ORG
 	OW_PAL += PAL_MOB_RED2; // MOB RED
 	OW_PAL += PAL_MOB_BLU2; // MOB BLU
-	OW_PAL += PAL_MOB_PUR1; // MOB PUR
+	//OW_PAL += PAL_MOB_PUR1; // MOB PUR  <- was PURPLE; overworld encounter mobs (ENC_PI = PI_MOB_PUR) must be BLACK.
+	OW_PAL += build_pal(C_WHT1,C_BLK1,C_BLK1,C_BLK1,-2,-2,-2,-2); // MOB PUR (black = ENC_PAL). SOURCE FIX for purple OW mobs.
 
 
 

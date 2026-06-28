@@ -28,9 +28,9 @@ function Item_update() {
     
     
 	    // E51E. ITEM_TYPE: "A":Major items, "B":Heart/Magic containers, "C":Quest items, "G":Extra Life Doll
-	    if (IS_HOLD_ITEM 
-	    &&  cs&CS_BD1 
-	    && !global.pc.ogr 
+	    if (IS_HOLD_ITEM
+	    &&  cs&CS_BD1
+	    // && !global.pc.ogr  // MOD removed: engage hold-item invuln on contact even airborne (was: grabbing a hold item airborne deferred HoldItem_timer until landing -> vulnerable mid-air)
 	    && !global.pc.HoldItem_timer )
 	    {   // E726, E538: JSR E771
 	        Item_update_1(); // E771
@@ -66,6 +66,7 @@ function Item_update() {
 	        {
 	            Item_update_1(); // E771
 	            stun_timer = STUN_DURATION1; // $30
+	            global.pc.iframes_timer = 4; // MOD: brief post-hit i-frames so small-item pickups (Key/Jar/P-Bag) aren't open to a free hit. Same value PC_take_damage sets after a real hit.
 	            aud_play_sound(get_audio_theme_track(dk_StrikeEnemy));
             
 	            if (ITEM_TYPE==STR_PBAG) state = state_DROP;

@@ -30,6 +30,12 @@ function PC_init() {
 
 	// get scripts from data, run scr_vars, run scr_ini1
 	GameObject_create_1a();
+	// GMS2 port: GameObject_create_1a() now also runs init_vars_draw_1a() (part of the
+	// "full base GO init chain" added for objects with no scr_init1) which unconditionally
+	// calls GO_depth_init(DEPTH_BASE), clobbering the DEPTH_PC_MAIN set above back to 0.
+	// OG (GMS1.4) GameObject_create_1a() never called init_vars_draw_1a(), so this
+	// re-assert restores OG's actual end result: PC stays at DEPTH_PC_MAIN. PC-scoped only.
+	GO_depth_init(DEPTH_PC_MAIN);
 	scr_draw     = PC_draw;
 	scr_inst_end = PC_end;
 

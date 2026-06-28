@@ -4,6 +4,11 @@
 function PC_take_damage() {
 
 
+	if (g.cheat_invuln)
+	{
+	    exit; // CHEAT: invincibility — take no damage
+	}
+
 	if (global.pc.iframes_timer)
 	{
 	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

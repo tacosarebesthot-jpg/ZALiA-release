@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"tas_apply_held",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"tas_apply_held",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

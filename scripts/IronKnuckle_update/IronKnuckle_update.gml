@@ -1,6 +1,8 @@
 /// @description  IronKnuckle_update()
 function IronKnuckle_update() {
 
+	if (stun_timer) { GOB_update_2(); if (stun_timer==2) attack_tokens = $4 | (rand()&$3); exit; }
+
 	// Object Resource Name: IrKnA
 
 	// v1 Orange $18

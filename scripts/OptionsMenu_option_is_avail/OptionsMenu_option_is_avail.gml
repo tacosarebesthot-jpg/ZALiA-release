@@ -16,9 +16,9 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case MainOption_MUSIC_SET:     {return true; break;}
 	        case MainOption_PC_SPRITES:    {return true; break;}
 	        case MainOption_INPUT_CONFIG:  {return true; break;}
-	        case MainOption_FULLSCREEN:    {return true; break;}
-	        case MainOption_APP_SCALE:     {return true; break;}
+	        case MainOption_CO_OP:         {return true; break;}
 	        case MainOption_DEV_TOOLS:     {return true; break;}
+	        case MainOption_DISPLAY:       {return true; break;}
 	        case MainOption_OTHER:         {return true; break;}
 	        case MainOption_RANDO:         {return true; break;}
 	        //case MainOption_PAL_EDITOR:    {return true; break;}
@@ -31,39 +31,200 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
     
     
 	    // ============================================================
+	    // DEV TOOLS is now a LAUNCHER: rows just open sub-folders, all always selectable.
 	    case menu_state_DEV_TOOLS:{
 	    switch(argument1)
 	    {
-	        default:                      {return false; break;}
-	        case DevTools.DEV_TOOLS_STATE:{return true; break;}
-	        case DevTools.SET_DEFAULT:    {return true; break;}
-	        case DevTools.APP_PERFORMANCE:{return true; break;}
-	        case DevTools.HITBOXES:       {return true; break;}
-	        case DevTools.SCP:            {return true; break;}
-	        case DevTools.XY:             {return true; break;}
-	        //case DevTools.OCS:            {return true; break;}
-	        case DevTools.OG_CAM:         {return true; break;}
-	        case DevTools.HP:             {return true; break;}
-	        case DevTools.SPRITE_OUTLINE: {return true; break;}
-	        case DevTools.FRAME_COUNT:    {return true; break;}
-	        case DevTools.EXITS:          {return DEV; break;}
-	        case DevTools.SOLID_TILES:    {return DEV; break;}
-	        case DevTools.UNIQUE_TILES:   {return DEV; break;}
-	        case DevTools.DUNGEON_MAP:    {return DEV; break;}
-	        case DevTools.ADD_ITEMS:      {return DEV; break;}
-	        //case DevTools.DOUBLE_JUMP:    {return f.items&ITM_FTHR; break;}
-	        //case DevTools.INVULNERABILITY:{return DEV; break;}
-	        case DevTools.PC_DASH:        {return true; break;}
-	        //case DevTools.PC_DASH:        {return DEV; break;}
-	        case DevTools.BGR_COLOR:      {return true; break;}
-	        case DevTools.ROOM_COLOR:     {return true; break;}
-	        case DevTools.BACK:           {return true; break;}
+	        default:                {return false; break;}
+	        case DevTools.OVERLAYS: {return true; break;}
+	        case DevTools.CHEATS:   {return true; break;}
+	        case DevTools.COLOR:    {return true; break;}
+	        case DevTools.TEST_CAP: {return true; break;}
+	        case DevTools.SWEEPS:   {return true; break;}
+	        case DevTools.MISC:     {return true; break;}
+	        case DevTools.BACK:     {return true; break;}
 	    }//switch(argument1)
 	    break;}//case Menu_DEV_TOOLS
-    
-    
-    
-    
+
+
+
+
+	    // ============================================================
+	    // DEV TOOLS sub-folder: OVERLAYS (debug overlays). DEV-only diagnostics keep
+	    // their original DEV gate; everything else stays available in play builds.
+	    case menu_state_OVERLAYS:{
+	    switch(argument1)
+	    {
+	        default:                      {return false; break;}
+	        case Overlays.HITBOXES:       {return true; break;}
+	        case Overlays.SCP:            {return true; break;}
+	        case Overlays.XY:             {return true; break;}
+	        case Overlays.OG_CAM:         {return true; break;}
+	        case Overlays.HP:             {return true; break;}
+	        case Overlays.SPRITE_OUTLINE: {return true; break;}
+	        case Overlays.FRAME_COUNT:    {return true; break;}
+	        case Overlays.DEPTH_DEBUG:    {return true; break;}
+	        case Overlays.DEATH_COUNTER:  {return true; break;}
+	        case Overlays.EXITS:          {return DEV; break;}
+	        case Overlays.SOLID_TILES:    {return DEV; break;}
+	        case Overlays.UNIQUE_TILES:   {return DEV; break;}
+	        case Overlays.DUNGEON_MAP:    {return DEV; break;}
+	        case Overlays.INPUT_DISPLAY:  {return true; break;}
+	        case Overlays.BACK:           {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_OVERLAYS
+
+
+
+
+	    // ============================================================
+	    // DEV TOOLS sub-folder: CHEATS. ADD_ITEMS keeps its DEV gate; the rest stay
+	    // available in play builds (DEV==false).
+	    case menu_state_CHEATS:{
+	    switch(argument1)
+	    {
+	        default:                 {return false; break;}
+	        case Cheats.ADD_ITEMS:   {return DEV; break;}
+	        case Cheats.PC_DASH:     {return true; break;}
+	        case Cheats.INF_HP:      {return true; break;}
+	        case Cheats.INF_MP:      {return true; break;}
+	        case Cheats.INF_LIVES:   {return true; break;}
+	        case Cheats.INVULN:      {return true; break;}
+	        case Cheats.BACK:        {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_CHEATS
+
+
+
+
+	    // ============================================================
+	    // DEV TOOLS sub-folder: COLOR (palette editors).
+	    case menu_state_COLOR:{
+	    switch(argument1)
+	    {
+	        default:                  {return false; break;}
+	        case ClrTools.BGR_COLOR:  {return true; break;}
+	        case ClrTools.ROOM_COLOR: {return true; break;}
+	        case ClrTools.BACK:       {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_COLOR
+
+
+
+
+	    // ============================================================
+	    // DEV TOOLS sub-folder: TEST / CAPTURE. BUGPROBE keeps its DEV gate.
+	    case menu_state_TEST_CAP:{
+	    switch(argument1)
+	    {
+	        default:                    {return false; break;}
+	        case TestCap.BUGPROBE:      {return DEV;  break;}
+	        case TestCap.TAS_RECORD:    {return true; break;}
+	        case TestCap.TAS_PLAYBACK:  {return true; break;}
+	        case TestCap.PLAYLOG:       {return true; break;}
+	        case TestCap.WALKTUNE:      {return true; break;}
+	        case TestCap.GP_DIAG:       {return true; break;}
+	        case TestCap.COOP_TEST:     {return true; break;}
+	        case TestCap.REPLAY_MARK:   {return true; break;}
+	        case TestCap.TWITCH:        {return true; break;}
+	        case TestCap.TWITCH_IRC:    {return true; break;}
+	        case TestCap.BACK:          {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_TEST_CAP
+
+
+
+
+	    // ============================================================
+	    // DEV TOOLS sub-folder: SWEEPS (live room-sweep starters, always selectable).
+	    case menu_state_SWEEPS:{
+	    switch(argument1)
+	    {
+	        default:                      {return false; break;}
+	        case Sweeps.SW_FULL:          {return true; break;}
+	        case Sweeps.SW_OVERWORLD:     {return true; break;}
+	        case Sweeps.SW_PALACES:       {return true; break;}
+	        case Sweeps.SW_TOWNS:         {return true; break;}
+	        case Sweeps.SW_CAVES:         {return true; break;}
+	        case Sweeps.SW_CAVES_WEST:    {return true; break;}
+	        case Sweeps.SW_CAVES_EAST:    {return true; break;}
+	        case Sweeps.SW_CAVES_DTHMT:   {return true; break;}
+	        case Sweeps.SW_CAVES_MAZIS:   {return true; break;}
+	        case Sweeps.SW_OTHER:         {return true; break;}
+	        case Sweeps.BACK:             {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_SWEEPS
+
+
+
+
+	    // ============================================================
+	    // DEV TOOLS sub-folder: MISC.
+	    case menu_state_MISC:{
+	    switch(argument1)
+	    {
+	        default:                          {return false; break;}
+	        case MiscTools.SET_DEFAULT:       {return true; break;}
+	        case MiscTools.APP_PERFORMANCE:   {return true; break;}
+	        case MiscTools.DEV_TOOLS_STATE:   {return true; break;}
+	        case MiscTools.BACK:              {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_MISC
+
+
+
+
+	    // ============================================================
+	    case menu_state_AUTO_TEST:{
+	    switch(argument1)
+	    {
+	        default:                      {return false; break;}
+	        // Sweep starters — always selectable (start a live in-game room sweep).
+	        case AutoTest.SW_FULL:        {return true; break;}
+	        case AutoTest.SW_OVERWORLD:   {return true; break;}
+	        case AutoTest.SW_PALACES:     {return true; break;}
+	        case AutoTest.SW_TOWNS:       {return true; break;}
+	        case AutoTest.SW_CAVES:       {return true; break;}
+	        case AutoTest.SW_CAVES_WEST:  {return true; break;}
+	        case AutoTest.SW_CAVES_EAST:  {return true; break;}
+	        case AutoTest.SW_CAVES_DTHMT: {return true; break;}
+	        case AutoTest.SW_CAVES_MAZIS: {return true; break;}
+	        case AutoTest.SW_OTHER:       {return true; break;}
+	        // Moved test / capture toggles (same availability they had under DEV TOOLS).
+	        case AutoTest.BUGPROBE:       {return DEV;  break;}
+	        case AutoTest.TAS_RECORD:     {return true; break;}
+	        case AutoTest.TAS_PLAYBACK:   {return true; break;}
+	        case AutoTest.INPUT_DISPLAY:  {return true; break;}
+	        case AutoTest.PLAYLOG:        {return true; break;}
+	        case AutoTest.WALKTUNE:       {return true; break;}
+	        case AutoTest.GP_DIAG:        {return true; break;}
+	        case AutoTest.BACK:           {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_AUTO_TEST
+
+
+
+
+	    // ============================================================
+	    case menu_state_DISPLAY:{
+	    switch(argument1)
+	    {
+	        default:             {return false; break;}
+	        case Display.FULLSCREEN:  {return true; break;}
+	        case Display.WINDOW_SCALE:{return true; break;}
+	        case Display.SMOOTH: {return true; break;}
+	        case Display.SHARP:  {return true; break;}
+	        case Display.PIXEL:  {return true; break;}
+	        case Display.FILL:   {return true; break;}
+	        case Display.CRT:    {return true; break;}
+	        case Display.SCAN:   {return true; break;}
+	        case Display.BACK:   {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_DISPLAY
+
+
+
+
 	    // ============================================================
 	    case menu_state_RANDO:{
 	    switch(argument1)

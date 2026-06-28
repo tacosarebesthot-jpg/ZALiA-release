@@ -32,8 +32,16 @@ function Audio_update_2() {
 
 
 	// ------------------------------------------------------------------------
-	if (can_play_boss_music 
-	&& !audio_is_playing(mus_rm_inst) 
+	// JUKEBOX coordination: while the NES-music jukebox is auditioning a track, the
+	// area-music state machine must NOT (re)start room/boss music or it plays ON TOP
+	// of the jukebox track (the bug this fixes). Guarded so it never throws if the
+	// jukebox model isn't built yet. When the jukebox is toggled OFF, _jb_on goes
+	// false and the room-music block below resumes the room's own music next frame.
+	var _jb_on = (variable_global_exists("jukebox_on") && global.jukebox_on);
+
+	if (can_play_boss_music
+	&& !_jb_on
+	&& !audio_is_playing(mus_rm_inst)
 	&&  instance_exists(Boss) )
 	{
 	    //sdm("Audio_update(): "+"Boss.MusicBattle_THEME: "+Boss.MusicBattle_THEME+", Boss.MusicBattle_BODY: "+audio_get_name(Boss.MusicBattle_BODY)+", Boss.MusicBattle_INTRO: "+audio_get_name(Boss.MusicBattle_INTRO)+", mus_rm_inst: "+string(mus_rm_inst)+" val(dm_music_inst[?string(mus_rm_inst)+STR_Audio+STR_Asset+STR_Name]) "+string(val(dm_music_inst[?string(mus_rm_inst)+STR_Audio+STR_Asset+STR_Name]))+" "+audio_get_name(mus_rm_inst));
@@ -73,7 +81,8 @@ function Audio_update_2() {
 	// removed the `g.ChangeRoom_timer<=0` condition here and instead set  
 	// `can_play_mus_rm_body` in Audio_Room_Start() and update_change_room().
 
-	if (can_play_mus_rm_body 
+	if (can_play_mus_rm_body
+	&& !_jb_on                       // JUKEBOX: don't restart area music over an auditioned track
 	&&  mus_rm_body!=0   // if mus_rm_body==0, there's no intro
 	&& !audio_is_playing(mus_rm_inst) )
 	//&&  g.ChangeRoom_timer<=0 ) // g.ChangeRoom_timer might not be a whole number. NEED <=0 check

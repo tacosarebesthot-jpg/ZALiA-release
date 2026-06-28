@@ -40,7 +40,9 @@ function get_pc_skin_palette() {
 	            //var _Skin_palette = p.PAL_PC_1+p.PAL_PC_2+p.PAL_PC_3; // default
 	                _Skin_palette = val(global.pc.dm_skins[?string(_DATAKEY)  +STR_Palette], _Skin_palette);
 	                _Skin_palette = val(global.pc.dm_skins[?hex_str(_Skin_IDX)+STR_Palette], _Skin_palette);
-	            if (g.RandoPalette_state)
+	            // RANDO-LEAK FIX (revert: change back to `if (g.RandoPalette_state)`). g.RandoPalette_state is a leaky GLOBAL pref; also gate on the per-save setting so vanilla saves keep the default PC tunic colors.
+	            if (g.RandoPalette_state
+	            &&  val(global.dm_save_file_settings[?STR_Randomize+STR_Palette]) )
 	            //&&  val(f.dm_rando[?STR_Randomize+STR_Palette]) )
 	            {
 	                var _PC_RANDO_PALETTE = f.dm_rando[?STR_Palette+"_PC"+"01"];

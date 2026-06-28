@@ -3204,8 +3204,8 @@ function rm_data_init_Town_A() {
 	_dist=rm_w_-_DIST2; // _dist: from rm center to locked door center
 	_val=_dist-($04<<3);
 	row5=row3-$02; y5=row5<<3;
-	data_spawn(rm+STR_PRIO,LoDoA,$2,  (x0-_val)-4,y5,  STR_Side+hex_str($2)); // Locked Door
-	data_spawn(rm+STR_PRIO,LoDoA,$2,  (x0+_val)-4,y5,  STR_Side+hex_str($1)); // Locked Door
+	data_spawn(rm+STR_PRIO,LoDoA,$2,  (x0-_val)-4,y5,  STR_Side+hex_str($2)); // Locked Door (Ruto-side btn)
+	data_spawn(rm+STR_PRIO,LoDoA,$2,  (x0+_val)-4,y5,  STR_Side+hex_str($1)); // Locked Door (Mido-side btn)
 
 	_dist-=_DIST3;
 	_dist-=$07<<3;

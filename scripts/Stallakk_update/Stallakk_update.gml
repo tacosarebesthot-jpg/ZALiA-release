@@ -1,6 +1,7 @@
 /// @description  Stallakk_update()
 function Stallakk_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	GO_update_cam_vars();
 	update_EF11();

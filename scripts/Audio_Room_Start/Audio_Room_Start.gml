@@ -7,12 +7,28 @@ function Audio_Room_Start() {
 
 	var _val, _theme;
 
-	var _ROOM_A = g.room_type=="A";
-	var _ROOM_B = g.room_type=="B";
-	var _ROOM_C = g.room_type=="C";
+	// DEST-TUPLE: Audio_Room_Start runs before g_Room_Start; derive destination from f.reen (mirrors g_Room_Start L67-68,122-131)
+	var _dest_val       = room_get_name(room);
+	var _dest_room_type = string_char_at(_dest_val, string_pos("_",_dest_val)-1);
+	var _dest_scene     = g.rm_name;        // fallback for non-A; overwritten below for A rooms
+	var _dest_town_num  = 0;
+	var _dest_town_name = undefined;
+	var _dest_dungeon_num = 0;
+	if (_dest_room_type=="A") {
+	    var _dest_area    = string_copy(f.reen, 1, AreaID_LEN);
+	    var _dest_rm_num  = str_hex(string_copy(f.reen, AreaID_LEN+1, 2));
+	    _dest_scene       = _dest_area + hex_str(_dest_rm_num);
+	    _dest_town_num    = get_town_num(_dest_scene);
+	    _dest_town_name   = g.dm_town[?STR_Town+STR_Name+hex_str(_dest_town_num)];
+	    _dest_dungeon_num = get_dungeon_num(_dest_scene);
+	}
+
+	var _ROOM_A = _dest_room_type=="A";
+	var _ROOM_B = _dest_room_type=="B";
+	var _ROOM_C = _dest_room_type=="C";
 
 
-	var                   _RM_NAME = g.rm_name;
+	var                   _RM_NAME = _dest_scene;
 	if(!_ROOM_A)          _RM_NAME = room_get_name(room);
 	switch(room){
 	case rmB_Title:      {_RM_NAME=Area_Title+"00"; break;}
@@ -50,14 +66,14 @@ function Audio_Room_Start() {
 	else if(!_ROOM_B)
 	{
 	    if (_ROOM_A 
-	    &&  g.town_name==STR_Bulblin 
+	    &&  _dest_town_name==STR_Bulblin
 	    //&& !(f.items&ITM_MASK) )
 	    && !global.pc.Disguise_enabled ) // set in g.Room_Start()
 	    {
 	        rm_music_theme = STR_Battle+"02"; // STR_Battle+"02": only difference is Niko's audio set will be a fuller variation of battle theme
 	    }
 	    else if (_ROOM_A 
-	    &&  g.rm_name==val(g.dm_rm[?"GameEnd1B_RM_NAME"]) 
+	    &&  _dest_scene==val(g.dm_rm[?"GameEnd1B_RM_NAME"])
 	    //&&  g.rm_name==g.GameEnd1B_RM_NAME 
 	    &&  rm_music_theme==dk_WakeZelda 
 	    &&  f.quest_num>=2 )
@@ -81,21 +97,21 @@ function Audio_Room_Start() {
 	        }
         
         
-	        if (_c1 
-	        &&  (g.town_num || g.dungeon_num) )
+	        if (_c1
+	        &&  (_dest_town_num || _dest_dungeon_num) )
 	        {
-	            if (g.town_num)
+	            if (_dest_town_num)
 	            {
-	                rm_music_theme = g.town_name;
+	                rm_music_theme = _dest_town_name;
 	            }
-	            else if (g.dungeon_num)
+	            else if (_dest_dungeon_num)
 	            {
-	                rm_music_theme = STR_Dungeon+hex_str(g.dungeon_num);
+	                rm_music_theme = STR_Dungeon+hex_str(_dest_dungeon_num);
 	            }
 	        }
 	        else
 	        {
-	            if (_c1 
+	            if (_c1
 	            ||  _ROOM_C )
 	            {
 	                     if (string_pos("DEATH MOUNTAIN", _AREA_NAME)) rm_music_theme = STR_Overworld+dk_DeathMountain; // Death Mtn
@@ -142,19 +158,19 @@ function Audio_Room_Start() {
 
 
 	var _use_town_halloween_music = false;
-	if (_ROOM_A 
-	&&  global.Halloween1_enabled 
-	&& !is_undefined(g.town_name) 
-	&&  ds_list_find_index(_dl_halloween_music_towns,g.town_name)!=-1 )
+	if (_ROOM_A
+	&&  global.Halloween1_enabled
+	&& !is_undefined(_dest_town_name)
+	&&  ds_list_find_index(_dl_halloween_music_towns,_dest_town_name)!=-1 )
 	{
-	    if (rm_music_theme==STR_House+"01" 
+	    if (rm_music_theme==STR_House+"01"
 	    ||  ds_list_find_index(_dl_halloween_music_towns,rm_music_theme)!=-1 )
 	    {
-	        if (val(g.dm_rm[?g.rm_name+STR_Town+STR_Outside]) 
-	        ||  val(g.dm_rm[?g.rm_name+STR_Town+STR_House]) )
+	        if (val(g.dm_rm[?_dest_scene+STR_Town+STR_Outside])
+	        ||  val(g.dm_rm[?_dest_scene+STR_Town+STR_House]) )
 	        {
 	            _use_town_halloween_music = true;
-	            rm_music_theme = g.town_name;
+	            rm_music_theme = _dest_town_name;
 	            //rm_music_theme = STR_Old_Kasuto;
 	        }
 	    }
@@ -165,6 +181,9 @@ function Audio_Room_Start() {
 
 
 	var _IS_DIFF_THEME = rm_music_theme != rm_music_theme_prev;
+
+	if (variable_global_exists("playlog_active") && global.playlog_active)
+	    playlog_write("AUDIODIAG dest=" + string(_dest_scene) + " stale_rm=" + string(g.rm_name) + " town=" + string(_dest_town_name) + " dgn=" + string(_dest_dungeon_num) + " theme=" + string(rm_music_theme));
 
 
 
@@ -191,7 +210,7 @@ function Audio_Room_Start() {
 
 	if (_use_town_halloween_music)
 	{
-	    mus_rm_body = val(dm[?STR_Halloween+STR_Music+g.town_name], mus_rm_body);
+	    mus_rm_body = val(dm[?STR_Halloween+STR_Music+_dest_town_name], mus_rm_body);
 	}
 	//mus_Wyng1_MazeIsland_Body, mus_IsabelleChiming_OldKasuto, mus_Z1_Dungeon_Triangle_1a, mus_Castlevania2_BloodyTears_Body, mus_Castlevania2_Town_Body, 
 	//mus_Wyng1_MazeIsland_Body, mus_IsabelleChiming_OldKasuto, mus_SteelCrescent3_OldKasuto, mus_Z1_Dungeon_Triangle_1a, mus_Castlevania2_BloodyTears_Body, mus_Castlevania2_Town_Body, mus_Castlevania2_Night_Body
@@ -328,9 +347,9 @@ function Audio_Room_Start() {
 
 	var _ROOM_B1 = _ROOM_B && (room==rmB_Title || room==rmB_FileSelect || room==rmB_ContinueSave);
 
-	if (_ROOM_B1 
-	||  _ROOM_C 
-	|| (_ROOM_A && !g.town_num) )
+	if (_ROOM_B1
+	||  _ROOM_C
+	|| (_ROOM_A && !_dest_town_num) )
 	{
 	    dm[?STR_Rauru     +dk_Intro_CanPlay] = true;
 	    dm[?STR_Ruto      +dk_Intro_CanPlay] = true;
@@ -343,9 +362,9 @@ function Audio_Room_Start() {
 	    dm[?STR_Bulblin   +dk_Intro_CanPlay] = true;
 	}
 
-	if (_ROOM_B1 
-	||  _ROOM_C 
-	|| (_ROOM_A && !g.dungeon_num) )
+	if (_ROOM_B1
+	||  _ROOM_C
+	|| (_ROOM_A && !_dest_dungeon_num) )
 	{
 	    dm[?STR_Dungeon+"01"+dk_Intro_CanPlay] = true;
 	    dm[?STR_Dungeon+"02"+dk_Intro_CanPlay] = true;

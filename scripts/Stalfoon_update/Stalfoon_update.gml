@@ -1,14 +1,13 @@
 /// @description  Stalfoon_update()
 function Stalfoon_update() {
 
-	hspd_impel = 0;
-	/*
 	if (stun_timer)
 	{   // DE40
 	    GOB_update_2();
 	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
-	*/
+
+	hspd_impel = 0;
 
 
 	// ------------------------------------------------------

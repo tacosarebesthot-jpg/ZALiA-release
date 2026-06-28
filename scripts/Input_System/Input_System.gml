@@ -13,9 +13,23 @@ function Input_System() {
 	        // ------------------------------------------------------------------
 	        case "gamepad discovered":{
 	        if (gamepad_slot==-1) gamepad_slot = _SLOT;
-        
+	        // CO-OP P2 is NOT auto-captured on connect anymore. The old auto-bind of the
+	        // first "extra" slot made a single physical controller that enumerates as TWO
+	        // gamepad slots (e.g. a PS4 pad through DS4Windows = native DS4 + emulated
+	        // XInput) drive BOTH players: the phantom 2nd slot mirrored P1. P2 now joins
+	        // ONLY by a deliberate, NON-mirrored button press on a separate pad, handled
+	        // in Input_update_p2(). Never bind gamepad_slot_p2 here.
+
 	        gamepad_name = gamepad_get_description(_SLOT);
 	        show_debug_message("gamepad discovered"+", slot: "+string(_SLOT)+", gamepad name: "+gamepad_name);
+
+	        // Re-apply a saved hand-calibrated SDL mapping for this pad, if one exists.
+	        var _guid = gamepad_get_guid(_SLOT);
+	        var _sdlmap = dm_UserInputConfig[?_guid+"_sdlmap"];
+	        if (!is_undefined(_sdlmap))
+	        {   gamepad_test_mapping(_SLOT, _sdlmap);
+	            show_debug_message("  re-applied calibrated mapping for guid "+string(_guid));
+	        }
         
 	        gamepad_set_axis_deadzone(   _SLOT, 0.5); // Set the "deadzone" for the axis
 	        gamepad_set_button_threshold(_SLOT, 0.1); // Set the "threshold" for the triggers
@@ -44,6 +58,12 @@ function Input_System() {
 	            GP_other5 = val(dm_UserInputConfig[?_DATAKEY+"other5"], GP_other5_DEFAULT);
 	            GP_other6 = val(dm_UserInputConfig[?_DATAKEY+"other6"], GP_other6_DEFAULT);
 	            //                                                                      //
+	            GP_spell_next = val(dm_UserInputConfig[?_DATAKEY+"spell_next"], GP_spell_next_DEFAULT);
+	            GP_spell_prev = val(dm_UserInputConfig[?_DATAKEY+"spell_prev"], GP_spell_prev_DEFAULT);
+	            //                                                                      //
+	            GP_jukebox_next = val(dm_UserInputConfig[?_DATAKEY+"jukebox_next"], GP_jukebox_next_DEFAULT);
+	            GP_jukebox_prev = val(dm_UserInputConfig[?_DATAKEY+"jukebox_prev"], GP_jukebox_prev_DEFAULT);
+	            //                                                                      //
 	            //show_debug_message("_gamepad_num "+hex_str(_num)+", "+_DATAKEY);
 	            //show_debug_message("GP_magic "+string(GP_magic)+", GP_magic_DEFAULT "+string(GP_magic_DEFAULT)+", gp_shoulderlb "+string(gp_shoulderlb));
 	            //show_debug_message("GP_magic==GP_magic_DEFAULT: "+string(GP_magic==GP_magic_DEFAULT)+", GP_magic==gp_shoulderlb: "+string(GP_magic==gp_shoulderlb));
@@ -67,6 +87,8 @@ function Input_System() {
         
 	        if (gamepad_slot == _SLOT)
 	        {   gamepad_slot =  -1;  }
+	        if (gamepad_slot_p2 == _SLOT) // CO-OP P2: release the fairy's pad if it unplugs
+	        {   gamepad_slot_p2 = -1;  }
 	        break;}//case "gamepad lost"
 	    }//switch(_TYPE)
 	}

@@ -1,6 +1,7 @@
 /// @description  RockGeru_update()
 function RockGeru_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	var _RAND = rand();
 

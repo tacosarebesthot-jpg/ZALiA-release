@@ -191,6 +191,7 @@ function OptionsMenu_Draw_Other() {
 	        else                                _pi = PI_MENU2;
 	        break;}
 
+	        /*
 	        // --------------------------------------------------------------------
 	        case Other_CHRISTMAS1:{
 	        _text = val(dm_options[?_dk+hex_str(global.Christmas_enabled)   +STR_Text],_STR_UNDEFINED);
@@ -198,6 +199,7 @@ function OptionsMenu_Draw_Other() {
 	        else if(!global.Christmas_enabled) _pi = PI_DARK1;
 	        else                               _pi = PI_MENU2;
 	        break;}
+	        */
 
 	        // --------------------------------------------------------------------
 	        case Other_DOUBLE_JUMP:{

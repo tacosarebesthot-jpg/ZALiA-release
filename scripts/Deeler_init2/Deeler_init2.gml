@@ -37,6 +37,8 @@ function Deeler_init2() {
 	    }
 	}
 
+	// OG-restore: STR_Distance now lives in its dedicated spawn key (data_spawn handler), not a DataNN slot.
+	if (!is_undefined(_spawn_datakey)) HANG_DIST_DEF = val(g.dm_spawn[?_spawn_datakey+STR_Distance], HANG_DIST_DEF);
 
 	HANG_DIST_DEF -= drawYOff_DROPPED;
 

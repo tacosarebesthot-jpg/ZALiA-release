@@ -170,6 +170,15 @@ function FileSelect_register_file(argument0) {
 	        _dm_save_file[?f.SDNAME_linkDolls] = _val;
 	    }
 	}
+	else
+	{
+	    // Vanilla "Start With Reflect" (non-rando new game). Mirrors the rando REFLECT grant,
+	    // but applies ONLY when this is NOT a rando file, so the rando path is left untouched.
+	    if (global.start_with_reflect)
+	    {
+	        _dm_save_file[?f.SDNAME_spells] = val(_dm_save_file[?f.SDNAME_spells]) | SPL_RFLC;
+	    }
+	}
 
 
 

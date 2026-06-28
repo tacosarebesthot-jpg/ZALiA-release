@@ -162,6 +162,43 @@ function Dev_RmWarper_Create() {
 	}
 
 	// ============================================================
+	// GRANULAR (single-category) RM SWEEP (added 2026-06-27, Phase 1).
+	//   sweep_build_list_filtered(_pred) is sweep_build_list() with a per-area predicate
+	//   gate: areas the predicate rejects are skipped, so we can sweep ONLY palaces, ONLY
+	//   towns, ONLY caves, or one cave-region. Reuses the exact same per-room exit lookup
+	//   + sweep_scene_check / crashes.txt / scene_report.txt / _progress.txt pipeline.
+	// Area-name predicates (area names look like "_PalcA_", "_TownA_", "_WestA_", ...):
+	sweep_pred_dungeon    = function(_a) { return area_is_dungeon(_a); };                                          // palaces  (_PalcA_.._PalcH_)
+	sweep_pred_town       = function(_a) { return area_is_town(_a); };                                             // towns    (_TownA_/_TownB_)
+	sweep_pred_cave       = function(_a) { return !area_is_ow(_a) && !area_is_dungeon(_a) && !area_is_town(_a); }; // caves/connectors
+	sweep_pred_cave_west  = function(_a) { return sweep_pred_cave(_a) && string_pos(Area_WestA, _a) == 1; };
+	sweep_pred_cave_east  = function(_a) { return sweep_pred_cave(_a) && string_pos(Area_EastA, _a) == 1; };
+	sweep_pred_cave_dthmt = function(_a) { return sweep_pred_cave(_a) && string_pos(Area_DthMt, _a) == 1; };
+	sweep_pred_cave_mazis = function(_a) { return sweep_pred_cave(_a) && string_pos(Area_MazIs, _a) == 1; };
+
+	// Copy of sweep_build_list() with a per-area predicate guard (skip rejected areas).
+	sweep_build_list_filtered = function(_pred) {
+	    ds_list_clear(sweep_list);
+	    var _ai, _ri, _rm_count, _rm_id, _area, _rm_name, _exit;
+	    var _AREA_N = ds_list_size(g.dl_AREA_NAME);
+	    for(_ai=0; _ai<_AREA_N; _ai++) {
+	        _area = g.dl_AREA_NAME[|_ai];
+	        if (!_pred(_area)) { continue; } // skip areas this category's predicate rejects
+	        _rm_count = val(g.dm_rm[?_area+STR_Rm+STR_Count]);
+	        for(_ri=1; _ri<=_rm_count; _ri++) {
+	            _rm_id = val(g.dm_rm[?_area+STR_Rm+hex_str(_ri)+STR_ID], -1);
+	            if (_rm_id < 0) continue;
+	            _rm_name = _area + hex_str(_rm_id);
+	            Dev_RmWarper_update_1a(_rm_name); // fills dl_Rm_ExitIDs
+	            if (ds_list_size(dl_Rm_ExitIDs) <= 0) continue;
+	            _exit = dl_Rm_ExitIDs[|0];
+	            ds_list_add(sweep_list, _rm_name + hex_str(_exit));
+	        }
+	    }
+	    return ds_list_size(sweep_list);
+	}
+
+	// ============================================================
 	// OVERWORLD PAGE SWEEP (added 2026-06-21).
 	//   The overworld is one continuous 256x256-tile grid (room_type=="C"),
 	//   unlike the discrete named scenes above (room_type=="A"). There's no
@@ -328,6 +365,106 @@ function Dev_RmWarper_Create() {
 	    sweep_warp_to(sweep_list[|0]);
 	}
 
+	// Single-category RM sweep entry. Mirrors sweep_start() but builds a FILTERED scene list
+	// (only the areas _pred accepts). Same RM warp/settle/check pipeline; same crashes.txt /
+	// scene_report.txt / _progress.txt output. Empty category -> sweep_stop() (finalizes a
+	// single-category run with _DONE.txt + game_end so a headless Igor run still terminates).
+	sweep_start_category = function(_pred) {
+	    // Force ALL dev overlays OFF (same as sweep_start).
+	    show_debug_overlay(false);
+	    g.can_show_debug_overlay  = false;
+	    g.can_draw_hb             = false;
+	    g.can_draw_Exit_hb        = false;
+	    g.can_draw_hp             = false;
+	    g.can_draw_cs             = false;
+	    g.can_show_t_solid        = false;
+	    g.canDrawSprOutline       = 0;
+	    g.canDraw_ogXY            = false;
+	    g.can_draw_og_cam_outline = false;
+	    g.dev_invState            = 0;
+
+	    sweep_mode = "RM";
+	    global.dev_ow_sweep_active = false;
+	    var _n = sweep_build_list_filtered(_pred);
+	    show_debug_message("[SWEEP] start (category). "+string(_n)+" scenes. saving under: "+working_directory+SWEEP_DIR);
+	    if (_n <= 0) { sweep_stop(); return; } // nothing matched -> finalize (single run quits)
+	    sweep_idx      = 0;
+	    sweep_watchdog = 0;
+	    sweep_active   = true;
+	    sweep_substate = SWEEP_WAITROOM;
+	    sweep_warp_to(sweep_list[|0]);
+	}
+
+	// ============================================================
+	// OTHER (system-room) SWEEP (added 2026-06-27, Phase 1). Iterates the 8 real rmB_*
+	// system rooms via room_goto (NOT data scenes / exits). Same settle->check->advance->
+	// watchdog cycle as RM. A save IS loaded by the time this starts (the g_Step autopilot
+	// reaches room_type "A" first), so Death/NextLife/GameOver/ContinueSave have a live f.
+	// The global exception handler (g_Create) catches+logs any bad room; the stall watchdog
+	// force-advances a soft-locked room. Logs [SWEEP-OTHER] per room.
+	// ------------------------------------------------------------
+	sweep_build_list_other = function() {
+	    ds_list_clear(sweep_list);
+	    var _rooms = ["rmB_Title","rmB_FileSelect","rmB_Start","rmB_Start_Wide","rmB_ContinueSave","rmB_Death","rmB_GameOver","rmB_NextLife"];
+	    var _i, _ri;
+	    for (_i=0; _i<array_length(_rooms); _i++) {
+	        _ri = asset_get_index(_rooms[_i]);
+	        if (_ri >= 0 && room_exists(_ri)) ds_list_add(sweep_list, _rooms[_i]);
+	        else show_debug_message("[SWEEP-OTHER] skip (no such room asset): "+_rooms[_i]);
+	    }
+	    return ds_list_size(sweep_list);
+	}
+
+	// Warp into the rmB_* room at sweep_list[|_idx] (async room change, like RM's warp).
+	sweep_warp_to_other = function(_idx) {
+	    var _name = sweep_list[|_idx];
+	    show_debug_message("[SWEEP-OTHER] room -> "+_name+"  ("+string(_idx+1)+"/"+string(ds_list_size(sweep_list))+")");
+	    var _f = file_text_open_append(SWEEP_DIR+"_progress.txt");
+	    file_text_write_string(_f, "try OTHER_"+_name); file_text_writeln(_f); file_text_close(_f);
+	    var _ri = asset_get_index(_name);
+	    if (_ri >= 0 && room_exists(_ri)) room_goto(_ri);
+	    else show_debug_message("[SWEEP-OTHER] cannot enter (bad room): "+_name); // watchdog force-advances
+	}
+
+	// Per-room log for the OTHER sweep (menus have no spawn data, so we DON'T reuse
+	// sweep_scene_check; just record what we actually landed in).
+	sweep_other_check = function() {
+	    var _rn  = room_get_name(room);
+	    var _hud = instance_number(HUD);
+	    var _go  = instance_number(GameObject);
+	    var _line = "OTHER " + string(sweep_list[|sweep_idx]) + "  landed=" + _rn
+	              + "  hud=" + string(_hud) + "  gob=" + string(_go);
+	    show_debug_message("[SWEEP-OTHER] " + _line);
+	    var _f = file_text_open_append(SWEEP_DIR + "scene_report.txt");
+	    file_text_write_string(_f, _line); file_text_writeln(_f); file_text_close(_f);
+	}
+
+	sweep_start_other = function() {
+	    // Force ALL dev overlays OFF (same as sweep_start).
+	    show_debug_overlay(false);
+	    g.can_show_debug_overlay  = false;
+	    g.can_draw_hb             = false;
+	    g.can_draw_Exit_hb        = false;
+	    g.can_draw_hp             = false;
+	    g.can_draw_cs             = false;
+	    g.can_show_t_solid        = false;
+	    g.canDrawSprOutline       = 0;
+	    g.canDraw_ogXY            = false;
+	    g.can_draw_og_cam_outline = false;
+	    g.dev_invState            = 0;
+
+	    sweep_mode = "OTHER";
+	    global.dev_ow_sweep_active = false;
+	    var _n = sweep_build_list_other();
+	    show_debug_message("[SWEEP-OTHER] start. "+string(_n)+" rooms. saving under: "+working_directory+SWEEP_DIR);
+	    if (_n <= 0) { sweep_stop(); return; }
+	    sweep_idx      = 0;
+	    sweep_watchdog = 0;
+	    sweep_active   = true;
+	    sweep_substate = SWEEP_WAITROOM;
+	    sweep_warp_to_other(0);
+	}
+
 	// Advance to the next scene/page (or finish). _tag != "" logs the current spot to crashes.txt first.
 	sweep_advance = function(_tag) {
 	    if (_tag != "") {
@@ -342,6 +479,9 @@ function Dev_RmWarper_Create() {
 	        sweep_settle   = SWEEP_SETTLE_FRAMES;
 	        sweep_substate = SWEEP_SETTLE;
 	        sweep_warp_to_ow(sweep_list[|sweep_idx]);
+	    } else if (sweep_mode == "OTHER") {
+	        sweep_substate = SWEEP_WAITROOM;
+	        sweep_warp_to_other(sweep_idx);
 	    } else {
 	        sweep_substate = SWEEP_WAITROOM;
 	        sweep_warp_to(sweep_list[|sweep_idx]);
@@ -406,7 +546,18 @@ function Dev_RmWarper_Create() {
 	    global.dev_ow_sweep_active = false;
 	    sweep_substate = 0;
 	    show_debug_message("[SWEEP] stopped ("+sweep_mode+") at "+string(sweep_idx)+"/"+string(ds_list_size(sweep_list)));
-	    // Unattended run: chain RM (towns/dungeons) -> OW (overworld), then mark done + quit.
+	    // MENU-TRIGGERED run (started live from the AUTOMATED TEST options submenu): do NOT
+	    // game_end() -- the player is sitting in front of the game. Stop cleanly, clear the
+	    // flag, and hand control back to normal play. Checked FIRST so a menu run never quits
+	    // even if a stale headless flag is somehow set. (The headless flag paths below keep
+	    // game_end() so a non-interactive Igor run still terminates.)
+	    if (variable_global_exists("sweep_from_menu") && global.sweep_from_menu) {
+	        show_debug_message("[SWEEP] menu run complete");
+	        global.sweep_from_menu = false;
+	        return;
+	    }
+	    // FULL unattended run (autosweep): finishing RM (towns/dungeons) chains -> OW
+	    // (overworld); finishing OW marks done + quits.
 	    if (variable_global_exists("autosweep") && global.autosweep) {
 	        if (sweep_mode == "RM") {
 	            sweep_start_ow();
@@ -415,6 +566,15 @@ function Dev_RmWarper_Create() {
 	        var _f = file_text_open_append(SWEEP_DIR+"_DONE.txt");
 	        file_text_write_string(_f, "DONE OW "+string(sweep_idx)+"/"+string(ds_list_size(sweep_list))); file_text_writeln(_f); file_text_close(_f);
 	        game_end();
+	        return;
+	    }
+	    // SINGLE-CATEGORY run: the one category IS the whole run -> NO chain. Mark done + quit
+	    // directly so a headless Igor run terminates (mirrors autosweep's OW-finish branch).
+	    if (variable_global_exists("sweep_single") && global.sweep_single) {
+	        var _f2 = file_text_open_append(SWEEP_DIR+"_DONE.txt");
+	        file_text_write_string(_f2, "DONE "+sweep_mode+" "+string(sweep_idx)+"/"+string(ds_list_size(sweep_list))); file_text_writeln(_f2); file_text_close(_f2);
+	        game_end();
+	        return;
 	    }
 	}
 

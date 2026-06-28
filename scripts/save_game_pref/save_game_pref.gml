@@ -34,6 +34,7 @@ function save_game_pref() {
 	_dm_save_data[?STR_Halloween+"01"]                      = global.Halloween1_enabled;
 	_dm_save_data[?"Christmas01"]                           = global.Christmas_enabled;
 	_dm_save_data[?"LowHPBeepDisabled"]                     = global.LowHPBeep_disabled;
+	_dm_save_data[?"StartWithReflect"]                      = global.start_with_reflect;
 
 	_dm_save_data[?STR_Overworld+STR_Mark+STR_Acquired]     = global.MarkItemLocations_state;
 	_dm_save_data[?STR_Rando+STR_Palette]                   = g.RandoPalette_state;
@@ -62,6 +63,7 @@ function save_game_pref() {
 	// Graphic Effects ----------------------------------------------------
 	_dm_save_data[?"_Retro_Shaders_Enabled"]       = global.RetroShaders_enabled;
 	_dm_save_data[?"_Retro_Shaders_Surface_Scale"] = global.RetroShaders_surface_scale;
+	_dm_save_data[?"_Display_Mode"]                = global.DisplayMode;
 
 	ds_map_clear(_dm);
 	with(g.surf.GEE)

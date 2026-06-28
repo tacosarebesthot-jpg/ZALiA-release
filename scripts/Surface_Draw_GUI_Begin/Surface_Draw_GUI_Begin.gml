@@ -2,6 +2,65 @@
 function Surface_Draw_GUI_Begin() {
 
 
+	// -------------------------------------------------------------------------------------
+	// SHADER PRE-WARM (one-time). GameMaker links/compiles a shader lazily on its FIRST
+	// shader_set in a draw context, so the first time the player picks Sharp/CRT/Scanlines
+	// (Options -> DISPLAY) the present stalls for a frame. We are already in a draw context
+	// here (Draw GUI Begin runs every frame), so on the very first frame we touch each of the
+	// three DisplayMode present shaders once -- set it, push its REAL uniform(s) to a harmless
+	// value (so GameMaker emits no "uniform not set" warnings), draw a 1x1 throwaway far
+	// off-screen, then shader_reset() -- moving that one-time cost to boot. Fully invisible
+	// (1px at negative coords), each shader guarded by shader_is_compiled (skips a missing
+	// one), and the flag is set BEFORE the warm work so it can only ever run once.
+	// Revert: delete this block + the global.shaders_prewarmed init in g_Create.
+	if (!variable_global_exists("shaders_prewarmed") || !global.shaders_prewarmed)
+	{
+		global.shaders_prewarmed = true; // arm-once first: even an early-out below never re-runs this
+
+		if (surface_exists(application_surface))
+		{
+			var _pw_aw = surface_get_width( application_surface);
+			var _pw_ah = surface_get_height(application_surface);
+			if (_pw_aw < 1) _pw_aw = BASE_GAME_RESOLUTION_W;
+			if (_pw_ah < 1) _pw_ah = BASE_GAME_RESOLUTION_H;
+
+			// throwaway draw: 1x1, far off the top-left of any buffer -> never visible.
+			var _pw_x = -64;
+			var _pw_y = -64;
+
+			// SHARP -> u_texSize (vec2), matches apply_display_present()'s DISPLAY_SHARP set.
+			if (shader_is_compiled(shd_SharpBilinear))
+			{
+				shader_set(shd_SharpBilinear);
+				shader_set_uniform_f(shader_get_uniform(shd_SharpBilinear,"u_texSize"), _pw_aw, _pw_ah);
+				draw_surface_stretched(application_surface, _pw_x,_pw_y, 1,1);
+				shader_reset();
+			}
+
+			// CRT -> u_resY (float), matches DISPLAY_CRT.
+			if (shader_is_compiled(shd_CRT))
+			{
+				shader_set(shd_CRT);
+				shader_set_uniform_f(shader_get_uniform(shd_CRT,"u_resY"), _pw_ah);
+				draw_surface_stretched(application_surface, _pw_x,_pw_y, 1,1);
+				shader_reset();
+			}
+
+			// SCAN -> u_texture_w/h + u_line_brightness/height (floats), matches DISPLAY_SCAN.
+			if (shader_is_compiled(shd_ScanLines01))
+			{
+				shader_set(shd_ScanLines01);
+				shader_set_uniform_f(shader_get_uniform(shd_ScanLines01,"u_texture_w"),       _pw_aw);
+				shader_set_uniform_f(shader_get_uniform(shd_ScanLines01,"u_texture_h"),       _pw_ah);
+				shader_set_uniform_f(shader_get_uniform(shd_ScanLines01,"u_line_brightness"), 0.70);
+				shader_set_uniform_f(shader_get_uniform(shd_ScanLines01,"u_line_height"),     1.0);
+				draw_surface_stretched(application_surface, _pw_x,_pw_y, 1,1);
+				shader_reset();
+			}
+		}
+	}
+
+
 	CamZoom_test1();
 
 
@@ -114,9 +173,14 @@ function Surface_Draw_GUI_Begin() {
     
     
     
+	    // FILL-WINDOW: keep this draw native (0,0). This Draw-event target IS the 480x270
+	    // application_surface, so it must stay 1:1 (a stretched draw here would crop/zoom into
+	    // the small surface, not fill). The fill-the-window stretch is GameMaker's final
+	    // present, set to Full-scale via option_windows_scale:1 in
+	    // options/windows/options_windows.yy (revert: scale->0).
 	    draw_surface(application_surface, 0,0);
-    
-    
+
+
 	    if (RetroShaders_Blur_can_draw)
 	    {   // *** Blur is drawn transparent over application_surface because it will not blend properly when the draw target is to a surface
 	        draw_surface_ext(_srf_blur, 0,0, 1,1, 0,c_white, GEE.dg_Blur[#GEE.Blur_EDIT,$5]);
@@ -128,7 +192,23 @@ function Surface_Draw_GUI_Begin() {
 	}
 	else if(!global.application_surface_draw_enable_state)
 	{
-	    draw_surface(application_surface, 0,0);
+	    // Manual present (RetroShaders off, GameMaker auto-present disabled).
+	    // DisplayMode takeover (SHARP/PIXEL/FILL/CRT/SCAN) owns the present here, but
+	    // only while the application_surface is still native res. SMOOTH never gets here
+	    // (it keeps the auto-present enabled), and CamZoom / any resized-surface case
+	    // falls through to the original native (0,0) draw below.
+	    if (global.DisplayMode != DISPLAY_SMOOTH
+	    &&  application_surface_w == BASE_GAME_RESOLUTION_W
+	    &&  application_surface_h == BASE_GAME_RESOLUTION_H )
+	    {
+	        apply_display_present();
+	    }
+	    else
+	    {
+	        // FILL-WINDOW: native (0,0) on purpose -- see note above; GameMaker's Full-scale
+	        // present (option_windows_scale:1) stretches the app_surface to fill the window.
+	        draw_surface(application_surface, 0,0);
+	    }
 	}
 
 	//if (keyboard_check_pressed(vk_f7)) sdm("Surface_Draw_GUI_Begin()");

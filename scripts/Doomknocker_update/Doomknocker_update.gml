@@ -1,6 +1,7 @@
 /// @description  Doomknocker_update()
 function Doomknocker_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	// B0AD
 

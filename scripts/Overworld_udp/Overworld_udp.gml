@@ -37,6 +37,27 @@ function Overworld_udp() {
 	PC_draw_yoff      = PC_draw_YOFF;
 	PC_draw_x_base    = ow_pc_xy(0); // pc view x
 	PC_draw_y_base    = ow_pc_xy(1); // pc view y
+
+	// WALKTUNE HOOK 1 (revert: delete this block) -- SUB-TILE SMOOTHING.
+	// Faithful base snaps Link's draw to the tile-aligned view center (ow_pc_xy).
+	// When global.ow_smooth_pct>0, nudge Link's draw-base by the SAME sub-tile
+	// progress the engine already computes for pc_ow_x (see Overworld_Step.gml:
+	// "_val = dest_dist & (T_SIZE-1); _sub = T_SIZE - _val"), scaled by pct/100.
+	// NO-OP at default: global.ow_smooth_pct==0 -> whole block skipped -> faithful.
+	// Also a no-op while NOT moving: (dest_dist & (T_SIZE-1)) == 0.
+	if (variable_global_exists("ow_smooth_pct") && global.ow_smooth_pct > 0)
+	{
+	    var _wt_rem = dest_dist & (T_SIZE-1); // sub-tile remainder; 0 when tile-aligned / idle
+	    if (_wt_rem) // only while mid-step
+	    {
+	        var _wt_sub = T_SIZE - _wt_rem;            // px progressed into the current tile (1..T_SIZE-1)
+	        var _wt_dx  = bit_dir(pc_dir&$3);          // +1 right / -1 left / 0
+	        var _wt_dy  = bit_dir(pc_dir&$C);          // +1 down  / -1 up   / 0
+	        PC_draw_x_base += round(_wt_sub * _wt_dx * global.ow_smooth_pct / 100);
+	        PC_draw_y_base += round(_wt_sub * _wt_dy * global.ow_smooth_pct / 100);
+	    }
+	}
+
 	PC_draw_x         = PC_draw_x_base + PC_draw_xoff;
 	PC_draw_y         = PC_draw_y_base + PC_draw_yoff;
 

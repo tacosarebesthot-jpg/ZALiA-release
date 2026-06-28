@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"tracker_state_write",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"tracker_state_write",
+  "parent":{
+    "name":"TrackerWindow",
+    "path":"folders/Scripts/TrackerWindow.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

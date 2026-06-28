@@ -1,5 +1,6 @@
 /// @description  Fokkeru_update()
 function Fokkeru_update() {
+	if (stun_timer) { GOB_update_2(); exit; }
 
 
 	var _RAND = rand();

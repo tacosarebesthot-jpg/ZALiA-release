@@ -81,6 +81,15 @@ function Overworld_Step() {
 	                move_distance = 0;
                 
 	                _tsrc  = dg_tsrc[#_pc_clm,_pc_row];
+	                // MARSH-RANDO-FIX: dg_tsrc holds the ORIGINAL (pre-rando) tsrc; with OW
+	                // biome rando active the VISIBLE tile is remapped (Overworld_refresh_tiles
+	                // does the same remap+mask). Apply it here so the swamp slow keys off the
+	                // VISIBLE tile, following randomized swamp tiles instead of pre-rando ones.
+	                if (RandoTSRC_active)
+	                {
+	                    _val1 = dm_Rando_TSRC[?hex_str(_tsrc)];
+	                    if(!is_undefined(_val1)) _tsrc = (_val1>>2)<<2;
+	                }
 	                _tsrc1 = _tsrc&$FF;
                 
 	                if (_tsrc1==TSRC_SWAM01 
@@ -91,12 +100,6 @@ function Overworld_Step() {
 	                    move_spd   = MOVE_SPD_2;
 	                    move_speed = move_SPEED2;
                     
-	                    if (RandoTSRC_active)
-	                    {
-	                        move_spd   = MOVE_SPD_1;
-	                        move_speed = move_SPEED1;
-	                        //move_speed = move_SPEED3;
-	                    }
 	                }
 	                else
 	                {
@@ -880,7 +883,7 @@ function Overworld_Step() {
 	    }
     
 	    // if lined up with the grid this frame after moving, relative to T_SIZE
-	    if!(dest_dist&_OFF) Overworld_refresh_tiles(_ow_x,_ow_y);
+	    if!(dest_dist&_OFF) Overworld_refresh_edge(_ow_x,_ow_y, move_x,move_y);
 	}
 
 

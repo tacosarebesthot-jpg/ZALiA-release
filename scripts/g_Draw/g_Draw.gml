@@ -148,8 +148,8 @@ function g_Draw() {
 
 	//DungeonLayoutRando_testing();
 
-
-
+	// DEV DEBUG HUD
+	Dev_DebugHarness_Draw();
 
 
 

@@ -1,6 +1,6 @@
 /// @description  Daira_update()
 function Daira_update() {
-
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	// Daira ver1(Orange)
 	// Daira ver2(Red)

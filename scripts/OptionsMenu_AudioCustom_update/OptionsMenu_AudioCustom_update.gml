@@ -150,8 +150,13 @@ function OptionsMenu_AudioCustom_update() {
 	        with(Audio)
 	        {
 	            audio_group_stop_all(audiogroup_mus);
-	            var _MUSIC = val(dm[?rm_music_theme+audio_set], STR_Default);
-	            if (_MUSIC) aud_play_sound(_MUSIC, PRIORITY_TOP, true, -1, rm_music_theme);
+	            // RandomCustom-safe resolve. This menu is ONLY enterable with audio_set==dk_RandomCustom,
+	            // for which dm[?rm_music_theme+audio_set] is ALWAYS undefined -> the old code fell back to
+	            // the STRING STR_Default ("_Default") and passed it to aud_play_sound -> audio_get_name(<string>)
+	            // crash on exit. get_audio_theme_track() is the RandomCustom-aware resolver used elsewhere and
+	            // returns a real sound id (or 0 when no track / all tracks toggled off).
+	            var _MUSIC = get_audio_theme_track(rm_music_theme);
+	            if (is_real(_MUSIC) && _MUSIC) aud_play_sound(_MUSIC, PRIORITY_TOP, true, -1, rm_music_theme);
 	            can_play_mus_rm_body = true;
 	            can_play_boss_music  = other.can_play_boss_music_at_open_RandomCustom;
 	        }

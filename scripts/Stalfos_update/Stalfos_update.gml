@@ -1,5 +1,6 @@
 /// @description  Stalfos_update()
 function Stalfos_update() {
+	if (stun_timer) { GOB_update_2(); exit; }
 
 
 

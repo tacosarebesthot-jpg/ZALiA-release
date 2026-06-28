@@ -55,6 +55,7 @@ function GraphicsEffectsEditor_update_Main() {
 	        global.application_surface_draw_enable_state = !global.RetroShaders_enabled;
 	        //global.application_surface_draw_enable_state = false; // for testing cam zoom
 	        application_surface_draw_enable(global.application_surface_draw_enable_state);
+	        apply_display_mode(); // re-route present: RetroShaders takes priority, else resume DisplayMode takeover + re-sync GUI size
         
 	        save_game_pref();
 	        aud_play_sound(SOUND_CONFIRM1, -1,-1, SOUND_VOLUME);

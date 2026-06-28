@@ -616,7 +616,7 @@ function PauseMenu_udp() {
 	{
 	    _y = Icons_y + (Icons_PAD*_i);
 	    dg_icons1[#_i,$5] = false; // $5: can draw
-	    if (_y+sprite_get_height(dg_icons1[#_i,$1])<Window_yb)
+	    if (_y+sprite_get_height(dg_icons1[#_i,$0])<Window_yb) // $0: sprite (was $1=text -> GMS2 sprite_get_height(string) crash on pause-menu open)
 	    {
 	        Icons_can_draw = true;
 	        dg_icons1[#_i,$5] = true; // $5: can draw

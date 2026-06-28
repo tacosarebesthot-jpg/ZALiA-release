@@ -2,7 +2,20 @@
 function PC_draw() {
 
 
-	if (can_draw_self)
+	// WALKTUNE HOOK 2 (revert: delete this _wt_ow_suppress var + remove it from the
+	// "if (can_draw_self ...)" guard below) -- DUPLICATE-LINK GATE.
+	// On the overworld (g.room_type=="C") the persistent Lonk object draws Link here
+	// EVERY frame, on top of the manual Overworld_Draw Link. At faithful default
+	// (ow_smooth_pct==0) the manual Link is NOT offset, so the two overlap exactly and
+	// look like one (correct -- leave them). But when smoothing>0 the manual Link is
+	// nudged sub-tile while this persistent one stays snapped, so it would show as a
+	// SECOND, snapped Link. Suppress THIS body-draw only in that case.
+	// NO-OP at default: ow_smooth_pct==0 -> _wt_ow_suppress is false -> draws normally.
+	var _wt_ow_suppress = (g.room_type == "C"
+	                    && variable_global_exists("ow_smooth_pct")
+	                    && global.ow_smooth_pct > 0);
+
+	if (can_draw_self && !_wt_ow_suppress)
 	{
 	    if (RescueFairy_sprite)
 	    {

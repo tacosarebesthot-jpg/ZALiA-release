@@ -109,7 +109,7 @@ function update_view_1() {
 	            var _XL = clamp(viewXL()+_diff, cam_xl_min(),cam_xl_max());
 	            set_camera_xy(_XL, viewYT());
             
-	            if (_viewXL!=viewXL()) view_dir_x = sign(viewXL()-_viewXL);
+	            if (_viewXL!=viewXL()) view_dir_x = (viewXL()>_viewXL); // right=1, left=0 (0/1 boolean for qual_spawn_3a / Boss_update_start)
 	        }
         
         
@@ -262,7 +262,7 @@ function update_view_1() {
 	            var _YT = clamp(viewYT()+_diff, cam_yt_min(),cam_yt_max());
 	            set_camera_xy(viewXL(), _YT);
             
-	            if (_viewYT!=viewYT()) view_dir_y = sign(viewYT()-_viewYT);
+	            if (_viewYT!=viewYT()) view_dir_y = (viewYT()>_viewYT); // down=1, up=0 (0/1 boolean for qual_spawn_3a / Boss_update_start)
 	        }
         
         

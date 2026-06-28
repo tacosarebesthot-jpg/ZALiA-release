@@ -32,6 +32,8 @@ function PC_update_hold_item() {
 
 	HoldItem_timer--;
 
+	if(!HoldItem_timer) iframes_timer = 4; // MOD: grace i-frames on hold-item release so an enemy still overlapping can't land a free hit on resume. Same value PC_take_damage sets after a real hit.
+
 
 
 	if(!is_cucco)

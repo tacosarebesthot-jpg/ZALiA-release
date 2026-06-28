@@ -2,7 +2,9 @@
 function goto_title_rm() {
 
 
-	// There's also a bunch of TitleScreen property resets 
+	dev_bugprobe_quit_sink_log("goto_title_rm");
+
+	// There's also a bunch of TitleScreen property resets
 	// in g_Room_Start(). Not sure if they should go here.
 
 	if (g.MaskWideView_RESPAWN)

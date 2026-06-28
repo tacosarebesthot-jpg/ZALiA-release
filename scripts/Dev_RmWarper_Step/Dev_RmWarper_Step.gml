@@ -26,10 +26,10 @@ function Dev_RmWarper_Step() {
 	}
 
 	if (DEV && g.room_type == "A") { // dev-only QA hotkeys; compiled out of final builds
-	    if (keyboard_check_pressed(vk_f9))  { if (sweep_active) sweep_stop(); else sweep_start(); }
-	    if (keyboard_check_pressed(vk_f8))  sweep_stop();
-	    if (keyboard_check_pressed(vk_f10)) sweep_flag();
-	    if (keyboard_check_pressed(vk_f7))  SWEEP_MANUAL = !SWEEP_MANUAL; // toggle manual-step / auto
+	    if (keyboard_check_pressed(ord("X")))  { if (sweep_active) sweep_stop(); else sweep_start(); }
+	    if (keyboard_check_pressed(ord("Y")))  sweep_stop();
+	    if (keyboard_check_pressed(ord("C"))) sweep_flag();
+	    if (keyboard_check_pressed(ord("B")))  SWEEP_MANUAL = !SWEEP_MANUAL; // toggle manual-step / auto
 	    if (sweep_active && sweep_substate == SWEEP_HOLD) {
 	        if (keyboard_check_pressed(vk_right)) sweep_advance(""); // RIGHT = next scene
 	        if (keyboard_check_pressed(vk_left))  sweep_back();      // LEFT  = prev scene
@@ -41,8 +41,8 @@ function Dev_RmWarper_Step() {
 	    }
 	}
 	if (DEV && g.room_type == "C") { // overworld sweep hotkeys (manual entry; no room change needed)
-	    if (keyboard_check_pressed(vk_f9)) { if (sweep_active) sweep_stop(); else sweep_start_ow_manual(); }
-	    if (keyboard_check_pressed(vk_f8)) sweep_stop();
+	    if (keyboard_check_pressed(ord("X"))) { if (sweep_active) sweep_stop(); else sweep_start_ow_manual(); }
+	    if (keyboard_check_pressed(ord("Y"))) sweep_stop();
 	}
 	if (sweep_flag_timer > 0) sweep_flag_timer--;
 	if (sweep_active) {
@@ -56,6 +56,13 @@ function Dev_RmWarper_Step() {
 	                if (--sweep_settle <= 0) {
 	                    if (SWEEP_CAPTURE) screen_save(SWEEP_DIR + "_OW_" + hex_str(sweep_list[|sweep_idx]) + ".png");
 	                    sweep_advance(""); // auto: next page (OW mode has no manual-hold step)
+	                }
+	            } else if (sweep_mode == "OTHER") {
+	                // System rmB_* rooms (menus): no PC to follow; just settle, log, shoot, advance.
+	                if (--sweep_settle <= 0) {
+	                    sweep_other_check(); // [SWEEP-OTHER] line -> scene_report.txt
+	                    if (SWEEP_CAPTURE) screen_save(SWEEP_DIR + string(sweep_list[|sweep_idx]) + ".png");
+	                    sweep_advance(""); // auto: next room (OTHER mode has no manual-hold step)
 	                }
 	            } else {
 	                if (instance_exists(global.pc)) set_view_xy_on_pc(); // snap camera onto the scene

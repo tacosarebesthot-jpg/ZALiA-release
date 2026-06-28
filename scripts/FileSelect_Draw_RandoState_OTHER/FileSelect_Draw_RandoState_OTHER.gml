@@ -73,6 +73,16 @@ function FileSelect_Draw_RandoState_OTHER() {
 	            break;}
             
 	            // ----------------------------------------------------
+	            case RandoOTHER_MAIN_START_REFLECT:{
+	            draw_text_(_x,_y, _text, _FONT_SPRITE,_pi2);
+	            if (dg_RandoOTHER_Options[#_i,2]) _text = Text_ON;
+	            else                              _text = Text_OFF;
+	            _x  = _xr-(string_length(_text)*_char_w);
+	            _x -= _x mod _char_w;
+	            draw_text_(_x,_y, _text, _FONT_SPRITE,_pi3);
+	            break;}
+
+	            // ----------------------------------------------------
 	            case RandoOTHER_MAIN_cursor_QUEST:{
 	            draw_text_(_x,_y, _text, _FONT_SPRITE, _pi2);
 	            _text=string(dg_RandoOTHER_Options[#_i,2]);

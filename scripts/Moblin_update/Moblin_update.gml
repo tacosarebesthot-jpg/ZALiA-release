@@ -1,5 +1,6 @@
 /// @description  Moblin_update()
 function Moblin_update() {
+	if (stun_timer) { GOB_update_2(); exit; }
 
 
 	//  Moblin v1 orange $14

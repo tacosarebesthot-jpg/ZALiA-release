@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"playlog_write",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"playlog_write",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

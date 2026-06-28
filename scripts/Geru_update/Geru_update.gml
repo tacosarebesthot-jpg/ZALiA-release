@@ -6,6 +6,8 @@ function Geru_update() {
 	// ver 3. Geru blue     weapon: Mace1 (Projectile)
 
 
+	if (stun_timer) { GOB_update_2(); exit; }
+
 	if (ver==3) attack_dist = $40; // $1C Geru blue
 	else        attack_dist = $18; // Geru red & orange
 

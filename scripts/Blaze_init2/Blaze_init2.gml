@@ -30,7 +30,16 @@ function Blaze_init2() {
 	    ANIM_SPEED = ANIM_SPEED;
     
 	    abilities |= ABL_JUMP;
-    
+	    // FIX (2026-06-27): a hopping 1-tall flame fills a 2-tall passage over its jump cycle = unavoidable hit.
+	    // If vertical clearance here is too tight (2-tall corridor or less), demote to a stationary flame.
+	    var _ya      = (spawn_yt >> 3) << 3;
+	    var _floor_y = get_ground_y(x, spawn_yt,  1, _ya + PAGE_H, TID_SOLID1 | TID_ONEWY1); // floor below
+	    var _ceil_y  = get_ground_y(x, spawn_yt, -1, _ya - PAGE_H, TID_SOLID1);              // ceiling above
+	    if ((_floor_y - _ceil_y) < $18) // < 3 tiles (24px) of open space
+	    {
+	        abilities &= ~ABL_JUMP; // stationary flame: passable / jump-over-able
+	    }
+
 	    SPR_KID  = spr_Flame_Small_1a;
 	    DUR_KID  = $40;
 	    KID_CUE1 = (DUR_KID>>3) * 3;

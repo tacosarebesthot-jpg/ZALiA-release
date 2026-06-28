@@ -36,10 +36,11 @@ function update_QuitAppMenu() {
                 
 	                if (_qual)
 	                {
-	                    if (room==rmB_Title 
+	                    if (room==rmB_Title
 	                    ||  room==rmB_FileSelect )
 	                    {
 	                        //sdm("update_QuitAppMenu() -> case sub_state_IDLE_CLOSED -> game_end()");
+	                        dev_bugprobe_quit_sink_log("update_QuitAppMenu_IDLE_CLOSED_game_end");
 	                        game_end(); // Quit app
 	                        return true;
 	                    }
@@ -110,10 +111,11 @@ function update_QuitAppMenu() {
 	            if (_CONFIRM 
 	            &&  cursor_option )
 	            {
-	                if (room==rmB_Title 
+	                if (room==rmB_Title
 	                ||  room==rmB_FileSelect )
 	                {
 	                    //sdm("update_QuitAppMenu() -> case sub_state_OPEN1 -> game_end()");
+	                    dev_bugprobe_quit_sink_log("update_QuitAppMenu_OPEN1_game_end");
 	                    game_end(); // Quit app
 	                }
 	                else
@@ -144,14 +146,23 @@ function update_QuitAppMenu() {
 	                    {
 	                        f.xp = round(f.xp*g.mod_Gameover_XP_PENALTY);
 	                        f.xp = clamp(f.xp, 0,XP_MAX);
+
+	                        // PENALTY ON: a forced ("quick") game over costs all remaining
+	                        // lives and counts each as a death. The HUD + companion stream
+	                        // tracker read f.death_count / global.pc_lives, so this is what
+	                        // makes the counters climb. When the GAME OVER WARPING PENALTY
+	                        // option is OFF (the "don't punish quick game over" state,
+	                        // dk_ForceQuitPenalty==0) we SKIP this -> the quick reset is a
+	                        // free warp: no death counted, no life lost. A NORMAL death
+	                        // (DeathScreen_Step, via rmB_Death) is unaffected.
+	                        f.death_count += global.pc_lives;
+	                        global.pc_lives = 0;
 	                    }
-                    
-	                    f.death_count += global.pc_lives;
-	                    global.pc_lives = 0;
                     
 	                    //sdm("update_QuitAppMenu() -> case sub_state_IDLE_CLOSED -> game_end()");
 	                    Audio.mus_rm_body = 0; // Need to do this so ContinueScreen music will play
                     
+	                    dev_bugprobe_quit_sink_log("update_QuitAppMenu_OPEN1_will_go_to_continuesave");
 	                    will_go_to_continuesave = true;
 	                    // Seems like the combination of get_saved_value() and room_goto_() can crash the app so I moved room_goto_(rmB_ContinueSave) to sub_state_CLOSING3
 	                    //room_goto_(rmB_ContinueSave);

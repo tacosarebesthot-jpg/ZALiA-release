@@ -1,6 +1,7 @@
 /// @description  Atta_update()
 function Atta_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	var                          _DUR = $30;
 	if ( counter == DUR_COOLDOWN+_DUR)

@@ -1,5 +1,6 @@
 /// @description  Fenser_update()
 function Fenser_update() {
+	if (stun_timer) { GOB_update_2(); exit; }
 
 
 	// BCEF: JSR EF11

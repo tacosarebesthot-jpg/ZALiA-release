@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Dev_DebugHarness_Log",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Dev_DebugHarness_Log",
+  "parent":{
+    "name":"Dev_RmWarping",
+    "path":"folders/Scripts/dev/Dev_RmWarping.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

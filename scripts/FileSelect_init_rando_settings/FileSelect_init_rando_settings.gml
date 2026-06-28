@@ -76,6 +76,7 @@ function FileSelect_init_rando_settings() {
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_WARP_PENALTY,  2] = 1;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_PALETTE,       2] = 0;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_DUNGEON_TS,    2] = 0;
+	dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT, 2] = global.start_with_reflect; // persistent (loaded from prefs)
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_cursor_QUEST,  2] = 1;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_cursor_ATTACK, 2] = 1;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_cursor_MAGIC,  2] = 1;

@@ -95,9 +95,16 @@ function HUD_Draw() {
 	    draw_text_(Keys_xl+8,Keys_yt, Keys_text, -1,-1);
 	}
 	// Deaths ---------------------------
-	if (Deaths_can_draw)
+	// On-screen HUD death-counter ("D:N"): default OFF, toggle via Dev Tools (DEATH
+	// COUNTER). This HUD draw is mispositioned; the real death readout is moving to the
+	// 2nd tracker window, so it's gated behind global.dbg_death_counter_show (init in
+	// g_Create, default false). Revert: drop this gate to restore the always-on draw.
+	if (global.dbg_death_counter_show)
 	{
-	    draw_text_(Deaths_xl,Deaths_yt, Deaths_text, -1,-1);
+	    if (Deaths_can_draw)
+	    {
+	        draw_text_(Deaths_xl,Deaths_yt, Deaths_text, -1,-1);
+	    }
 	}
 
 
@@ -111,6 +118,46 @@ function HUD_Draw() {
 	{
 	    draw_spr_aligned(SpellQueued_ICON_SPR, SpellQueuedIcon_xl,SpellQueuedIcon_yt, -1,-1, PI_MENU1);
 	    draw_text_(SpellQueued_xl,SpellQueued_yt, SpellQueued_text, -1, SpellQueued_palidx);
+	}
+
+
+
+
+	// -------------------------------------------------------------------
+	// MAP-NAME LABEL (relocated here from Surface_Draw_GUI_End on 2026-06-23).
+	// Always-on, ungated (no DEV flag / no key) — a native part of the top status bar.
+	// Drawn with the bar's own sprite-font routine draw_text_() at native (1x) scale and
+	// PI_MENU1 palette, so it matches LIFE/MAGIC/LEVEL/KEYS text exactly.
+	// RIGHT-ALIGNED to the bar's right edge (viewXR() == viewXL()+viewW()) on the top line
+	// (Levels_yt == _Y1). Moved here 2026-06-23 from the LEFT edge: the QuestTimer draws at
+	// the LEFT edge top line (global.QuestTimer_xl == $4, yt == global.HUD_YOFF1 ==_Y1, see
+	// update_QuestTimer.gml / Surface_Draw_GUI_End.gml) and the map label was covering it.
+	// The stat cluster (meters/levels/XP/lives/keys) is horizontally CENTERED, so the bar's
+	// far-right region is the genuinely empty slot — nothing else draws there.
+	// draw_text_ is the bar's fixed-width sprite font (8px per glyph), and has no built-in
+	// halign, so we right-align manually: label_width = string_length*8, draw x = right edge
+	// - label_width - 2 (small inset). On a very long name the text just grows leftward into
+	// the empty right region; it stays clear of the centered cluster in practice.
+	// On the overworld (room_type=="C") it appends the area name in (parentheses) — '(' ')'
+	// are in FONT_LAYOUT, unlike '[' ']' — only when present. draw_text_ upper-cases and
+	// safely substitutes a glyph for any unsupported char, so this never throws.
+	// To revert: restore _map_xl = Levels_xl + 2 (and the old top-right block in
+	// Surface_Draw_GUI_End.gml).
+	if (instance_exists(g) && variable_instance_exists(g, "rm_name"))
+	{
+	    var _map_label = string(g.rm_name);
+	    if (variable_instance_exists(g, "room_type") && g.room_type == "C"
+	    &&  variable_instance_exists(g, "area_name"))
+	    {
+	        _map_label += " (" + string(g.area_name) + ")";
+	    }
+	    // Right edge of the bar (same source viewXR() uses: viewXL()+viewW()). The bar font
+	    // is fixed-width 8px/glyph, so width == length*8. Subtract it + a 2px inset to right-
+	    // align. Levels_yt is set every HUD_Step (== the bar's top text line, _Y1).
+	    var _map_w  = string_length(_map_label) * 8;
+	    var _map_xl = viewXR() - _map_w - 2;   // right-aligned, small inset from the right edge
+	    var _map_yt = Levels_yt;               // share the bar's top text line
+	    draw_text_(_map_xl, _map_yt, _map_label, -1, PI_MENU1);
 	}
 
 

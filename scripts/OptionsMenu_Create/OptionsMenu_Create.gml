@@ -150,6 +150,14 @@ function OptionsMenu_Create() {
 	menu_state_AUDIO_CUSTOM  = _a++;
 	menu_state_RANDO         = _a++;
 	menu_state_OTHER         = _a++;
+	menu_state_AUTO_TEST     = _a++; // ORPHANED: AUTOMATED TEST submenu kept compilable but unreachable (no main-menu row); its contents now live under DEV TOOLS -> SWEEPS + TEST/CAPTURE.
+	menu_state_DISPLAY       = _a++;
+	menu_state_OVERLAYS      = _a++; // DEV TOOLS sub-folder
+	menu_state_CHEATS        = _a++; // DEV TOOLS sub-folder
+	menu_state_COLOR         = _a++; // DEV TOOLS sub-folder
+	menu_state_TEST_CAP      = _a++; // DEV TOOLS sub-folder
+	menu_state_SWEEPS        = _a++; // DEV TOOLS sub-folder
+	menu_state_MISC          = _a++; // DEV TOOLS sub-folder
 	menu_state               = _first;
 
 
@@ -207,26 +215,32 @@ function OptionsMenu_Create() {
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "INPUT CONFIGURATION FOR CONTROLLERS";
 	//MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "CHANGE WHICH CONTROLLER BUTTONS DO WHAT";
 	//                                                                          //
-	MainOption_FULLSCREEN        = ds_grid_width(MainOptions_dg);
+	// CO-OP master toggle (promoted to MAIN 2026-06-28; was DEV TOOLS -> MISC -> CO-OP).
+	// Player-facing ON/OFF row that flips the SAME global.coop_enabled. Runtime-only flag
+	// (re-inits false in g_Create each launch) so no save_game_pref(), like the old MISC row.
+	MainOption_CO_OP             = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "FULLSCREEN STATE";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "CO-OP";
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "TOGGLE FULLSCREEN";
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,3] = "'F'-KEY WILL ALSO TOGGLE FULLSCREEN";
-	//MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,3] = "YOU CAN ALSO TOGGLE FULLSCREEN WITH THE 'F' KEY";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "TWO-PLAYER CO-OP: A 2ND CONTROLLER FLIES A HELPER FAIRY";
 	//                                                                          //
-	MainOption_APP_SCALE         = ds_grid_width(MainOptions_dg);
-	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "APP SCALE";
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = ": ADJUST THE APP'S SCALE";
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,3] = "CTRL(OR CTRL+SHIFT) + 'G'-KEY ALSO WORKS";
+	// (FULLSCREEN + APP SCALE main rows were MOVED into the DISPLAY submenu on 2026-06-27;
+	//  fullscreen toggle / window-scale cycle now live as the first two DISPLAY rows.)
 	//                                                                          //
 	MainOption_DEV_TOOLS         = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "DEV TOOLS";
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "VARIOUS DEVELOPMENT TOOLS: APP PERFORMANCE, HITBOXES, XY COORDS, ETC...";
+	//                                                                          //
+	// (AUTOMATED TEST main-menu row REMOVED 2026-06-28 -- its sweeps + test/capture
+	//  tools now live under DEV TOOLS -> SWEEPS + TEST/CAPTURE sub-folders.)
+	//                                                                          //
+	MainOption_DISPLAY           = ds_grid_width(MainOptions_dg);
+	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "DISPLAY";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "CHOOSE HOW THE GAME IMAGE IS SCALED TO YOUR SCREEN";
 	//                                                                          //
 	MainOption_OTHER             = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
@@ -292,7 +306,20 @@ function OptionsMenu_Create() {
 	_first=1;                  _a=_first;
 	InputConfigState_MAIN    = _a++;
 	InputConfigState_EDITING = _a++;
+	InputConfigState_CALIBRATE = _a++; // raw-input controller calibration wizard
+	InputConfigState_KB_EDITING = _a++; // keyboard rebind: press a key to assign
 	InputConfigState         = _first;
+
+	// Controls menu sections (cycle with LEFT/RIGHT in MAIN). GAMEPLAY = the original
+	// gamepad rebind list (default so the menu looks/acts as before); KEYBOARD = new
+	// keyboard rebinding; DEBUG = read-only hotkey reference.
+	InputSection_GAMEPLAY = 0;
+	InputSection_KEYBOARD = 1;
+	InputSection_DEBUG    = 2;
+	InputSection_COUNT    = 3;
+	InputSection_NAME     = ["GAMEPLAY","KEYBOARD","DEBUG"];
+	InputSection          = InputSection_GAMEPLAY;
+	KbEdit_clear          = true; // keyboard rebind: require a clean key release before capture
 
 
 	_first=0;                   _a=_first;
@@ -304,11 +331,43 @@ function OptionsMenu_Create() {
 	InputConfigOption_PAUSE   = _a++; // NES START
 	InputConfigOption_ATTACK  = _a++; // NES B
 	InputConfigOption_JUMP    = _a++; // NES A
+	InputConfigOption_SPELL_NEXT = _a++; // quick spell cycle: next
+	InputConfigOption_SPELL_PREV = _a++; // quick spell cycle: prev
+	InputConfigOption_JUKEBOX_NEXT = _a++; // jukebox: next track
+	InputConfigOption_JUKEBOX_PREV = _a++; // jukebox: prev track
+	InputConfigOption_CALIBRATE = _a++; // build a fresh SDL mapping for an unrecognized pad
 	InputConfigOption_DEFAULT = _a++;
 	InputConfigOption_BACK    = _a++;
 	InputConfigOption         = _first;
 
 	InputConfigOption_COUNT   = _a;
+
+
+	// --------------------------------------------------------
+	// Controller-calibration wizard state.
+	// Each step captures one SDL output name from a raw button/axis/hat,
+	// letting us build a mapping for a pad the SDL DB doesn't recognise.
+	Calib_active      = false;
+	Calib_step        = 0;
+	Calib_bindings    = ""; // accumulates "a:b0,b:b1,..." as steps complete
+	Calib_input_clear = true; // require a full release between captures
+	Calib_msg         = "";
+	Calib_dg = ds_grid_create(2,14); // [#0,step]=SDL name, [#1,step]=on-screen prompt
+	Calib_dg[#0, 0]="a";             Calib_dg[#1, 0]="PRESS LOWER FACE BUTTON";   // south  (Xbox A / PS Cross)
+	Calib_dg[#0, 1]="b";             Calib_dg[#1, 1]="PRESS RIGHT FACE BUTTON";   // east   (Xbox B / PS Circle)
+	Calib_dg[#0, 2]="x";             Calib_dg[#1, 2]="PRESS LEFT FACE BUTTON";    // west   (Xbox X / PS Square)
+	Calib_dg[#0, 3]="y";             Calib_dg[#1, 3]="PRESS UPPER FACE BUTTON";   // north  (Xbox Y / PS Triangle)
+	Calib_dg[#0, 4]="dpup";          Calib_dg[#1, 4]="PRESS D-PAD UP";
+	Calib_dg[#0, 5]="dpdown";        Calib_dg[#1, 5]="PRESS D-PAD DOWN";
+	Calib_dg[#0, 6]="dpleft";        Calib_dg[#1, 6]="PRESS D-PAD LEFT";
+	Calib_dg[#0, 7]="dpright";       Calib_dg[#1, 7]="PRESS D-PAD RIGHT";
+	Calib_dg[#0, 8]="leftshoulder";  Calib_dg[#1, 8]="PRESS LEFT BUMPER";
+	Calib_dg[#0, 9]="rightshoulder"; Calib_dg[#1, 9]="PRESS RIGHT BUMPER";
+	Calib_dg[#0,10]="lefttrigger";   Calib_dg[#1,10]="PRESS LEFT TRIGGER";
+	Calib_dg[#0,11]="righttrigger";  Calib_dg[#1,11]="PRESS RIGHT TRIGGER";
+	Calib_dg[#0,12]="start";         Calib_dg[#1,12]="PRESS START";
+	Calib_dg[#0,13]="back";          Calib_dg[#1,13]="PRESS SELECT / BACK";
+	Calib_COUNT = 14;
 
 
 
@@ -350,6 +409,26 @@ function OptionsMenu_Create() {
 	dg_InputConfigOptions[#_i,0] = "JUMP";
 	dg_InputConfigOptions[#_i,1] = _font;
 	//                                                                          //
+	                       _i=InputConfigOption_SPELL_NEXT;
+	dg_InputConfigOptions[#_i,0] = "NEXT SPELL";
+	dg_InputConfigOptions[#_i,1] = _font;
+	//                                                                          //
+	                       _i=InputConfigOption_SPELL_PREV;
+	dg_InputConfigOptions[#_i,0] = "PREV SPELL";
+	dg_InputConfigOptions[#_i,1] = _font;
+	//                                                                          //
+	                       _i=InputConfigOption_JUKEBOX_NEXT;
+	dg_InputConfigOptions[#_i,0] = "JUKEBOX NEXT";
+	dg_InputConfigOptions[#_i,1] = _font;
+	//                                                                          //
+	                       _i=InputConfigOption_JUKEBOX_PREV;
+	dg_InputConfigOptions[#_i,0] = "JUKEBOX PREV";
+	dg_InputConfigOptions[#_i,1] = _font;
+	//                                                                          //
+	                       _i=InputConfigOption_CALIBRATE;
+	dg_InputConfigOptions[#_i,0] = "CALIBRATE NEW CONTROLLER";
+	dg_InputConfigOptions[#_i,1] = _font;
+	//                                                                          //
 	                       _i=InputConfigOption_DEFAULT;
 	dg_InputConfigOptions[#_i,0] = "SET DEFAULTS";
 	dg_InputConfigOptions[#_i,1] = _font;
@@ -358,6 +437,102 @@ function OptionsMenu_Create() {
 	dg_InputConfigOptions[#_i,0] = "BACK";
 	dg_InputConfigOptions[#_i,1] = _font;
 	//                                                                          //
+
+
+	// --- KEYBOARD section rows (same actions; no CALIBRATE) ---
+	_first=0; _a=_first;
+	KbOption_RIGHT   = _a++;
+	KbOption_LEFT    = _a++;
+	KbOption_DOWN    = _a++;
+	KbOption_UP      = _a++;
+	KbOption_MAGIC   = _a++;
+	KbOption_PAUSE   = _a++;
+	KbOption_ATTACK  = _a++;
+	KbOption_JUMP    = _a++;
+	KbOption_SPELL_NEXT = _a++;
+	KbOption_SPELL_PREV = _a++;
+	KbOption_TRACKER_TOGGLE = _a++;
+	KbOption_JUKEBOX_TOGGLE = _a++;
+	KbOption_JUKEBOX_PREV   = _a++;
+	KbOption_JUKEBOX_NEXT   = _a++;
+	KbOption_JUKEBOX_ASSIGN = _a++;
+	KbOption_DEFAULT = _a++;
+	KbOption_BACK    = _a++;
+	KbOption_COUNT   = _a;
+	dg_KbOptions = ds_grid_create(KbOption_COUNT, 8);
+	dg_KbOptions[#KbOption_RIGHT,0]  ="RIGHT";        dg_KbOptions[#KbOption_RIGHT,1]  =_font;
+	dg_KbOptions[#KbOption_LEFT,0]   ="LEFT";         dg_KbOptions[#KbOption_LEFT,1]   =_font;
+	dg_KbOptions[#KbOption_DOWN,0]   ="DOWN";         dg_KbOptions[#KbOption_DOWN,1]   =_font;
+	dg_KbOptions[#KbOption_UP,0]     ="UP";           dg_KbOptions[#KbOption_UP,1]     =_font;
+	dg_KbOptions[#KbOption_MAGIC,0]  ="MAGIC";        dg_KbOptions[#KbOption_MAGIC,1]  =_font;
+	dg_KbOptions[#KbOption_PAUSE,0]  ="PAUSE";        dg_KbOptions[#KbOption_PAUSE,1]  =_font;
+	dg_KbOptions[#KbOption_ATTACK,0] ="ATTACK";       dg_KbOptions[#KbOption_ATTACK,1] =_font;
+	dg_KbOptions[#KbOption_JUMP,0]   ="JUMP";         dg_KbOptions[#KbOption_JUMP,1]   =_font;
+	dg_KbOptions[#KbOption_SPELL_NEXT,0]="NEXT SPELL";     dg_KbOptions[#KbOption_SPELL_NEXT,1]=_font;
+	dg_KbOptions[#KbOption_SPELL_PREV,0]="PREV SPELL";     dg_KbOptions[#KbOption_SPELL_PREV,1]=_font;
+	dg_KbOptions[#KbOption_TRACKER_TOGGLE,0]="TRACKER WINDOW"; dg_KbOptions[#KbOption_TRACKER_TOGGLE,1]=_font;
+	dg_KbOptions[#KbOption_JUKEBOX_TOGGLE,0]="JUKEBOX ON/OFF"; dg_KbOptions[#KbOption_JUKEBOX_TOGGLE,1]=_font;
+	dg_KbOptions[#KbOption_JUKEBOX_PREV,0]  ="JUKEBOX PREV";   dg_KbOptions[#KbOption_JUKEBOX_PREV,1]  =_font;
+	dg_KbOptions[#KbOption_JUKEBOX_NEXT,0]  ="JUKEBOX NEXT";   dg_KbOptions[#KbOption_JUKEBOX_NEXT,1]  =_font;
+	dg_KbOptions[#KbOption_JUKEBOX_ASSIGN,0]="ASSIGN TRACK";   dg_KbOptions[#KbOption_JUKEBOX_ASSIGN,1]=_font;
+	dg_KbOptions[#KbOption_DEFAULT,0]="SET DEFAULTS";  dg_KbOptions[#KbOption_DEFAULT,1]=_font;
+	dg_KbOptions[#KbOption_BACK,0]   ="BACK";         dg_KbOptions[#KbOption_BACK,1]   =_font;
+
+
+	// --- DEBUG section rows (read-only HOTKEY reference) ---
+	// FULL special-hotkey list shown in one place (the controls menu "doesn't show
+	// everything for buttons"). These are DISPLAY-ONLY rows: only DbgOption_CHEATS and
+	// DbgOption_BACK have behavior in OptionsMenu_InputConfig_update (everything else
+	// falls through to the read-only "play BACK_SOUND1" branch). Adding rows is safe:
+	// members use enum-style _a++ names (no hardcoded indices), the grid is sized off
+	// DbgOption_COUNT, and the cursor wraps on DbgOption_COUNT -- no enum-shift hazard.
+	// Keys verified against scripts/Surface_Draw_GUI_End.gml (F1/F3/F4/F6/F8/F9/F11/F12,
+	// [ / ], L/R triggers) and scripts/Input_Create.gml (Q/E + L1/R1 spell-cycle defaults).
+	// Reversible: to shrink back to the original short list, delete the added
+	// DbgOption_* members + their dg_DbgOptions rows below (keep F1, CHEATS, BACK).
+	_first=0; _a=_first;
+	DbgOption_HDR_WIN  = _a++; // sub-header: window / overlay toggles
+	DbgOption_F1       = _a++;
+	DbgOption_F3       = _a++;
+	DbgOption_F4       = _a++;
+	DbgOption_F5       = _a++;
+	DbgOption_F6       = _a++;
+	DbgOption_F7       = _a++;
+	DbgOption_HDR_JUKE = _a++; // sub-header: music jukebox
+	DbgOption_F8       = _a++;
+	DbgOption_F12      = _a++;
+	DbgOption_JUKE_TRK = _a++; // [ / ] and L/R triggers cycle tracks
+	DbgOption_HDR_WALK = _a++; // sub-header: walk tuning
+	DbgOption_F9       = _a++;
+	DbgOption_F11      = _a++;
+	DbgOption_WALK_SP  = _a++; // [ / ] speed, \ smoothing (while F9 overlay up)
+	DbgOption_HDR_SPELL= _a++; // sub-header: spell quick-cycle (rebindable defaults)
+	DbgOption_SPELL_KB = _a++; // Q / E
+	DbgOption_SPELL_GP = _a++; // L1 / R1
+	DbgOption_CHEATS   = _a++; // -> opens DEV TOOLS (the only actionable non-BACK row)
+	DbgOption_BACK     = _a++;
+	DbgOption_COUNT    = _a;
+	dg_DbgOptions = ds_grid_create(DbgOption_COUNT, 8);
+	dg_DbgOptions[#DbgOption_HDR_WIN,0] ="- WINDOWS / OVERLAYS -";    dg_DbgOptions[#DbgOption_HDR_WIN,1] =_font;
+	dg_DbgOptions[#DbgOption_F1,0]      ="F1: TRACKER WINDOW";        dg_DbgOptions[#DbgOption_F1,1]      =_font;
+	dg_DbgOptions[#DbgOption_F3,0]      ="F3: REC PLAY-TELEMETRY";    dg_DbgOptions[#DbgOption_F3,1]      =_font;
+	dg_DbgOptions[#DbgOption_F4,0]      ="F4: DEPTH OVERLAY";         dg_DbgOptions[#DbgOption_F4,1]      =_font;
+	dg_DbgOptions[#DbgOption_F5,0]      ="F5: MOVE SPEED CYCLE";      dg_DbgOptions[#DbgOption_F5,1]      =_font;
+	dg_DbgOptions[#DbgOption_F6,0]      ="F6: FLAG / SCREENSHOT";     dg_DbgOptions[#DbgOption_F6,1]      =_font;
+	dg_DbgOptions[#DbgOption_F7,0]      ="F7: BUG NOTE / SNAPSHOT";   dg_DbgOptions[#DbgOption_F7,1]      =_font;
+	dg_DbgOptions[#DbgOption_HDR_JUKE,0]="- MUSIC JUKEBOX -";         dg_DbgOptions[#DbgOption_HDR_JUKE,1]=_font;
+	dg_DbgOptions[#DbgOption_F8,0]      ="F8: JUKEBOX MODE";          dg_DbgOptions[#DbgOption_F8,1]      =_font;
+	dg_DbgOptions[#DbgOption_F12,0]     ="F12: ASSIGN TRACK TO AREA"; dg_DbgOptions[#DbgOption_F12,1]     =_font;
+	dg_DbgOptions[#DbgOption_JUKE_TRK,0]="] / [ OR R/L TRIG: TRACK";  dg_DbgOptions[#DbgOption_JUKE_TRK,1]=_font;
+	dg_DbgOptions[#DbgOption_HDR_WALK,0]="- WALK TUNING -";           dg_DbgOptions[#DbgOption_HDR_WALK,1]=_font;
+	dg_DbgOptions[#DbgOption_F9,0]      ="F9: WALK-TUNE PANEL";       dg_DbgOptions[#DbgOption_F9,1]      =_font;
+	dg_DbgOptions[#DbgOption_F11,0]     ="F11: SAVE WALK VALUES";     dg_DbgOptions[#DbgOption_F11,1]     =_font;
+	dg_DbgOptions[#DbgOption_WALK_SP,0] ="MOUSE: DRAG SLIDERS";   dg_DbgOptions[#DbgOption_WALK_SP,1] =_font;
+	dg_DbgOptions[#DbgOption_HDR_SPELL,0]="- SPELL CYCLE (REBINDABLE) -";dg_DbgOptions[#DbgOption_HDR_SPELL,1]=_font;
+	dg_DbgOptions[#DbgOption_SPELL_KB,0]="Q / E: NEXT / PREV SPELL";  dg_DbgOptions[#DbgOption_SPELL_KB,1]=_font;
+	dg_DbgOptions[#DbgOption_SPELL_GP,0]="R1 / L1: NEXT / PREV SPELL";dg_DbgOptions[#DbgOption_SPELL_GP,1]=_font;
+	dg_DbgOptions[#DbgOption_CHEATS,0]  ="CHEATS: SEE DEV TOOLS";     dg_DbgOptions[#DbgOption_CHEATS,1]  =_font;
+	dg_DbgOptions[#DbgOption_BACK,0]    ="BACK";                      dg_DbgOptions[#DbgOption_BACK,1]    =_font;
 
 
 
@@ -373,29 +548,20 @@ function OptionsMenu_Create() {
 	DevToolsState         = _first;
 
 
+	// DEV TOOLS is now a LAUNCHER (refactor 2026-06-28): each row opens a sub-folder
+	// submenu (its own menu_state + enum + grid + update + draw). DEV TOOLS itself holds
+	// NO toggles. The actual toggles/actions were relocated into the sub-folder enums
+	// (Overlays / Cheats / ClrTools / TestCap / Sweeps / MiscTools, defined below), each
+	// flipping the EXACT SAME global it did under the old flat DEV TOOLS / AUTO TEST menus.
 	enum DevTools
 	{
-	    DEV_TOOLS_STATE,  // 
-	    SET_DEFAULT,      // Turn all options off
-	    APP_PERFORMANCE,  // App Performance. show_debug_overlay()
-	    HITBOXES,         // Show hitboxes
-	    SCP,              // Solid Collision Points
-	    XY,               // Show xy points
-	    //OCS,              // Off Camera State
-	    OG_CAM,           // Original Game Camera outline
-	    HP,               // Show HP
-	    SPRITE_OUTLINE,   // Show sprite outlines
-	    FRAME_COUNT,      // App frame count
-	    EXITS,            // Show exits
-	    SOLID_TILES,      // Highlight solid tiles
-	    UNIQUE_TILES,     // Highlight unique tiles
-	    DUNGEON_MAP,      // Full dungeon map
-	    ADD_ITEMS,        // Add items by stabbing them
-	    PC_DASH,          // Toggle ability to move faster
-	    //INVULNERABILITY,  // Invulnerability state
-	    BGR_COLOR,        // Edit background color
-	    ROOM_COLOR,       // Edit scene colors
-	    BACK,             // 
+	    OVERLAYS,   // -> menu_state_OVERLAYS  (hitboxes, scp, xy, og-cam, hp, sprite-outline, frame-count, depth, death-counter, exits, solid/unique tiles, dungeon map, input display)
+	    CHEATS,     // -> menu_state_CHEATS    (add-items, faster move, inf hp/mp/lives, invuln)
+	    COLOR,      // -> menu_state_COLOR     (bgr color, room color editors)
+	    TEST_CAP,   // -> menu_state_TEST_CAP  (bugprobe, TAS rec/playback, playlog, walktune, controller diag)
+	    SWEEPS,     // -> menu_state_SWEEPS    (live room-sweep starters)
+	    MISC,       // -> menu_state_MISC      (set-all-default, app performance, dev-tools master switch)
+	    BACK,       //
 	    COUNT
 	}
 
@@ -406,115 +572,497 @@ function OptionsMenu_Create() {
 
 	_font = FONT2;
 
+	// DEV TOOLS launcher grid: one row per sub-folder + BACK. No toggles here.
 	DevTools_dg = ds_grid_create(DevTools.COUNT,8);
 	//                                                                          //
-	             _i=DevTools.DEV_TOOLS_STATE;
-	DevTools_dg[#_i,0] = "DEV TOOLS STATE";
+	             _i=DevTools.OVERLAYS;
+	DevTools_dg[#_i,0] = "OVERLAYS";
 	DevTools_dg[#_i,1] = _font;
+	DevTools_dg[#_i,2] = "Debug overlays: hitboxes, xy, hp, exits, tiles, input display, etc.";
 	//                                                                          //
-	             _i=DevTools.SET_DEFAULT;
-	DevTools_dg[#_i,0] = "SET ALL TO DEFAULT";
+	             _i=DevTools.CHEATS;
+	DevTools_dg[#_i,0] = "CHEATS";
 	DevTools_dg[#_i,1] = _font;
+	DevTools_dg[#_i,2] = "Add items, faster movement, infinite hp / mp / lives, invincibility.";
 	//                                                                          //
-	             _i=DevTools.APP_PERFORMANCE;
-	DevTools_dg[#_i,0] = "APP PERFORMANCE";
+	             _i=DevTools.COLOR;
+	DevTools_dg[#_i,0] = "COLOR";
 	DevTools_dg[#_i,1] = _font;
+	DevTools_dg[#_i,2] = "Open the background / room color editors.";
 	//                                                                          //
-	             _i=DevTools.HITBOXES;
-	DevTools_dg[#_i,0] = "HITBOXES";
+	             _i=DevTools.TEST_CAP;
+	DevTools_dg[#_i,0] = "TEST / CAPTURE";
 	DevTools_dg[#_i,1] = _font;
+	DevTools_dg[#_i,2] = "Bug-probe, TAS record / playback, playlog, walk-tune, controller diag.";
 	//                                                                          //
-	             _i=DevTools.SCP;
-	DevTools_dg[#_i,0] = "SOLID COLLISION POINTS";
+	             _i=DevTools.SWEEPS;
+	DevTools_dg[#_i,0] = "SWEEPS";
 	DevTools_dg[#_i,1] = _font;
+	DevTools_dg[#_i,2] = "Run live automated room-sweep tests.";
 	//                                                                          //
-	             _i=DevTools.XY;
-	DevTools_dg[#_i,0] = "XY POINTS";
+	             _i=DevTools.MISC;
+	DevTools_dg[#_i,0] = "MISC";
 	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	/*
-	             _i=DevTools.OCS;
-	DevTools_dg[#_i,0] = "OFF-CAMERA LINES";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	*/
-	             _i=DevTools.OG_CAM;
-	//DevTools_dg[#_i,0] = "OG CAMERA OUTLINE";
-	DevTools_dg[#_i,0] = "ORIGINAL GAME CAMERA OUTLINE";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	             _i=DevTools.HP;
-	DevTools_dg[#_i,0] = "HP";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	             _i=DevTools.SPRITE_OUTLINE;
-	DevTools_dg[#_i,0] = "SPRITE OUTLINES";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	             _i=DevTools.FRAME_COUNT;
-	DevTools_dg[#_i,0] = "APP FRAME COUNT";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	/*
-	             _i=DevTools.BGR_BLACK;
-	DevTools_dg[#_i,0] = "ROOM BACKGROUNDS BLACK ONLY";
-	//DevTools_dg[#_i,0] = "ALL ROOM BGR BLACK";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	*/
-	             _i=DevTools.EXITS;
-	DevTools_dg[#_i,0] = "EXITS";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	             _i=DevTools.SOLID_TILES;
-	DevTools_dg[#_i,0] = "HIGHLIGHT SOLID TILES";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	             _i=DevTools.UNIQUE_TILES;
-	DevTools_dg[#_i,0] = "HIGHLIGHT UNIQUE TILES";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	             _i=DevTools.DUNGEON_MAP;
-	DevTools_dg[#_i,0] = "COMPLETE DUNGEON MAPS";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	             _i=DevTools.ADD_ITEMS;
-	DevTools_dg[#_i,0] = "ADD ITEMS CHEAT";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	/*
-	             _i=DevTools.DOUBLE_JUMP;
-	DevTools_dg[#_i,0] = "DOUBLE JUMP";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	*/
-	             _i=DevTools.PC_DASH;
-	DevTools_dg[#_i,0] = "FASTER MOVEMENT SPEED";
-	//DevTools_dg[#_i,0] = "FASTER PC HSPD";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	/*
-	             _i=DevTools.INVULNERABILITY;
-	DevTools_dg[#_i,0] = "INVULNERABILITY STATE";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	*/
-	             _i=DevTools.BGR_COLOR;
-	DevTools_dg[#_i,0] = "EDIT BACKGROUND COLOR";
-	DevTools_dg[#_i,1] = _font;
-	//                                                                          //
-	             _i=DevTools.ROOM_COLOR;
-	DevTools_dg[#_i,0] = "EDIT ROOM COLORS";
-	DevTools_dg[#_i,1] = _font;
+	DevTools_dg[#_i,2] = "Set all to default, app performance overlay, dev-tools master switch.";
 	//                                                                          //
 	             _i=DevTools.BACK;
 	DevTools_dg[#_i,0] = "BACK";
 	DevTools_dg[#_i,1] = _font;
+	DevTools_dg[#_i,2] = "Return to the previous menu.";
 	//                                                                          //
 
 
 
 
+	// -------------------------------------------------------------
+	// AUTOMATED TEST submenu (added 2026-06-27). Mirrors the DEV TOOLS submenu
+	// (enum + dg grid + *_update + Draw_* + is_avail). Two groups of rows:
+	//   (A) SWEEP STARTERS — start a live in-game room-sweep test using the granular
+	//       sweep engine on the persistent Dev_RmWarper object. Selecting a row closes
+	//       the options menu and runs that sweep with global.sweep_from_menu=true, so
+	//       sweep_stop() finishes cleanly and returns to play (NO game_end) — see
+	//       Dev_RmWarper_Create.sweep_stop().
+	//   (B) TEST / CAPTURE TOGGLES — relocated from DEV TOOLS (BUGPROBE, TAS RECORD,
+	//       TAS PLAYBACK, INPUT DISPLAY, PLAYLOG, WALKTUNE). Exact same behavior, just
+	//       listed here instead of under DEV TOOLS.
+	// NOTE: the Dev_RmWarper room-warp UI itself opens via a controller combo (SELECT +
+	// xbox-B) inside the PAUSE menu (see Dev_RmWarper_Step STATE_IDLE), NOT a menu row,
+	// so it is intentionally not duplicated here (forcing it open from the options menu,
+	// outside the pause menu it expects, can soft-lock).
+	_first=1;               _a=_first;
+	AutoTestState_MAIN    = _a++;
+	AutoTestState         = _first;
+
+
+	enum AutoTest
+	{
+	    SW_FULL,          // sweep_start()                                  (full RM scenes)
+	    SW_OVERWORLD,     // sweep_start_ow()                               (overworld pages)
+	    SW_PALACES,       // sweep_start_category(sweep_pred_dungeon)
+	    SW_TOWNS,         // sweep_start_category(sweep_pred_town)
+	    SW_CAVES,         // sweep_start_category(sweep_pred_cave)
+	    SW_CAVES_WEST,    // sweep_start_category(sweep_pred_cave_west)
+	    SW_CAVES_EAST,    // sweep_start_category(sweep_pred_cave_east)
+	    SW_CAVES_DTHMT,   // sweep_start_category(sweep_pred_cave_dthmt)
+	    SW_CAVES_MAZIS,   // sweep_start_category(sweep_pred_cave_mazis)
+	    SW_OTHER,         // sweep_start_other()                            (rmB_* system rooms)
+	    BUGPROBE,         // toggle global.bugprobe        (moved from DEV TOOLS)
+	    TAS_RECORD,       // TAS input recording           (moved from DEV TOOLS)
+	    TAS_PLAYBACK,     // TAS input playback            (moved from DEV TOOLS)
+	    INPUT_DISPLAY,    // On-screen input overlay       (moved from DEV TOOLS)
+	    PLAYLOG,          // Record play session log       (moved from DEV TOOLS)
+	    WALKTUNE,         // Walk-tuning panel overlay      (moved from DEV TOOLS)
+	    GP_DIAG,          // Controller-diagnostic overlay (gp_diag_overlay); toggles global.gp_diag_on
+	    BACK,             //
+	    COUNT
+	}
+
+	AutoTest_cursor = 0;
+
+
+	_font = FONT2;
+
+	AutoTest_dg = ds_grid_create(AutoTest.COUNT,8);
+	//                                                                          //
+	             _i=AutoTest.SW_FULL;
+	AutoTest_dg[#_i,0] = "SWEEP: FULL";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over every action-room scene.";
+	//                                                                          //
+	             _i=AutoTest.SW_OVERWORLD;
+	AutoTest_dg[#_i,0] = "SWEEP: OVERWORLD";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over every overworld page.";
+	//                                                                          //
+	             _i=AutoTest.SW_PALACES;
+	AutoTest_dg[#_i,0] = "SWEEP: PALACES";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over palace (dungeon) scenes only.";
+	//                                                                          //
+	             _i=AutoTest.SW_TOWNS;
+	AutoTest_dg[#_i,0] = "SWEEP: TOWNS";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over town scenes only.";
+	//                                                                          //
+	             _i=AutoTest.SW_CAVES;
+	AutoTest_dg[#_i,0] = "SWEEP: CAVES";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over cave / connector scenes only.";
+	//                                                                          //
+	             _i=AutoTest.SW_CAVES_WEST;
+	AutoTest_dg[#_i,0] = "SWEEP: CAVES-WEST";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over west-region cave scenes.";
+	//                                                                          //
+	             _i=AutoTest.SW_CAVES_EAST;
+	AutoTest_dg[#_i,0] = "SWEEP: CAVES-EAST";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over east-region cave scenes.";
+	//                                                                          //
+	             _i=AutoTest.SW_CAVES_DTHMT;
+	AutoTest_dg[#_i,0] = "SWEEP: CAVES-DTHMT";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over Death-Mountain cave scenes.";
+	//                                                                          //
+	             _i=AutoTest.SW_CAVES_MAZIS;
+	AutoTest_dg[#_i,0] = "SWEEP: CAVES-MAZIS";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over Maze-Island cave scenes.";
+	//                                                                          //
+	             _i=AutoTest.SW_OTHER;
+	AutoTest_dg[#_i,0] = "SWEEP: OTHER";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Run a live sweep over the system menu rooms.";
+	//                                                                          //
+	             _i=AutoTest.BUGPROBE;
+	AutoTest_dg[#_i,0] = "RUN BUGPROBE";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Toggle the automated bug-probe test.";
+	//                                                                          //
+	             _i=AutoTest.TAS_RECORD;
+	AutoTest_dg[#_i,0] = "TAS RECORD";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Record your inputs each frame to a file.";
+	//                                                                          //
+	             _i=AutoTest.TAS_PLAYBACK;
+	AutoTest_dg[#_i,0] = "TAS PLAYBACK";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Replay the recorded inputs 1:1.";
+	//                                                                          //
+	             _i=AutoTest.INPUT_DISPLAY;
+	AutoTest_dg[#_i,0] = "INPUT DISPLAY";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Show on-screen button input overlay.";
+	//                                                                          //
+	             _i=AutoTest.PLAYLOG;
+	AutoTest_dg[#_i,0] = "PLAYLOG (REC SESSION)";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Record play telemetry to a session log.";
+	//                                                                          //
+	             _i=AutoTest.WALKTUNE;
+	AutoTest_dg[#_i,0] = "WALKTUNE PANEL";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Toggle the walk-tuning panel overlay.";
+	//                                                                          //
+	             _i=AutoTest.GP_DIAG;
+	AutoTest_dg[#_i,0] = "CONTROLLER DIAG";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Live gamepad readout: buttons, trigger values, axes + raw scan. Debug a pad whose L2/R2/L1 do nothing.";
+	//                                                                          //
+	             _i=AutoTest.BACK;
+	AutoTest_dg[#_i,0] = "BACK";
+	AutoTest_dg[#_i,1] = _font;
+	AutoTest_dg[#_i,2] = "Return to the previous menu.";
+	//                                                                          //
+
+
+
+
+	// -------------------------------------------------------------
+	// DISPLAY submenu (added 2026-06-27). Mirrors the AUTOMATED TEST submenu
+	// (enum + dg grid + *_update + Draw_* + is_avail). One row per screen-scaling
+	// MODE plus a BACK row. The selected mode is persisted in global.DisplayMode
+	// (DISPLAY_* macros) via save_game_pref(); the rendering that APPLIES the mode
+	// is a separate follow-up — DISPLAY_SMOOTH (default) is the current behavior so
+	// nothing visually changes yet. Enum order maps 1:1 onto the DISPLAY_* macros.
+	_first=1;               _a=_first;
+	DisplayState_MAIN     = _a++;
+	DisplayState          = _first;
+
+
+	enum Display
+	{
+	    // Window/video options consolidated here (2026-06-27). FULLSCREEN + WINDOW_SCALE
+	    // are NOT part of the scaling-mode radio group below: FULLSCREEN is an ON/OFF
+	    // toggle and WINDOW_SCALE is a value, both driven by update_game_window_1a()
+	    // (which keys off menu_state_DISPLAY + Display_cursor). The mode rows SMOOTH..SCAN
+	    // stay contiguous and map 1:1 onto the DISPLAY_* macros via the Display.SMOOTH
+	    // offset (macro = enum - Display.SMOOTH).
+	    FULLSCREEN,   // fullscreen ON/OFF toggle  (logic in update_game_window_1a)
+	    WINDOW_SCALE, // window scale value (e.g. "2X") (logic in update_game_window_1a)
+	    SMOOTH,   // DISPLAY_SMOOTH (current behavior)
+	    SHARP,    // DISPLAY_SHARP
+	    PIXEL,    // DISPLAY_PIXEL
+	    FILL,     // DISPLAY_FILL
+	    CRT,      // DISPLAY_CRT
+	    SCAN,     // DISPLAY_SCAN
+	    BACK,     //
+	    COUNT
+	}
+
+	Display_cursor = 0;
+
+
+	_font = FONT2;
+
+	Display_dg = ds_grid_create(Display.COUNT,8);
+	//                                                                          //
+	             _i=Display.FULLSCREEN;
+	Display_dg[#_i,0] = "FULLSCREEN";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Toggle fullscreen. The 'F' key also toggles it.";
+	//                                                                          //
+	             _i=Display.WINDOW_SCALE;
+	Display_dg[#_i,0] = "WINDOW SCALE";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Resize the window with LEFT/RIGHT. CTRL(+SHIFT)+'G' also works.";
+	//                                                                          //
+	             _i=Display.SMOOTH;
+	Display_dg[#_i,0] = "SMOOTH";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Soft scaling, fills the window. (current)";
+	//                                                                          //
+	             _i=Display.SHARP;
+	Display_dg[#_i,0] = "SHARP";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Crisp pixels, fills any size. Recommended.";
+	//                                                                          //
+	             _i=Display.PIXEL;
+	Display_dg[#_i,0] = "PIXEL PERFECT";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Pixel-perfect, every pixel equal, black bars.";
+	//                                                                          //
+	             _i=Display.FILL;
+	Display_dg[#_i,0] = "CRISP FILL";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Crisp-fill: hard pixels, fills window.";
+	//                                                                          //
+	             _i=Display.CRT;
+	Display_dg[#_i,0] = "CRT";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Old-TV look: scanlines + curve.";
+	//                                                                          //
+	             _i=Display.SCAN;
+	Display_dg[#_i,0] = "SCANLINES";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Light scanlines only.";
+	//                                                                          //
+	             _i=Display.BACK;
+	Display_dg[#_i,0] = "BACK";
+	Display_dg[#_i,1] = _font;
+	Display_dg[#_i,2] = "Return to the previous menu.";
+	//                                                                          //
+
+
+
+
+	// =============================================================
+	// DEV TOOLS SUB-FOLDERS (added 2026-06-28). DEV TOOLS is now a launcher; the
+	// real toggles/actions live here, one sub-folder per enum, each mirroring the
+	// DISPLAY submenu (enum + _dg grid + *_update + Draw_* + is_avail + dispatch).
+	// Every toggle flips the EXACT SAME global it did under the old flat DEV TOOLS /
+	// AUTOMATED TEST menus -- only its menu home changed.
+	// =============================================================
+
+
+	// -------- OVERLAYS --------
+	_first=1;               _a=_first;
+	OverlaysState_MAIN    = _a++;
+	OverlaysState         = _first;
+
+	enum Overlays
+	{
+	    HITBOXES, SCP, XY, OG_CAM, HP, SPRITE_OUTLINE, FRAME_COUNT,
+	    DEPTH_DEBUG, DEATH_COUNTER, EXITS, SOLID_TILES, UNIQUE_TILES,
+	    DUNGEON_MAP, INPUT_DISPLAY,
+	    BACK,
+	    COUNT
+	}
+	Overlays_cursor = 0;
+
+	_font = FONT2;
+	Overlays_dg = ds_grid_create(Overlays.COUNT,8);
+	             _i=Overlays.HITBOXES;
+	Overlays_dg[#_i,0]="HITBOXES";                    Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Draw collision hitboxes.";
+	             _i=Overlays.SCP;
+	Overlays_dg[#_i,0]="SOLID COLLISION POINTS";      Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Draw solid collision points.";
+	             _i=Overlays.XY;
+	Overlays_dg[#_i,0]="XY POINTS";                   Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Draw object XY origin points.";
+	             _i=Overlays.OG_CAM;
+	Overlays_dg[#_i,0]="ORIGINAL GAME CAMERA OUTLINE"; Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Outline the original game camera area.";
+	             _i=Overlays.HP;
+	Overlays_dg[#_i,0]="HP";                          Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Show HP values overlay.";
+	             _i=Overlays.SPRITE_OUTLINE;
+	Overlays_dg[#_i,0]="SPRITE OUTLINES";             Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Outline sprites (cycles modes).";
+	             _i=Overlays.FRAME_COUNT;
+	Overlays_dg[#_i,0]="APP FRAME COUNT";             Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Show app and room frame counters.";
+	             _i=Overlays.DEPTH_DEBUG;
+	Overlays_dg[#_i,0]="DEPTH OVERLAY";               Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Toggle the depth-layer debug overlay.";
+	             _i=Overlays.DEATH_COUNTER;
+	Overlays_dg[#_i,0]="DEATH COUNTER";               Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Toggle the on-screen HUD death counter.";
+	             _i=Overlays.EXITS;
+	Overlays_dg[#_i,0]="EXITS";                       Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Draw room-exit hitboxes.";
+	             _i=Overlays.SOLID_TILES;
+	Overlays_dg[#_i,0]="HIGHLIGHT SOLID TILES";       Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Highlight solid collision tiles.";
+	             _i=Overlays.UNIQUE_TILES;
+	Overlays_dg[#_i,0]="HIGHLIGHT UNIQUE TILES";      Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Highlight unique tiles.";
+	             _i=Overlays.DUNGEON_MAP;
+	Overlays_dg[#_i,0]="COMPLETE DUNGEON MAPS";       Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Reveal the entire dungeon map.";
+	             _i=Overlays.INPUT_DISPLAY;
+	Overlays_dg[#_i,0]="INPUT DISPLAY";               Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Show on-screen button input overlay.";
+	             _i=Overlays.BACK;
+	Overlays_dg[#_i,0]="BACK";                        Overlays_dg[#_i,1]=_font; Overlays_dg[#_i,2]="Return to the DEV TOOLS menu.";
+
+
+	// -------- CHEATS --------
+	_first=1;               _a=_first;
+	CheatsState_MAIN      = _a++;
+	CheatsState           = _first;
+
+	enum Cheats
+	{
+	    ADD_ITEMS, PC_DASH, INF_HP, INF_MP, INF_LIVES, INVULN,
+	    BACK,
+	    COUNT
+	}
+	Cheats_cursor = 0;
+
+	_font = FONT2;
+	Cheats_dg = ds_grid_create(Cheats.COUNT,8);
+	             _i=Cheats.ADD_ITEMS;
+	Cheats_dg[#_i,0]="ADD ITEMS CHEAT";       Cheats_dg[#_i,1]=_font; Cheats_dg[#_i,2]="Stab to grant items (cheat).";
+	             _i=Cheats.PC_DASH;
+	Cheats_dg[#_i,0]="FASTER MOVEMENT SPEED"; Cheats_dg[#_i,1]=_font; Cheats_dg[#_i,2]="Move faster than normal.";
+	             _i=Cheats.INF_HP;
+	Cheats_dg[#_i,0]="CHEAT: INFINITE HP";    Cheats_dg[#_i,1]=_font; Cheats_dg[#_i,2]="Cheat: never lose HP.";
+	             _i=Cheats.INF_MP;
+	Cheats_dg[#_i,0]="CHEAT: INFINITE MP";    Cheats_dg[#_i,1]=_font; Cheats_dg[#_i,2]="Cheat: never lose magic.";
+	             _i=Cheats.INF_LIVES;
+	Cheats_dg[#_i,0]="CHEAT: INFINITE LIVES"; Cheats_dg[#_i,1]=_font; Cheats_dg[#_i,2]="Cheat: never lose lives.";
+	             _i=Cheats.INVULN;
+	Cheats_dg[#_i,0]="CHEAT: INVINCIBILITY";  Cheats_dg[#_i,1]=_font; Cheats_dg[#_i,2]="Cheat: take no damage.";
+	             _i=Cheats.BACK;
+	Cheats_dg[#_i,0]="BACK";                  Cheats_dg[#_i,1]=_font; Cheats_dg[#_i,2]="Return to the DEV TOOLS menu.";
+
+
+	// -------- COLOR --------
+	_first=1;               _a=_first;
+	ColorState_MAIN       = _a++;
+	ColorState            = _first;
+
+	enum ClrTools
+	{
+	    BGR_COLOR, ROOM_COLOR,
+	    BACK,
+	    COUNT
+	}
+	Color_cursor = 0;
+
+	_font = FONT2;
+	Color_dg = ds_grid_create(ClrTools.COUNT,8);
+	             _i=ClrTools.BGR_COLOR;
+	Color_dg[#_i,0]="EDIT BACKGROUND COLOR"; Color_dg[#_i,1]=_font; Color_dg[#_i,2]="Open the background color editor.";
+	             _i=ClrTools.ROOM_COLOR;
+	Color_dg[#_i,0]="EDIT ROOM COLORS";      Color_dg[#_i,1]=_font; Color_dg[#_i,2]="Open the room color editor.";
+	             _i=ClrTools.BACK;
+	Color_dg[#_i,0]="BACK";                  Color_dg[#_i,1]=_font; Color_dg[#_i,2]="Return to the DEV TOOLS menu.";
+
+
+	// -------- TEST / CAPTURE --------
+	_first=1;               _a=_first;
+	TestCapState_MAIN     = _a++;
+	TestCapState          = _first;
+
+	enum TestCap
+	{
+	    BUGPROBE, TAS_RECORD, TAS_PLAYBACK, PLAYLOG, WALKTUNE, GP_DIAG, COOP_TEST,
+	    REPLAY_MARK, TWITCH, TWITCH_IRC,
+	    BACK,
+	    COUNT
+	}
+	TestCap_cursor = 0;
+
+	_font = FONT2;
+	TestCap_dg = ds_grid_create(TestCap.COUNT,8);
+	             _i=TestCap.BUGPROBE;
+	TestCap_dg[#_i,0]="RUN BUGPROBE";          TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Toggle the automated bug-probe test.";
+	             _i=TestCap.TAS_RECORD;
+	TestCap_dg[#_i,0]="TAS RECORD";            TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Record your inputs each frame to a file.";
+	             _i=TestCap.TAS_PLAYBACK;
+	TestCap_dg[#_i,0]="TAS PLAYBACK";          TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Replay the recorded inputs 1:1.";
+	             _i=TestCap.PLAYLOG;
+	TestCap_dg[#_i,0]="PLAYLOG (REC SESSION)"; TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Record play telemetry to a session log.";
+	             _i=TestCap.WALKTUNE;
+	TestCap_dg[#_i,0]="WALKTUNE PANEL";        TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Toggle the walk-tuning panel overlay.";
+	             _i=TestCap.GP_DIAG;
+	TestCap_dg[#_i,0]="CONTROLLER DIAG";       TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Live gamepad readout: buttons, triggers, axes + raw scan.";
+	             _i=TestCap.COOP_TEST;
+	TestCap_dg[#_i,0]="COOP TEST";             TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Run the automated co-op fairy test (move/shoot/heal/tank/ferry/revive/room-hop).";
+	             _i=TestCap.REPLAY_MARK;
+	TestCap_dg[#_i,0]="REPLAY LAST MARK";      TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Restore the last MARK (key 3) snapshot and replay its recorded inputs.";
+	             _i=TestCap.TWITCH;
+	TestCap_dg[#_i,0]="TWITCH";                TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Master switch for the Twitch file-drop poll (channel-point / donation verb files). Enables triggers WITHOUT needing the in-game IRC to connect.";
+	             _i=TestCap.TWITCH_IRC;
+	TestCap_dg[#_i,0]="TWITCH IRC";            TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Connect to Twitch chat directly (reads twitch_config.txt). Chat !commands drive game effects.";
+	             _i=TestCap.BACK;
+	TestCap_dg[#_i,0]="BACK";                  TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Return to the DEV TOOLS menu.";
+
+
+	// -------- SWEEPS --------
+	_first=1;               _a=_first;
+	SweepsState_MAIN      = _a++;
+	SweepsState           = _first;
+
+	enum Sweeps
+	{
+	    SW_FULL, SW_OVERWORLD, SW_PALACES, SW_TOWNS, SW_CAVES,
+	    SW_CAVES_WEST, SW_CAVES_EAST, SW_CAVES_DTHMT, SW_CAVES_MAZIS, SW_OTHER,
+	    BACK,
+	    COUNT
+	}
+	Sweeps_cursor = 0;
+
+	_font = FONT2;
+	Sweeps_dg = ds_grid_create(Sweeps.COUNT,8);
+	             _i=Sweeps.SW_FULL;
+	Sweeps_dg[#_i,0]="SWEEP: FULL";        Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over every action-room scene.";
+	             _i=Sweeps.SW_OVERWORLD;
+	Sweeps_dg[#_i,0]="SWEEP: OVERWORLD";   Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over every overworld page.";
+	             _i=Sweeps.SW_PALACES;
+	Sweeps_dg[#_i,0]="SWEEP: PALACES";     Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over palace (dungeon) scenes only.";
+	             _i=Sweeps.SW_TOWNS;
+	Sweeps_dg[#_i,0]="SWEEP: TOWNS";       Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over town scenes only.";
+	             _i=Sweeps.SW_CAVES;
+	Sweeps_dg[#_i,0]="SWEEP: CAVES";       Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over cave / connector scenes only.";
+	             _i=Sweeps.SW_CAVES_WEST;
+	Sweeps_dg[#_i,0]="SWEEP: CAVES-WEST";  Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over west-region cave scenes.";
+	             _i=Sweeps.SW_CAVES_EAST;
+	Sweeps_dg[#_i,0]="SWEEP: CAVES-EAST";  Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over east-region cave scenes.";
+	             _i=Sweeps.SW_CAVES_DTHMT;
+	Sweeps_dg[#_i,0]="SWEEP: CAVES-DTHMT"; Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over Death-Mountain cave scenes.";
+	             _i=Sweeps.SW_CAVES_MAZIS;
+	Sweeps_dg[#_i,0]="SWEEP: CAVES-MAZIS"; Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over Maze-Island cave scenes.";
+	             _i=Sweeps.SW_OTHER;
+	Sweeps_dg[#_i,0]="SWEEP: OTHER";       Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Run a live sweep over the system menu rooms.";
+	             _i=Sweeps.BACK;
+	Sweeps_dg[#_i,0]="BACK";               Sweeps_dg[#_i,1]=_font; Sweeps_dg[#_i,2]="Return to the DEV TOOLS menu.";
+
+
+	// -------- MISC --------
+	_first=1;               _a=_first;
+	MiscState_MAIN        = _a++;
+	MiscState             = _first;
+
+	// CO_OP removed 2026-06-28 -- the CO-OP toggle was promoted to the MAIN options list
+	// (MainOption_CO_OP), so it no longer lives here (avoid two toggles for one flag).
+	enum MiscTools
+	{
+	    SET_DEFAULT, APP_PERFORMANCE, DEV_TOOLS_STATE,
+	    BACK,
+	    COUNT
+	}
+	Misc_cursor = 0;
+
+	_font = FONT2;
+	Misc_dg = ds_grid_create(MiscTools.COUNT,8);
+	             _i=MiscTools.SET_DEFAULT;
+	Misc_dg[#_i,0]="SET ALL TO DEFAULT"; Misc_dg[#_i,1]=_font; Misc_dg[#_i,2]="Reset all dev tool options to off.";
+	             _i=MiscTools.APP_PERFORMANCE;
+	Misc_dg[#_i,0]="APP PERFORMANCE";    Misc_dg[#_i,1]=_font; Misc_dg[#_i,2]="Show FPS and performance overlay.";
+	             _i=MiscTools.DEV_TOOLS_STATE;
+	Misc_dg[#_i,0]="DEV TOOLS STATE";    Misc_dg[#_i,1]=_font; Misc_dg[#_i,2]="Master switch for developer tools.";
+	             _i=MiscTools.BACK;
+	Misc_dg[#_i,0]="BACK";               Misc_dg[#_i,1]=_font; Misc_dg[#_i,2]="Return to the DEV TOOLS menu.";
 
 
 
@@ -716,7 +1264,7 @@ function OptionsMenu_Create() {
 	dm_options[?_dk2+STR_State+hex_str(_j++)+STR_Text] = "ON";
 	//dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "OVERWORLD WILL USE THIS QUEST'S SHUFFLED BIOMES";
 	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "OVERWORLD BIOMES ARE SHUFFLED";
-	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "THIS DEACTIVATES SLOW SWAMP WALK SPEED IN THE OVERWORLD";
+	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "SWAMPS STILL SLOW YOU AND CAN APPEAR ANYWHERE";
 	//dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "SWAMPS WILL NOT SLOW YOUR SPEED SINCE THERE COULD BE A SIGNIFICANT NUMBER OF SWAMP TILES";
 	//dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "SWAMPS WILL NOT SLOW YOUR SPEED AS THERE COULD BE A SIGNIFICANT NUMBER OF SWAMP TILES";
 	//dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "-SWAMPS WILL NOT SLOW YOU DOWN LIKE THEY DO NORMALLY AS THERE COULD END UP BEING A SIGNIFICANT NUMBER OF SWAMP TILES";
@@ -1061,6 +1609,50 @@ function OptionsMenu_Create() {
 	{
 	    _len  = string_length(DevTools_dg[#_i,0]);
 	    _font = DevTools_dg[#_i,1];
+	    _option_text_len_max   = max(_option_text_len_max, _len);
+	    _option_text_width_max = max(_option_text_width_max, sprite_get_width(_font)*_len);
+	}
+
+	// DEV TOOLS sub-folder grids (so the menu window is wide enough for their labels).
+	for(_i=0; _i<Overlays.COUNT; _i++)
+	{
+	    _len  = string_length(Overlays_dg[#_i,0]);
+	    _font = Overlays_dg[#_i,1];
+	    _option_text_len_max   = max(_option_text_len_max, _len);
+	    _option_text_width_max = max(_option_text_width_max, sprite_get_width(_font)*_len);
+	}
+	for(_i=0; _i<Cheats.COUNT; _i++)
+	{
+	    _len  = string_length(Cheats_dg[#_i,0]);
+	    _font = Cheats_dg[#_i,1];
+	    _option_text_len_max   = max(_option_text_len_max, _len);
+	    _option_text_width_max = max(_option_text_width_max, sprite_get_width(_font)*_len);
+	}
+	for(_i=0; _i<ClrTools.COUNT; _i++)
+	{
+	    _len  = string_length(Color_dg[#_i,0]);
+	    _font = Color_dg[#_i,1];
+	    _option_text_len_max   = max(_option_text_len_max, _len);
+	    _option_text_width_max = max(_option_text_width_max, sprite_get_width(_font)*_len);
+	}
+	for(_i=0; _i<TestCap.COUNT; _i++)
+	{
+	    _len  = string_length(TestCap_dg[#_i,0]);
+	    _font = TestCap_dg[#_i,1];
+	    _option_text_len_max   = max(_option_text_len_max, _len);
+	    _option_text_width_max = max(_option_text_width_max, sprite_get_width(_font)*_len);
+	}
+	for(_i=0; _i<Sweeps.COUNT; _i++)
+	{
+	    _len  = string_length(Sweeps_dg[#_i,0]);
+	    _font = Sweeps_dg[#_i,1];
+	    _option_text_len_max   = max(_option_text_len_max, _len);
+	    _option_text_width_max = max(_option_text_width_max, sprite_get_width(_font)*_len);
+	}
+	for(_i=0; _i<MiscTools.COUNT; _i++)
+	{
+	    _len  = string_length(Misc_dg[#_i,0]);
+	    _font = Misc_dg[#_i,1];
 	    _option_text_len_max   = max(_option_text_len_max, _len);
 	    _option_text_width_max = max(_option_text_width_max, sprite_get_width(_font)*_len);
 	}

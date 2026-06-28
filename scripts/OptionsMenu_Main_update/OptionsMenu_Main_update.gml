@@ -76,19 +76,51 @@ function OptionsMenu_Main_update() {
 	    break;}//case MainOption_INPUT_CONFIG
     
 	    // ---------------------------------------------------------
+	    // CO-OP ON/OFF toggle (promoted from DEV TOOLS -> MISC). A / START (or SPACE / ENTER)
+	    // flips the SAME global.coop_enabled. Runtime-only flag, so no save_game_pref().
+	    case MainOption_CO_OP:{
+	    if (timer) break;
+
+	    if (_InputConfirm_pressed2)
+	    {
+	        global.coop_enabled = !global.coop_enabled;
+	        aud_play_sound(CONFIRM_SOUND1);
+	        timer = DURATION1;
+	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    }
+	    break;}//case MainOption_CO_OP
+
+	    // ---------------------------------------------------------
 	    case MainOption_DEV_TOOLS:{
 	    if (timer) break;
     
 	    if (_InputConfirm_pressed2)
 	    {
-	        DevTools_cursor = DevTools.DEV_TOOLS_STATE;
+	        DevTools_cursor = DevTools.OVERLAYS; // launcher: land on the first sub-folder row
 	        aud_play_sound(CONFIRM_SOUND1);
 	        timer = DURATION1;
 	        menu_state = menu_state_DEV_TOOLS;
 	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	    }
 	    break;}//case MainOption_DEV_TOOLS
-    
+
+	    // (MainOption_AUTO_TEST enter-case REMOVED 2026-06-28 -- AUTOMATED TEST is gone
+	    //  from the menu; its sweeps + test/capture tools now live under DEV TOOLS.)
+
+	    // ---------------------------------------------------------
+	    case MainOption_DISPLAY:{
+	    if (timer) break;
+
+	    if (_InputConfirm_pressed2)
+	    {
+	        Display_cursor = global.DisplayMode + Display.SMOOTH; // start the cursor on the active mode (mode rows sit at the Display.SMOOTH offset)
+	        aud_play_sound(CONFIRM_SOUND1);
+	        timer = DURATION1;
+	        menu_state = menu_state_DISPLAY;
+	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    }
+	    break;}//case MainOption_DISPLAY
+
 	    // ---------------------------------------------------------
 	    case MainOption_RANDO:{
 	    if (timer) break;
@@ -360,20 +392,21 @@ function OptionsMenu_Main_update() {
 	            }
 	        }
 	        break;}//case MainOption_PC_SPRITES
-        
+
 	        // ---------------------------------------------------------
 	        // ---------------------------------------------------
-	        case MainOption_FULLSCREEN:{ // **fullscreen toggle is updated in `update_game_window_1a()`
-	        //aud_play_sound(get_audio_theme_track(CURSOR_SOUND_THEME1));
-	        //save_game_pref();
-	        break;}//case MainOption_FULLSCREEN
-        
-	        // ---------------------------------------------------------
-	        // ---------------------------------------------------
-	        case MainOption_APP_SCALE:{ // **app scale is updated in `update_game_window_1a()`
-	        //aud_play_sound(get_audio_theme_track(CURSOR_SOUND_THEME1));
-	        //save_game_pref();
-	        break;}//case MainOption_APP_SCALE
+	        // CO-OP ON/OFF toggle: LEFT / RIGHT also flips it (mirrors the A/START toggle above).
+	        case MainOption_CO_OP:{
+	        //if (timer) break;
+
+	        global.coop_enabled = !global.coop_enabled;
+	        aud_play_sound(CURSOR_SOUND1);
+	        timer = DURATION0;
+	        break;}//case MainOption_CO_OP
+
+	        // (MainOption_FULLSCREEN + MainOption_APP_SCALE horizontal cases removed 2026-06-27 —
+	        //  fullscreen toggle / window-scale cycle now live in the DISPLAY submenu, driven by
+	        //  update_game_window_1a() off menu_state_DISPLAY + Display_cursor.)
 	        /*
 	        // ---------------------------------------------------------
 	        // ---------------------------------------------------

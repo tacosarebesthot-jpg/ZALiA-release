@@ -1,6 +1,7 @@
 /// @description  Balshot_update()
 function Balshot_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	//if(!ocs) // if on screen
 	if (Shoot_timer) Shoot_timer--;

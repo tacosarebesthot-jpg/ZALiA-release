@@ -1,6 +1,7 @@
 /// @description  Zora_update()
 function Zora_update() {
 
+	if (stun_timer) { GOB_update_2(); exit; }
 
 	if (timer)
 	{   // tall/standing

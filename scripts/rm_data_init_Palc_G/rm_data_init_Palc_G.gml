@@ -2176,7 +2176,7 @@ function rm_data_init_Palc_G() {
 
 	data_exit(EXU0,etA4,0,  $44,row_e0,  $18,ROWS5,  $4F,row_e4,  "31"+EXD0_); // UP  0, Pit up 
 	data_exit(EXL0,etA0,1,  CLM2,ROW0,  CLMS2,rows1,  CLM3,row3,  "59"+EXR0_); // LFT 0, 
-	data_exit(EXR0,etA0,1,  clm2,ROW0,  CLMS2,rows1,  clmA,row3,  "35"+EXL0_); // RGT 0, 
+	data_exit(EXR0,etA0,1,  clm2,ROW0,  CLMS2,rows1,  clmA,row3,  "35"+EXL0_); // RGT 0,
 
 
 	data_path_conditions(exit_name_r0, exit_name_l0, STR_GLOVE);
@@ -2368,6 +2368,15 @@ function rm_data_init_Palc_G() {
 
 
 	data_path_conditions(exit_name_r0, _dk_spawn_item0);
+
+
+	// One-way town-style press-Up door back to the Great Palace entrance (room $00).
+	// On the floor just left of the All-Key pedestal (key is at clm $0E). The player walks up
+	// to it and presses Up to teleport to the GP start, skipping the climb back up the Gooma
+	// branch. There is no automatic warp and no return door at the entrance. Room $3A is only
+	// reachable after Gooma, so this door needs no separate defeat-gate.
+	_exit=data_exit(EXM0,etB0,1,  $0A,row3,  CLMS2,ROWS2,  $0B,row3,  "00"+EXL0_,  0); // MID 0, press-Up door -> GP entrance
+	g.dm_rm[?_exit+STR_Rando+"_Safe"] = true; // Don't let rando change where this door goes to
 
 	data_scene_rando(rm);
 
