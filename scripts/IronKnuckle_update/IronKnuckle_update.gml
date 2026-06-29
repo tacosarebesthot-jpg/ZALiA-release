@@ -1,7 +1,7 @@
 /// @description  IronKnuckle_update()
 function IronKnuckle_update() {
 
-	if (stun_timer) { GOB_update_2(); if (stun_timer==2) attack_tokens = $4 | (rand()&$3); exit; }
+	// [stun-lock revert] OG: no freeze on hit — IK recoils & keeps acting while damage-flashing (the stun_timer==2 attack_tokens refresh is preserved below in normal flow).
 
 	// Object Resource Name: IrKnA
 

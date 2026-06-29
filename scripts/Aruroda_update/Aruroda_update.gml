@@ -1,7 +1,7 @@
 /// @description  Aruroda_update()
 function Aruroda_update() {
 
-	if (stun_timer) { GOB_update_2(); exit; }
+	// [stun-lock revert] OG: no freeze on hit — enemy recoils & keeps acting while damage-flashing (stun_timer only drives flash/pushback/i-frames).
 
 	// 9AAE
 	GO_update_cs();

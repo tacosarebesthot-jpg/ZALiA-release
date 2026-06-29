@@ -66,7 +66,6 @@ function Item_update() {
 	        {
 	            Item_update_1(); // E771
 	            stun_timer = STUN_DURATION1; // $30
-	            global.pc.iframes_timer = 4; // MOD: brief post-hit i-frames so small-item pickups (Key/Jar/P-Bag) aren't open to a free hit. Same value PC_take_damage sets after a real hit.
 	            aud_play_sound(get_audio_theme_track(dk_StrikeEnemy));
             
 	            if (ITEM_TYPE==STR_PBAG) state = state_DROP;

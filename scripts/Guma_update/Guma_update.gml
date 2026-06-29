@@ -1,7 +1,7 @@
 /// @description  Guma_update()
 function Guma_update() {
 
-	if (stun_timer) { GOB_update_2(); exit; }
+	// [stun-lock revert] OG: no freeze on hit — enemy recoils & keeps acting while damage-flashing (stun_timer only drives flash/pushback/i-frames).
 
 	// BA57
 	if(!g.counter1) vspd = $D0;

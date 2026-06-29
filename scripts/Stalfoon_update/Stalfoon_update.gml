@@ -1,11 +1,7 @@
 /// @description  Stalfoon_update()
 function Stalfoon_update() {
 
-	if (stun_timer)
-	{   // DE40
-	    GOB_update_2();
-	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	}
+	// [stun-lock revert] OG: no freeze on hit — Stalfoon paces/shoots & recoils while damage-flashing (stun_timer only drives flash/pushback/i-frames).
 
 	hspd_impel = 0;
 
