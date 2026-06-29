@@ -57,6 +57,10 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		case "1up":
 			if (instance_exists(f) && variable_global_exists("pc_lives"))
 			{   global.pc_lives = min(global.pc_lives + 1, f.LIVES_MAX);  }
+			// MOD: on-screen confirmation toast — the life COUNT only draws on the pause/death
+			// screen, so chat-driven 1ups looked like nothing happened mid-game.
+			global.tw_toast       = _who_s + " -> 1UP";
+			global.tw_toast_timer = 180;
 			break;
 
 		// ---- self-reverting timers (decremented by existing game code) -------------
@@ -147,6 +151,12 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					if (_q != "" && string_pos(_q, string_lower(string(_names[_ti]))) > 0)
 					{   _hit = _ti; break;  }
 				}
+
+				// no arg / "random" / "shuffle" -> pick a random REAL track so Smoken's
+				// dead-chat "change the music" actually shuffles SONGS (not a fixed jingle/FX).
+				if (_hit < 0 && array_length(_names) > 0
+				&& (_q == "" || _q == "random" || _q == "shuffle"))
+				{   _hit = irandom(array_length(_names) - 1);  }
 
 				if (_hit >= 0)
 				{
