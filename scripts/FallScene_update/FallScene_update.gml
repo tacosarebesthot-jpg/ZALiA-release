@@ -4,6 +4,15 @@ function FallScene_update() {
 
 	if (g.FallScene_timer)
 	{
+	    // MOD timing: user suspects the fall is render-bound (slow per-frame), not just a one-time load. Log
+	    // this frame's real frame-time + fps to fall_timing.txt so a fall (manual or sweep) shows whether
+	    // per-frame cost spikes. delta_time = last frame's us, so the logging itself doesn't skew it. DEV only.
+	    if (DEV) {
+	        var _ftf = file_text_open_append(working_directory + "fall_timing.txt");
+	        file_text_write_string(_ftf, room_get_name(room) + " | FALLFRAME | dt=" + string(delta_time) + " us fps_real=" + string(fps_real));
+	        file_text_writeln(_ftf);
+	        file_text_close(_ftf);
+	    }
 	    var _ANIM_SPEED = $3; // OG is every 2 frames but that looks too fast in ZALiA. Every 4 frames looks too slow, but 3 looks fine.
 	    var _TYPE_      =  val(global.FallScene_dm[?STR_Current+STR_Type], "1"); // "1": vertical fall, "2": horizontal fall
 	    var _FALL_DIR   =  val(global.FallScene_dm[?STR_Current+STR_Fall+STR_Direction], $1<<(2*(_TYPE_=="1")));

@@ -257,7 +257,29 @@ function update_Drop() {
     
     
 	    Projectile_udd();
-	    Projectile_collision_1a();
+	    // MOD (red-drop swept collision, Option B): a fast drop out-runs its own body hitbox in
+	    // one frame AND only collision-checks every other frame (GO_can_collide_this_frame), so it
+	    // TUNNELS past a short target -- the cucco body is only 6-11px tall, so the drop never hits
+	    // the chicken. Instead of one end-position check, walk the collision along the path the drop
+	    // actually travelled SINCE its last pass, in steps shorter than the smallest target, so it
+	    // can't skip over anything. Drop-scoped; reuses Projectile_collision_1a (shield/reflect/body),
+	    // so human Link behaves exactly as before.
+	    if (!variable_instance_exists(id, "_sweep_x0")) { _sweep_x0 = x; _sweep_y0 = y; }
+	    if (GO_can_collide_this_frame(update_idx))
+	    {
+	        var _x_now = x, _y_now = y;
+	        var _dx = _x_now - _sweep_x0, _dy = _y_now - _sweep_y0;
+	        var _n  = max(1, ceil(max(abs(_dx), abs(_dy)) / 4)); // step 4px <= cucco crouch body (6)
+	        var _st0 = state, _csh0 = collided_shield, _hit = false;
+	        for (var _ss = 1; _ss <= _n; _ss++)
+	        {
+	            set_xy(id, _sweep_x0 + _dx*(_ss/_n), _sweep_y0 + _dy*(_ss/_n));
+	            Projectile_collision_1a();
+	            if (state != _st0 || collided_shield != _csh0) { _hit = true; break; }
+	        }
+	        if (!_hit) set_xy(id, _x_now, _y_now); // survived -> restore the true end position
+	        _sweep_x0 = x; _sweep_y0 = y;          // next pass sweeps from wherever it ended
+	    }
 	    //Projectile_update_3a(true); // Projectile_update_1a(!isVal(pID, 6, 8));
 	}
 
