@@ -30,7 +30,7 @@ function g_Create() {
 	            + " msg=" + string(e.message)
 	            + " script=" + string(e.script)
 	            + " line=" + string(e.line)
-	            + " long=" + string(e.longMessage));
+	            + " long=" + string(e.longMessage) + " stack=" + (variable_struct_exists(e,"stacktrace") ? string(e.stacktrace) : "n/a")); // GMS2 e.line is often 0; stacktrace carries the real "gml_Script_X (line N)" frames
 	        file_text_writeln(_cf);
 	        file_text_close(_cf);
 	    }

@@ -46,10 +46,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	switch (_v)
 	{
 		// ---- instant stat pokes (self-clamping via adjust_stat -> get_stat_max) ----
-		case "heal":  if (instance_exists(f)) adjust_stat( _amt, 0); break;
-		case "hurt":  if (instance_exists(f)) adjust_stat(-_amt, 0); break;
-		case "mp":    if (instance_exists(f)) adjust_stat(0,  _amt); break;
-		case "drain": if (instance_exists(f)) adjust_stat(0, -_amt); break;
+		// Bare "!heal"/"!mp" (no number) -> FULL restore of that meter (9999 clamps to
+		// get_stat_max, like !refill); "!heal N" adds N. Bare "!hurt"/"!drain" -> a modest
+		// 16-pt chip. Previously a bare verb gave _amt=0 -> adjust_stat(0,0) -> no-op.
+		case "heal":  if (instance_exists(f)) adjust_stat( (_amt > 0 ? _amt : 9999), 0); break;
+		case "hurt":  if (instance_exists(f)) adjust_stat(-(_amt > 0 ? _amt : 16),   0); break;
+		case "mp":    if (instance_exists(f)) adjust_stat(0,  (_amt > 0 ? _amt : 9999)); break;
+		case "drain": if (instance_exists(f)) adjust_stat(0, -(_amt > 0 ? _amt : 16));   break;
 
 		case "1up":
 			if (instance_exists(f) && variable_global_exists("pc_lives"))
@@ -83,7 +86,10 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				array_push(global.tw_active, {
 					frames  : _frames,
 					reapply : function() { if (instance_exists(g)) set_rm_brightness(0);   },
-					restore : function() { if (instance_exists(g)) update_rm_brightness(); }
+					// update_rm_brightness reads bare instance vars (pal_rm_dark_idx) that live on
+					// the palette instance `p`; called from this struct method, self == the struct,
+					// so it must run in p's scope or it throws "struct.pal_rm_dark_idx not set".
+					restore : function() { if (instance_exists(g) && instance_exists(p)) with (p) update_rm_brightness(); }
 				});
 			}
 			break;
@@ -171,13 +177,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			if (instance_exists(global.pc))
 			{
 				var _sc = (_v == "grow") ? 1.5 : 0.6;
-				global.pc.image_xscale = _sc;
-				global.pc.image_yscale = _sc;
+				global.pc.tw_scale_mul = _sc;
+				global.pc.tw_scale_mul = _sc;
 				array_push(global.tw_active, {
 					frames  : _frames,
 					sc      : _sc,
-					reapply : function() { if (instance_exists(global.pc)) { global.pc.image_xscale = self.sc; global.pc.image_yscale = self.sc; } },
-					restore : function() { if (instance_exists(global.pc)) { global.pc.image_xscale = 1;       global.pc.image_yscale = 1;       } }
+					reapply : function() { if (instance_exists(global.pc)) { global.pc.tw_scale_mul = self.sc; global.pc.tw_scale_mul = self.sc; } },
+					restore : function() { if (instance_exists(global.pc)) { global.pc.tw_scale_mul = 1;       global.pc.tw_scale_mul = 1;       } }
 				});
 			}
 			break;
@@ -205,13 +211,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			{
 				var _prev = global.pc.hspd_max;
 				var _fast = _prev * 1.5;
-				global.pc.hspd_max = _fast;
+				global.pc.tw_speed_mul = 1.5;
 				array_push(global.tw_active, {
 					frames  : _frames,
 					fast    : _fast,
 					prev    : _prev,
 					reapply : function() { if (instance_exists(global.pc)) global.pc.hspd_max = self.fast; },
-					restore : function() { if (instance_exists(global.pc)) global.pc.hspd_max = self.prev; }
+					restore : function() { if (instance_exists(global.pc)) global.pc.tw_speed_mul = 1; }
 				});
 			}
 			break;
@@ -254,6 +260,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				var _obj  = tw_spawn_obj(string_lower(string(_arg)));
 				var _face = (global.pc.xScale < 0) ? -1 : 1;
 				GameObject_create(global.pc.xl + 24 * _face, global.pc.yt, _obj, 1);
+				// MOD: brief i-frames so a mob spawned on top of the PC can't hit him before he reacts
+				global.pc.iframes_timer = max(global.pc.iframes_timer, 48);
 			}
 			global.tw_toast       = _who_s + " -> spawn " + string(_arg);
 			global.tw_toast_timer = 180;
@@ -273,6 +281,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					var _ox = (((_si & 1) == 0) ? -1 : 1) * (16 + 8 * _si);
 					GameObject_create(global.pc.xl + _ox, global.pc.yt, Myu_A, 1);
 				}
+				// MOD: brief i-frames so the pack can't gang-hit the PC the instant it spawns on him
+				global.pc.iframes_timer = max(global.pc.iframes_timer, 48);
 				global.tw_toast       = _who_s + " -> swarm " + string(_n);
 				global.tw_toast_timer = 180;
 			}

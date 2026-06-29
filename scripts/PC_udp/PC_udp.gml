@@ -233,13 +233,13 @@ function PC_udp() {
 	||  Draw_behavior==behavior_HOLD_ITEM5 )
 	//if (HoldItem_can_draw)
 	{
-	    Draw_xscale1 = HoldItem_x_scale;
+	    Draw_xscale1 = HoldItem_x_scale * tw_scale_mul;
 	}
 	else
 	{
-	    Draw_xscale1 = xScale;
+	    Draw_xscale1 = xScale * tw_scale_mul;
 	}
-	Draw_yscale1 = yScale;
+	Draw_yscale1 = yScale * tw_scale_mul;
 
 	if (Draw_can_rando1)
 	{

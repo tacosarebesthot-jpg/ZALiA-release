@@ -31,6 +31,7 @@ function PC_update_1() {
 
 
 	PC_update_1a(); // set properties specific to PC form(cucco, fairy, Lonk)
+	hspd_max *= tw_speed_mul; // MOD (twitch "speed"): fold the live multiplier into the per-frame-reset walk cap
 	hspd_impel = 0;
 
 	if (RescueFairy_sprite) aud_play_fairy1();
@@ -498,11 +499,11 @@ function PC_update_1() {
 	                    _clm  = csBtm1X>>3;
 	                    _row  = csBtm1Y>>3;
 	                var _clm2 = csBtm2X>>3;
-	                var _row2 = csBtm2Y>>3;
-	                if(!isVal(g.dg_RmTile_Break_def[#clamp(_clm, 0,_CLMS1) ,clamp(_row, 0,_ROWS1)]&$FF, TID_BREAK1,TID_BREAK2,TID_BREAK3,TID_BREAK4) 
-	                && !isVal(g.dg_RmTile_Break_def[#clamp(_clm2,0,_CLMS1) ,clamp(_row2,0,_ROWS1)]&$FF, TID_BREAK1,TID_BREAK2,TID_BREAK3,TID_BREAK4) 
-	                &&       !g.dg_RmTile_TempSolid[#clamp(_clm, 0,_CLMS2) ,clamp(_row, 0,_ROWS2)]&$FF 
-	                &&       !g.dg_RmTile_TempSolid[#clamp(_clm2,0,_CLMS2) ,clamp(_row2,0,_ROWS2)]&$FF )
+	                var _row2 = csBtm2Y>>3; // GMS2 port: clamp grid reads below to width-1/height-1. clamp to width/height lets an index hit one-past-last -> out-of-grid read returns undefined -> &$FF throws via DoConv (GM1.4 auto-zeroed). Crashed at scene edges on Death Mountain while carrying ITM_FRY1 (rescue fairy): right edge=col overflow, bottom edge "coming down"=row overflow.
+	                if(!isVal(g.dg_RmTile_Break_def[#clamp(_clm, 0,_CLMS1-1) ,clamp(_row, 0,_ROWS1-1)]&$FF, TID_BREAK1,TID_BREAK2,TID_BREAK3,TID_BREAK4) 
+	                && !isVal(g.dg_RmTile_Break_def[#clamp(_clm2,0,_CLMS1-1) ,clamp(_row2,0,_ROWS1-1)]&$FF, TID_BREAK1,TID_BREAK2,TID_BREAK3,TID_BREAK4) 
+	                &&       !g.dg_RmTile_TempSolid[#clamp(_clm, 0,_CLMS2-1) ,clamp(_row, 0,_ROWS2-1)]&$FF 
+	                &&       !g.dg_RmTile_TempSolid[#clamp(_clm2,0,_CLMS2-1) ,clamp(_row2,0,_ROWS2-1)]&$FF )
 	                {
 	                         if (_C1 && _C2) _clm =       x>>3;
 	                    else if (_C1)        _clm = csBtm1X>>3;

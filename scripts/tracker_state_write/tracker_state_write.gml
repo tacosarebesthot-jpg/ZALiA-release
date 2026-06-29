@@ -94,6 +94,7 @@ function tracker_state_write() {
 	    bottle_full         : (val(f.dm_quests[? STR_Bottle + "01" + STR_State], 0) == 1),
 	    spells              : f.spells,
 	    skills              : f.skills,
+		cucco_skills        : f.Cucco_skills,
 	    crystals            : f.crystals,
 
 	    spell_selected      : g.spell_selected,

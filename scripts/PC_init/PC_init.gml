@@ -458,6 +458,11 @@ function PC_init() {
 	Draw_yscale1 = 1;
 	Draw_yscale2 = 1;
 
+	// MOD (twitch effects): live multipliers the game folds in each frame.
+	// twitch_apply grow/shrink sets tw_scale_mul (PC_udp), speed sets tw_speed_mul (PC_update_1). 1 = no effect.
+	tw_scale_mul = 1;
+	tw_speed_mul = 1;
+
 	Draw_rotation1 = 0;
 	Draw_rotation2 = 0;
 
