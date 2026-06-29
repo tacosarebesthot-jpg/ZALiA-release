@@ -21,7 +21,10 @@ function PC_update_shield_hb() {
 	                ShieldHB_w    = dg_ShieldHB[#_IDX,ShieldHB_IDX_W1];
 	//
 	ShieldHB_collidable = true;
-	if (is_cucco)
+	// Cucco normally has no shield. EXCEPTION: while REFLECT is active, keep the cucco's
+	// shield hitbox alive so projectiles still get reflected (the reflect check in
+	// Projectile_collision_1a is gated on collide_pc_shield, which needs a non-zero ShieldHB).
+	if (is_cucco && !(g.spells_active & SPL_RFLC))
 	{
 	    ShieldHB_collidable = false;
 	    ShieldHB_w=0;
