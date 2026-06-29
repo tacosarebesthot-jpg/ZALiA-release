@@ -18,8 +18,11 @@ function GraphicsEffectsEditor_Draw_GUI() {
 	    //_cursor_XOFF += -$1; // micro adjustment
 	var _dg = ds_grid_create(1,1);
 
-	var _SURF = surface_create(BASE_GAME_RESOLUTION_W,BASE_GAME_RESOLUTION_H);
-	surface_set_target(_SURF);
+	// PERF: reuse a cached surface instead of create+free every frame (the old code did
+	// surface_create + surface_free EACH Draw-GUI frame -> VRAM churn that lagged the game
+	// and starved input). Recreate only if the surface was volatile-lost.
+	if (!surface_exists(GEE_surf)) GEE_surf = surface_create(BASE_GAME_RESOLUTION_W,BASE_GAME_RESOLUTION_H);
+	surface_set_target(GEE_surf);
 	draw_clear_alpha(c_black,0);
 
 
@@ -153,8 +156,9 @@ function GraphicsEffectsEditor_Draw_GUI() {
 	if (global.RetroShaders_enabled) _val = global.RetroShaders_surface_scale;
 	else                             _val = 1;
 	//_val = 1; // testing
-	draw_surface_stretched(_SURF, 0,0, surface_get_width(_SURF)*_val,surface_get_height(_SURF)*_val);
-	surface_free(_SURF);
+	draw_surface_stretched(GEE_surf, 0,0, surface_get_width(GEE_surf)*_val,surface_get_height(GEE_surf)*_val);
+	// GEE_surf is NOT freed here anymore (that was the per-frame VRAM churn). It stays cached and
+	// is freed on Game End (GraphicsEffectsEditor_Game_End); recreated automatically if volatile-lost.
 
 
 	ds_grid_destroy(_dg); _dg=undefined;

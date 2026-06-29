@@ -92,6 +92,10 @@ function GraphicsEffectsEditor_Game_End() {
 	if (_exists)                             dg_Blur=undefined;
 
 
+	// PERF: free the cached editor Draw-GUI surface (created once + reused; see GEE Create / Draw GUI).
+	if (variable_instance_exists(id,"GEE_surf") && surface_exists(GEE_surf)) { surface_free(GEE_surf); GEE_surf = -1; }
+
+
 
 
 

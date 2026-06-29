@@ -2,6 +2,8 @@
 function GraphicsEffectsEditor_Create() {
 
 
+	GEE_surf = -1; // PERF: cached Draw-GUI surface. Previously surface_create()'d + surface_free()'d EVERY frame the menu was open (full-res VRAM churn -> lag + input starvation). Now reused; recreated only if volatile-lost; freed on Game End.
+
 	var _UserPref_dm = -1;
 
 	var _UserPref_FILE_NAME = UserPrefFileName;
