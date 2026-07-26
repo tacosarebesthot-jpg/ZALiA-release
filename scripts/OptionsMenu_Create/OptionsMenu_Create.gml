@@ -234,7 +234,7 @@ function OptionsMenu_Create() {
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "TWITCH";
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "LET YOUR TWITCH VIEWERS CHANGE THE GAME WHILE YOU PLAY. NEEDS A ONE-TIME SETUP - SEE ZALIA_TWITCH_IRC_SETUP\START_HERE.TXT";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "LET YOUR TWITCH VIEWERS CHANGE THE GAME WHILE YOU PLAY. NEEDS A ONE-TIME SETUP.";
 	//                                                                          //
 	MainOption_DEV_TOOLS         = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
@@ -857,7 +857,7 @@ function OptionsMenu_Create() {
 	// The oauth token is deliberately NEVER shown -- the owner streams this menu.
 	enum Twitch
 	{
-	    REWARDS, CHAT, COOLDOWN, DURATION, COMMANDS,
+	    REWARDS, CHAT, COOLDOWN, DURATION, COMMANDS, SETUP,
 	    BACK,
 	    COUNT
 	}
@@ -866,15 +866,17 @@ function OptionsMenu_Create() {
 	Twitch_dg = ds_grid_create(Twitch.COUNT,8);
 	_font = FONT2;
 	             _i=Twitch.REWARDS;
-	Twitch_dg[#_i,0]="TWITCH REWARDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="LETS CHANNEL-POINT REDEEMS AND DONATIONS CHANGE THE GAME. THIS ONE NEEDS THE COMPANION BOT RUNNING OUTSIDE THE GAME - IT DROPS FILES THE GAME PICKS UP. SETUP: SEE ZALIA_TWITCH_IRC_SETUP\START_HERE.TXT";
+	Twitch_dg[#_i,0]="TWITCH REWARDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="CHANNEL-POINT REDEEMS AND DONATIONS. NEEDS THE COMPANION BOT RUNNING OUTSIDE THE GAME.";
 	             _i=Twitch.CHAT;
-	Twitch_dg[#_i,0]="TWITCH IRC";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="CONNECTS STRAIGHT TO YOUR OWN CHAT SO VIEWERS CAN TYPE !COMMANDS. NO BOT NEEDED - THIS IS THE EASY ONE. RUN SETUP_TWITCH_IRC.BAT ONCE FIRST. SETUP: SEE ZALIA_TWITCH_IRC_SETUP\START_HERE.TXT";
+	Twitch_dg[#_i,0]="TWITCH IRC";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="CONNECTS TO YOUR CHAT SO VIEWERS CAN TYPE !COMMANDS. NO BOT NEEDED - THIS IS THE EASY ONE.";
 	             _i=Twitch.COOLDOWN;
-	Twitch_dg[#_i,0]="COMMAND COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="SECONDS THE GAME WAITS BEFORE ACCEPTING ANOTHER CHAT COMMAND. RAISE IT IF CHAT IS SPAMMING FASTER THAN YOU CAN PLAY. ONLY AFFECTS TWITCH IRC, NOT REWARDS. LEFT/RIGHT TO CHANGE.";
+	Twitch_dg[#_i,0]="COMMAND COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="SECONDS BETWEEN CHAT COMMANDS. AFFECTS TWITCH IRC ONLY. LEFT/RIGHT TO CHANGE.";
 	             _i=Twitch.DURATION;
-	Twitch_dg[#_i,0]="EFFECT LENGTH";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="HOW LONG A TIMED EFFECT LASTS, LIKE SLOW OR CONFUSE OR DARK. LEFT/RIGHT TO CHANGE.";
+	Twitch_dg[#_i,0]="EFFECT LENGTH";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="HOW LONG A TIMED EFFECT LASTS, LIKE SLOW OR DARK. LEFT/RIGHT TO CHANGE.";
 	             _i=Twitch.COMMANDS;
-	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="WHAT CHAT CAN TYPE: !HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SHRINK !GROW !SPAWN !SWARM !PARTY !DISCO !FREEZE !CURSE !ARISE !CUCCO !1UP. FULL LIST: ZALIA_TWITCH_IRC_SETUP\TWITCH_COMMANDS.TXT";
+	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP";
+	             _i=Twitch.SETUP;
+	Twitch_dg[#_i,0]="HOW TO SET UP";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="RUN SETUP_TWITCH_IRC.BAT, THEN READ START_HERE.TXT IN THE ZALIA_TWITCH_IRC_SETUP FOLDER.";
 	             _i=Twitch.BACK;
 	Twitch_dg[#_i,0]="BACK";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="RETURN TO THE MAIN OPTIONS MENU.";
 

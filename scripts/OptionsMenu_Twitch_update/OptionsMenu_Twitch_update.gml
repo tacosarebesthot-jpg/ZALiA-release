@@ -63,7 +63,7 @@ function OptionsMenu_Twitch_update() {
 
 	switch(Twitch_cursor){
 
-	    // CHANNEL REWARDS: the file-drop poll. An external bot writes verb files into
+	    // TWITCH REWARDS: the file-drop poll. An external bot writes verb files into
 	    // working_directory\twitch_drop\ and twitch_poll picks them up. Independent of
 	    // the IRC connection below -- either path can drive effects on its own.
 	    case Twitch.REWARDS:{ if (timer) break;
@@ -76,7 +76,7 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
-	    // CONNECT TO CHAT: the in-game IRC client, no external bot needed. ON -> load
+	    // TWITCH IRC: the in-game IRC client, no external bot needed. ON -> load
 	    // config + connect; OFF -> disconnect.
 	    case Twitch.CHAT:{ if (timer) break;
 	    if (_InputConfirm_pressed2)
@@ -147,6 +147,17 @@ function OptionsMenu_Twitch_update() {
 	    // COMMANDS: read-only reference. The verb list lives in this row's description
 	    // string, so it draws in the info area like every other row's help text.
 	    case Twitch.COMMANDS:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        aud_play_sound(BACK_SOUND1);
+	        timer = DURATION1;
+	    }
+	    break;}
+
+	    // HOW TO SET UP: read-only pointer at the setup files that ship with the game.
+	    // Named rather than described because a first-time user has no idea either
+	    // Twitch route needs anything outside the game at all.
+	    case Twitch.SETUP:{ if (timer) break;
 	    if (_InputConfirm_pressed2)
 	    {
 	        aud_play_sound(BACK_SOUND1);

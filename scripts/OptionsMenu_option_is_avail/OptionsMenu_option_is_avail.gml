@@ -128,6 +128,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case Twitch.COOLDOWN:       {return true; break;}
 	        case Twitch.DURATION:       {return true; break;}
 	        case Twitch.COMMANDS:       {return true; break;}
+	        case Twitch.SETUP:          {return true; break;}
 	        case Twitch.BACK:           {return true; break;}
 	    }//switch(argument1)
 	    break;}//case menu_state_TWITCH
