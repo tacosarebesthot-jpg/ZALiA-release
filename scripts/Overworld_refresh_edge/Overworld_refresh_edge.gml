@@ -100,6 +100,15 @@ function Overworld_refresh_edge(argument0, argument1, argument2, argument3) {
 	        _scale_x = 1;
 	        _scale_y = 1;
 
+	        // GMS2 PORT FIX: out-of-range ds_grid_get returns undefined (GMS1.4 returned 0),
+	        // which throws on the `&$FF` below. Edge refreshes read past the grid by design
+	        // when the camera sits at a border, so this guard is load-bearing here.
+	        if (_ow_clm < 0 || _ow_row < 0
+	        ||  _ow_clm >= ds_grid_width(dg_tsrc) || _ow_row >= ds_grid_height(dg_tsrc))
+	        {
+	            continue;
+	        }
+
 	        _tile_data = dg_tsrc[#_ow_clm,_ow_row];
 
 	        if (RandoTSRC_active)
@@ -199,6 +208,15 @@ function Overworld_refresh_edge(argument0, argument1, argument2, argument3) {
 
 	        _scale_x = 1;
 	        _scale_y = 1;
+
+	        // GMS2 PORT FIX: out-of-range ds_grid_get returns undefined (GMS1.4 returned 0),
+	        // which throws on the `&$FF` below. Edge refreshes read past the grid by design
+	        // when the camera sits at a border, so this guard is load-bearing here.
+	        if (_ow_clm < 0 || _ow_row < 0
+	        ||  _ow_clm >= ds_grid_width(dg_tsrc) || _ow_row >= ds_grid_height(dg_tsrc))
+	        {
+	            continue;
+	        }
 
 	        _tile_data = dg_tsrc[#_ow_clm,_ow_row];
 

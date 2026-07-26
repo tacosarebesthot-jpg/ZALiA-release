@@ -143,13 +143,29 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				if (variable_global_exists("jukebox_count") && global.jukebox_count > 0)
 				{   jukebox_build_playlist();  }
 
+				// Match on a normalised form (letters+digits only). The display names come
+				// from the asset names, so they carry UNDERSCORES -- a raw substring test
+				// meant chat had to type "bloodytears" and "!music bloody tears" never
+				// matched anything. Normalising BOTH sides lets chat type it naturally:
+				// "bloody tears", "BloodyTears" and "bloodytears" are now equivalent.
 				var _names = global.jukebox_names;
-				var _q     = string_lower(string(_arg));
+				var _q     = tw_slug(_arg);
 				var _hit   = -1;
-				for (var _ti = 0; _ti < array_length(_names); _ti++)
+				if (_q != "")
 				{
-					if (_q != "" && string_pos(_q, string_lower(string(_names[_ti]))) > 0)
-					{   _hit = _ti; break;  }
+					// exact normalised name wins over a substring hit, so a short track
+					// title can still be requested even when it is contained in a longer one
+					for (var _ti = 0; _ti < array_length(_names); _ti++)
+					{
+						if (tw_slug(_names[_ti]) == _q) { _hit = _ti; break; }
+					}
+					if (_hit < 0)
+					{
+						for (var _ti = 0; _ti < array_length(_names); _ti++)
+						{
+							if (string_pos(_q, tw_slug(_names[_ti])) > 0) { _hit = _ti; break; }
+						}
+					}
 				}
 
 				// no arg / "random" / "shuffle" -> pick a random REAL track so Smoken's
@@ -201,14 +217,36 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		case "slow":
 			// control_MOVE1 = the "slow walk" control bit (PC_init.gml:710). Re-assert
 			// each tick (PC rebuilds control during movement); clear the bit on revert.
+			//
+			// OVERWORLD FIX: control_MOVE1 is inert on the overworld -- Link is driven there
+			// by OVERWORLD.move_spd / move_speed, which Overworld_Step RECOMPUTES every step
+			// from the tile underfoot (swamp -> MOVE_SPD_2, else MOVE_SPD_1). So the bit alone
+			// did nothing outside side-scroll rooms. Force swamp speed in the reapply closure
+			// too: because it re-runs each tick it also survives a screen/room change, which is
+			// the other half of the reported bug. No restore needed for the overworld half --
+			// Overworld_Step writes the correct value again on the next frame by itself.
 			if (instance_exists(global.pc))
 			{
 				var _bit = global.pc.control_MOVE1;
 				global.pc.control |= _bit;
+
+				var _ow_slow = function() {
+					if (instance_exists(global.OVERWORLD) && instance_exists(g) && g.room_type == "C")
+					{
+						global.OVERWORLD.move_spd   = global.OVERWORLD.MOVE_SPD_2;
+						global.OVERWORLD.move_speed = global.OVERWORLD.move_SPEED2;
+					}
+				};
+				_ow_slow();
+
 				array_push(global.tw_active, {
 					frames  : _frames,
 					bit     : _bit,
-					reapply : function() { if (instance_exists(global.pc)) global.pc.control |=  self.bit;  },
+					ow_slow : _ow_slow,
+					reapply : function() {
+						if (instance_exists(global.pc)) global.pc.control |=  self.bit;
+						self.ow_slow();
+					},
 					restore : function() { if (instance_exists(global.pc)) global.pc.control &= ~self.bit;  }
 				});
 			}
@@ -217,36 +255,96 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		case "speed":
 			// hspd_max is recomputed during movement, so re-assert the bumped value
 			// each tick; restore the prior cap on revert.
+			// DURATION: "!speed N" -> N SECONDS (arg parsed here, x60 -> frames). No/blank/bad
+			// arg -> 10s default. Capped at 60s so chat can't lock a permanent buff. This
+			// overrides the generic _dur (IRC always passes 300); the drop-folder path can
+			// still pass its own dur, but the arg wins when present.
 			if (instance_exists(global.pc))
 			{
+				var _spd_secs   = tw_num(_arg, 0);
+				var _spd_frames  = (_spd_secs > 0) ? floor(_spd_secs * 60) : 600; // default 10s
+				if (_spd_frames > 3600) _spd_frames = 3600;                       // cap 60s
+
 				var _prev = global.pc.hspd_max;
 				var _fast = _prev * 1.5;
 				global.pc.tw_speed_mul = 1.5;
 				array_push(global.tw_active, {
-					frames  : _frames,
+					frames  : _spd_frames,
 					fast    : _fast,
 					prev    : _prev,
 					reapply : function() { if (instance_exists(global.pc)) global.pc.hspd_max = self.fast; },
 					restore : function() { if (instance_exists(global.pc)) global.pc.tw_speed_mul = 1; }
 				});
+				global.tw_toast       = _who_s + " -> speed " + string(_spd_frames div 60) + "s";
+				global.tw_toast_timer = 180;
 			}
 			break;
 
 		case "spell":
-			// force-select a spell the player already owns; restore the prior pick.
-			if (instance_exists(f) && instance_exists(g))
+			// CAST the named spell for real via the game's own cast_spell() lever, so its
+			// VISUAL / active effect actually shows (PROTECT shield, REFLECT, FAIRY->cucco,
+			// FIRE bolt, THUNDER, ENIGMA, etc.) -- the old version only swapped the queued
+			// icon and nothing happened. No ownership gate (chat chaos): casting drives the
+			// effect directly. Persistent spells (PROTECT/REFLECT/JUMP/FAIRY) stay in
+			// g.spells_active = visible for the duration; we clear that bit on revert UNLESS
+			// it was already active (never strip a form/shield the player set). Instant
+			// spells self-clear in update_spell_effects, so the revert entry is a harmless
+			// no-op for them.
+			if (instance_exists(g) && instance_exists(global.pc))
 			{
 				var _spellbit = tw_spell_bit(string_lower(string(_arg)));
-				if (_spellbit != 0 && (f.spells & _spellbit))
+				if (_spellbit != 0)
 				{
-					var _prev_spell = g.spell_selected;
-					g.spell_selected = _spellbit;
-					g.spell_ready    = _spellbit;
+					var _was_active = (g.spells_active & _spellbit) != 0;
+					cast_spell(_spellbit);
 					array_push(global.tw_active, {
 						frames  : _frames,
-						prev    : _prev_spell,
-						restore : function() { if (instance_exists(g)) { g.spell_selected = self.prev; g.spell_ready = self.prev; } }
+						bit     : _spellbit,
+						was_act : _was_active,
+						restore : function() { if (instance_exists(g) && !self.was_act) g.spells_active &= ~self.bit; }
 					});
+
+					// ENIGMA (SPL_SPEL) -- turn mobs into Bots. The stock update_spell_effects
+					// loop BREAKS on the first non-reacting entry in go_mgr.dl_gob1, so with a
+					// twitch-spawned mob / the herald fairy in the list it can bail before it
+					// reaches the real enemies -> "nothing changed". Do it robustly here over
+					// ALL on-screen reacting NON-boss enemies (continue, not break), then consume
+					// the bit so the stock loop doesn't re-run. Mirrors the stock react_spell
+					// switch (1->Bot, 2->Ache, 3->RestoreFairy).
+					if (_spellbit == SPL_SPEL)
+					{
+						g.spells_active &= ~SPL_SPEL;
+						with (Enemy)
+						{
+							if (is_ancestor(object_index, Boss)) continue;
+							if (!state) continue;
+							if (!variable_instance_exists(id, "react_spell") || !react_spell) continue;
+							GO_update_cam_vars();
+							if (!ocsHV3(id)) continue;
+
+							timer = 0;
+							state = 0;
+
+							var _eo, _ev;
+							switch (react_spell)
+							{
+								case 2:  _eo = Ache01; _ev = 1; break;
+								case 3:  _eo = ReFaA;  _ev = 1; break;
+								default: _eo = Bot_A;  _ev = 1; break;
+							}
+
+							var _eobjver = object_get_name(_eo) + hex_str(_ev);
+							var _ePI     = val(g.dm_go_prop[?_eobjver + STR_pal_idx], palidx_def);
+							g.go_mgr.uIdxSwap_gob = update_idx;
+							with (GameObject_create(xl, yt, _eo, _ev, -1, _ePI))
+							{
+								if (is_ver(id, Bot_A, 1)) hp = 0;
+							}
+						}
+					}
+
+					global.tw_toast       = _who_s + " -> spell " + string(_arg);
+					global.tw_toast_timer = 180;
 				}
 			}
 			break;
@@ -263,36 +361,63 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 
 		// ---- GAME-MASTER / dungeon-master verbs: chat spawns enemies to harass --------
 		case "spawn":
-			// spawn ONE normal enemy (named by arg) next to the PC, toward its facing.
-			// reuses the flame lever exactly: GameObject_create(x, y, <obj>, <ver=1>).
+			// spawn N of a NAMED enemy next to the PC, toward its facing. Arg accepts an
+			// optional COUNT: "!spawn moblin", "!spawn moblin 3", "!spawn 3 moblin", or
+			// "!spawn 3" (count only -> default enemy). Count defaults to 1, capped at 6 so
+			// chat can't flood a room. reuses the flame lever: GameObject_create(x,y,obj,1).
 			if (instance_exists(global.pc))
 			{
-				var _obj  = tw_spawn_obj(string_lower(string(_arg)));
+				// parse name + optional numeric count out of the arg (order-independent)
+				var _sp_name  = "";
+				var _sp_cnt   = 1;
+				var _sp_parts = string_split(string(_arg), " ");
+				for (var _pi = 0; _pi < array_length(_sp_parts); _pi++)
+				{
+					var _tok = tw_trim(_sp_parts[_pi]);
+					if (_tok == "") continue;
+					if (string_digits(_tok) == _tok) _sp_cnt = floor(tw_num(_tok, 1)); // pure number -> count
+					else if (_sp_name == "")         _sp_name = _tok;                  // first word -> name
+				}
+				if (_sp_cnt < 1) _sp_cnt = 1;
+				if (_sp_cnt > 6) _sp_cnt = 6;
+
+				var _obj  = tw_spawn_obj(string_lower(_sp_name));
 				var _face = (global.pc.xScale < 0) ? -1 : 1;
-				GameObject_create(global.pc.xl + 24 * _face, global.pc.yt, _obj, 1);
-				// MOD: brief i-frames so a mob spawned on top of the PC can't hit him before he reacts
-				global.pc.iframes_timer = max(global.pc.iframes_timer, 48);
+				for (var _sc = 0; _sc < _sp_cnt; _sc++)
+				{   GameObject_create(global.pc.xl + (24 + 16 * _sc) * _face, global.pc.yt, _obj, 1);  }
+				// MOD: brief i-frames so mobs spawned on top of the PC can't hit him before he reacts.
+				// NOT frames -- this field only decrements when timer_b wraps (~21 frames, see
+				// update_game_timers:18), so 48 was ~16 SECONDS of invulnerability, which is what
+				// made !spawn read as a free pass on stream. A real hit grants 4 (~1.4s,
+				// PC_take_damage:85); match that.
+				global.pc.iframes_timer = max(global.pc.iframes_timer, 4);
+
+				global.tw_toast       = _who_s + " -> spawn " + string(_sp_cnt) + " " + (_sp_name == "" ? "daira" : _sp_name);
+				global.tw_toast_timer = 180;
 			}
-			global.tw_toast       = _who_s + " -> spawn " + string(_arg);
-			global.tw_toast_timer = 180;
 			break;
 
 		case "swarm":
-			// spawn a small pack of a single WEAK enemy (Myu) spread around the PC.
-			// count via tw_num (default 3), CAPPED at 6 so chat can't flood the room.
+			// spawn a small pack of RANDOM enemies spread around the PC. count via tw_num
+			// (default 3), CAPPED at 6 so chat can't flood the room. Each spawn rolls a
+			// random type from a land-safe pool (was: all Myu).
 			if (instance_exists(global.pc))
 			{
 				var _n = floor(tw_num(_arg, 3));
 				if (_n < 1) _n = 3;
 				if (_n > 6) _n = 6;
+				// land-safe mix (skip Zora, which wants shoreline). all exist w/ ver-1 data.
+				var _pool = [DairA, MoblA, GoriA, StalA, Myu_A, Ache01, Atta01];
 				for (var _si = 0; _si < _n; _si++)
 				{
 					// alternate L/R of the PC, widening slightly each step
-					var _ox = (((_si & 1) == 0) ? -1 : 1) * (16 + 8 * _si);
-					GameObject_create(global.pc.xl + _ox, global.pc.yt, Myu_A, 1);
+					var _ox   = (((_si & 1) == 0) ? -1 : 1) * (16 + 8 * _si);
+					var _sobj = _pool[irandom(array_length(_pool) - 1)];
+					GameObject_create(global.pc.xl + _ox, global.pc.yt, _sobj, 1);
 				}
-				// MOD: brief i-frames so the pack can't gang-hit the PC the instant it spawns on him
-				global.pc.iframes_timer = max(global.pc.iframes_timer, 48);
+				// MOD: brief i-frames so the pack can't gang-hit the PC the instant it spawns on him.
+				// Same timer_b units as the spawn case above -- 4 ticks ~= 1.4s, not 48 (~16s).
+				global.pc.iframes_timer = max(global.pc.iframes_timer, 4);
 				global.tw_toast       = _who_s + " -> swarm " + string(_n);
 				global.tw_toast_timer = 180;
 			}
@@ -385,6 +510,33 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			if (instance_exists(f)) adjust_stat(9999, 9999);
 			break;
 
+		case "arise":
+		case "chicken":
+		case "cucco":
+			// FUN: turn Link into a CUCCO (chicken) for the duration. The cucco form is
+			// driven entirely by (g.mod_PC_CUCCO_1 && g.spells_active & SPL_FARY) -- and
+			// PC_update_1 recomputes global.pc.is_cucco from those every frame -- so we
+			// just raise the FAIRY spell bit (the game's own transform lever) and clear it
+			// on revert. Re-assert each tick so a room change / spell clear can't drop the
+			// form early. Gated on mod_PC_CUCCO_1 (default ON); if that mod is off, casting
+			// FAIRY makes a normal fairy instead, so we no-op rather than mis-transform.
+			if (instance_exists(g) && instance_exists(global.pc) && g.mod_PC_CUCCO_1)
+			{
+				var _had_fary = (g.spells_active & SPL_FARY) != 0;
+				g.spells_active |= SPL_FARY;
+				array_push(global.tw_active, {
+					frames   : _frames,
+					had_fary : _had_fary,
+					reapply  : function() { if (instance_exists(g)) g.spells_active |= SPL_FARY; },
+					// only clear the bit if the player wasn't already fairy/cucco before us,
+					// so we never strip a form the player set themselves.
+					restore  : function() { if (instance_exists(g) && !self.had_fary) g.spells_active &= ~SPL_FARY; }
+				});
+				global.tw_toast       = _who_s + " -> arise (CHICKEN!)";
+				global.tw_toast_timer = 180;
+			}
+			break;
+
 		default:
 			_known                = false;
 			global.tw_toast       = "unknown: " + _v;
@@ -424,6 +576,25 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			if (_s != -1 && audio_exists(_s)) aud_play_sound(_s);
 		}
 	}
+}
+
+
+/// @description  tw_slug(value) -- lowercase, letters+digits only. Used to compare a chat
+/// request against a track name without caring about spaces, underscores, case or punctuation.
+/// Chat types "Bloody Tears"; the jukebox display name is "CASTLEVANIA2_BLOODYTEARS_BODY".
+/// Both slug to a form where a substring test actually does what a human expects.
+function tw_slug(_s) {
+
+	var _str = string_lower(string(_s));
+	var _out = "";
+	var _len = string_length(_str);
+	for (var _i = 1; _i <= _len; _i++)
+	{
+		var _c = string_char_at(_str, _i);
+		var _o = ord(_c);
+		if ((_o >= 48 && _o <= 57) || (_o >= 97 && _o <= 122)) _out += _c; // 0-9, a-z
+	}
+	return _out;
 }
 
 

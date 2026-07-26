@@ -1,0 +1,47 @@
+ZALiA - Twitch IRC chat commands
+=================================
+Type these in the streamer's Twitch chat once TWITCH IRC is connected.
+Syntax:  !verb [arg]      Unknown commands are ignored.
+Timed effects last ~5 seconds. A shared cooldown throttles all of chat.
+
+PLAYER
+  !heal <amount>     heal HP
+  !hurt <amount>     chip damage (non-lethal)
+  !mp <amount>       give magic
+  !drain <amount>    drain magic
+  !1up               +1 life
+  !refill            full HP + MP
+  !curse             slow non-lethal HP drip (stops at 1 HP) [timed]
+  !arise             turn Link into a CHICKEN (cucco) [timed]   (aliases: !chicken !cucco)
+  !spell <name>      CAST a spell (shows its visual/effect)
+                     names: PROTECT JUMP HEAL FAIRY FIRE REFLECT ENIGMA THUNDER SUMMON
+
+BUFFS / SCREEN (all timed)
+  !invuln            brief invincibility
+  !speed <secs>      speed buff (default 10s, max 60s)   e.g. !speed 20
+  !slow              marsh-slow legs
+  !shrink / !grow    shrink / embiggen Link
+  !shake             screen shake
+  !dark              darken room (need fire/candle to see)
+  !flip              mirror screen left/right
+  !confuse           swap LEFT/RIGHT controls ("drunk")
+  !disco             color-cycling overlay
+  !party             disco + flip together
+
+ENEMIES / DUNGEON MASTER
+  !spawn <enemy> [n] spawn n of a named enemy (default 1, max 6)
+                     names: daira moblin goriya zora stalfos bat(ache) atta myu
+                     e.g. !spawn moblin 3   or   !spawn 3   (3 of the default)
+  !swarm <1-6>       spawn a pack of RANDOM enemies (default 3, max 6)
+  !flame  (!heckler) spawn a jumping-flame heckler named after the chatter
+  !freeze (!stun)    freeze on-screen non-boss mobs [timed]
+  !smite  (!clearscreen)  kill all on-screen non-boss mobs
+
+AUDIO
+  !music <track>     play a jukebox track (matches part of the track name)
+
+Notes:
+  - Bosses are never affected by !freeze / !smite.
+  - Nothing touches the save file. Every effect is runtime-only and reversible.
+
+Examples:  !heal 4   !spawn moblin   !swarm 5   !spell fire   !music forest   !party

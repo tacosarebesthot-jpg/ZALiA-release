@@ -140,6 +140,7 @@ function tw_irc_is_verb(_v) {
 		case "flip":   case "confuse": case "disco":
 		case "freeze": case "stun":  case "smite": case "clearscreen":
 		case "curse":  case "party": case "refill":
+		case "arise":  case "chicken": case "cucco":
 			return true;
 		default:
 			return false;

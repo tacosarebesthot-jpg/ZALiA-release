@@ -59,21 +59,36 @@ function Surface_Draw_End() {
 	        // screenshake present above (temp-surface copy -> redraw transformed), changing
 	        // only the transform from a translate to a NEGATIVE x-scale. Draw-time only;
 	        // the timed flag (global.tw_flip) is cleared on revert in twitch_tick.
+	        // SCOPE FIX (NEEDS A VISUAL CHECK -- see below): this used to mirror the ENTIRE
+	        // application_surface, which is why !flip broke the viewport on the Twitch capture
+	        // rather than just mirroring the game. Now scoped to the view box.
+	        //
+	        // CAVEAT if this looks wrong: viewXL()/viewYT() are ROOM coordinates (XView/YView),
+	        // while draw_surface_part_ext samples in application_surface PIXELS. Those two only
+	        // line up while the view sits at room origin. If the mirrored region drifts or
+	        // shows the wrong slice once the overworld scrolls, that's the cause -- swap the
+	        // source rect to (0,0,application_surface_w,application_surface_h) and mirror about
+	        // the surface centre instead.
 	        if (variable_global_exists("tw_flip") && global.tw_flip)
 	        {
+	            var _vx = viewXL(), _vy = viewYT(), _vw = viewW(), _vh = viewH();
+
 	            var          _FSURF = surface_create(application_surface_w,application_surface_h);
-	            surface_copy(_FSURF, 0,0, application_surface);
+	            surface_copy(_FSURF, 0,0, application_surface); // pristine copy to sample from
 
 	            if (global.application_surface_draw_enable_state)
 	            {
 	                draw_clear_alpha(c_black,0);
-	                draw_surface_ext(_FSURF, application_surface_w,0, -1,1, 0, c_white,1);
+	                draw_surface(_FSURF, 0,0); // everything, unmirrored
+	                // then overdraw JUST the play area, mirrored in place
+	                draw_surface_part_ext(_FSURF, _vx,_vy,_vw,_vh, _vx+_vw,_vy, -1,1, c_white,1);
 	            }
 	            else
 	            {
+	                // _FSURF already holds the full frame; overdraw the mirrored view box onto
+	                // it, then copy the composite back. No clear -- the surround must survive.
 	                surface_set_target(_FSURF);
-	                draw_clear_alpha(c_black,0);
-	                draw_surface_ext(application_surface, application_surface_w,0, -1,1, 0, c_white,1);
+	                draw_surface_part_ext(application_surface, _vx,_vy,_vw,_vh, _vx+_vw,_vy, -1,1, c_white,1);
 	                surface_reset_target();
 	                surface_copy(application_surface, 0,0, _FSURF);
 	            }

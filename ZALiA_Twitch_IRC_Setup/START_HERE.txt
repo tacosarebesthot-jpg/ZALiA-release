@@ -1,0 +1,23 @@
+ZALiA - Twitch IRC setup  (start here)
+======================================
+
+This lets the game connect to your Twitch chat so viewers can affect the game
+with !commands. No bot, no extra software.
+
+QUICK START
+  1. Double-click  setup_twitch_irc.bat
+  2. Say YES to open the token page, pick "chat:read", authorise, copy the token.
+  3. Paste the token, type your Twitch login + channel. It writes your config.
+  4. In-game:  Options -> DEV TOOLS -> TEST/CAPTURE -> TWITCH IRC  -> turn ON
+  5. Top-left shows  TWITCH: connecting -> connected.
+     Type  !heal 4  in your chat to test.
+
+FILES IN THIS FOLDER
+  setup_twitch_irc.bat   run this - creates your config (asks for your token)
+  twitch_test.bat        fire a command without live chat (e.g. twitch_test.bat heal 4)
+  TWITCH_COMMANDS.txt     the full list of chat !commands for viewers/mods
+  TWITCH_IRC_README.md    full setup + troubleshooting guide (the status line explains errors)
+
+The config it writes lives at:
+  %LOCALAPPDATA%\ZALiA\twitch_config.txt
+(You can re-run setup any time to change it, then toggle TWITCH IRC OFF then ON.)

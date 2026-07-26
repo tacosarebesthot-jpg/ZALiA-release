@@ -23,8 +23,17 @@ function Overworld_refresh_tiles(argument0, argument1) {
             
 	            _ow_clm = (argument0+_x)>>SHIFT;
 	            _ow_row = (argument1+_y)>>SHIFT;
-            
-            
+
+	            // Same GMS2 out-of-range hazard as the non-anarkhya branch below: an
+	            // out-of-grid read returns undefined, and the `!=0` test that follows then
+	            // throws instead of skipping the cell.
+	            if (_ow_clm < 0 || _ow_row < 0
+	            ||  _ow_clm >= ds_grid_width(dg_anarkhya_tsrc)
+	            ||  _ow_row >= ds_grid_height(dg_anarkhya_tsrc))
+	            {
+	                continue;
+	            }
+
 	            // MAIN layer
 	                _tile_data = dg_anarkhya_tsrc[#_ow_clm,_ow_row];
 	            if (_tile_data!=0)
@@ -76,10 +85,21 @@ function Overworld_refresh_tiles(argument0, argument1) {
             
 	            _ow_clm = (argument0+_x)>>SHIFT;
 	            _ow_row = (argument1+_y)>>SHIFT;
-            
+
 	            _scale_x = 1;
 	            _scale_y = 1;
-            
+
+	            // GMS2 PORT FIX: an out-of-range ds_grid_get returns UNDEFINED in GMS2 where
+	            // GMS1.4 returned 0, so `_tile_data&$FF` below threw and the tile layer was
+	            // never built -> blue screen. Reachable from any exit whose spawn column lands
+	            // outside the populated grid (repro: TownA_02 right exit). Same hazard the
+	            // sweep tooling hit in commit 6e4f5693; this is the live path.
+	            if (_ow_clm < 0 || _ow_row < 0
+	            ||  _ow_clm >= ds_grid_width(dg_tsrc) || _ow_row >= ds_grid_height(dg_tsrc))
+	            {
+	                continue;
+	            }
+
 	            _tile_data = dg_tsrc[#_ow_clm,_ow_row];
             
 	            if (RandoTSRC_active)

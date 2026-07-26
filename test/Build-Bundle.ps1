@@ -38,7 +38,7 @@
 param(
     [string]$IgorPath = 'C:\ProgramData\GameMakerStudio2-LTS2026\Cache\runtimes\runtime-2026.0.0.23\bin\igor\windows\x64\Igor.exe',
 
-    [string]$ProjectPath = 'C:\Users\osrs-lab\GameMakerProjects\ZALiA\ZALiA.yyp',
+    [string]$ProjectPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'ZALiA.yyp'),
 
     [string]$RuntimePath = 'C:\ProgramData\GameMakerStudio2-LTS2026\Cache\runtimes\runtime-2026.0.0.23',
 
@@ -52,7 +52,9 @@ $ErrorActionPreference = 'Stop'
 # ---------------------------------------------------------------------------
 # Constants / paths
 # ---------------------------------------------------------------------------
-$ProjectRoot  = 'C:\Users\osrs-lab\GameMakerProjects\ZALiA'
+# Derived from this script's own location (test\ lives inside the project root) so the
+# harness follows the repo instead of a machine-specific checkout path.
+$ProjectRoot  = Split-Path -Parent $PSScriptRoot
 $MacrosPath   = Join-Path $ProjectRoot 'scripts\macros\macros.gml'
 $TestRoot     = Join-Path $ProjectRoot 'test'
 $RunsDir      = Join-Path $TestRoot 'runs'

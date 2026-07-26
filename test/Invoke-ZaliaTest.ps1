@@ -42,9 +42,14 @@ param(
 
     [string]$IgorPath = 'C:\ProgramData\GameMakerStudio2-LTS2026\Cache\runtimes\runtime-2026.0.0.23\bin\igor\windows\x64\Igor.exe',
 
-    [string]$ProjectPath = 'C:\Users\osrs-lab\GameMakerProjects\ZALiA\ZALiA.yyp',
+    [string]$ProjectPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'ZALiA.yyp'),
 
-    [string]$RuntimePath = 'C:\ProgramData\GameMakerStudio2-LTS2026\Cache\runtimes\runtime-2026.0.0.23'
+    [string]$RuntimePath = 'C:\ProgramData\GameMakerStudio2-LTS2026\Cache\runtimes\runtime-2026.0.0.23',
+
+    # Where the game writes its flag files / screen_check / bugprobe artifacts.
+    # Leave empty to auto-detect (see Resolve-SaveDir below); set explicitly for a
+    # portable build that saves next to the executable.
+    [string]$SaveDir = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -52,9 +57,28 @@ $ErrorActionPreference = 'Stop'
 # ---------------------------------------------------------------------------
 # Constants / paths
 # ---------------------------------------------------------------------------
-$ProjectRoot   = 'C:\Users\osrs-lab\GameMakerProjects\ZALiA'
+# Derived from this script's own location (test\ lives inside the project root) so the
+# harness follows the repo instead of a machine-specific checkout path.
+$ProjectRoot   = Split-Path -Parent $PSScriptRoot
 $MacrosPath    = Join-Path $ProjectRoot 'scripts\macros\macros.gml'
-$LocalAppData  = Join-Path $env:LOCALAPPDATA 'ZALiA'
+# Save-dir resolution. GameMaker's Windows "save location" option decides whether the
+# game writes under %LOCALAPPDATA% or next to the runner, so probe rather than assume:
+# an explicit -SaveDir wins, then whichever candidate already exists, else the
+# %LOCALAPPDATA% default (which the game will create on first run).
+function Resolve-SaveDir {
+    param([string]$Explicit)
+    if ($Explicit) { return $Explicit }
+    $candidates = @(
+        (Join-Path $env:LOCALAPPDATA 'ZALiA')
+        (Join-Path $env:APPDATA      'ZALiA')
+    )
+    foreach ($c in $candidates) {
+        if (Test-Path -LiteralPath $c) { return $c }
+    }
+    return $candidates[0]
+}
+
+$LocalAppData  = Resolve-SaveDir -Explicit $SaveDir
 $ScreenCheck   = Join-Path $LocalAppData 'screen_check'
 $BugprobeDir   = Join-Path $LocalAppData 'bugprobe'
 $TestRoot      = Join-Path $ProjectRoot 'test'

@@ -76,7 +76,13 @@ function update_change_room() {
 
 	// ------------------------------------------------------------------------------------------
 	// ------------------------------------------------------------------------------------------
-	if (FallScene_timer) FallScene_timer--;
+	// FALL-SCENE TIMING FIX: FallScene_timer gates the stripe/PC DRAW (Surface_Draw_End: >2),
+	// while ChangeRoom_timer (below) gates when the room actually swaps. They start equal but
+	// used DIFFERENT clocks -- this was frame-based (-1) while ChangeRoom_timer is delta-based
+	// (-delta_multiplier). Under any fps deviation (the fall is render-bound) they drift, so the
+	// animation stopped early while the transition ran on -> the "brief fall then long black".
+	// Decrement on the SAME delta clock so the draw window tracks the transition window exactly.
+	if (FallScene_timer) FallScene_timer -= 1*global.delta_multiplier;
 
 
 
@@ -154,6 +160,29 @@ function update_change_room() {
 	            var _PARENT_PI = val(global.FallScene_dm[?_dk0+"_Parent"], global.PI_GUI2);
 	            var _PALETTE   = val(global.FallScene_dm[?_TYPE_+STR_Palette], p.PAL_GUI2);
 	            change_pal(strReplaceAt(p.pal_rm_new, get_pal_pos(_PARENT_PI), string_length(_PALETTE), _PALETTE));
+
+		            // DIAG (DEV only): the fall shows BLACK with only a brief PC because the STRIPE
+		            // layer isn't rendering. draw_falling_scene() draws the PC OUTSIDE the
+		            // surface_exists() guard but the stripe surface INSIDE it -> if the type surface
+		            // is missing (Current copy stays black) OR the fall palette index resolves to the
+		            // PI_GUI2 fallback, the stripes render black. Log both so we know which. Writes to
+		            // working_directory\fall_diag.txt. Delete this block once solved.
+		            if (DEV) {
+		                var _tImg = val(global.FallScene_dm[?_TYPE_+STR_Image], -1);
+		                var _cImg = val(global.FallScene_dm[?STR_Current+STR_Image], -1);
+		                var _cPI  = val(global.FallScene_dm[?STR_Current+dk_PI], -999);
+		                var _flog = file_text_open_append(working_directory + "fall_diag.txt");
+		                file_text_write_string(_flog,
+		                    "FALLTRIG scene=" + string(g.rm_name)
+		                    + " type=" + string(_TYPE_) + " dir=$" + hex_str(_FALL_DIR)
+		                    + " typeSurfExists=" + string(surface_exists(_tImg))
+		                    + " curSurfExists=" + string(surface_exists(_cImg))
+		                    + " curPI=" + string(_cPI) + " (PI_GUI2=" + string(global.PI_GUI2) + ")"
+		                    + " palDefined=" + string(!is_undefined(global.FallScene_dm[?_TYPE_+STR_Palette]))
+		                    + " imgW=" + string(_Image_W) + " imgH=" + string(_Image_H));
+		                file_text_writeln(_flog);
+		                file_text_close(_flog);
+		            }
             
             
             

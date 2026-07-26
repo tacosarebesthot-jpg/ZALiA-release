@@ -3204,6 +3204,16 @@ function rm_data_init_Town_A() {
 	_dist=rm_w_-_DIST2; // _dist: from rm center to locked door center
 	_val=_dist-($04<<3);
 	row5=row3-$02; y5=row5<<3;
+	// NOTE (2026-07-26): these values are VERIFIED IDENTICAL to the GMS1.4 original
+	// (rm_data_init_Town_A.gml:3206-3207 in the 1.4 source) -- do not "fix" them.
+	// A previous attempt set both to $3 == ($1|$2) on the theory that the hub was
+	// soft-locked; that was wrong twice over: it deviates from OG data, and $3 puts a
+	// switch on BOTH sides of each door, which is visibly wrong in game (owner report:
+	// "you added buttons on both side of the door, only one side gets them").
+	// One-sided access here is intended behaviour, not a soft-lock. If B2 genuinely
+	// blocks progress, the cause is elsewhere (elevator drop position / entry side),
+	// NOT these side flags -- LockedDoor_update's switch_side test is byte-identical to
+	// the 1.4 original too, so the door logic is faithful.
 	data_spawn(rm+STR_PRIO,LoDoA,$2,  (x0-_val)-4,y5,  STR_Side+hex_str($2)); // Locked Door (Ruto-side btn)
 	data_spawn(rm+STR_PRIO,LoDoA,$2,  (x0+_val)-4,y5,  STR_Side+hex_str($1)); // Locked Door (Mido-side btn)
 
