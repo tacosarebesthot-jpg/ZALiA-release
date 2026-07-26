@@ -58,6 +58,27 @@ function g_Step() {
 	global.App_frame_count++;
 
 
+	// DEV HITCH LOG (2026-07-26): the existing FALLFRAME logger in FallScene_update only
+	// fires while g.FallScene_timer is non-zero -- but g_Room_Start resets that to
+	// FallScene_INACTIVE (-1) BEFORE the heavy scene_enter_add_tiles run, so every
+	// EXPENSIVE frame was excluded from fall_timing.txt by construction. That is why every
+	// logged FALLFRAME looks like a healthy 16.7ms while a 1.8s fall takes 26s of wall clock.
+	// This logger is unconditional: any frame costing more than ~2 frame-times is recorded
+	// with the scene it happened in, so a replayed fall (TAS mark) shows exactly where the
+	// time goes. Writes only on a hitch, so it costs nothing on healthy frames.
+	if (DEV && delta_time > 30000 && instance_exists(g))
+	{
+	    var _hf = file_text_open_append(working_directory + "fall_hitch.txt");
+	    file_text_write_string(_hf,
+	          "frame=" + string(global.App_frame_count)
+	        + " | dt=" + string(delta_time) + " us"
+	        + " | scene=" + string(g.rm_name)
+	        + " | fallT=" + string(g.FallScene_timer));
+	    file_text_writeln(_hf);
+	    file_text_close(_hf);
+	}
+
+
 	// ── DEV AUTOSWEEP auto-pilot: boot -> file select -> load save 1 -> start sweep ──
 	// Sets dev_inject_pause BEFORE Input_update2() (line below) so the virtual press
 	// lands the same frame the menus read it.
@@ -250,7 +271,21 @@ function g_Step() {
 	if(!update_QuitAppMenu() 
 	&& !update_OptionsMenu() )
 	{
-	    if(!update_change_room()) // if not changing rm
+	    // PERF PROBE (2026-07-26): update_change_room() is the OTHER half of the fall
+	    // frame (fall trigger + room swap). Timed as a whole so one run localises the
+	    // 8.7s to either here or ROOMSTART above -- no more guess-rebuild-repeat.
+	    var _ucr_t0 = get_timer();
+	    var _ucr    = update_change_room();
+	    var _ucr_dt = get_timer() - _ucr_t0;
+	    if (DEV && _ucr_dt > 50000)
+	    {
+	        var _uf = file_text_open_append(working_directory + "fall_hitch.txt");
+	        file_text_write_string(_uf, "CHANGEROOM scene=" + string(rm_name)
+	            + " | fallT=" + string(FallScene_timer)
+	            + " | total=" + string(_ucr_dt) + " us");
+	        file_text_writeln(_uf); file_text_close(_uf);
+	    }
+	    if(!_ucr) // if not changing rm
 	    {
 	        // --------------------------------------------------------------------
 	        switch(room_type){

@@ -4,15 +4,6 @@ function FallScene_update() {
 
 	if (g.FallScene_timer)
 	{
-	    // MOD timing: user suspects the fall is render-bound (slow per-frame), not just a one-time load. Log
-	    // this frame's real frame-time + fps to fall_timing.txt so a fall (manual or sweep) shows whether
-	    // per-frame cost spikes. delta_time = last frame's us, so the logging itself doesn't skew it. DEV only.
-	    if (DEV) {
-	        var _ftf = file_text_open_append(working_directory + "fall_timing.txt");
-	        file_text_write_string(_ftf, room_get_name(room) + " | FALLFRAME | dt=" + string(delta_time) + " us fps_real=" + string(fps_real));
-	        file_text_writeln(_ftf);
-	        file_text_close(_ftf);
-	    }
 	    var _ANIM_SPEED = $3; // OG is every 2 frames but that looks too fast in ZALiA. Every 4 frames looks too slow, but 3 looks fine.
 	    var _TYPE_      =  val(global.FallScene_dm[?STR_Current+STR_Type], "1"); // "1": vertical fall, "2": horizontal fall
 	    var _FALL_DIR   =  val(global.FallScene_dm[?STR_Current+STR_Fall+STR_Direction], $1<<(2*(_TYPE_=="1")));
@@ -20,6 +11,25 @@ function FallScene_update() {
     
 	    if (_FALL_DIR&($1|$2)) global.FallScene_dm[?STR_Current+"_x"] = val(global.FallScene_dm[?STR_Current+"_x"]) + _FALL_SPEED;
 	    if (_FALL_DIR&($4|$8)) global.FallScene_dm[?STR_Current+"_y"] = val(global.FallScene_dm[?STR_Current+"_y"]) + _FALL_SPEED;
+	    // DO NOT ADD MID-FALL STEERING HERE. Investigated and settled 2026-07-26 -- recorded
+	    // so nobody burns another session on it:
+	    //
+	    //   * The Palace D ledge that skips a key door REQUIRES THE CUCCO. That is intended
+	    //     design, confirmed in play against HoverBat's official 1.7.12.01 build from
+	    //     itch.io: Link cannot make it there either, the Cucco can. The Cucco flutters,
+	    //     so it has horizontal authority Link does not. Nothing is broken.
+	    //   * This port is NOT regressed. Every script in the fall path is byte-identical to
+	    //     HoverBat's 1.4 upstream (github.com/ZA-LiA/ZALiA), as are the Palace D scene
+	    //     data, the PalcD tile geometry JSON, and spr_Placement_16x32's bbox.
+	    //   * The NES original does allow steering mid-fall (datacrystal RAM map, Link x at
+	    //     $004D). GameMaker ZALiA never implemented it. Adding it would let Link reach
+	    //     the ledge WITHOUT the Cucco and defeat a deliberate gate -- a design change,
+	    //     not a fix. A steering implementation was written, play-tested, and removed for
+	    //     exactly this reason.
+	    //
+	    // The real fall bug was elsewhere and IS fixed: tile_delete_all() was O(N^2) and cost
+	    // 9.88s per fall. See scripts/tile_delete_all.
+
 	    var _FALL_X     =  val(global.FallScene_dm[?STR_Current+"_x"]);
 	    var _FALL_Y     =  val(global.FallScene_dm[?STR_Current+"_y"]);
     
