@@ -1599,6 +1599,7 @@
     {"id":{"name":"jukebox_build_playlist","path":"scripts/jukebox_build_playlist/jukebox_build_playlist.yy",},},
     {"id":{"name":"jukebox_build_set_map","path":"scripts/jukebox_build_set_map/jukebox_build_set_map.yy",},},
     {"id":{"name":"dev_avail","path":"scripts/dev_avail/dev_avail.yy",},},
+    {"id":{"name":"mob_teleport_ground_y","path":"scripts/mob_teleport_ground_y/mob_teleport_ground_y.yy",},},
     {"id":{"name":"OptionsMenu_Twitch_update","path":"scripts/OptionsMenu_Twitch_update/OptionsMenu_Twitch_update.yy",},},
     {"id":{"name":"OptionsMenu_Draw_Twitch","path":"scripts/OptionsMenu_Draw_Twitch/OptionsMenu_Draw_Twitch.yy",},},
     {"id":{"name":"twitch_config_save","path":"scripts/twitch_config_save/twitch_config_save.yy",},},

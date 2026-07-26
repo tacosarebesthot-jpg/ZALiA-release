@@ -60,6 +60,12 @@ function Wizard_update() {
 	    stun_timer = 0;
 	    counter    = 0;
     
+	    // GROUND SNAP (2026-07-26): every branch below picks a new X and reuses the
+	    // Wizard's current Y, so on a multi-tier room it rematerialises in mid-air.
+	    // Invisible in the original game (these rooms are flat where Wizards appear);
+	    // enemy rando puts them on layered rooms and it shows. mob_teleport_ground_y
+	    // returns the y unchanged when there is no floor below, so each call is a
+	    // no-op in the cases that used to look fine.
 	    switch(g.mod_Wizard_TELEPORT_AREA)
 	    {
 	        case 0:{
@@ -67,18 +73,18 @@ function Wizard_update() {
 	        var           _xl  = rand();
 	        if (_xl>=$E0) _xl  = _xl>>1;
 	                      _xl += $100;
-	        set_xy(id,    _xl+sprite_index_xoff, yt);
+	        set_xy(id,    _xl+sprite_index_xoff, mob_teleport_ground_y(_xl+sprite_index_xoff, yt, 0));
 	        break;}
         
         
 	        case 1:{
 	        var _x = g.view_xl_og + irandom($100); // MOD.  Using rand() can make Wizards group together
 	            _x = clamp(_x, cam_xl_min()+sprite_index_xoff, cam_xr_max()-sprite_index_xoff);
-	        set_xy(id, _x,y);
+	        set_xy(id, _x, mob_teleport_ground_y(_x, y, hh_));
         
 	        prevent_spawn_in_pc(id);
 	        _x = clamp(_x, cam_xl_min()+sprite_index_xoff, cam_xr_max()-sprite_index_xoff);
-	        set_xy(id, _x,y);
+	        set_xy(id, _x, mob_teleport_ground_y(_x, y, hh_));
 	        break;}
         
         
@@ -87,7 +93,7 @@ function Wizard_update() {
 	        var _x = max(cam_xl_min()+_PAD, g.view_xl_og);
 	        var _W = min(_x+PAGE_W, cam_xr_max()-_PAD) - _x;
 	        _x += irandom(_W);
-	        set_xy(id, _x,y);
+	        set_xy(id, _x, mob_teleport_ground_y(_x, y, hh_));
 	        prevent_spawn_in_pc(id);
 	        break;}
 	    }

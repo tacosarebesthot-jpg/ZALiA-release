@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"mob_teleport_ground_y",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"mob_teleport_ground_y",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

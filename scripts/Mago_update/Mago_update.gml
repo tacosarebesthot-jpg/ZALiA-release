@@ -141,50 +141,14 @@ function Mago_update() {
         
         
         
-	        // 2021/10/16. Inst always teleports to spawn coords. Turned mod off.
-	        if (g.mod_MAGO_ADJ2) // Prevent teleporting in walls and over pits
-	        {
-	            _RAND = irandom(VIEW_W_OG-1); // $00-$FF
-	            _x  = g.view_xl_og + VIEW_W_OG_;
-	            // _x  = g.view_xc_og;
-	            _x += ((_RAND>>1) * sign_(_RAND&$1));
-	            _x  = clamp(_x, g.view_xl_og+ww_, (g.view_xr_og+1)-ww_);
-            
-	            var _NULL = -1;
-            
-	            var _CLM  = _x>>3;
-	            var _ROW  =  y>>3;
-	            // var _ROW  = (yb>>3)-1;
-	            var _clm  = _CLM;
-	            var _row  = get_ground_y(_clm<<3,_ROW<<3, 1, yb);
-	            // var _row  = find_row_solid(TID_SOLID1, _clm,_ROW, 1,-1, _NULL);
-	            // var _row  = find_row_solid(TID_SOLID1|TID_ONEWY1, _clm,_ROW, 1,-1, _NULL);
-            
-            
-	            // TODO: Find better way of finding nearest ground.
-            
-	            if (_row == _NULL) // if no solid ground below new xy (For example: Elevator shaft)
-	            {
-	                // Gonna be lazy and just set x to something simple.
-	                // _x += ($04<<3) * sign_(_x < global.pc.x);
-	                // _x  = global.pc.x + (($03<<3) * -sign_(_x < global.pc.x));
-	                _x  = spawn_xl + ww_;
-	                _y  = spawn_yt + hh_;
-                
-	                // _clm  = _x>>3;
-	                // _row  = find_row_solid(TID_SOLID1, _clm,_ROW, 1,-1, _NULL);
-	            }
-	            else
-	            {
-	                if (_row == _ROW) // _row found is the start _ROW of the search
-	                {    _y  = get_ground_y(_clm<<3,_ROW<<3, -1, yb);  } // search upward
-	                else _y  = _row<<3;
-	                     _y -= hh_;
-	            }
-	        }
-        
-        
-        
+	        // GROUND SNAP (2026-07-26): the teleport above only chooses a new X, so on a
+	        // multi-tier room the Mago rematerialises at its old height, hanging in the
+	        // air. See mob_teleport_ground_y for why HoverBat's mod_MAGO_ADJ2 version of
+	        // this was disabled in 2021 -- the idea was right, the arithmetic double-shifted
+	        // a pixel value as if it were a row index. The helper is a no-op when there is
+	        // no floor below, so this can never place the mob worse than before.
+	        _y = mob_teleport_ground_y(_x, _y, hh_);
+
 	        set_xy(id, _x,_y);
 	    }
     
