@@ -74,8 +74,6 @@ function OptionsMenu_Draw_TestCap() {
 	    case TestCap.PLAYLOG:      {_text=_dg_state_text[#0,sign(global.playlog_active)]; break;}
 	    case TestCap.WALKTUNE:     {_text=_dg_state_text[#1,sign(global.walktune_on)]; break;}
 	    case TestCap.GP_DIAG:      {_text=_dg_state_text[#1,sign(global.gp_diag_on)]; break;}
-	    case TestCap.TWITCH:       {_text=_dg_state_text[#0,sign(global.tw_enabled)]; break;}
-	    case TestCap.TWITCH_IRC:   {_text=_dg_state_text[#0,sign(global.tw_irc_enabled)]; break;}
 	    }//switch(_enum)
 
 	    if (_text != 0)

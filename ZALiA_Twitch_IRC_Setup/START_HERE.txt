@@ -8,7 +8,7 @@ QUICK START
   1. Double-click  setup_twitch_irc.bat
   2. Say YES to open the token page, pick "chat:read", authorise, copy the token.
   3. Paste the token, type your Twitch login + channel. It writes your config.
-  4. In-game:  Options -> DEV TOOLS -> TEST/CAPTURE -> TWITCH IRC  -> turn ON
+  4. In-game:  Options -> TWITCH -> TWITCH IRC  -> turn ON
   5. Top-left shows  TWITCH: connecting -> connected.
      Type  !heal 4  in your chat to test.
 

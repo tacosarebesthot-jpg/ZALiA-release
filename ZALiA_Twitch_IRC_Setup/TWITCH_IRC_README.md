@@ -18,7 +18,7 @@ Source of truth for everything below:
 
 1. Create `%LOCALAPPDATA%\ZALiA\twitch_config.txt` (run `setup_twitch_irc.bat`, or hand-write it — see §1).
 2. Start the game.
-3. **Options → DEV TOOLS → TEST·CAPTURE → TWITCH IRC**, press confirm to turn it **ON**.
+3. **Options → TWITCH → TWITCH IRC**, press confirm to turn it **ON**.
 4. Watch the **top-left status line**: `TWITCH: connecting` → `TWITCH: connected`.
 5. Type `!heal 4` in your Twitch chat → effect fires + a bottom-centre toast shows `tester → heal`.
 
@@ -76,7 +76,7 @@ to work and suddenly doesn't, **regenerate the token first.**
 
 Menu path:
 
-    Options → DEV TOOLS → TEST·CAPTURE → TWITCH IRC
+    Options → TWITCH → TWITCH IRC
 
 Press confirm (**A** / **START** on a pad, or the **H** key) to toggle.
 
@@ -196,7 +196,7 @@ miss them.
 | `scripts/twitch_irc_handle_line` | parse IRC lines, route `!verb` → `twitch_apply()` |
 | `scripts/twitch_irc_step` / `_send` | per-frame tick / raw line send |
 | `objects/obj_twitch_irc` | hosts the Async-Networking receive event |
-| `scripts/OptionsMenu_TestCap_update` | the DEV TOOLS → TEST·CAPTURE toggles |
+| `scripts/OptionsMenu_Twitch_update` | the Options → TWITCH menu toggles |
 | `scripts/Surface_Draw_GUI_End` | draws the top-left `TWITCH:` status line + verb toast |
 | `setup_twitch_irc.bat` / `twitch_test.bat` | write the config / simulate a command |
 | `TWITCH_INTEGRATION_README.md` | the **bot → drop-folder** path + full verb table |

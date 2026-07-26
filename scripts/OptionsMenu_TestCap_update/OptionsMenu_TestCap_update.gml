@@ -158,36 +158,7 @@ function OptionsMenu_TestCap_update() {
 	    // + verb dispatcher (twitch_apply), both gated on global.tw_enabled. Lets you test
 	    // the channel-point / donation file-drop path WITHOUT the in-game IRC connecting
 	    // (which is the only OTHER thing that flips tw_enabled, as a side effect).
-	    case TestCap.TWITCH:{ if (timer) break;
-	    if (_InputConfirm_pressed2)
-	    {
-	        if (!variable_global_exists("tw_enabled")) global.tw_enabled = false;
-	        global.tw_enabled = !global.tw_enabled;
-	        aud_play_sound(_SOUND2);
-	        timer = DURATION1;
-	    }
-	    break;}
-
-	    // TWITCH IRC (no-bot mode): toggle the in-game IRC client. ON -> load config
-	    // (%LOCALAPPDATA%\ZALiA\twitch_config.txt) + connect; OFF -> disconnect. Status
-	    // is shown live in Surface_Draw_GUI_End while tw_irc_enabled.
-	    case TestCap.TWITCH_IRC:{ if (timer) break;
-	    if (_InputConfirm_pressed2)
-	    {
-	        if (variable_global_exists("tw_irc_enabled") && global.tw_irc_enabled)
-	        {
-	            twitch_irc_disconnect();
-	        }
-	        else
-	        {
-	            global.tw_irc_enabled = true;
-	            twitch_irc_load_config();
-	            twitch_irc_connect();
-	        }
-	        aud_play_sound(_SOUND2);
-	        timer = DURATION1;
-	    }
-	    break;}
+	    // TWITCH + TWITCH IRC moved to the player-facing TWITCH menu (2026-07-26).
 
 	    case TestCap.BACK:{ if (timer) break;
 	    if (_InputConfirm_pressed){ aud_play_sound(BACK_SOUND1); timer = DURATION1; menu_state = menu_state_DEV_TOOLS; }

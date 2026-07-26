@@ -235,7 +235,7 @@ function OptionsMenu_Create() {
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "TWITCH";
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "LET TWITCH CHAT AFFECT THE GAME: CHANNEL-POINT REWARDS AND CHAT COMMANDS";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "LET YOUR TWITCH VIEWERS CHANGE THE GAME WHILE YOU PLAY. NEEDS A ONE-TIME SETUP - SEE ZALIA_TWITCH_IRC_SETUP\START_HERE.TXT";
 	//                                                                          //
 	MainOption_DEV_TOOLS         = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
@@ -989,15 +989,15 @@ function OptionsMenu_Create() {
 	Twitch_dg = ds_grid_create(Twitch.COUNT,8);
 	_font = FONT2;
 	             _i=Twitch.REWARDS;
-	Twitch_dg[#_i,0]="CHANNEL REWARDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="LET CHANNEL-POINT REDEEMS AND DONATIONS TRIGGER EFFECTS. NEEDS THE COMPANION BOT RUNNING.";
+	Twitch_dg[#_i,0]="TWITCH REWARDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="LETS CHANNEL-POINT REDEEMS AND DONATIONS CHANGE THE GAME. THIS ONE NEEDS THE COMPANION BOT RUNNING OUTSIDE THE GAME - IT DROPS FILES THE GAME PICKS UP. SETUP: SEE ZALIA_TWITCH_IRC_SETUP\START_HERE.TXT";
 	             _i=Twitch.CHAT;
-	Twitch_dg[#_i,0]="CONNECT TO CHAT";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="CONNECT DIRECTLY TO YOUR TWITCH CHAT SO !COMMANDS WORK. SET UP YOUR CHANNEL IN TWITCH_CONFIG.TXT FIRST.";
+	Twitch_dg[#_i,0]="TWITCH IRC";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="CONNECTS STRAIGHT TO YOUR OWN CHAT SO VIEWERS CAN TYPE !COMMANDS. NO BOT NEEDED - THIS IS THE EASY ONE. RUN SETUP_TWITCH_IRC.BAT ONCE FIRST. SETUP: SEE ZALIA_TWITCH_IRC_SETUP\START_HERE.TXT";
 	             _i=Twitch.COOLDOWN;
-	Twitch_dg[#_i,0]="COMMAND COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="SECONDS BETWEEN CHAT COMMANDS. RAISE IT IF CHAT IS SPAMMING EFFECTS FASTER THAN YOU CAN PLAY.";
+	Twitch_dg[#_i,0]="COMMAND COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="SECONDS THE GAME WAITS BEFORE ACCEPTING ANOTHER CHAT COMMAND. RAISE IT IF CHAT IS SPAMMING FASTER THAN YOU CAN PLAY. ONLY AFFECTS TWITCH IRC, NOT REWARDS. LEFT/RIGHT TO CHANGE.";
 	             _i=Twitch.DURATION;
-	Twitch_dg[#_i,0]="EFFECT LENGTH";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="HOW MANY SECONDS A TIMED EFFECT LASTS, LIKE SLOW OR CONFUSE.";
+	Twitch_dg[#_i,0]="EFFECT LENGTH";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="HOW LONG A TIMED EFFECT LASTS, LIKE SLOW OR CONFUSE OR DARK. LEFT/RIGHT TO CHANGE.";
 	             _i=Twitch.COMMANDS;
-	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="HEAL HURT SLOW SPEED FLIP CONFUSE DARK SHRINK GROW SPAWN SWARM PARTY DISCO FREEZE CURSE ARISE CUCCO 1UP";
+	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="WHAT CHAT CAN TYPE: !HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SHRINK !GROW !SPAWN !SWARM !PARTY !DISCO !FREEZE !CURSE !ARISE !CUCCO !1UP. FULL LIST: ZALIA_TWITCH_IRC_SETUP\TWITCH_COMMANDS.TXT";
 	             _i=Twitch.BACK;
 	Twitch_dg[#_i,0]="BACK";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="RETURN TO THE MAIN OPTIONS MENU.";
 
@@ -1005,7 +1005,9 @@ function OptionsMenu_Create() {
 	enum TestCap
 	{
 	    BUGPROBE, TAS_RECORD, TAS_PLAYBACK, PLAYLOG, WALKTUNE, GP_DIAG, COOP_TEST,
-	    REPLAY_MARK, SPAWN_MARK, TWITCH, TWITCH_IRC,
+	    REPLAY_MARK, SPAWN_MARK,
+	    // TWITCH + TWITCH_IRC moved to the player-facing TWITCH menu 2026-07-26 --
+	    // they were unreachable once DEV TOOLS was hidden behind the unlock code.
 	    BACK,
 	    COUNT
 	}
@@ -1031,10 +1033,6 @@ function OptionsMenu_Create() {
 	TestCap_dg[#_i,0]="REPLAY LAST MARK";      TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Restore the last MARK (key 3) snapshot and replay its recorded inputs.";
 	             _i=TestCap.SPAWN_MARK;
 	TestCap_dg[#_i,0]="SPAWN AT LAST MARK";    TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Restore the last MARK (key 3) snapshot but KEEP the controls -- re-run a bug from its exact state without walking back.";
-	             _i=TestCap.TWITCH;
-	TestCap_dg[#_i,0]="TWITCH";                TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Master switch for the Twitch file-drop poll (channel-point / donation verb files). Enables triggers WITHOUT needing the in-game IRC to connect.";
-	             _i=TestCap.TWITCH_IRC;
-	TestCap_dg[#_i,0]="TWITCH IRC";            TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Connect to Twitch chat directly (reads twitch_config.txt). Chat !commands drive game effects.";
 	             _i=TestCap.BACK;
 	TestCap_dg[#_i,0]="BACK";                  TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Return to the DEV TOOLS menu.";
 
