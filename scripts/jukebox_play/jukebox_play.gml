@@ -50,10 +50,16 @@ function jukebox_play() {
 	// play looping via the existing music system. Signature:
 	//   aud_play_sound(sound, *priority, *loop, *volume, *theme)
 	// theme "JUKEBOX" is a sentinel so the room-music logic leaves it alone.
+	// AUTO-ADVANCE (2026-07-26): loop=false when auto-advance is on, so the track ENDS and
+	// the poll in Surface_Draw_GUI_End can move to the next one. loop=true reproduces the
+	// old single-track-repeat behaviour.
+	var _loop = true;
+	if (variable_global_exists("jukebox_autoadvance") && global.jukebox_autoadvance) _loop = false;
+
 	var _inst = 0;
 	if (instance_exists(Audio))
 	{
-	    _inst = aud_play_sound(_asset, -1, true, -1, "JUKEBOX");
+	    _inst = aud_play_sound(_asset, -1, _loop, -1, "JUKEBOX");
 	}
 	global.jukebox_inst = _inst;
 

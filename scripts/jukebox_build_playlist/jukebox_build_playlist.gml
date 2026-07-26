@@ -63,6 +63,24 @@ function jukebox_build_playlist() {
         else if (string_pos("Square1_only",  _name) > 0)  _skip = true;
         else if (string_pos("Square2_1a",    _name) > 0)  _skip = true;
 
+        // STINGER + INTRO-PART FILTER (2026-07-26): the list was carrying every short
+        // fanfare (GetItem, GetSpell, LevelUp, Fanfare, PlaceCrystal, DungeonClear...) once
+        // per SET, which is dozens of 1-3 second jingles nobody wants to sit on in a jukebox.
+        // Filter by REAL DURATION, not by name: keyword matching would wrongly kill genuine
+        // songs like mus_IsabelleChiming_EvilHeart and mus_Overworld_DeathMtn. Only exclude
+        // when we actually got a positive length back, so an unloaded stream that reports 0
+        // is kept rather than silently dropped.
+        if (!_skip)
+        {
+            var _len = audio_sound_length(_asset);
+            if (is_real(_len) && _len > 0 && _len < 15) _skip = true; // 15s = stinger cutoff
+        }
+
+        // "_Intro" assets are the intro HALF of an intro+body pair -- the body is the real
+        // track and already listed, so the intro on its own is a duplicate fragment.
+        if (!_skip && string_length(_name) > 6
+        &&  string_copy(_name, string_length(_name) - 5, 6) == "_Intro") _skip = true;
+
         if (!_skip)
         {
             // ASSIGNED = sound was registered in Audio.dm via add_sound_data().

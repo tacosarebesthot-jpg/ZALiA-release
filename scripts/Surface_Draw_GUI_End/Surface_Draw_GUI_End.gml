@@ -367,18 +367,22 @@ function Surface_Draw_GUI_End() {
 
 
 	// ------------------------------------------------------------------------------------
-	// NES-MUSIC JUKEBOX (F8 toggle): a user-driven music player layered over the game.
+	// NES-MUSIC JUKEBOX (HOME toggle): a user-driven music player layered over the game.
 	// Play-safe -- gated on its OWN state (global.jukebox_on), NEVER on DEV. Self-contained
 	// + reversible: delete this whole block + the jukebox_* scripts + the jukebox_init()
 	// call in g_Create. Controls:
-	//   F8 ......... toggle jukebox MODE on/off (on -> overrides area music with the
+	//
+	// KEY MAP CORRECTED 2026-07-26 -- this block still documented the ORIGINAL hardcoded
+	// F8 / ] / [ / F12 scheme long after the jukebox moved onto the remappable Input system
+	// (Input_Create.gml:206-209). Following these stale keys meant pressing F12 and getting
+	// nothing, because vk_f12 is bound to NOTHING anywhere in the project. The live bindings
+	// are Input.Key_jukebox_* and are rebindable in OPTIONS > INPUT CONFIG; the defaults are:
+	//   HOME ....... toggle jukebox MODE on/off (on -> overrides area music with the
 	//                selected track; off -> stop our track, area music resumes on its own)
-	//   ] / [ ...... next / previous track (keyboard). GATED on !global.walktune_on so it
-	//                never fights the WALKTUNE overlay (which owns [ / ] while its F9
-	//                overlay is open). Jukebox owns them otherwise.
+	//   PGDN/PGUP .. next / previous track (keyboard, = Key_jukebox_next / _prev)
 	//   R-trig ..... next track   (gamepad gp_shoulderrb = Input.GP_other6)
 	//   L-trig ..... prev track   (gamepad gp_shoulderlb = Input.GP_other5)
-	//   F12 ........ assign current theme -> current track + append to jukebox_assignments.txt
+	//   END ........ assign current theme -> current track + append to jukebox_assignments.txt
 	// Now-playing line drawn bottom-RIGHT (clear of the top-left timer/REC, the top-right
 	// map label, and the bottom-left WALKTUNE overlay). Everything guarded.
 	if (instance_exists(Input) && Input.Jukebox_Toggle_pressed)
@@ -388,7 +392,22 @@ function Surface_Draw_GUI_End() {
 	    if (global.jukebox_on)
 	    {
 	        jukebox_build_playlist(); // rebuild playlist from actual audiogroup_mus (fresh each toggle-on)
-	        jukebox_play(); // start the currently-selected track, looping
+
+	        // TAKE THE CHANNEL (2026-07-26): toggling the jukebox ON while area music was
+	        // already playing used to leave that music running -- the selected track either
+	        // never took over or both played at once. It only behaved when you entered the
+	        // area fresh, because that path re-inits the music state. Stop the music group
+	        // outright and clear Audio's "currently playing" handle first, exactly the way
+	        // the fall-scene trigger does it (update_change_room.gml: audio_group_stop_all +
+	        // clear the can_play flags), so jukebox_play() starts from silence.
+	        audio_group_stop_all(audiogroup_mus);
+	        if (instance_exists(Audio))
+	        {
+	            Audio.mus_rm_inst = 0; // nothing believes room music is still live
+	        }
+
+	        jukebox_play(); // start the currently-selected track
+	        global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps); // show HUD, then it fades
 	    }
 	    else
 	    {
@@ -413,6 +432,30 @@ function Surface_Draw_GUI_End() {
 
 	if (variable_global_exists("jukebox_on") && global.jukebox_on)
 	{
+	    // --- AUTO-ADVANCE poll (2026-07-26) ---------------------------------------------
+	    // Play one track, then the next, like a real player. jukebox_play() starts tracks
+	    // NON-looping while global.jukebox_autoadvance is set, so "instance no longer
+	    // playing" means "track finished" -> step to the next entry.
+	    //
+	    // Safe here: Audio_update_2's room-music (gml:84-88) and boss-music (gml:42-45)
+	    // restarts are BOTH gated on !global.jukebox_on, which stays true throughout, so the
+	    // brief gap between tracks can never let area music seize the channel.
+	    //
+	    // Deliberately requires jukebox_inst to be non-zero first: a 0 id means we have not
+	    // started anything yet (or the jukebox was just toggled on), and advancing then would
+	    // skip the very first track.
+	    if (variable_global_exists("jukebox_autoadvance") && global.jukebox_autoadvance
+	    &&  variable_global_exists("jukebox_inst")        && global.jukebox_inst)
+	    {
+	        var _jb_alive = audio_exists(global.jukebox_inst) && audio_is_playing(global.jukebox_inst);
+	        if (!_jb_alive && variable_global_exists("jukebox_count") && global.jukebox_count > 0)
+	        {
+	            global.jukebox_idx = (global.jukebox_idx + 1) mod global.jukebox_count;
+	            jukebox_play();
+	            global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps); // show what changed
+	        }
+	    }
+
 	    // --- skip inputs ---
 	    var _jb_next = false;
 	    var _jb_prev = false;
@@ -437,17 +480,30 @@ function Surface_Draw_GUI_End() {
 	                if (_jb_next) global.jukebox_idx = (global.jukebox_idx + 1) mod _jb_n;
 	                if (_jb_prev) global.jukebox_idx = (global.jukebox_idx - 1 + _jb_n) mod _jb_n;
 	                jukebox_play(); // stops previous track + plays the new selection
+	                global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps); // re-show HUD
 	            }
 	        }
 	    }
 
-	    // --- F12 (jukebox_assign): assign current theme -> current track, append to jukebox_assignments.txt ---
+	    // --- END (jukebox_assign): assign current theme -> current track, append to jukebox_assignments.txt ---
 	    if (instance_exists(Input) && Input.Jukebox_Assign_pressed)
 	    {
 	        jukebox_assign();
+	        global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps); // re-show HUD
 	    }
 
 	    // --- now-playing readout (bottom-RIGHT, GUI space, default font like the other HUDs) ---
+	    // AUTO-FADE (2026-07-26): this used to draw for as long as the jukebox was ON, so it
+	    // parked on screen permanently and cluttered the stream. It now shows for ~3s after
+	    // any change (toggle on / track skip / assign) and fades over the last ~0.75s.
+	    // jukebox_hud_timer is set at each of those three sites; nothing else touches it.
+	    if (!variable_global_exists("jukebox_hud_timer")) global.jukebox_hud_timer = 0;
+	    if (global.jukebox_hud_timer > 0)
+	    {
+	    global.jukebox_hud_timer--;
+	    var _jb_fade = 0.75 * game_get_speed(gamespeed_fps);
+	    var _jb_a    = min(1, global.jukebox_hud_timer / max(1, _jb_fade));
+
 	    var _jb_pf = draw_get_font();
 	    draw_set_font(-1);
 
@@ -481,14 +537,17 @@ function Surface_Draw_GUI_End() {
 	    var _jb_x = _jb_gw - 8;
 	    var _jb_y = _jb_gh - 26;
 
+	    draw_set_alpha(_jb_a);
 	    draw_set_colour(c_black);  draw_text(_jb_x+1, _jb_y+1,  _jb_line);
 	    draw_set_colour(c_aqua);   draw_text(_jb_x,   _jb_y,    _jb_line);
 	    draw_set_colour(c_black);  draw_text(_jb_x+1, _jb_y+13, _jb_help);
 	    draw_set_colour(c_white);  draw_text(_jb_x,   _jb_y+12, _jb_help);
+	    draw_set_alpha(1);
 
 	    draw_set_halign(fa_left);
 	    draw_set_colour(c_white);
 	    draw_set_font(_jb_pf);
+	    } // end jukebox_hud_timer > 0
 	}
 
 	// JUKEBOX confirmation message (also shown briefly when the jukebox is toggled OFF,
