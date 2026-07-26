@@ -55,7 +55,11 @@ function OptionsMenu_InputConfig_update() {
 	                else if (InputSection == InputSection_DEBUG)
 	                {
 	                    if (InputConfigOption == DbgOption_BACK) _CLOSE = true;
-	                    else if (InputConfigOption == DbgOption_CHEATS) { aud_play_sound(CONFIRM_SOUND1); timer=DURATION1; menu_state=menu_state_DEV_TOOLS; }
+	                    // BACK DOOR CLOSED (2026-07-26): this row jumped straight into DEV
+	                    // TOOLS with no check, so hiding the DEV TOOLS row on the MAIN menu
+	                    // achieved nothing -- any player could reach the cheats and sweeps
+	                    // through EDIT CONTROLS > DEBUG. Same gate as the MAIN row now.
+	                    else if (InputConfigOption == DbgOption_CHEATS) { if (dev_avail()) { aud_play_sound(CONFIRM_SOUND1); timer=DURATION1; menu_state=menu_state_DEV_TOOLS; } else { aud_play_sound(BACK_SOUND1); timer=DURATION1; } }
 	                    else { aud_play_sound(BACK_SOUND1); timer=DURATION1; }
 	                }
 	                else
