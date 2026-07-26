@@ -4219,6 +4219,19 @@ function g_Create() {
 	global.konami_toast       = "";   // toast text (drawn in Surface_Draw_GUI_End)
 	global.konami_toast_timer = 0;    // frames remaining to draw the toast
 
+	// ── DEV TOOLS UNLOCK CODE ── shares konami_check's buffer and input plumbing.
+	// The DEV TOOLS menu is hidden from players by default (dev_avail()); this
+	// sequence toggles it on for the session. Entering it a second time hides it
+	// again, so it can be shown to someone and put away without a restart.
+	// Deliberately the MIRROR of the Konami code so it is easy to remember:
+	//   DOWN DOWN UP UP RIGHT LEFT RIGHT LEFT A B
+	// Tokens: 1=UP 2=DOWN 3=LEFT 4=RIGHT 5=B(attack) 6=A(jump).
+	// It shares no suffix with konami_target, so neither can trigger the other.
+	// For a PERMANENT unlock on your own machine, drop a file called
+	// dev_unlock.txt into the save dir (%LOCALAPPDATA%\ZALiA\) instead.
+	global.devcode_target = [2,2,1,1,4,3,4,3,6,5];
+	global.dev_unlocked   = false; // session unlock state; dev_avail() also reads the file
+
 	// ── CO-OP P2 FAIRY ── master gate, OFF by default. When true: a 2nd pad drives
 	// obj_fairy_p2 (float / shoot / heal). Toggle in DEV TOOLS > MISC > CO-OP.
 	global.coop_enabled   = false;

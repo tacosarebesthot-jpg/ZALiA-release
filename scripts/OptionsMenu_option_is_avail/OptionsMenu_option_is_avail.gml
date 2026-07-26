@@ -17,7 +17,10 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case MainOption_PC_SPRITES:    {return true; break;}
 	        case MainOption_INPUT_CONFIG:  {return true; break;}
 	        case MainOption_CO_OP:         {return true; break;}
-	        case MainOption_DEV_TOOLS:     {return true; break;}
+	        // DEV TOOLS hidden from players (2026-07-26). Runtime gate, not the DEV
+	        // macro: enter the dev code (mirror of the Konami code) to reveal it for
+	        // the session, or drop dev_unlock.txt in the save dir to keep it visible.
+	        case MainOption_DEV_TOOLS:     {return dev_avail(); break;}
 	        case MainOption_DISPLAY:       {return true; break;}
 	        case MainOption_OTHER:         {return true; break;}
 	        case MainOption_RANDO:         {return true; break;}
@@ -65,10 +68,10 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case Overlays.FRAME_COUNT:    {return true; break;}
 	        case Overlays.DEPTH_DEBUG:    {return true; break;}
 	        case Overlays.DEATH_COUNTER:  {return true; break;}
-	        case Overlays.EXITS:          {return DEV; break;}
-	        case Overlays.SOLID_TILES:    {return DEV; break;}
-	        case Overlays.UNIQUE_TILES:   {return DEV; break;}
-	        case Overlays.DUNGEON_MAP:    {return DEV; break;}
+	        case Overlays.EXITS:          {return dev_avail(); break;}
+	        case Overlays.SOLID_TILES:    {return dev_avail(); break;}
+	        case Overlays.UNIQUE_TILES:   {return dev_avail(); break;}
+	        case Overlays.DUNGEON_MAP:    {return dev_avail(); break;}
 	        case Overlays.INPUT_DISPLAY:  {return true; break;}
 	        case Overlays.BACK:           {return true; break;}
 	    }//switch(argument1)
@@ -84,7 +87,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	    switch(argument1)
 	    {
 	        default:                 {return false; break;}
-	        case Cheats.ADD_ITEMS:   {return DEV; break;}
+	        case Cheats.ADD_ITEMS:   {return dev_avail(); break;}
 	        case Cheats.PC_DASH:     {return true; break;}
 	        case Cheats.INF_HP:      {return true; break;}
 	        case Cheats.INF_MP:      {return true; break;}
@@ -118,7 +121,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	    switch(argument1)
 	    {
 	        default:                    {return false; break;}
-	        case TestCap.BUGPROBE:      {return DEV;  break;}
+	        case TestCap.BUGPROBE:      {return dev_avail();  break;}
 	        case TestCap.TAS_RECORD:    {return true; break;}
 	        case TestCap.TAS_PLAYBACK:  {return true; break;}
 	        case TestCap.PLAYLOG:       {return true; break;}
@@ -192,7 +195,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case AutoTest.SW_CAVES_MAZIS: {return true; break;}
 	        case AutoTest.SW_OTHER:       {return true; break;}
 	        // Moved test / capture toggles (same availability they had under DEV TOOLS).
-	        case AutoTest.BUGPROBE:       {return DEV;  break;}
+	        case AutoTest.BUGPROBE:       {return dev_avail();  break;}
 	        case AutoTest.TAS_RECORD:     {return true; break;}
 	        case AutoTest.TAS_PLAYBACK:   {return true; break;}
 	        case AutoTest.INPUT_DISPLAY:  {return true; break;}

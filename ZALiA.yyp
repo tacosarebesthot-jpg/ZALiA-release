@@ -1598,6 +1598,7 @@
     {"id":{"name":"jukebox_assign","path":"scripts/jukebox_assign/jukebox_assign.yy",},},
     {"id":{"name":"jukebox_build_playlist","path":"scripts/jukebox_build_playlist/jukebox_build_playlist.yy",},},
     {"id":{"name":"jukebox_build_set_map","path":"scripts/jukebox_build_set_map/jukebox_build_set_map.yy",},},
+    {"id":{"name":"dev_avail","path":"scripts/dev_avail/dev_avail.yy",},},
     {"id":{"name":"jukebox_build_playlist_external","path":"scripts/jukebox_build_playlist_external/jukebox_build_playlist_external.yy",},},
     {"id":{"name":"jukebox_playlist_name","path":"scripts/jukebox_playlist_name/jukebox_playlist_name.yy",},},
     {"id":{"name":"walktune_panel","path":"scripts/walktune_panel/walktune_panel.yy",},},

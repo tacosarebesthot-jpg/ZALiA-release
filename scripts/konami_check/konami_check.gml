@@ -62,25 +62,70 @@ function konami_check() {
 	array_push(global.konami_seq, _press);
 	global.konami_timer = global.KONAMI_TIMEOUT;
 
-	var _target = global.konami_target;
-	var _tlen   = array_length(_target);
-	while (array_length(global.konami_seq) > _tlen) array_delete(global.konami_seq, 0, 1);
+	// TWO sequences share this one buffer (2026-07-26): the original Konami egg, and
+	// the DEV TOOLS unlock. Keeping one buffer means the input plumbing above -- the
+	// edge reads, the idle timeout, the simultaneous-press reset -- is written once.
+	// The buffer is therefore trimmed to the LONGEST target, and each target is tested
+	// against the buffer's TAIL rather than the whole thing.
+	var _k_target = global.konami_target;
+	var _d_target = variable_global_exists("devcode_target") ? global.devcode_target : [];
+	var _klen     = array_length(_k_target);
+	var _dlen     = array_length(_d_target);
+	var _maxlen   = max(_klen, _dlen);
 
-	// fire when the rolling buffer matches the full sequence in order
-	if (array_length(global.konami_seq) == _tlen)
+	while (array_length(global.konami_seq) > _maxlen) array_delete(global.konami_seq, 0, 1);
+
+	// Does the tail of the buffer equal this target, in order?
+	var _tail_matches = function(_target)
 	{
-		var _match = true;
+		var _tlen = array_length(_target);
+		if (_tlen == 0) return false;
+
+		var _blen = array_length(global.konami_seq);
+		if (_blen < _tlen) return false;
+
+		var _off = _blen - _tlen; // compare the LAST _tlen entries
 		for (var _i = 0; _i < _tlen; _i++)
 		{
-			if (global.konami_seq[_i] != _target[_i]) { _match = false; break; }
+			if (global.konami_seq[_off + _i] != _target[_i]) return false;
 		}
-		if (_match)
-		{
-			konami_fire();
-			global.konami_seq      = [];
-			global.konami_cooldown = 60; // ~1s lockout, then it can be entered again
-		}
+		return true;
+	};
+
+	// DEV unlock first: if the two sequences ever share a suffix, the deliberate
+	// action should win over the easter egg.
+	if (_dlen > 0 && _tail_matches(_d_target))
+	{
+		dev_unlock_fire();
+		global.konami_seq      = [];
+		global.konami_cooldown = 60;
+		return;
 	}
+
+	if (_tail_matches(_k_target))
+	{
+		konami_fire();
+		global.konami_seq      = [];
+		global.konami_cooldown = 60; // ~1s lockout, then it can be entered again
+	}
+}
+
+
+/// @description  dev_unlock_fire() -- reveal the DEV TOOLS surface for this session
+function dev_unlock_fire() {
+
+	// Session-only. The permanent unlock is the dev_unlock.txt file in the save
+	// directory -- see dev_avail(). Nothing here is written to the save.
+	var _was = variable_global_exists("dev_unlocked") && global.dev_unlocked;
+	global.dev_unlocked = !_was; // second entry hides it again, so it can be demoed and put away
+
+	aud_play_sound(snd_Z1_Secret);
+
+	// Reuse the Konami toast so there is one drawing path for both.
+	global.konami_toast       = global.dev_unlocked ? "DEV TOOLS UNLOCKED" : "DEV TOOLS HIDDEN";
+	global.konami_toast_timer = 180;
+
+	if (DEV) show_debug_message("[DEV] dev_unlocked = " + string(global.dev_unlocked));
 }
 
 
