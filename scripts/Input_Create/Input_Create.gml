@@ -339,6 +339,14 @@ function Input_Create() {
 	Jukebox_Assign_pressed = false;
 	Jukebox_Playlist_pressed = false;
 
+	// Previous-frame trigger state for the jukebox skip edge detection in
+	// Input_update1. Deliberately NOT one of the GP_*_held vars -- those are cleared
+	// every frame, so an edge derived from them would fire continuously while a
+	// trigger is held. These are written only by that block and persist across the
+	// per-frame reset.
+	GP_Jukebox_Next_was = false;
+	GP_Jukebox_Prev_was = false;
+
 	Pause_pressed   = false;
 	Pause_held      = false;
 	Pause_released  = false;

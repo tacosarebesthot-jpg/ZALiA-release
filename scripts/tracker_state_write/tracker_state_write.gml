@@ -12,14 +12,42 @@ function tracker_state_write() {
 	// 0" bug. Hints (when enabled) are resolved here into final 38-char lines.
 	// Called every 4 frames from g_Step(). Self-guards on instance_exists(f).
 
-	// No save loaded -> minimal payload, bail.
+	// No save loaded. Careful here -- this is the "tracker icons didn't carry over"
+	// bug (RECONCILE P6-6 / master list B68).
+	//
+	// `f` is briefly absent during ordinary transitions: room changes, save loads,
+	// death-respawn. Writing {live:false} the instant it goes missing means the
+	// companion app sees the run END and blanks every icon, then sees it start again
+	// a few frames later -- which reads as "the tracker lost my items". Randomizer
+	// runs hit this far more often because they transition more, which is why it
+	// looked rando-specific.
+	//
+	// So: DEBOUNCE. While f is missing, simply leave the last good payload on disk
+	// (the companion keeps showing the real state). Only after f has stayed missing
+	// for a sustained stretch -- i.e. we genuinely are back at the title/file-select
+	// rather than mid-transition -- do we declare the run over. This writer is called
+	// every 4 frames from g_Step, so ~15 consecutive misses is about one second.
 	if (!instance_exists(f))
 	{
-	    var _fh0 = file_text_open_write("tracker_state.json");
-	    file_text_write_string(_fh0, json_stringify({ live : false }));
-	    file_text_close(_fh0);
+	    if (!variable_global_exists("tracker_f_absent")) global.tracker_f_absent = 0;
+	    global.tracker_f_absent++;
+
+	    // Under the threshold: a transition, not an ended run. Leave the file alone.
+	    if (global.tracker_f_absent < 15) return;
+
+	    // Sustained absence -> really no save loaded. Announce it once, then stop
+	    // rewriting the same payload every tick.
+	    if (global.tracker_f_absent == 15)
+	    {
+	        var _fh0 = file_text_open_write("tracker_state.json");
+	        file_text_write_string(_fh0, json_stringify({ live : false }));
+	        file_text_close(_fh0);
+	    }
 	    return;
 	}
+
+	// f is present -- any pending absence was just a transition.
+	global.tracker_f_absent = 0;
 
 	// Selected-spell display name. dm_Spell stores names with a leading "_"
 	// (e.g. "_PROTECT") — strip it so the companion shows "PROTECT".

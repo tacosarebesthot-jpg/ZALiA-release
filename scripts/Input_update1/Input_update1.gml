@@ -254,12 +254,42 @@ function Input_update1() {
 	    GP_Spell_Prev_held     = gamepad_button_check(         gamepad_slot, GP_spell_prev);
 	    GP_Spell_Prev_released = gamepad_button_check_released(gamepad_slot, GP_spell_prev);
 	    // Jukebox track skip: NEXT (R2 / gp_shoulderrb) / PREV (L2 / gp_shoulderlb)
-	    GP_Jukebox_Next_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_jukebox_next);
-	    GP_Jukebox_Next_held     = gamepad_button_check(         gamepad_slot, GP_jukebox_next);
-	    GP_Jukebox_Next_released = gamepad_button_check_released(gamepad_slot, GP_jukebox_next);
-	    GP_Jukebox_Prev_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_jukebox_prev);
-	    GP_Jukebox_Prev_held     = gamepad_button_check(         gamepad_slot, GP_jukebox_prev);
-	    GP_Jukebox_Prev_released = gamepad_button_check_released(gamepad_slot, GP_jukebox_prev);
+	    //
+	    // ANALOG-TRIGGER FIX (2026-07-26): gp_shoulderlb / gp_shoulderrb are the ANALOG
+	    // triggers, and a DualShock 4 reports those as AXES, not buttons. On that pad
+	    // gamepad_button_check_pressed() never returns true no matter how hard you pull,
+	    // so pad track-skip was simply dead while the keyboard worked -- reported as
+	    // "L2/R2 do nothing" (master bug list B78).
+	    //
+	    // gamepad_button_value() returns the 0..1 analog position for a trigger, and
+	    // 0 or 1 for a plain digital button, so reading it covers BOTH pad styles. We
+	    // OR it with the digital check so nothing regresses on pads where the digital
+	    // read already worked, and derive the pressed/released EDGES ourselves from the
+	    // previous frame's state, because the built-in edge functions are exactly what
+	    // fails here.
+	    //
+	    // 0.5 threshold: a trigger has to be pulled about halfway, which stops a resting
+	    // or slightly-drifting trigger from spamming track changes.
+	    //
+	    // The previous state is kept in GP_Jukebox_*_was, NOT in the _held vars: every
+	    // GP_*_held is reset to false at the top of this script each frame, so testing
+	    // against _held would report a fresh PRESS on every frame the trigger stayed
+	    // down -- one track skip per frame. _was is only written here and survives that
+	    // reset, so the edge is real.
+	    var _jb_n_now = gamepad_button_check(gamepad_slot, GP_jukebox_next)
+	                 || (gamepad_button_value(gamepad_slot, GP_jukebox_next) > 0.5);
+	    var _jb_p_now = gamepad_button_check(gamepad_slot, GP_jukebox_prev)
+	                 || (gamepad_button_value(gamepad_slot, GP_jukebox_prev) > 0.5);
+
+	    GP_Jukebox_Next_pressed  =  _jb_n_now && !GP_Jukebox_Next_was;
+	    GP_Jukebox_Next_released = !_jb_n_now &&  GP_Jukebox_Next_was;
+	    GP_Jukebox_Next_held     =  _jb_n_now;
+	    GP_Jukebox_Next_was      =  _jb_n_now;
+
+	    GP_Jukebox_Prev_pressed  =  _jb_p_now && !GP_Jukebox_Prev_was;
+	    GP_Jukebox_Prev_released = !_jb_p_now &&  GP_Jukebox_Prev_was;
+	    GP_Jukebox_Prev_held     =  _jb_p_now;
+	    GP_Jukebox_Prev_was      =  _jb_p_now;
 	    // Xbox Start  button, PS4 touch-pad press
 	    GP_Pause_pressed  = gamepad_button_check_pressed( gamepad_slot, GP_pause); // pressed
 	    GP_Pause_held     = gamepad_button_check(         gamepad_slot, GP_pause); // held
