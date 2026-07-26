@@ -4223,13 +4223,17 @@ function g_Create() {
 	// The DEV TOOLS menu is hidden from players by default (dev_avail()); this
 	// sequence toggles it on for the session. Entering it a second time hides it
 	// again, so it can be shown to someone and put away without a restart.
-	// Deliberately the MIRROR of the Konami code so it is easy to remember:
-	//   DOWN DOWN UP UP RIGHT LEFT RIGHT LEFT A B
+	// NOT a mirror of the Konami code. That was tried and was a bad idea: the two
+	// halves are so similar that muscle memory finishes the Konami ending instead,
+	// which then FIRES THE KONAMI EGG (full heal + 3 lives) rather than doing
+	// nothing -- a wrong entry had a real side effect. Observed in testing.
+	// This one starts with BUTTONS, which no directional habit leads into:
+	//   B B A A UP DOWN UP DOWN
 	// Tokens: 1=UP 2=DOWN 3=LEFT 4=RIGHT 5=B(attack) 6=A(jump).
 	// It shares no suffix with konami_target, so neither can trigger the other.
 	// For a PERMANENT unlock on your own machine, drop a file called
 	// dev_unlock.txt into the save dir (%LOCALAPPDATA%\ZALiA\) instead.
-	global.devcode_target = [2,2,1,1,4,3,4,3,6,5];
+	global.devcode_target = [5,5,6,6,1,2,1,2];
 	global.dev_unlocked   = false; // session unlock state; dev_avail() also reads the file
 
 	// ── CO-OP P2 FAIRY ── master gate, OFF by default. When true: a 2nd pad drives
