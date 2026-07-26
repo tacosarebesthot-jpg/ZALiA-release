@@ -1469,16 +1469,30 @@ function Audio_Create() {
 	// Registered under the NES MIX set (dk_NESmix); add_sound_data appends each track to
 	// that theme's RANDOM / RANDOM-CUSTOM music pool (and sets the fixed theme+set lookup,
 	// first-wins). Guarded by asset_get_index so a missing import simply skips.
-	var _nm_ow_town = ["mus_OoT_Market","mus_OoT_Hyrule_Castle_Courtyard","mus_OoT_Lon_Lon_Ranch","mus_Blades_of_Steel_Menu_Theme","mus_Blaster_Master_Area_1","mus_Castlevania_Stage_01_Vampire_Killer","mus_Castlevania_Stage_04_Stalker","mus_Commando_Area_Theme","mus_Dr_Mario_Chill_Theme","mus_Dr_Mario_Title_Theme","mus_Dr_Mario_Fever","mus_Dragon_Warrior_Castle_Theme","mus_Dragon_Warrior_Village_Theme","mus_Drouble_Dribble_Menu","mus_Duck_Tales_Title_Theme","mus_Ghosts_n_Goblins_Stage_Theme_01","mus_Kid_Icarus_Title_Screen","mus_R_B_I_Baseball_Game_Theme","mus_Super_Mario_Bros_2_Overworld_Theme"];
-	var _nm_level = ["mus_OoT_Forest_Temple","mus_OoT_Spirit_Temple","mus_Commando_Underground_Bunker_1","mus_Contra_Enemy_Base","mus_Contra_Jungle_Theme","mus_Duck_Tales_African_Mines_Stage","mus_Duck_Tales_Amazon_Stage","mus_Duck_Tales_Moon_Stage","mus_Duck_Tales_Transylvania_Stage","mus_OoT_Gerudo_Valley_8bit","mus_Ghosts_n_Goblins_Stage_Theme_03","mus_Kid_Icarus_Angel_Land","mus_Kid_Icarus_Castle_Theme","mus_Kid_Icarus_Medusa_Fight","mus_Kid_Icarus_Sky_Palace","mus_Kid_Icarus_Sky_World","mus_Kid_Icarus_Underworld_Theme","mus_Mega_Man_2_Crash_Man_Stage","mus_Mega_Man_2_Flash_Man_Stage","mus_Mega_Man_2_Heat_Man_Stage","mus_Mega_Man_2_Metal_Man_Stage","mus_Mike_Tyson_s_Punch_Out_Fight_Theme","mus_Super_Mario_Bros_2_Cave_Theme","mus_Wizards_Warriors_Princess_Rescued","mus_Wizards_Warriors_Stage_1_Forest_of_Elrond_1","mus_Wizards_Warriors_Stage_2_Ice_Caves","mus_Wizards_Warriors_Stage_3_Fire_Caverns","mus_Wizards_Warriors_Stage_5_Forest_of_Elrond_2","mus_Wizards_Warriors_Stage_7_Inner_Castle","mus_Wizards_Warriors_Tree_Trunk_Level"];
-	var _nm_boss = ["mus_Castlevania_Boss_Battle_Poison_Mind","mus_Contra_Boss_Battle","mus_Dragon_Warrior_Battle_Theme","mus_Dragon_Warrior_Dragon_Lord_Theme","mus_Mega_Man_2_Wily_Fortress_1","mus_TMNT2_Arcade_Game","mus_Wizards_Warriors_Boss_Battle"];
+	// NEW 2026-07-26: 29 imported tracks appended to the pools below. Owner's zone calls
+	// override gain's filename-prefix guesses where they disagree -- Matoya's Cavern is a
+	// CAVE not a town, Ninja Gaiden Act 4 and Town & Country are stage music not town/boss,
+	// Double Dragon Mission 1 is a cave/dungeon. Caves ride the DUNGEON pool because
+	// _Cave01 is a dead theme -- no room ever selects it, so anything registered there is
+	// never heard (verified 2026-07-26).
+	var _nm_ow_town = ["mus_FF2_VillageTheme","mus_BionicCommando_Area1","mus_Shatterhand_AreasEF","mus_RushNAttack_StageTheme1","mus_OoT_Market","mus_OoT_Hyrule_Castle_Courtyard","mus_OoT_Lon_Lon_Ranch","mus_Blades_of_Steel_Menu_Theme","mus_Blaster_Master_Area_1","mus_Castlevania_Stage_01_Vampire_Killer","mus_Castlevania_Stage_04_Stalker","mus_Commando_Area_Theme","mus_Dr_Mario_Chill_Theme","mus_Dr_Mario_Title_Theme","mus_Dr_Mario_Fever","mus_Dragon_Warrior_Castle_Theme","mus_Dragon_Warrior_Village_Theme","mus_Drouble_Dribble_Menu","mus_Duck_Tales_Title_Theme","mus_Ghosts_n_Goblins_Stage_Theme_01","mus_Kid_Icarus_Title_Screen","mus_R_B_I_Baseball_Game_Theme","mus_Super_Mario_Bros_2_Overworld_Theme"];
+	var _nm_level = ["mus_FF1_MatoyaCavern","mus_NinjaGaiden_Act4Pt2","mus_TownCountrySurf_LevelMusic","mus_DoubleDragon_Mission1","mus_KickMaster_Sector4","mus_TMNT2_Scene3","mus_Batman_Stage1","mus_CV_Stage07WickedChild","mus_CV_Stage13HeartOfFire","mus_CV_Stage06OutOfTime","mus_CV3_MadForest","mus_CV3_Clockwork","mus_FestersQuest_Track04","mus_FestersQuest_Track06","mus_Metroid_KraidsHideout","mus_SMB_CastleTheme","mus_MM1_CutmanStage","mus_MM2_WoodManStage","mus_OoT_Forest_Temple","mus_OoT_Spirit_Temple","mus_Commando_Underground_Bunker_1","mus_Contra_Enemy_Base","mus_Contra_Jungle_Theme","mus_Duck_Tales_African_Mines_Stage","mus_Duck_Tales_Amazon_Stage","mus_Duck_Tales_Moon_Stage","mus_Duck_Tales_Transylvania_Stage","mus_OoT_Gerudo_Valley_8bit","mus_Ghosts_n_Goblins_Stage_Theme_03","mus_Kid_Icarus_Angel_Land","mus_Kid_Icarus_Castle_Theme","mus_Kid_Icarus_Medusa_Fight","mus_Kid_Icarus_Sky_Palace","mus_Kid_Icarus_Sky_World","mus_Kid_Icarus_Underworld_Theme","mus_Mega_Man_2_Crash_Man_Stage","mus_Mega_Man_2_Flash_Man_Stage","mus_Mega_Man_2_Heat_Man_Stage","mus_Mega_Man_2_Metal_Man_Stage","mus_Mike_Tyson_s_Punch_Out_Fight_Theme","mus_Super_Mario_Bros_2_Cave_Theme","mus_Wizards_Warriors_Princess_Rescued","mus_Wizards_Warriors_Stage_1_Forest_of_Elrond_1","mus_Wizards_Warriors_Stage_2_Ice_Caves","mus_Wizards_Warriors_Stage_3_Fire_Caverns","mus_Wizards_Warriors_Stage_5_Forest_of_Elrond_2","mus_Wizards_Warriors_Stage_7_Inner_Castle","mus_Wizards_Warriors_Tree_Trunk_Level"];
+	var _nm_boss = ["mus_DarkLink_MortalKombatTheme","mus_Castlevania_Boss_Battle_Poison_Mind","mus_Contra_Boss_Battle","mus_Dragon_Warrior_Battle_Theme","mus_Dragon_Warrior_Dragon_Lord_Theme","mus_Mega_Man_2_Wily_Fortress_1","mus_TMNT2_Arcade_Game","mus_Wizards_Warriors_Boss_Battle"];
 	var _nm_ending = ["mus_Wizards_Warriors_Princess_Rescued"];
+	// TWO NEW POOLS. The original four buckets covered overworld/town, dungeon, boss and
+	// ending -- nothing fed the title screen or the minigame theme, so tracks meant for
+	// those had nowhere to go.
+	var _nm_title    = ["mus_WW_MusicIntro","mus_Gauntlet_MenuTheme","mus_Metroid_TitleFDS","mus_MM2_IntroTheme"];
+	// Punch-Out Bicycle Training is the owner's call: it is a training-montage cue, not town music.
+	var _nm_minigame = ["mus_Gyromite_GameABGM","mus_PunchOut_BicycleTraining"];
+	var _nm_title_themes    = [STR_Title, dk_FileSelect, dk_ContinueSave];
+	var _nm_minigame_themes = [dk_Minigame+"01"];
 	var _nm_ow_themes = [STR_Overworld+STR_Standard, STR_Overworld+dk_DeathMountain, STR_Overworld+dk_MazeIsland, STR_Overworld+dk_ValleyOfDeath, STR_Overworld+STR_Dragmire, STR_Overworld+STR_Makarrha, STR_Rauru, STR_Ruto, STR_Saria, STR_Mido, STR_Nabooru, STR_Darunia, STR_New_Kasuto, STR_Old_Kasuto, STR_Bulblin, STR_House+"01", STR_Basement+"01"];
 	var _nm_dun_themes = [STR_Dungeon+hex_str(1), STR_Dungeon+hex_str(2), STR_Dungeon+hex_str(3), STR_Dungeon+hex_str(4), STR_Dungeon+hex_str(5), STR_Dungeon+hex_str(6), STR_Dungeon+hex_str(7), STR_Dungeon+hex_str(8)];
 	var _nm_boss_themes = [STR_Boss+"01", dk_ThunderBird, dk_ShadowBoss+"01", dk_ShadowBoss+"02", STR_Ganon+"1", STR_Ganon+"2", STR_Ganon+"3"];
 	var _nm_end_themes = [dk_Credits, dk_GameClear];
-	var _nm_buckets_tracks = [_nm_ow_town, _nm_level, _nm_boss, _nm_ending];
-	var _nm_buckets_themes = [_nm_ow_themes, _nm_dun_themes, _nm_boss_themes, _nm_end_themes];
+	var _nm_buckets_tracks = [_nm_ow_town, _nm_level, _nm_boss, _nm_ending, _nm_title, _nm_minigame];
+	var _nm_buckets_themes = [_nm_ow_themes, _nm_dun_themes, _nm_boss_themes, _nm_end_themes, _nm_title_themes, _nm_minigame_themes];
 	for (var _nm_b=0; _nm_b<array_length(_nm_buckets_tracks); _nm_b++)
 	{
 	    var _nm_tracks = _nm_buckets_tracks[_nm_b];
