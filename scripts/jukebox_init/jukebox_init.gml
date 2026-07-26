@@ -11,7 +11,7 @@
 //   global.jukebox_on        - is jukebox MODE active (overrides area music)
 //   global.jukebox_idx       - current track index 0..count-1
 //   global.jukebox_count     - 56
-//   global.jukebox_names[]   - friendly display names (jukebox_init_names)
+//   global.jukebox_names[]   - display names (built by jukebox_build_playlist)
 //   global.jukebox_assets[]  - resolved sound asset indices (-1 if missing)
 //   global.jukebox_inst      - currently-playing jukebox audio instance (0=none)
 //   global.jukebox_assignments - ds_map of theme -> "track | name" (assign log)
@@ -21,36 +21,26 @@ function jukebox_init() {
 
 	global.jukebox_on    = false; // jukebox MODE off by default (normal area music plays)
 	global.jukebox_idx   = 0;     // selected track 0..count-1
-	global.jukebox_count = 56;
+	global.jukebox_count = 0;     // real count comes from jukebox_build_playlist() below
 	global.jukebox_inst  = 0;     // last audio instance we started (0 = none)
 
-	// friendly-name lookup (hard-coded from the manifest)
-	global.jukebox_names = array_create(global.jukebox_count, "");
-	jukebox_init_names();
+	global.jukebox_names  = [];
+	global.jukebox_assets = [];
 
-	// resolve the 56 sound asset indices; guard -1 (missing/not-yet-imported asset)
-	global.jukebox_assets = array_create(global.jukebox_count, -1);
-	var _i = 0;
-	var _missing = 0;
-	repeat(global.jukebox_count)
-	{
-	    var _nnn = string(_i + 1);
-	    if (_i + 1 < 100) _nnn = "0" + _nnn;
-	    if (_i + 1 < 10)  _nnn = "0" + _nnn;
-	    var _name = "mus_NESJUKE_" + _nnn;
-	    var _idx  = asset_get_index(_name);
-	    global.jukebox_assets[_i] = _idx; // asset_get_index returns -1 if the asset doesn't exist
-	    if (_idx == -1) _missing++;
-	    _i++;
-	}
+	// Populate from the actual audiogroup rather than the old hard-coded
+	// mus_NESJUKE_001..056 scan (those assets were byte-identical re-imports of tracks
+	// already present under readable names, and have been removed). Building here rather
+	// than only on the F-toggle keeps jukebox_count > 0 from game start, which the
+	// twitch "!music" verb relies on before the player ever opens the jukebox.
+	jukebox_build_playlist();
 
-	// assignment log (theme -> "mus_NESJUKE_NNN | friendly")
+	// assignment log (theme -> "asset | friendly")
 	global.jukebox_assignments = ds_map_create();
 
 	// brief on-screen confirmation message ("ASSIGNED ..." etc.)
 	global.jukebox_msg       = "";
 	global.jukebox_msg_timer = 0;
 
-	if (DEV) show_debug_message("[JUKEBOX] init: " + string(global.jukebox_count) + " tracks, " + string(_missing) + " missing asset(s)");
+	if (DEV) show_debug_message("[JUKEBOX] init: " + string(global.jukebox_count) + " tracks");
 
 }

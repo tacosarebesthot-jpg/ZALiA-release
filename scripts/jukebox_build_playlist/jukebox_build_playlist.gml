@@ -92,25 +92,18 @@ function jukebox_build_playlist() {
     var _count = _un_count + _as_count;
 
     // ---- Safety fallback: empty result ----------------------------------------
+    // The old fallback rebuilt a hardcoded mus_NESJUKE_001..056 list. Those assets were
+    // byte-identical re-imports of tracks already present under readable names and have
+    // been removed, so the scan can only ever have produced 56 x asset_get_index()==-1.
+    // An empty list is now reported honestly and the jukebox simply has nothing to play,
+    // rather than filling itself with invalid ids.
     if (_count == 0)
     {
-        var _fb = 56;
-        global.jukebox_count  = _fb;
-        global.jukebox_assets = array_create(_fb, -1);
-        global.jukebox_names  = array_create(_fb, "");
-        var _k = 0;
-        repeat(_fb)
-        {
-            var _nnn = string(_k + 1);
-            if (_k + 1 < 100) _nnn = "0" + _nnn;
-            if (_k + 1 < 10)  _nnn = "0" + _nnn;
-            var _fname = "mus_NESJUKE_" + _nnn;
-            global.jukebox_assets[_k] = asset_get_index(_fname);
-            global.jukebox_names[_k]  = string_upper(_fname);
-            _k++;
-        }
-        global.jukebox_idx = 0;
-        if (DEV) show_debug_message("[JUKEBOX] build_playlist: FALLBACK (empty list), using 56 hardcoded tracks");
+        global.jukebox_count  = 0;
+        global.jukebox_assets = [];
+        global.jukebox_names  = [];
+        global.jukebox_idx    = 0;
+        if (DEV) show_debug_message("[JUKEBOX] build_playlist: no tracks found in audiogroup_mus");
         return;
     }
 
