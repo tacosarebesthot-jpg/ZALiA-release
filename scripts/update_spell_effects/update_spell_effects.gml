@@ -72,6 +72,12 @@ function update_spell_effects() {
 	            }//switch(react_thunder)
             
             
+	            // THUNDER STRIKE VFX (2026-07-26, owner spec 2026-07-12): drop a bolt on
+	            // this enemy as it dies. The with()-scope here IS the enemy, so x/y are
+	            // already its position. Staggered by list index so a screen-clear reads as
+	            // a cascade rather than one simultaneous flash. Cosmetic only.
+	            if (_DAMAGE) thunderbolt_spawn(x, y, (_i mod 12) * 2);
+
 	            if (_DAMAGE) damage_gob(id, _DAMAGE, false);
 	        }
 	    }

@@ -148,6 +148,11 @@ function g_Draw() {
 
 	//DungeonLayoutRando_testing();
 
+	// THUNDER STRIKE VFX -- world-space, so it must live here in g_Draw rather than
+	// any GUI pass. Cheap no-op when no bolts are queued.
+	thunderbolt_draw();
+
+
 	// DEV DEBUG HUD
 	Dev_DebugHarness_Draw();
 
