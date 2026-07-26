@@ -197,9 +197,27 @@ function Cutscene_GameEnd_1B_init() {
 	// ------------------- ME -------------------
 	_text="LINK IS ADVENTURESOME CREATOR";
 	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
-	dg_CREDITS[#_idx,1] = "HOVERBAT";         // 
+	dg_CREDITS[#_idx,1] = "HOVERBAT";         //
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
-	//                                                  // 
+	//                                                  //
+	//                                                  //
+	//                                                  //
+	//                                                  //
+	// ------------------- PORT -------------------
+	_text="GAMEMAKER 2026 PORT";
+	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
+	dg_CREDITS[#_idx,1] = "GAINEY";           //
+	dg_CREDITS[#_idx,5] = _text; // 5: staff text
+	//                                                  //
+	//                                                  //
+	//                                                  //
+	//                                                  //
+	// ------------------- DESIGN AND TESTING -------------------
+	_text="DESIGN IDEAS AND PLAYTESTING";
+	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
+	dg_CREDITS[#_idx,1] = "LANEAGE";          //
+	dg_CREDITS[#_idx,5] = _text; // 5: staff text
+	//                                                  //
 	//                                                  //
 	//                                                  //
 	//                                                  //
@@ -265,12 +283,15 @@ function Cutscene_GameEnd_1B_init() {
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
-	dg_CREDITS[#_idx,1] = "JACOB THE MOO"; // 
-	dg_CREDITS[#_idx,2] = "ATOMIC DRACULA"; // 
-	dg_CREDITS[#_idx,3] = "AARON"; // 
-	dg_CREDITS[#_idx,4] = "ZABII"; // 
+	dg_CREDITS[#_idx,1] = "JACOB THE MOO"; //
+	dg_CREDITS[#_idx,2] = "ATOMIC DRACULA"; //
+	dg_CREDITS[#_idx,3] = "AARON"; //
+	dg_CREDITS[#_idx,4] = "ZABII"; //
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
+	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
+	dg_CREDITS[#_idx,1] = "DOWPYRO"; // funded the tooling the 2026 port was built with
+	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	//                                                  //
 	//                                                  //
 	//                                                  //
