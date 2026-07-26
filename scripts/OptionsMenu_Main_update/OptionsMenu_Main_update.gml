@@ -108,6 +108,20 @@ function OptionsMenu_Main_update() {
 	    //  from the menu; its sweeps + test/capture tools now live under DEV TOOLS.)
 
 	    // ---------------------------------------------------------
+	    // TWITCH: opens the player-facing stream menu (was buried in DEV TOOLS).
+	    case MainOption_TWITCH:{
+	    if (timer) break;
+
+	    if (_InputConfirm_pressed2)
+	    {
+	        Twitch_cursor = 0;
+	        aud_play_sound(CONFIRM_SOUND1);
+	        timer = DURATION1;
+	        menu_state = menu_state_TWITCH;
+	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    }
+	    break;}//case MainOption_TWITCH
+
 	    case MainOption_DISPLAY:{
 	    if (timer) break;
 

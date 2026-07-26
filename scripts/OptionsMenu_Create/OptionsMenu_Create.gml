@@ -151,6 +151,7 @@ function OptionsMenu_Create() {
 	menu_state_RANDO         = _a++;
 	menu_state_OTHER         = _a++;
 	menu_state_AUTO_TEST     = _a++; // ORPHANED: AUTOMATED TEST submenu kept compilable but unreachable (no main-menu row); its contents now live under DEV TOOLS -> SWEEPS + TEST/CAPTURE.
+	menu_state_TWITCH        = _a++; // player-facing; the Twitch toggles used to be buried in DEV TOOLS -> TEST/CAPTURE
 	menu_state_DISPLAY       = _a++;
 	menu_state_OVERLAYS      = _a++; // DEV TOOLS sub-folder
 	menu_state_CHEATS        = _a++; // DEV TOOLS sub-folder
@@ -226,6 +227,15 @@ function OptionsMenu_Create() {
 	//                                                                          //
 	// (FULLSCREEN + APP SCALE main rows were MOVED into the DISPLAY submenu on 2026-06-27;
 	//  fullscreen toggle / window-scale cycle now live as the first two DISPLAY rows.)
+	//                                                                          //
+	// TWITCH promoted to the MAIN menu (2026-07-26). It used to live in DEV TOOLS ->
+	// TEST/CAPTURE, which is now hidden from players -- so the stream features were
+	// unreachable by exactly the people meant to use them.
+	MainOption_TWITCH            = ds_grid_width(MainOptions_dg);
+	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "TWITCH";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "LET TWITCH CHAT AFFECT THE GAME: CHANNEL-POINT REWARDS AND CHAT COMMANDS";
 	//                                                                          //
 	MainOption_DEV_TOOLS         = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
@@ -962,6 +972,35 @@ function OptionsMenu_Create() {
 	_first=1;               _a=_first;
 	TestCapState_MAIN     = _a++;
 	TestCapState          = _first;
+
+	// ── TWITCH (player-facing) ────────────────────────────────────────────────
+	// The two toggles moved out of DEV TOOLS -> TEST/CAPTURE so viewers-affect-the-game
+	// is reachable without the dev unlock. COOLDOWN and DURATION are value rows the
+	// streamer will actually want to tune mid-stream; both persist to twitch_config.txt.
+	// The oauth token is deliberately NEVER shown -- the owner streams this menu.
+	enum Twitch
+	{
+	    REWARDS, CHAT, COOLDOWN, DURATION, COMMANDS,
+	    BACK,
+	    COUNT
+	}
+	Twitch_cursor = 0;
+
+	Twitch_dg = ds_grid_create(Twitch.COUNT,8);
+	_font = FONT2;
+	             _i=Twitch.REWARDS;
+	Twitch_dg[#_i,0]="CHANNEL REWARDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="LET CHANNEL-POINT REDEEMS AND DONATIONS TRIGGER EFFECTS. NEEDS THE COMPANION BOT RUNNING.";
+	             _i=Twitch.CHAT;
+	Twitch_dg[#_i,0]="CONNECT TO CHAT";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="CONNECT DIRECTLY TO YOUR TWITCH CHAT SO !COMMANDS WORK. SET UP YOUR CHANNEL IN TWITCH_CONFIG.TXT FIRST.";
+	             _i=Twitch.COOLDOWN;
+	Twitch_dg[#_i,0]="COMMAND COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="SECONDS BETWEEN CHAT COMMANDS. RAISE IT IF CHAT IS SPAMMING EFFECTS FASTER THAN YOU CAN PLAY.";
+	             _i=Twitch.DURATION;
+	Twitch_dg[#_i,0]="EFFECT LENGTH";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="HOW MANY SECONDS A TIMED EFFECT LASTS, LIKE SLOW OR CONFUSE.";
+	             _i=Twitch.COMMANDS;
+	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="HEAL HURT SLOW SPEED FLIP CONFUSE DARK SHRINK GROW SPAWN SWARM PARTY DISCO FREEZE CURSE ARISE CUCCO 1UP";
+	             _i=Twitch.BACK;
+	Twitch_dg[#_i,0]="BACK";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="RETURN TO THE MAIN OPTIONS MENU.";
+
 
 	enum TestCap
 	{

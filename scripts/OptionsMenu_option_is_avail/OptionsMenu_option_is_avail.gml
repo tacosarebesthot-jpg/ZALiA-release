@@ -21,6 +21,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        // macro: enter the dev code (mirror of the Konami code) to reveal it for
 	        // the session, or drop dev_unlock.txt in the save dir to keep it visible.
 	        case MainOption_DEV_TOOLS:     {return dev_avail(); break;}
+	        case MainOption_TWITCH:        {return true; break;}
 	        case MainOption_DISPLAY:       {return true; break;}
 	        case MainOption_OTHER:         {return true; break;}
 	        case MainOption_RANDO:         {return true; break;}
@@ -117,6 +118,21 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 
 	    // ============================================================
 	    // DEV TOOLS sub-folder: TEST / CAPTURE. BUGPROBE keeps its DEV gate.
+	    // TWITCH: player-facing, every row always selectable. COMMANDS is read-only.
+	    case menu_state_TWITCH:{
+	    switch(argument1)
+	    {
+	        default:                    {return false; break;}
+	        case Twitch.REWARDS:        {return true; break;}
+	        case Twitch.CHAT:           {return true; break;}
+	        case Twitch.COOLDOWN:       {return true; break;}
+	        case Twitch.DURATION:       {return true; break;}
+	        case Twitch.COMMANDS:       {return true; break;}
+	        case Twitch.BACK:           {return true; break;}
+	    }//switch(argument1)
+	    break;}//case menu_state_TWITCH
+
+
 	    case menu_state_TEST_CAP:{
 	    switch(argument1)
 	    {
