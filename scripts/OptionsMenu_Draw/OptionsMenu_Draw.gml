@@ -115,7 +115,6 @@ function OptionsMenu_Draw() {
 	    case   menu_state_TEST_CAP:     {_text="TEST / CAPTURE"; break;}
 	    case   menu_state_SWEEPS:       {_text="SWEEPS"; break;}
 	    case   menu_state_MISC:         {_text="MISC"; break;}
-	    case   menu_state_AUTO_TEST:    {_text="AUTOMATED TEST"; break;} // ORPHANED (unreachable)
 	    case   menu_state_DISPLAY:      {_text=MainOptions_dg[#MainOption_DISPLAY,0]; break;}
 	    case   menu_state_RANDO:        {_text="RANDO OPTIONS"; break;} // pad
 	    case   menu_state_OTHER:        {_text="OTHER"; break;}
@@ -149,7 +148,6 @@ function OptionsMenu_Draw() {
 	case   menu_state_TEST_CAP:     {OptionsMenu_Draw_TestCap(_y+4);      break;}//DEV TOOLS sub-folder
 	case   menu_state_SWEEPS:       {OptionsMenu_Draw_Sweeps(_y+4);       break;}//DEV TOOLS sub-folder
 	case   menu_state_MISC:         {OptionsMenu_Draw_Misc(_y+4);         break;}//DEV TOOLS sub-folder
-	case   menu_state_AUTO_TEST:    {OptionsMenu_Draw_AutoTest(_y+4);     break;}//case menu_state_AUTO_TEST (ORPHANED, unreachable)
 	case   menu_state_DISPLAY:      {OptionsMenu_Draw_Display(_y+4);      break;}//case menu_state_DISPLAY
 	case   menu_state_RANDO:        {OptionsMenu_Draw_RandoOptions(_y+4); break;}//case Menu_RANDO_OPTIONS
 	case   menu_state_OTHER:        {OptionsMenu_Draw_Other(_y+4);        break;}//case menu_state_OTHER

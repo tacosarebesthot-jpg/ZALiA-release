@@ -137,7 +137,6 @@ function update_OptionsMenu() {
 	            case   menu_state_TEST_CAP:     {OptionsMenu_TestCap_update();     break;} // DEV TOOLS sub-folder
 	            case   menu_state_SWEEPS:       {OptionsMenu_Sweeps_update();      break;} // DEV TOOLS sub-folder
 	            case   menu_state_MISC:         {OptionsMenu_Misc_update();        break;} // DEV TOOLS sub-folder
-	            case   menu_state_AUTO_TEST:    {OptionsMenu_AutoTest_update();    break;} // ORPHANED (unreachable; kept compilable)
 	            case   menu_state_DISPLAY:      {OptionsMenu_Display_update();     break;}
 	            case   menu_state_RANDO:        {OptionsMenu_RandoOptions_update();break;}
 	            case   menu_state_OTHER:        {OptionsMenu_Other_update();       break;}

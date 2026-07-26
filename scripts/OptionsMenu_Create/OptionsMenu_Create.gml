@@ -150,7 +150,6 @@ function OptionsMenu_Create() {
 	menu_state_AUDIO_CUSTOM  = _a++;
 	menu_state_RANDO         = _a++;
 	menu_state_OTHER         = _a++;
-	menu_state_AUTO_TEST     = _a++; // ORPHANED: AUTOMATED TEST submenu kept compilable but unreachable (no main-menu row); its contents now live under DEV TOOLS -> SWEEPS + TEST/CAPTURE.
 	menu_state_TWITCH        = _a++; // player-facing; the Twitch toggles used to be buried in DEV TOOLS -> TEST/CAPTURE
 	menu_state_DISPLAY       = _a++;
 	menu_state_OVERLAYS      = _a++; // DEV TOOLS sub-folder
@@ -640,130 +639,8 @@ function OptionsMenu_Create() {
 	// so it is intentionally not duplicated here (forcing it open from the options menu,
 	// outside the pause menu it expects, can soft-lock).
 	_first=1;               _a=_first;
-	AutoTestState_MAIN    = _a++;
-	AutoTestState         = _first;
-
-
-	enum AutoTest
-	{
-	    SW_FULL,          // sweep_start()                                  (full RM scenes)
-	    SW_OVERWORLD,     // sweep_start_ow()                               (overworld pages)
-	    SW_PALACES,       // sweep_start_category(sweep_pred_dungeon)
-	    SW_TOWNS,         // sweep_start_category(sweep_pred_town)
-	    SW_CAVES,         // sweep_start_category(sweep_pred_cave)
-	    SW_CAVES_WEST,    // sweep_start_category(sweep_pred_cave_west)
-	    SW_CAVES_EAST,    // sweep_start_category(sweep_pred_cave_east)
-	    SW_CAVES_DTHMT,   // sweep_start_category(sweep_pred_cave_dthmt)
-	    SW_CAVES_MAZIS,   // sweep_start_category(sweep_pred_cave_mazis)
-	    SW_OTHER,         // sweep_start_other()                            (rmB_* system rooms)
-	    BUGPROBE,         // toggle global.bugprobe        (moved from DEV TOOLS)
-	    TAS_RECORD,       // TAS input recording           (moved from DEV TOOLS)
-	    TAS_PLAYBACK,     // TAS input playback            (moved from DEV TOOLS)
-	    INPUT_DISPLAY,    // On-screen input overlay       (moved from DEV TOOLS)
-	    PLAYLOG,          // Record play session log       (moved from DEV TOOLS)
-	    WALKTUNE,         // Walk-tuning panel overlay      (moved from DEV TOOLS)
-	    GP_DIAG,          // Controller-diagnostic overlay (gp_diag_overlay); toggles global.gp_diag_on
-	    BACK,             //
-	    COUNT
-	}
-
-	AutoTest_cursor = 0;
-
-
-	_font = FONT2;
-
-	AutoTest_dg = ds_grid_create(AutoTest.COUNT,8);
-	//                                                                          //
-	             _i=AutoTest.SW_FULL;
-	AutoTest_dg[#_i,0] = "SWEEP: FULL";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over every action-room scene.";
-	//                                                                          //
-	             _i=AutoTest.SW_OVERWORLD;
-	AutoTest_dg[#_i,0] = "SWEEP: OVERWORLD";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over every overworld page.";
-	//                                                                          //
-	             _i=AutoTest.SW_PALACES;
-	AutoTest_dg[#_i,0] = "SWEEP: PALACES";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over palace (dungeon) scenes only.";
-	//                                                                          //
-	             _i=AutoTest.SW_TOWNS;
-	AutoTest_dg[#_i,0] = "SWEEP: TOWNS";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over town scenes only.";
-	//                                                                          //
-	             _i=AutoTest.SW_CAVES;
-	AutoTest_dg[#_i,0] = "SWEEP: CAVES";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over cave / connector scenes only.";
-	//                                                                          //
-	             _i=AutoTest.SW_CAVES_WEST;
-	AutoTest_dg[#_i,0] = "SWEEP: CAVES-WEST";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over west-region cave scenes.";
-	//                                                                          //
-	             _i=AutoTest.SW_CAVES_EAST;
-	AutoTest_dg[#_i,0] = "SWEEP: CAVES-EAST";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over east-region cave scenes.";
-	//                                                                          //
-	             _i=AutoTest.SW_CAVES_DTHMT;
-	AutoTest_dg[#_i,0] = "SWEEP: CAVES-DTHMT";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over Death-Mountain cave scenes.";
-	//                                                                          //
-	             _i=AutoTest.SW_CAVES_MAZIS;
-	AutoTest_dg[#_i,0] = "SWEEP: CAVES-MAZIS";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over Maze-Island cave scenes.";
-	//                                                                          //
-	             _i=AutoTest.SW_OTHER;
-	AutoTest_dg[#_i,0] = "SWEEP: OTHER";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Run a live sweep over the system menu rooms.";
-	//                                                                          //
-	             _i=AutoTest.BUGPROBE;
-	AutoTest_dg[#_i,0] = "RUN BUGPROBE";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Toggle the automated bug-probe test.";
-	//                                                                          //
-	             _i=AutoTest.TAS_RECORD;
-	AutoTest_dg[#_i,0] = "TAS RECORD";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Record your inputs each frame to a file.";
-	//                                                                          //
-	             _i=AutoTest.TAS_PLAYBACK;
-	AutoTest_dg[#_i,0] = "TAS PLAYBACK";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Replay the recorded inputs 1:1.";
-	//                                                                          //
-	             _i=AutoTest.INPUT_DISPLAY;
-	AutoTest_dg[#_i,0] = "INPUT DISPLAY";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Show on-screen button input overlay.";
-	//                                                                          //
-	             _i=AutoTest.PLAYLOG;
-	AutoTest_dg[#_i,0] = "PLAYLOG (REC SESSION)";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Record play telemetry to a session log.";
-	//                                                                          //
-	             _i=AutoTest.WALKTUNE;
-	AutoTest_dg[#_i,0] = "WALKTUNE PANEL";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Toggle the walk-tuning panel overlay.";
-	//                                                                          //
-	             _i=AutoTest.GP_DIAG;
-	AutoTest_dg[#_i,0] = "CONTROLLER DIAG";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Live gamepad readout: buttons, trigger values, axes + raw scan. Debug a pad whose L2/R2/L1 do nothing.";
-	//                                                                          //
-	             _i=AutoTest.BACK;
-	AutoTest_dg[#_i,0] = "BACK";
-	AutoTest_dg[#_i,1] = _font;
-	AutoTest_dg[#_i,2] = "Return to the previous menu.";
-	//                                                                          //
+	// AUTOMATED TEST submenu DELETED 2026-07-26 -- it was orphaned (no entry point
+	// anywhere) and its 18 rows duplicated DEV TOOLS -> SWEEPS + TEST/CAPTURE.
 
 
 

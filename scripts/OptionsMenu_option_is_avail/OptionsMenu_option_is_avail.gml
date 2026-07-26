@@ -193,32 +193,6 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 
 
 	    // ============================================================
-	    case menu_state_AUTO_TEST:{
-	    switch(argument1)
-	    {
-	        default:                      {return false; break;}
-	        // Sweep starters — always selectable (start a live in-game room sweep).
-	        case AutoTest.SW_FULL:        {return true; break;}
-	        case AutoTest.SW_OVERWORLD:   {return true; break;}
-	        case AutoTest.SW_PALACES:     {return true; break;}
-	        case AutoTest.SW_TOWNS:       {return true; break;}
-	        case AutoTest.SW_CAVES:       {return true; break;}
-	        case AutoTest.SW_CAVES_WEST:  {return true; break;}
-	        case AutoTest.SW_CAVES_EAST:  {return true; break;}
-	        case AutoTest.SW_CAVES_DTHMT: {return true; break;}
-	        case AutoTest.SW_CAVES_MAZIS: {return true; break;}
-	        case AutoTest.SW_OTHER:       {return true; break;}
-	        // Moved test / capture toggles (same availability they had under DEV TOOLS).
-	        case AutoTest.BUGPROBE:       {return dev_avail();  break;}
-	        case AutoTest.TAS_RECORD:     {return true; break;}
-	        case AutoTest.TAS_PLAYBACK:   {return true; break;}
-	        case AutoTest.INPUT_DISPLAY:  {return true; break;}
-	        case AutoTest.PLAYLOG:        {return true; break;}
-	        case AutoTest.WALKTUNE:       {return true; break;}
-	        case AutoTest.GP_DIAG:        {return true; break;}
-	        case AutoTest.BACK:           {return true; break;}
-	    }//switch(argument1)
-	    break;}//case menu_state_AUTO_TEST
 
 
 
