@@ -966,7 +966,7 @@ function OptionsMenu_Create() {
 	enum TestCap
 	{
 	    BUGPROBE, TAS_RECORD, TAS_PLAYBACK, PLAYLOG, WALKTUNE, GP_DIAG, COOP_TEST,
-	    REPLAY_MARK, TWITCH, TWITCH_IRC,
+	    REPLAY_MARK, SPAWN_MARK, TWITCH, TWITCH_IRC,
 	    BACK,
 	    COUNT
 	}
@@ -990,6 +990,8 @@ function OptionsMenu_Create() {
 	TestCap_dg[#_i,0]="COOP TEST";             TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Run the automated co-op fairy test (move/shoot/heal/tank/ferry/revive/room-hop).";
 	             _i=TestCap.REPLAY_MARK;
 	TestCap_dg[#_i,0]="REPLAY LAST MARK";      TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Restore the last MARK (key 3) snapshot and replay its recorded inputs.";
+	             _i=TestCap.SPAWN_MARK;
+	TestCap_dg[#_i,0]="SPAWN AT LAST MARK";    TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Restore the last MARK (key 3) snapshot but KEEP the controls -- re-run a bug from its exact state without walking back.";
 	             _i=TestCap.TWITCH;
 	TestCap_dg[#_i,0]="TWITCH";                TestCap_dg[#_i,1]=_font; TestCap_dg[#_i,2]="Master switch for the Twitch file-drop poll (channel-point / donation verb files). Enables triggers WITHOUT needing the in-game IRC to connect.";
 	             _i=TestCap.TWITCH_IRC;

@@ -140,6 +140,20 @@ function OptionsMenu_TestCap_update() {
 	    }
 	    break;}
 
+	    // SPAWN AT LAST MARK: same snapshot restore as REPLAY LAST MARK, but WITHOUT arming
+	    // TAS playback -- the tester keeps the controls. Added so a bug that takes a long walk
+	    // to reach can be re-tested from its exact state as many times as needed.
+	    case TestCap.SPAWN_MARK:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        anim_frame = 0; draw_rows_count = 0; g.gui_state = g.gui_state_NONE;
+	        mark_replay_load(false); // false = restore state, do NOT replay inputs
+	        aud_play_sound(_SOUND2);
+	        timer = 0; sub_state = sub_state_IDLE_CLOSED;
+	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    }
+	    break;}
+
 	    // TWITCH (master gate): standalone ON/OFF for the file-drop poll (twitch_poll)
 	    // + verb dispatcher (twitch_apply), both gated on global.tw_enabled. Lets you test
 	    // the channel-point / donation file-drop path WITHOUT the in-game IRC connecting

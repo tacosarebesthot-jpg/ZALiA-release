@@ -126,6 +126,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case TestCap.GP_DIAG:       {return true; break;}
 	        case TestCap.COOP_TEST:     {return true; break;}
 	        case TestCap.REPLAY_MARK:   {return true; break;}
+	        case TestCap.SPAWN_MARK:    {return true; break;}
 	        case TestCap.TWITCH:        {return true; break;}
 	        case TestCap.TWITCH_IRC:    {return true; break;}
 	        case TestCap.BACK:          {return true; break;}
