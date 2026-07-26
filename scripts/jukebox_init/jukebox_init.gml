@@ -17,9 +17,37 @@
 //   global.jukebox_assignments - ds_map of theme -> "track | name" (assign log)
 //   global.jukebox_msg / _timer - brief on-screen confirmation line
 // ============================================================================
+// PLAYLISTS (2026-07-26). The jukebox listed every music asset in one flat list;
+// with ~283 registered tracks plus the player's own imports that is unusable. These
+// five views slice the same audiogroup by SET, except EXTERNAL which reads loose
+// .ogg files off disk and never touches the project at all.
+//
+// Order matters: it is the cycle order on the playlist key, so it runs from the most
+// familiar (HoverBat's original soundtrack) to the most personal.
+enum JukeboxPL
+{
+    HOVERBAT_OG,   // set == _Default -- HoverBat's original soundtrack
+    REMIXED_NES,   // every other HoverBat set (SteelCrescent, Wyng, Nikos, Isabelle, FDS, Zelda1...)
+    MY_NESMIX,     // the player's own imports, registered under _NESmix
+    EVERYTHING,    // all of the above plus unregistered standalones
+    EXTERNAL,      // loose .ogg files in <working_directory>\music\ -- see jukebox_build_playlist_external
+    COUNT
+}
+
 function jukebox_init() {
 
 	global.jukebox_on    = false; // jukebox MODE off by default (normal area music plays)
+
+	// Which playlist view is active. Cycled with the playlist key; rebuilding the
+	// list is cheap enough to do on every change.
+	global.jukebox_playlist = JukeboxPL.EVERYTHING;
+
+	// Runtime streams owned by the EXTERNAL playlist. Held here so a playlist
+	// switch can destroy them -- audio_create_stream leaks otherwise.
+	global.jukebox_streams  = [];
+
+	// name -> set lookup, rebuilt by jukebox_build_set_map() on each playlist build.
+	global.jukebox_set_of   = -1;
 	global.jukebox_idx   = 0;     // selected track 0..count-1
 	global.jukebox_count = 0;     // real count comes from jukebox_build_playlist() below
 	global.jukebox_inst  = 0;     // last audio instance we started (0 = none)

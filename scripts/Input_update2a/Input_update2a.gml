@@ -74,6 +74,7 @@ function Input_update2a() {
 	var _JUKEBOX_PREV_KBDP   = 0;
 	var _JUKEBOX_NEXT_KBDP   = 0;
 	var _JUKEBOX_ASSIGN_KBDP = 0;
+	var _JUKEBOX_PLAYLIST_KBDP = 0;
 	if (!_tas_inject)
 	{
 	    _TRACKER_TOGGLE_KBDP = (Key_tracker_toggle>0 && keyboard_check_pressed(Key_tracker_toggle)) || (Key_tracker_toggle_alt>0 && keyboard_check_pressed(Key_tracker_toggle_alt));
@@ -81,12 +82,14 @@ function Input_update2a() {
 	    _JUKEBOX_PREV_KBDP   = (Key_jukebox_prev>0   && keyboard_check_pressed(Key_jukebox_prev))   || (Key_jukebox_prev_alt>0   && keyboard_check_pressed(Key_jukebox_prev_alt));
 	    _JUKEBOX_NEXT_KBDP   = (Key_jukebox_next>0   && keyboard_check_pressed(Key_jukebox_next))   || (Key_jukebox_next_alt>0   && keyboard_check_pressed(Key_jukebox_next_alt));
 	    _JUKEBOX_ASSIGN_KBDP = (Key_jukebox_assign>0 && keyboard_check_pressed(Key_jukebox_assign)) || (Key_jukebox_assign_alt>0 && keyboard_check_pressed(Key_jukebox_assign_alt));
+	    _JUKEBOX_PLAYLIST_KBDP = (Key_jukebox_playlist>0 && keyboard_check_pressed(Key_jukebox_playlist)) || (Key_jukebox_playlist_alt>0 && keyboard_check_pressed(Key_jukebox_playlist_alt));
 	}
 	Tracker_Toggle_pressed = _TRACKER_TOGGLE_KBDP;
 	Jukebox_Toggle_pressed = _JUKEBOX_TOGGLE_KBDP;
 	Jukebox_Prev_pressed   = _JUKEBOX_PREV_KBDP || GP_Jukebox_Prev_pressed;
 	Jukebox_Next_pressed   = _JUKEBOX_NEXT_KBDP || GP_Jukebox_Next_pressed;
 	Jukebox_Assign_pressed = _JUKEBOX_ASSIGN_KBDP;
+	Jukebox_Playlist_pressed = _JUKEBOX_PLAYLIST_KBDP;
 
 	var _R_NEW = R * (GP_Right_held  || _R_KEY);  // $01 NES d-pad  RIGHT
 	var _L_NEW = L * (GP_Left_held   || _L_KEY);  // $02 NES d-pad  LEFT

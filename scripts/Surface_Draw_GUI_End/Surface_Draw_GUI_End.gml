@@ -383,6 +383,8 @@ function Surface_Draw_GUI_End() {
 	//   R-trig ..... next track   (gamepad gp_shoulderrb = Input.GP_other6)
 	//   L-trig ..... prev track   (gamepad gp_shoulderlb = Input.GP_other5)
 	//   END ........ assign current theme -> current track + append to jukebox_assignments.txt
+	//   DELETE ..... cycle PLAYLIST: HoverBat OG / Remixed NES / My NES Mix / Everything /
+	//                Music Folder (loose .ogg files in <working_directory>\music\)
 	// Now-playing line drawn bottom-RIGHT (clear of the top-left timer/REC, the top-right
 	// map label, and the bottom-left WALKTUNE overlay). Everything guarded.
 	if (instance_exists(Input) && Input.Jukebox_Toggle_pressed)
@@ -454,6 +456,25 @@ function Surface_Draw_GUI_End() {
 	            jukebox_play();
 	            global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps); // show what changed
 	        }
+	    }
+
+	    // --- PLAYLIST CYCLE (DELETE) ----------------------------------------------------
+	    // Steps through HOVERBAT OG -> REMIXED NES -> MY NES MIX -> EVERYTHING ->
+	    // MUSIC FOLDER. Rebuilds the list and starts playing the new list's first track
+	    // immediately, so the key always produces audible feedback rather than silently
+	    // changing a mode. Bound to DELETE to keep every jukebox key in the same nav
+	    // cluster as HOME / PGUP / PGDN / END.
+	    if (instance_exists(Input) && Input.Jukebox_Playlist_pressed)
+	    {
+	        global.jukebox_playlist = (global.jukebox_playlist + 1) mod JukeboxPL.COUNT;
+
+	        jukebox_build_playlist(); // resets jukebox_idx to 0
+	        if (global.jukebox_count > 0) jukebox_play();
+
+	        global.jukebox_msg       = jukebox_playlist_name(global.jukebox_playlist)
+	                                 + " (" + string(global.jukebox_count) + ")";
+	        global.jukebox_msg_timer = 150;
+	        global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps);
 	    }
 
 	    // --- skip inputs ---

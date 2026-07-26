@@ -36,6 +36,37 @@ function jukebox_build_playlist() {
                && variable_instance_exists(Audio, "dm")
                && ds_exists(Audio.dm, ds_type_map);
 
+    // ---- PLAYLIST FILTER (2026-07-26) -----------------------------------------
+    // Which subset of the music are we listing? See jukebox_init for the enum.
+    // The set a track belongs to is NOT derivable from its asset index, so
+    // jukebox_build_set_map() harvests name -> set by walking the theme index.
+    var _pl = 0;
+    if (variable_global_exists("jukebox_playlist")) _pl = global.jukebox_playlist;
+
+    // PL_EXTERNAL loads .ogg files off disk and has nothing to do with the
+    // audiogroup scan below, so it gets its own builder entirely.
+    if (_pl == JukeboxPL.EXTERNAL)
+    {
+        jukebox_build_playlist_external();
+        return;
+    }
+
+    var _set_of = jukebox_build_set_map();
+
+    // ORDERING GUARD: jukebox_init() runs from g_Create(), which is BEFORE Audio.dm is
+    // populated -- the boot log shows "set_map: Audio.dm not ready, empty map". With no
+    // set data, every set-filtered playlist would come back EMPTY and look broken. That
+    // is harmless for the default view (EVERYTHING does no filtering), but if the active
+    // playlist is a filtered one at that moment, fall back to EVERYTHING for this build
+    // rather than presenting an empty jukebox. The next rebuild -- on jukebox toggle-on
+    // or a playlist cycle, both long after Audio.dm is live -- gets the real list.
+    if (_pl != JukeboxPL.EVERYTHING && ds_map_size(_set_of) == 0)
+    {
+        if (DEV) show_debug_message("[JUKEBOX] set map empty (Audio.dm not ready yet) -- "
+            + "falling back to EVERYTHING for this build");
+        _pl = JukeboxPL.EVERYTHING;
+    }
+
     var _all   = audio_group_get_assets(audiogroup_mus);
     var _total = array_length(_all);
 
@@ -90,6 +121,41 @@ function jukebox_build_playlist() {
             if (_has_dm)
                 _is_assigned = !is_undefined(Audio.dm[?_name + "_AudioGroup"]);
 
+            // ---- apply the playlist filter ------------------------------------
+            // A track with no set at all is UNREGISTERED (a standalone import that
+            // never went through add_sound_data with a theme). Those belong only to
+            // EVERYTHING, since no soundtrack pack claims them.
+            var _set = _set_of[?_name];              // undefined = no set
+            switch (_pl)
+            {
+                case JukeboxPL.HOVERBAT_OG:
+                    // HoverBat's original soundtrack only.
+                    if (is_undefined(_set) || _set != STR_Default) _skip = true;
+                break;
+
+                case JukeboxPL.REMIXED_NES:
+                    // Every HoverBat set EXCEPT the original -- and excluding the
+                    // player's own imports, which get their own list.
+                    if (is_undefined(_set) || _set == STR_Default || _set == dk_NESmix) _skip = true;
+                break;
+
+                case JukeboxPL.MY_NESMIX:
+                    // The player's own added tracks (registered under _NESmix).
+                    if (is_undefined(_set) || _set != dk_NESmix) _skip = true;
+                break;
+
+                case JukeboxPL.EVERYTHING:
+                default:
+                    // no filtering -- registered and unregistered alike
+                break;
+            }
+
+            if (_skip)
+            {
+                _i++;
+                continue;
+            }
+
             if (_is_assigned)
             {
                 _as_ids[_as_count]   = _asset;
@@ -115,13 +181,22 @@ function jukebox_build_playlist() {
     // been removed, so the scan can only ever have produced 56 x asset_get_index()==-1.
     // An empty list is now reported honestly and the jukebox simply has nothing to play,
     // rather than filling itself with invalid ids.
+    // A filtered playlist legitimately CAN come back empty (e.g. the player has
+    // imported nothing of their own yet). Report which list was empty rather than
+    // implying the whole audiogroup is.
     if (_count == 0)
     {
         global.jukebox_count  = 0;
         global.jukebox_assets = [];
         global.jukebox_names  = [];
         global.jukebox_idx    = 0;
-        if (DEV) show_debug_message("[JUKEBOX] build_playlist: no tracks found in audiogroup_mus");
+        if (variable_global_exists("jukebox_msg"))
+        {
+            global.jukebox_msg       = jukebox_playlist_name(_pl) + " IS EMPTY";
+            global.jukebox_msg_timer = 120;
+        }
+        if (DEV) show_debug_message("[JUKEBOX] build_playlist: 0 tracks for playlist "
+            + jukebox_playlist_name(_pl));
         return;
     }
 
@@ -155,7 +230,8 @@ function jukebox_build_playlist() {
 
     global.jukebox_idx = 0;
 
-    if (DEV) show_debug_message("[JUKEBOX] build_playlist: " + string(_count) + " tracks ("
+    if (DEV) show_debug_message("[JUKEBOX] build_playlist [" + jukebox_playlist_name(_pl) + "]: "
+        + string(_count) + " tracks ("
         + string(_un_count) + " unassigned, " + string(_as_count) + " assigned)");
 
 }

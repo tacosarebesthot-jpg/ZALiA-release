@@ -207,11 +207,13 @@ function Input_Create() {
 	Key_jukebox_prev_DEFAULT   = vk_pageup;   Key_jukebox_prev_alt_DEFAULT   = 0;
 	Key_jukebox_next_DEFAULT   = vk_pagedown; Key_jukebox_next_alt_DEFAULT   = 0;
 	Key_jukebox_assign_DEFAULT = vk_end;      Key_jukebox_assign_alt_DEFAULT = 0;
+	Key_jukebox_playlist_DEFAULT = vk_delete; Key_jukebox_playlist_alt_DEFAULT = 0; // cycle playlist view
 	Key_tracker_toggle = Key_tracker_toggle_DEFAULT; Key_tracker_toggle_alt = Key_tracker_toggle_alt_DEFAULT;
 	Key_jukebox_toggle = Key_jukebox_toggle_DEFAULT; Key_jukebox_toggle_alt = Key_jukebox_toggle_alt_DEFAULT;
 	Key_jukebox_prev   = Key_jukebox_prev_DEFAULT;   Key_jukebox_prev_alt   = Key_jukebox_prev_alt_DEFAULT;
 	Key_jukebox_next   = Key_jukebox_next_DEFAULT;   Key_jukebox_next_alt   = Key_jukebox_next_alt_DEFAULT;
 	Key_jukebox_assign = Key_jukebox_assign_DEFAULT; Key_jukebox_assign_alt = Key_jukebox_assign_alt_DEFAULT;
+	Key_jukebox_playlist = Key_jukebox_playlist_DEFAULT; Key_jukebox_playlist_alt = Key_jukebox_playlist_alt_DEFAULT;
 
 	gamepad_set_default();
 
@@ -335,6 +337,7 @@ function Input_Create() {
 	Jukebox_Prev_pressed   = false;
 	Jukebox_Next_pressed   = false;
 	Jukebox_Assign_pressed = false;
+	Jukebox_Playlist_pressed = false;
 
 	Pause_pressed   = false;
 	Pause_held      = false;

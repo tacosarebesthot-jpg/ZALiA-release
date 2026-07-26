@@ -57,10 +57,30 @@ function jukebox_play() {
 	if (variable_global_exists("jukebox_autoadvance") && global.jukebox_autoadvance) _loop = false;
 
 	var _inst = 0;
-	if (instance_exists(Audio))
+
+	// EXTERNAL playlist tracks are runtime streams (audio_create_stream), which belong
+	// to NO audiogroup. aud_play_sound() branches on audiogroup membership, so it would
+	// treat these as SFX: it would skip the audiogroup_mus stop AND the audiogroup_mus
+	// master gain would never apply, leaving the player's music volume slider dead.
+	// So play them directly and apply Audio.mus_vol by hand, matching what the master
+	// gain does for asset tracks (Audio_Create sets it to mus_vol/10).
+	if (variable_global_exists("jukebox_playlist")
+	&&  global.jukebox_playlist == JukeboxPL.EXTERNAL)
+	{
+	    audio_group_stop_all(audiogroup_mus); // silence area music ourselves
+	    if (instance_exists(Audio)) Audio.mus_rm_inst = 0;
+
+	    _inst = audio_play_sound(_asset, 100, _loop);
+	    if (_inst && instance_exists(Audio))
+	    {
+	        audio_sound_gain(_inst, Audio.mus_vol / 10, 0);
+	    }
+	}
+	else if (instance_exists(Audio))
 	{
 	    _inst = aud_play_sound(_asset, -1, _loop, -1, "JUKEBOX");
 	}
+
 	global.jukebox_inst = _inst;
 
 	if (DEV) show_debug_message("[JUKEBOX] play #" + string(_i + 1) + " (" + audio_get_name(_asset) + ") inst=" + string(_inst));
