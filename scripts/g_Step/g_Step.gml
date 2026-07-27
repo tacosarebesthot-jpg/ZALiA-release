@@ -208,6 +208,30 @@ function g_Step() {
 	// + the konami_* globals in g_Create + the KONAMI toast block in Surface_Draw_GUI_End.
 	konami_check();
 
+	// Standalone ZALiA Jukebox window: consume any command it dropped. One
+	// file_exists() per frame when idle; does nothing if the companion never runs.
+	jukebox_poll_cmd();
+
+	// ONE-SHOT RE-EXPORT once Audio.dm is populated. jukebox_init() runs from
+	// g_Create(), BEFORE Audio.dm exists, so the first export goes out with every
+	// track's SET blank -- and the set is exactly what lets the companion collapse
+	// ~440 tracks into ~15 headings. Re-export once the data is really there, so the
+	// window has grouping without the player having to open the jukebox first.
+	if (!variable_global_exists("jukebox_exported_live")) global.jukebox_exported_live = false;
+	if (!global.jukebox_exported_live
+	&&   instance_exists(Audio)
+	&&   variable_instance_exists(Audio, "dm")
+	&&   ds_exists(Audio.dm, ds_type_map)
+	&&   val(Audio.dm[?STR_Theme+STR_Count+STR_Music]) > 0 )
+	{
+	    global.jukebox_exported_live = true;
+	    // Rebuild the PLAYLIST, not just the set map. The boot-time build ran while
+	    // Audio.dm was empty, so every track was classed "unassigned" and the export
+	    // carried no sets. build_playlist re-derives assigned/unassigned, rebuilds the
+	    // set map and re-exports, so the companion gets a correctly grouped list.
+	    jukebox_build_playlist();
+	}
+
 
 
 

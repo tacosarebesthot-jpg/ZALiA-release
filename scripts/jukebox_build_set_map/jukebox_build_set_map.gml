@@ -34,8 +34,11 @@
 function jukebox_build_set_map() {
 
     // Destroy a previous map so repeated playlist rebuilds cannot leak.
+    // Same is_real() trap as in jukebox_export_list: ds_map_create() returns a
+    // REFERENCE, so is_real() is false and this destroy never fired -- leaking one
+    // ds_map on every playlist rebuild.
     if (variable_global_exists("jukebox_set_of")
-    &&  is_real(global.jukebox_set_of)
+    &&  !is_undefined(global.jukebox_set_of)
     &&  ds_exists(global.jukebox_set_of, ds_type_map))
     {
         ds_map_destroy(global.jukebox_set_of);

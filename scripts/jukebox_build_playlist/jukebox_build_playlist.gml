@@ -264,6 +264,9 @@ function jukebox_build_playlist() {
 
     global.jukebox_idx = 0;
 
+    // Keep the companion window's view in step with whatever we just built.
+    jukebox_export_list();
+
     if (DEV) show_debug_message("[JUKEBOX] build_playlist [" + jukebox_playlist_name(_pl) + "]: "
         + string(_count) + " tracks ("
         + string(_un_count) + " unassigned, " + string(_as_count) + " assigned)");

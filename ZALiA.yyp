@@ -1607,6 +1607,8 @@
     {"id":{"name":"twitch_config_save","path":"scripts/twitch_config_save/twitch_config_save.yy",},},
     {"id":{"name":"jukebox_build_playlist_external","path":"scripts/jukebox_build_playlist_external/jukebox_build_playlist_external.yy",},},
     {"id":{"name":"jukebox_playlist_name","path":"scripts/jukebox_playlist_name/jukebox_playlist_name.yy",},},
+    {"id":{"name":"jukebox_export_list","path":"scripts/jukebox_export_list/jukebox_export_list.yy",},},
+    {"id":{"name":"jukebox_poll_cmd","path":"scripts/jukebox_poll_cmd/jukebox_poll_cmd.yy",},},
     {"id":{"name":"walktune_panel","path":"scripts/walktune_panel/walktune_panel.yy",},},
     {"id":{"name":"walktune_save","path":"scripts/walktune_save/walktune_save.yy",},},
     {"id":{"name":"aud_toggle_mus","path":"scripts/aud_toggle_mus/aud_toggle_mus.yy",},},
