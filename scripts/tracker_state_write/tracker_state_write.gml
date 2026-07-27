@@ -208,6 +208,13 @@ function tracker_state_write() {
 	    val(global.dm_save_file_settings[? STR_Kakusu + STR_Required + STR_Count],
 	        val(g.dm_spawn[? STR_Kakusu + STR_Count], 0));
 
+	// HOW MANY YOU HAVE. get_kakusu_count() reads the authoritative
+	// dm_kakusu[Defeated_Count] rather than f.kakusu_count, which
+	// Cutscene_MoaiOpenMouth_1_init_2 overwrites with a derived value.
+	// Required is a RANDO SETTING, so the denominator moves per seed -- which is
+	// exactly why the pair has to be exported rather than a bare count.
+	_s.kakusu_got = get_kakusu_count();
+
 	// ── CONTAINERS GRANTED AT FILE CREATION ─────────────────────────────────────
 	// START HEART/MAGIC CONTAINERS pre-fill the piece string in
 	// FileSelect_register_file.gml:110-131, so hearts_got/magic_got are NEVER 0 at
