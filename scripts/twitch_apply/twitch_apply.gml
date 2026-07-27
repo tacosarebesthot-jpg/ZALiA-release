@@ -147,6 +147,78 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			});
 			break;
 
+		case "steal": case "rob": case "thief": case "pickpocket":
+			// HOSTILE: chat temporarily TAKES one of your items.
+			//
+			// Picks from what you ACTUALLY HOLD, so early-game chat cannot steal a
+			// candle you never found and produce a no-op that looks broken. Bits are
+			// the real, obtainable set -- deliberately not a range, because TABLET,
+			// MELODY and FEATHER are registered but never spawn (see the tracker's
+			// ITEMS table), and "stealing" one would be invisible and confusing.
+			//
+			// Restores by OR-ing the bit back rather than reassigning f.items, so
+			// anything picked up DURING the theft survives. Two overlapping steals of
+			// different items also both restore correctly; two of the SAME item are
+			// prevented below, since the second would capture an already-stolen bit
+			// and give it back early.
+			var _steal_pool = [
+			    ITM_CAND, ITM_GLOV, ITM_RAFT, ITM_BOOT, ITM_FLUT, ITM_CROS,
+			    ITM_HAMM, ITM_BRAC, ITM_FRY1, ITM_MASK, ITM_BOOK, ITM_MEAT,
+			    ITM_SHLD, ITM_RING, ITM_NKLC, ITM_SWRD, ITM_NOTE, ITM_MIRR,
+			    ITM_TRPH, ITM_MEDI, ITM_CHLD, ITM_BTL1, ITM_SKEY
+			];
+			var _held = [];
+			for (var _si = 0; _si < array_length(_steal_pool); _si++)
+			{
+			    var _sb = _steal_pool[_si];
+			    // skip anything a still-running steal already took
+			    if (!(f.items & _sb)) continue;
+			    if (variable_global_exists("tw_stolen") && (global.tw_stolen & _sb)) continue;
+			    array_push(_held, _sb);
+			}
+
+			if (array_length(_held) == 0)
+			{
+			    global.tw_toast       = _who_s + " -> NOTHING TO STEAL";
+			    global.tw_toast_timer = 180;
+			    break;
+			}
+
+			if (!variable_global_exists("tw_stolen")) global.tw_stolen = 0;
+
+			var _bit  = _held[irandom(array_length(_held) - 1)];
+
+			// Readable name for the toast. There is NO bit->name key in dm_ITEM, so go
+			// bit -> object -> object name -> item TYPE, which is the display word
+			// ("_CANDLE"). Checked against g_Create's registration block rather than
+			// guessed; a wrong key here would silently read "AN ITEM" forever.
+			var _sobj = val(g.dm_ITEM[? hex_str(_bit) + STR_Object], -1);
+			var _name = "AN ITEM";
+			if (_sobj != -1)
+			{
+			    var _stype = g.dm_ITEM[? object_get_name(_sobj) + STR_Item + STR_Type];
+			    if (!is_undefined(_stype)) _name = _stype;
+			}
+			if (string_length(_name) > 0 && string_char_at(_name, 1) == "_")
+			    _name = string_delete(_name, 1, 1);
+			f.items       &= ~_bit;
+			global.tw_stolen |= _bit;
+
+			array_push(global.tw_active, {
+			    frames  : _frames,
+			    bit     : _bit,
+			    // No reapply: taking it once is enough, and re-clearing every tick
+			    // would fight a legitimate re-pickup during the theft.
+			    restore : function() {
+			        f.items          |=  self.bit;
+			        global.tw_stolen &= ~self.bit;
+			    }
+			});
+
+			global.tw_toast       = _who_s + " STOLE YOUR " + _name;
+			global.tw_toast_timer = 180;
+			break;
+
 		case "confuse":
 			// FUN: "drunk" controls -- swap LEFT<->RIGHT player input for the duration.
 			// Input_update2a mirrors Right/Left held+pressed+released while the flag is

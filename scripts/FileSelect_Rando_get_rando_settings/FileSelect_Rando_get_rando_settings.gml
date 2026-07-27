@@ -59,6 +59,29 @@ function FileSelect_Rando_get_rando_settings() {
 	_dm_SETTINGS[?STR_File+STR_Start+STR_Level+STR_Life]   = dg_RandoOTHER_Options[#RandoOTHER_MAIN_cursor_LIFE,  2];
 
 
+	// START SPELLS -- a BITMASK, written so the file-select summary can show it.
+	//
+	// FileSelect_build_surfaces_2.gml:749 reads this key to decide whether to draw
+	// the "START SPELLS:" block, and nothing in the codebase ever wrote it -- one
+	// hit for the whole project, the read itself. So val() returned 0, the `if`
+	// never passed, and a rando file that starts you with spells silently showed
+	// nothing on the file-select screen. The spells themselves always worked;
+	// FileSelect_register_file grants them from dg_RandoOTHER_SPELLS directly.
+	//
+	// Built from the same grid register_file uses, so the two cannot drift.
+	// SUMMON is excluded to match register_file, where its line is commented out.
+	var _start_spells = 0;
+	if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_PROTECT,2]) _start_spells |= SPL_PRTC;
+	if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_JUMP,   2]) _start_spells |= SPL_JUMP;
+	if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_HEAL,   2]) _start_spells |= SPL_LIFE;
+	if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_FAIRY,  2]) _start_spells |= SPL_FARY;
+	if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_FIRE,   2]) _start_spells |= SPL_FIRE;
+	if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_REFLECT,2]) _start_spells |= SPL_RFLC;
+	if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_ENIGMA, 2]) _start_spells |= SPL_SPEL;
+	if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_THUNDER,2]) _start_spells |= SPL_THUN;
+	if (global.start_with_reflect)                                 _start_spells |= SPL_RFLC;
+	_dm_SETTINGS[?STR_File+STR_Start+STR_Spells] = _start_spells;
+
 	_dm_SETTINGS[?STR_File+STR_Start+STR_CANDLE]  = dg_RandoOTHER_ITEMS[#RandoOTHER_ITEMS_item_cursor_CANDLE,2];
 	_dm_SETTINGS[?STR_File+STR_Start+STR_FLUTE]   = dg_RandoOTHER_ITEMS[#RandoOTHER_ITEMS_item_cursor_FLUTE,2];
 	_dm_SETTINGS[?STR_File+STR_Start+STR_MEAT]    = dg_RandoOTHER_ITEMS[#RandoOTHER_ITEMS_item_cursor_BAIT,2];

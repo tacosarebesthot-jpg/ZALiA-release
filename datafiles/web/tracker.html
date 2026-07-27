@@ -276,8 +276,8 @@ body.obs .hidebtn { display:none; }
    .pips rules died with the pip grids (the bars reuse .meter).
    =========================================================================== */
 
-/* ---- ZELDA 1 ------------------------------------------------------------- */
-body[data-theme="zelda1"] {
+/* ---- SANDSTONE ------------------------------------------------------------- */
+body[data-theme="sandstone"] {
   /* Zelda 1's status bar is a flat black field with one block of gold text on
      it -- no HUD gradient, no bevel. Panels borrow the overworld's tan/olive
      ground instead of the base theme's palace-stone violet. */
@@ -289,35 +289,35 @@ body[data-theme="zelda1"] {
 }
 /* NES dialog boxes fake a rounded corner by notching one pixel off each corner
    rather than curving anything -- the hardware has no rounded-rect primitive. */
-body[data-theme="zelda1"] .panel,
-body[data-theme="zelda1"] .hud {
+body[data-theme="sandstone"] .panel,
+body[data-theme="sandstone"] .hud {
   clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px),
                       calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
   border-width:2px;
 }
 /* Ground dither: the NES had no smooth shading, so a second tone gets stippled
    in with a diagonal checker -- the same trick the overworld tiles use. */
-body[data-theme="zelda1"] .panel {
+body[data-theme="sandstone"] .panel {
   background-image: repeating-linear-gradient(45deg, rgba(0,0,0,.16) 0 2px, transparent 2px 4px);
   background-color: var(--stone);
 }
-body[data-theme="zelda1"].obs .panel {
+body[data-theme="sandstone"].obs .panel {
   background-color: rgba(10,8,4,.8);
   background-image: none;
 }
-body[data-theme="zelda1"] h2,
-body[data-theme="zelda1"] .hud .lbl {
+body[data-theme="sandstone"] h2,
+body[data-theme="sandstone"] .hud .lbl {
   color: var(--got); font-weight:900; text-shadow:1px 1px 0 #000;
 }
-body[data-theme="zelda1"] .timer {
+body[data-theme="sandstone"] .timer {
   text-shadow:-1px -1px 0 rgba(255,255,255,.2), 1px 1px 0 #000;
 }
-body[data-theme="zelda1"] .it,
-body[data-theme="zelda1"] .key { border-width:2px; border-color:var(--edge); }
-body[data-theme="zelda1"] .it { background:var(--pip-off); }
+body[data-theme="sandstone"] .it,
+body[data-theme="sandstone"] .key { border-width:2px; border-color:var(--edge); }
+body[data-theme="sandstone"] .it { background:var(--pip-off); }
 
-/* ---- ILLUMINATED TOME (the one LIGHT theme) ------------------------------ */
-body[data-theme="tome"] {
+/* ---- VELLUM (the one LIGHT theme) ------------------------------ */
+body[data-theme="vellum"] {
   /* Aged vellum ground, iron-gall ink, oxblood and lapis for the two vital
      stats, verdigris for hints, antique gold for the numbers that matter. */
   --void:#e9dfc4; --stone:#e2d3a9; --edge:#8a7040;
@@ -326,7 +326,7 @@ body[data-theme="tome"] {
   --pip-off:#cdbb8c;
   --ghost:#b0a077; --card:#efe4c4; --hudbg:#eee3c6;
 }
-body[data-theme="tome"] {
+body[data-theme="vellum"] {
   font-family:Georgia,"Times New Roman",serif;
   background-color:var(--void);
   background-image:
@@ -336,50 +336,50 @@ body[data-theme="tome"] {
 }
 /* OBS is the hard case for a light theme: solid vellum, not the dark wash the
    base rule uses, or gameplay behind it fights the page for attention. */
-body[data-theme="tome"].obs .panel {
+body[data-theme="vellum"].obs .panel {
   background:rgba(233,223,198,.94);
   backdrop-filter:blur(3px);
   box-shadow:0 2px 10px rgba(40,28,10,.45), inset 0 0 0 1px rgba(138,106,18,.25);
 }
-body[data-theme="tome"] .panel { position:relative; }
-body[data-theme="tome"] .panel::before {
+body[data-theme="vellum"] .panel { position:relative; }
+body[data-theme="vellum"] .panel::before {
   content:""; position:absolute; top:0; left:0; right:0; height:3px;
   background:linear-gradient(90deg, transparent, var(--got) 15%, var(--got) 85%, transparent);
   opacity:.55;
 }
-body[data-theme="tome"] h2 {
+body[data-theme="vellum"] h2 {
   font-family:Palatino,"Palatino Linotype","Book Antiqua",Georgia,serif;
   font-variant:small-caps; font-weight:700; letter-spacing:.16em;
   border-bottom:1px solid var(--edge); padding-bottom:6px;
 }
-body[data-theme="tome"] h2::first-letter { font-size:1.55em; color:var(--got); font-weight:700; }
-body[data-theme="tome"] .hud {
+body[data-theme="vellum"] h2::first-letter { font-size:1.55em; color:var(--got); font-weight:700; }
+body[data-theme="vellum"] .hud {
   background:linear-gradient(180deg,#f1e8d2,#e6d7ae);
   border-top:3px double var(--got); border-bottom:3px double var(--got);
 }
 /* GHOSTED OUTLINES on vellum: faded sepia + a dashed hairline reads as "drawn
    but not yet inked in gold" where a dark ghost would read as a muddy blot. */
-body[data-theme="tome"] .it, body[data-theme="tome"] .key {
+body[data-theme="vellum"] .it, body[data-theme="vellum"] .key {
   border-style:dashed; font-weight:600;
 }
-body[data-theme="tome"] .it.on, body[data-theme="tome"] .key.on { border-style:solid; }
-body[data-theme="tome"] .key.on b { text-shadow:0 0 3px rgba(138,106,18,.45); }
-body[data-theme="tome"] .h { box-shadow:inset 0 0 0 1px rgba(138,106,18,.15); }
+body[data-theme="vellum"] .it.on, body[data-theme="vellum"] .key.on { border-style:solid; }
+body[data-theme="vellum"] .key.on b { text-shadow:0 0 3px rgba(138,106,18,.45); }
+body[data-theme="vellum"] .h { box-shadow:inset 0 0 0 1px rgba(138,106,18,.15); }
 /* Unlit notches sit close in lightness to the panel ground -- both warm tans --
    so a hairline ring keeps the tally visible without darkening the variable. */
-body[data-theme="tome"] .meter i {
+body[data-theme="vellum"] .meter i {
   box-shadow:inset 0 0 0 1px rgba(90,65,25,.25);
 }
 /* SIGNATURE: the run timer in gold leaf. One number on the page gets the full
    illumination treatment; everything else stays disciplined. */
-body[data-theme="tome"] .timer {
+body[data-theme="vellum"] .timer {
   background:linear-gradient(180deg,#b8912c,#6e5209);
   -webkit-background-clip:text; background-clip:text; color:transparent;
   text-shadow:0 1px 0 rgba(255,255,255,.35);
 }
 
-/* ---- FINAL FANTASY (the command window) ---------------------------------- */
-body[data-theme="ff"] {
+/* ---- SAPPHIRE (command-window blue) ---------------------------------- */
+body[data-theme="sapphire"] {
   --void:#0a1030; --stone:#1c3f8a; --edge:#eef2ff;
   --ink:#ffffff; --dim:#9db4e8;
   --life:#ff5568; --magic:#55c8ff; --got:#ffd657; --hint:#7cf0d2;
@@ -390,12 +390,12 @@ body[data-theme="ff"] {
      muddy. */
   text-shadow: 1px 1px 0 rgba(0,0,20,.75);
 }
-body[data-theme="ff"]:not(.obs) {
+body[data-theme="sapphire"]:not(.obs) {
   background: radial-gradient(ellipse at 50% -10%, #1c2f6e 0%, #060912 60%);
 }
 /* THE SIGNATURE: `border: 4px double` draws the FF window edge for free; the
    four corner studs are tiny radial-gradient dots. */
-body[data-theme="ff"] .panel {
+body[data-theme="sapphire"] .panel {
   background-image:
     radial-gradient(circle at 7px 7px, var(--got) 0 1.3px, transparent 1.6px),
     radial-gradient(circle at calc(100% - 7px) 7px, var(--got) 0 1.3px, transparent 1.6px),
@@ -409,7 +409,7 @@ body[data-theme="ff"] .panel {
               inset 0 0 26px rgba(120,170,255,.22),
               0 3px 10px rgba(0,0,0,.5);
 }
-body[data-theme="ff"].obs .panel {
+body[data-theme="sapphire"].obs .panel {
   background-image:
     radial-gradient(circle at 7px 7px, var(--got) 0 1.2px, transparent 1.5px),
     radial-gradient(circle at calc(100% - 7px) 7px, var(--got) 0 1.2px, transparent 1.5px),
@@ -418,49 +418,49 @@ body[data-theme="ff"].obs .panel {
     linear-gradient(to bottom, rgba(60,95,190,.55), rgba(8,14,50,.7));
   background-repeat: no-repeat; backdrop-filter: blur(3px);
 }
-body[data-theme="ff"] .hud {
+body[data-theme="sapphire"] .hud {
   background: linear-gradient(to bottom, #16255c, #060b24);
   border: 4px double var(--edge); border-radius: 8px; padding: 11px 15px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.4),
               inset 0 0 22px rgba(120,170,255,.18),
               0 3px 10px rgba(0,0,0,.5);
 }
-body[data-theme="ff"] h2 { border-bottom:1px solid rgba(255,255,255,.22); padding-bottom:5px; }
+body[data-theme="sapphire"] h2 { border-bottom:1px solid rgba(255,255,255,.22); padding-bottom:5px; }
 /* THE RISK: a real FF command cursor, blinking, on the one panel this page
    exists for. Everything else stays still. */
-body[data-theme="ff"] .hints h2 { position:relative; padding-left:16px; }
-body[data-theme="ff"] .hints h2::before {
+body[data-theme="sapphire"] .hints h2 { position:relative; padding-left:16px; }
+body[data-theme="sapphire"] .hints h2::before {
   content:"\25B6"; position:absolute; left:0; color:var(--got);
   animation: ff-cursor-blink 1s steps(1) infinite;
 }
 @keyframes ff-cursor-blink { 50% { opacity:0; } }
 @media (prefers-reduced-motion: reduce) {
-  body[data-theme="ff"] .hints h2::before { animation:none; }
+  body[data-theme="sapphire"] .hints h2::before { animation:none; }
 }
-body[data-theme="ff"] .it  { border-color:rgba(238,242,255,.35); border-radius:3px; }
-body[data-theme="ff"] .it.on {
+body[data-theme="sapphire"] .it  { border-color:rgba(238,242,255,.35); border-radius:3px; }
+body[data-theme="sapphire"] .it.on {
   background:linear-gradient(to bottom,#ffe9a8,var(--got) 55%,#c99a1e);
   border-color:#fff6d8; color:#3a2400; text-shadow:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.25);
 }
-body[data-theme="ff"] .spellboard .it.on {
+body[data-theme="sapphire"] .spellboard .it.on {
   background:linear-gradient(to bottom,#bfe6ff,var(--magic) 55%,#1c6fb0);
   border-color:#eaf7ff; color:#00182c; text-shadow:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.25);
 }
-body[data-theme="ff"] .spellboard .it.stab.on {
+body[data-theme="sapphire"] .spellboard .it.stab.on {
   background:linear-gradient(to bottom,#c9ffe9,var(--hint) 55%,#1c9a72);
   border-color:#eafff5; color:#00220f; text-shadow:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.25);
 }
-body[data-theme="ff"] .meter { border:1px solid rgba(238,242,255,.35); border-radius:2px; padding:2px; }
-body[data-theme="ff"] .meter i { border-radius:1px; }
-body[data-theme="ff"] .meter i.on { box-shadow:inset 0 1px 0 rgba(255,255,255,.5); }
-body[data-theme="ff"] .key { border-color:rgba(238,242,255,.3); border-radius:3px; }
-body[data-theme="ff"] .key.on { border-color:var(--got); box-shadow:inset 0 0 6px rgba(255,214,87,.3); }
-body[data-theme="ff"] ::selection { background:var(--got); color:#241800; }
+body[data-theme="sapphire"] .meter { border:1px solid rgba(238,242,255,.35); border-radius:2px; padding:2px; }
+body[data-theme="sapphire"] .meter i { border-radius:1px; }
+body[data-theme="sapphire"] .meter i.on { box-shadow:inset 0 1px 0 rgba(255,255,255,.5); }
+body[data-theme="sapphire"] .key { border-color:rgba(238,242,255,.3); border-radius:3px; }
+body[data-theme="sapphire"] .key.on { border-color:var(--got); box-shadow:inset 0 0 6px rgba(255,214,87,.3); }
+body[data-theme="sapphire"] ::selection { background:var(--got); color:#241800; }
 
-/* ---- CASTLEVANIA / GOTHIC ------------------------------------------------ */
+/* ---- GOTHIC ------------------------------------------------ */
 body[data-theme="gothic"] {
   /* Candlelit aubergine stone, a tarnished gold-bronze frame, ruby/sapphire
      stained glass for life/magic. --got doubles as "gilt" -- from across the
@@ -541,11 +541,11 @@ body[data-theme="gothic"] .h { box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
 <div id="themebar">
   <span>THEME</span>
   <select id="themesel" onchange="setTheme(this.value)">
-    <option value="">ZELDA II</option>
-    <option value="zelda1">ZELDA 1</option>
-    <option value="ff">FINAL FANTASY</option>
-    <option value="gothic">CASTLEVANIA</option>
-    <option value="tome">ILLUMINATED TOME</option>
+    <option value="">MIDNIGHT</option>
+    <option value="sandstone">SANDSTONE</option>
+    <option value="sapphire">SAPPHIRE</option>
+    <option value="gothic">GOTHIC</option>
+    <option value="vellum">VELLUM</option>
   </select>
 </div>
 
@@ -625,7 +625,7 @@ if (QS.has('obs')) document.body.classList.add('obs');
 // The URL param has to win, and has to work WITHOUT localStorage, because OBS
 // browser sources run in their own isolated profile -- a theme picked in your
 // normal browser is simply not visible to them. Point OBS at
-// ?theme=zelda1&obs=1 and it is deterministic.
+// ?theme=sandstone&obs=1 and it is deterministic.
 function setTheme(name, remember) {
   if (name) document.body.setAttribute('data-theme', name);
   else      document.body.removeAttribute('data-theme');

@@ -60,12 +60,13 @@ footer { position:sticky; bottom:0; background:var(--panel); border-top:1px soli
             border:1px solid var(--btn-edge); border-radius:var(--radius); padding:3px 5px; }
 
 /* ===========================================================================
-   THEMES -- palettes lifted from tracker.html so the two pages match.
+   THEMES -- palettes shared with tracker.html so the two pages match.
+   Named for the PALETTE, not for games they never really resembled.
    Adding one = a new block plus a new <option>.
    =========================================================================== */
 
-/* ---- ZELDA 1: black status field, tan overworld ground, gold lettering ---- */
-body[data-theme="zelda1"] {
+/* ---- SANDSTONE: black status field, tan ground, gold lettering ------------ */
+body[data-theme="sandstone"] {
   --void:#000000; --panel:#1a1408; --edge:#d4c896; --ink:#f8ecd0;
   --btn:#5c4a26; --btn-edge:#d4c896; --btn-hover:#7a6434;
   --btn-on-bg:#f8b800; --btn-on-ink:#241a00;
@@ -73,12 +74,12 @@ body[data-theme="zelda1"] {
 }
 /* NES boxes notch their corners rather than curving them; --radius:0 above plus
    the gold rule here is the whole look. Headings take the status-bar gold. */
-body[data-theme="zelda1"] h1 { color:#f8b800; text-shadow:1px 1px 0 #000; }
-body[data-theme="zelda1"] header,
-body[data-theme="zelda1"] footer { border-color:#f8b800; }
+body[data-theme="sandstone"] h1 { color:#f8b800; text-shadow:1px 1px 0 #000; }
+body[data-theme="sandstone"] header,
+body[data-theme="sandstone"] footer { border-color:#f8b800; }
 
-/* ---- FINAL FANTASY: the blue command window in silver chrome -------------- */
-body[data-theme="ff"] {
+/* ---- SAPPHIRE: blue command window in silver chrome ----------------------- */
+body[data-theme="sapphire"] {
   --void:#0a1030; --panel:#0d1642; --edge:#eef2ff; --ink:#ffffff;
   --btn:#1c3f8a; --btn-edge:#eef2ff; --btn-hover:#2a55b0;
   --btn-on-bg:#ffd657; --btn-on-ink:#241800;
@@ -86,12 +87,12 @@ body[data-theme="ff"] {
 }
 /* The double rule is the signature -- same trick as the tracker: `double` is a
    real border-style that draws two parallel lines with a gap for free. */
-body[data-theme="ff"] header { border-bottom:4px double var(--edge); }
-body[data-theme="ff"] footer { border-top:4px double var(--edge); }
-body[data-theme="ff"] button { box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
-body[data-theme="ff"] { text-shadow:1px 1px 0 rgba(0,0,20,.75); }
+body[data-theme="sapphire"] header { border-bottom:4px double var(--edge); }
+body[data-theme="sapphire"] footer { border-top:4px double var(--edge); }
+body[data-theme="sapphire"] button { box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+body[data-theme="sapphire"] { text-shadow:1px 1px 0 rgba(0,0,20,.75); }
 
-/* ---- CASTLEVANIA: candlelit stone and tarnished gold --------------------- */
+/* ---- GOTHIC: candlelit stone and tarnished gold -------------------------- */
 body[data-theme="gothic"] {
   --void:#0a0609; --panel:#221521; --edge:#8a6d3a; --ink:#ede0c8;
   --btn:#2c2030; --btn-edge:#8a6d3a; --btn-hover:#3d2c42;
@@ -103,28 +104,28 @@ body[data-theme="gothic"] h1 {
   text-shadow:0 1px 0 rgba(0,0,0,.7), 0 0 10px rgba(216,179,74,.25);
 }
 
-/* ---- ILLUMINATED TOME: the light one ------------------------------------- */
-body[data-theme="tome"] {
+/* ---- VELLUM: the light one ----------------------------------------------- */
+body[data-theme="vellum"] {
   --void:#e9dfc4; --panel:#e2d3a9; --edge:#8a7040; --ink:#241a10;
   --btn:#dbc99a; --btn-edge:#8a7040; --btn-hover:#cdb87f;
   --btn-on-bg:#8a6a12; --btn-on-ink:#f6efd8;
   --field:#f1e8d2; --accent:#3d6b3f; --sel:#c9b485; --radius:3px;
   color-scheme: light;   /* so the native range/scrollbar chrome flips too */
 }
-body[data-theme="tome"] {
+body[data-theme="vellum"] {
   font-family:Georgia,"Times New Roman",serif;
 }
-body[data-theme="tome"] h1 { font-variant:small-caps; letter-spacing:.14em; }
+body[data-theme="vellum"] h1 { font-variant:small-caps; letter-spacing:.14em; }
 </style></head><body>
 <header>
   <h1>ZALiA JUKEBOX</h1>
   <span class="count" id="count"></span>
   <select id="themesel" onchange="setTheme(this.value)" title="page theme">
-    <option value="">ZELDA II</option>
-    <option value="zelda1">ZELDA 1</option>
-    <option value="ff">FINAL FANTASY</option>
-    <option value="gothic">CASTLEVANIA</option>
-    <option value="tome">ILLUMINATED TOME</option>
+    <option value="">MIDNIGHT</option>
+    <option value="sandstone">SANDSTONE</option>
+    <option value="sapphire">SAPPHIRE</option>
+    <option value="gothic">GOTHIC</option>
+    <option value="vellum">VELLUM</option>
   </select>
 </header>
 <div class="row" id="playlists"></div>

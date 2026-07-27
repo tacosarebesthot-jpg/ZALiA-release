@@ -280,7 +280,14 @@ function TrackerWin_draw() {
 	        TrackerWin_fill(_dc, 0,_y-1, 600,_y, C_SEP);
 	        var _hnums   = val(g.dm_RandoHintsRecorder[?STR_Found+STR_Hint+STR_Num], "");
 	        var _hfound  = string_length(_hnums)>>1;
-	        var _htotal  = val(g.dm_RandoHints[?STR_Hint+STR_Count], 0);
+	        // SEED's hint count, not the world's. g.dm_RandoHints[Hint_Count] counts
+	        // every hint-CAPABLE dialogue in the world data (data_spawn.gml:577-579),
+	        // so it is identical for every seed and showed a fixed denominator like
+	        // "0/38" that had nothing to do with this run. f.dm_rando[Rando_Hint_Count]
+	        // is the real per-seed number (Rando_generate_hints.gml:208-209, +1 for the
+	        // Zelda hint) and is what g_Room_Start.gml:1654 iterates.
+	        // Same fix already applied to the web tracker; the two disagreed until now.
+	        var _htotal  = val(f.dm_rando[?STR_Rando+STR_Hint+STR_Count], 0);
 	        TrackerWin_put(_dc, _MX, _y,
 	            "HINTS: "+string(_hfound)+"/"+string(_htotal)+" found",
 	            C_GRAY);
