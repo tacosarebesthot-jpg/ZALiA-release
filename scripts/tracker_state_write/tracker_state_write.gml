@@ -77,7 +77,16 @@ function tracker_state_write() {
 	||  val(global.dm_save_file_settings[?STR_Randomize+STR_Dungeon +STR_Boss])
 	||  val(global.dm_save_file_settings[?STR_Randomize+STR_Town    +STR_Locations])
 	||  val(global.dm_save_file_settings[?STR_Randomize+STR_Level   +STR_Cost])
-	||  val(global.dm_save_file_settings[?STR_Randomize+STR_XP]) )
+	||  val(global.dm_save_file_settings[?STR_Randomize+STR_XP])
+	// ADDED 2026-07-27. The list above mirrored FileSelect_Step, but the file is
+	// actually MADE a rando file by the wider test in FileSelect_register_file
+	// (:23-24) -- which counts palette and dungeon-tileset too. A file randomized
+	// only on colours or dungeon graphics still gets a generated seed there
+	// (:197-198), so the narrower test reported is_rando:false and blanked a seed
+	// line that genuinely exists. Enemy difficulty is in register_file's test too.
+	||  val(global.dm_save_file_settings[?STR_Randomize+STR_Palette])
+	||  val(global.dm_save_file_settings[?STR_Randomize+STR_Dungeon +STR_Tileset])
+	||  val(global.dm_save_file_settings[?STR_Randomize+STR_Enemy   +STR_Difficulty]) )
 	{
 	    _is_rando = true;
 	}
@@ -148,6 +157,63 @@ function tracker_state_write() {
 	_s.keys_held_p5 = get_key_count(5);
 	_s.keys_held_p6 = get_key_count(6);
 
+	// ── GAME OVER WARPING PENALTY (rando setup > OTHER) ─────────────────────────
+	// dk_ForceQuitPenalty, chosen at file creation. It decides what a FORCED
+	// ("quick") game over costs: ON charges every remaining life as a death
+	// (update_QuitAppMenu:158), OFF makes it a free warp. A normal death via
+	// rmB_Death is unaffected either way.
+	//
+	// The companion needs this because death_count means two different things
+	// depending on it -- 18 deaths with the penalty on may be mostly free-warp
+	// charges, not 18 real deaths. Undefined = no choice made in setup, which the
+	// game treats as ON, so mirror that default here rather than showing "off".
+	var _fqp = global.dm_save_file_settings[? dk_ForceQuitPenalty];
+	_s.warp_penalty = is_undefined(_fqp) ? 1 : (_fqp ? 1 : 0);
+
+	// Of death_count, the portion that was lives forfeited to a quick reset
+	// rather than actual deaths. 0 on saves made before the field existed.
+	_s.deaths_warped = val(f.death_count_warped, 0);
+	_s.deaths_real   = max(0, f.death_count - val(f.death_count_warped, 0));
+
+	// ── CRYSTALS REQUIRED (rando setup > REQUIREMENTS) ──────────────────────────
+	// This -- not a hardcoded 6 -- is what gates the Great Palace barrier
+	// (Barrier_init2.gml:105, Barrier_update_2.gml:114/132). A seed can require
+	// fewer, so a companion drawing six slots is wrong. It is ALSO the only rando
+	// setting changeable mid-run (OptionsMenu_RandoOptions_update.gml:179-199),
+	// so it must be re-read every write rather than cached at boot.
+	_s.crystals_required =
+	    val(global.dm_save_file_settings[? STR_Crystal + STR_Required + STR_Count], 6);
+
+	// ── KAKUSU (gold slimes) REQUIRED ───────────────────────────────────────────
+	// Gates a reward (Cutscene_MoaiOpenMouth_1_init_2.gml:34) and counts toward
+	// completion (Cutscene_GameEnd_1B_update.gml:918). Was not exported at all.
+	_s.kakusu_required =
+	    val(global.dm_save_file_settings[? STR_Kakusu + STR_Required + STR_Count],
+	        val(g.dm_spawn[? STR_Kakusu + STR_Count], 0));
+
+	// ── CONTAINERS GRANTED AT FILE CREATION ─────────────────────────────────────
+	// START HEART/MAGIC CONTAINERS pre-fill the piece string in
+	// FileSelect_register_file.gml:110-131, so hearts_got/magic_got are NEVER 0 at
+	// the start of a run -- a default file already reads 9/27. Exporting the
+	// baseline lets a companion show "found since the run began" instead of
+	// counting the handout as progress.
+	_s.start_containers_hp =
+	    val(global.dm_save_file_settings[? STR_File + STR_Start + STR_Container + STR_HP], 3);
+	_s.start_containers_mp =
+	    val(global.dm_save_file_settings[? STR_File + STR_Start + STR_Container + STR_MP], 3);
+
+	// ── keys: TOTAL placed in each palace ───────────────────────────────────────
+	// Same source the in-game key readout uses (draw_key_stats.gml:73), so the two
+	// can never disagree. With found + held + total the companion can show all
+	// three numbers a runner actually wants: USED (found-held), COLLECTED (found),
+	// and TOTAL. Rando changes these per seed, which is exactly why the total has
+	// to be read from dm_spawn rather than hardcoded to the vanilla counts.
+	for (var _kp = 1; _kp <= 6; _kp++)
+	{
+	    _s[$ ("keys_total_p" + string(_kp))] =
+	        val(g.dm_spawn[? STR_Dungeon + hex_str(_kp) + STR_Key + STR_Count]);
+	}
+
 	// ── hints (only when the rando hint system is on) ───────────────────────────
 	// Found hint numbers are stored as 2-char hex pairs in dm_RandoHintsRecorder.
 	// Each found hint is emitted as a STRUCT { item, location }: item = letters of
@@ -159,7 +225,18 @@ function tracker_state_write() {
 	    var _found_count = string_length(_found_nums) >> 1;
 
 	    _s.hints_found = _found_count;
-	    _s.hints_total = val(g.dm_RandoHints[? STR_Hint + STR_Count], 0);
+
+	    // HINTS TOTAL -- must be the SEED's count, not the world's.
+	    // g.dm_RandoHints[?STR_Hint+STR_Count] counts every hint-CAPABLE dialogue
+	    // in the world data (incremented per spawn in data_spawn.gml:577-579). It
+	    // is identical for every seed, so using it showed a fixed denominator
+	    // ("0/38") that had nothing to do with how many hints the seed placed.
+	    // f.dm_rando[?STR_Rando+STR_Hint+STR_Count] is the real per-seed count,
+	    // built in Rando_generate_hints.gml:208-209 (+1 for the Zelda hint), and
+	    // it is what the game itself iterates in g_Room_Start.gml:1654.
+	    // NOTE: TrackerWin_draw.gml:283 still has the original bug.
+	    var _seed_hints = val(f.dm_rando[? STR_Rando + STR_Hint + STR_Count], 0);
+	    _s.hints_total = _seed_hints;
 
 	    // Clean "ITEM on LOCATION" hints: location = the item's randomized PLACEMENT
 	    // area (NOT the free-form hint sentence). Map a 7-char area-id prefix

@@ -1,0 +1,356 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>ZALiA Tracker</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+/* ---------------------------------------------------------------------------
+   Palette lifted from the game itself rather than a generic dark theme: the
+   NES Zelda II status bar (black field, white text), palace stone violet, the
+   red life bar and the blue magic bar. Items you do not have are GHOSTED
+   OUTLINES rather than hidden -- the board shows the shape of the whole run
+   from the first second, which is the thing a viewer wants to read at a glance.
+   --------------------------------------------------------------------------- */
+:root {
+  --void:#0b0b12; --stone:#1b1830; --edge:#332c56;
+  --ink:#f4f4ff; --dim:#7a7398;
+  --life:#e8484c; --magic:#4c9ff0; --got:#ffd23f; --hint:#7dffb0;
+  --pip-off:#2a2544;
+}
+* { box-sizing:border-box; }
+html,body { height:100%; }
+body { margin:0; background:var(--void); color:var(--ink);
+       font:13px/1.4 ui-monospace,"Cascadia Mono",Consolas,monospace; }
+
+/* OBS: append ?obs=1 for a transparent background over gameplay. */
+body.obs { background:transparent; }
+body.obs .panel { background:rgba(11,11,18,.72); backdrop-filter:blur(2px); }
+
+.wrap { display:grid; grid-template-columns:1fr 340px; gap:12px; padding:12px;
+        min-height:100%; align-content:start; }
+@media (max-width:900px){ .wrap { grid-template-columns:1fr; } }
+
+.panel { border:1px solid var(--edge); background:var(--stone); padding:11px 13px; }
+h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); font-weight:700; }
+
+/* ---- status bar: the game's own HUD, not a card grid ---------------------- */
+.hud { grid-column:1/-1; display:flex; gap:26px; align-items:center; flex-wrap:wrap;
+       border:1px solid var(--edge); background:#000; padding:10px 14px; }
+.hud .lbl { font-size:9px; letter-spacing:.2em; color:var(--dim); display:block; }
+.timer { font-size:34px; font-weight:700; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
+.stat  { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
+.stat.life  { color:var(--life); }
+.stat.magic { color:var(--magic); }
+.stat.dead  { color:var(--life); }
+.where { margin-left:auto; text-align:right; color:var(--dim); font-size:11px; }
+.where b { color:var(--ink); font-size:14px; display:block; }
+
+/* ---- meters: segmented like the NES bar, not a smooth CSS gradient -------- */
+.meter { display:flex; gap:2px; margin-top:4px; }
+.meter i { flex:1; height:9px; background:var(--pip-off); }
+.meter.life  i.on { background:var(--life); }
+.meter.magic i.on { background:var(--magic); }
+
+/* ---- container pips: 27 discrete things, so show 27 discrete pips --------- */
+.pips { display:grid; grid-template-columns:repeat(14,1fr); gap:3px; margin-top:5px; }
+.pips b { aspect-ratio:1; background:var(--pip-off); border-radius:50%; }
+.pips.heart b.on { background:var(--life); }
+.pips.mag   b.on { background:var(--magic); }
+
+/* ---- the inventory board: the signature element -------------------------- */
+.board { display:grid; grid-template-columns:repeat(8,1fr); gap:5px; }
+.it { border:1px solid var(--pip-off); color:#4a4368; background:transparent;
+      padding:7px 2px; text-align:center; font-size:9px; letter-spacing:.04em;
+      line-height:1.25; min-height:38px; display:flex; align-items:center;
+      justify-content:center; transition:none; }
+.it.on { color:#1a1600; background:var(--got); border-color:var(--got); font-weight:700; }
+.spellboard { grid-template-columns:repeat(5,1fr); }
+.spellboard .it.on { background:var(--magic); border-color:var(--magic); color:#001222; }
+.skillrow { grid-template-columns:repeat(5,1fr); }
+.skillrow .it.on { background:var(--hint); border-color:var(--hint); color:#00220f; }
+
+/* ---- keys ---------------------------------------------------------------- */
+.keys { display:grid; grid-template-columns:repeat(6,1fr); gap:5px; }
+.key { border:1px solid var(--pip-off); text-align:center; padding:7px 2px; font-size:10px; color:#4a4368; }
+.key b { display:block; font-size:16px; }
+.key.on { border-color:var(--got); color:var(--got); }
+
+/* ---- hints: the reason this page exists ---------------------------------- */
+.hints { position:sticky; top:12px; }
+.hints h2 { color:var(--hint); }
+.hcount { float:right; color:var(--hint); }
+.hlist { display:flex; flex-direction:column; gap:1px; }
+.h { display:grid; grid-template-columns:1fr auto; gap:8px; padding:6px 7px;
+     background:#141127; border-left:3px solid var(--hint); align-items:baseline; }
+.h .item { font-weight:700; font-size:14px; letter-spacing:.03em; }
+.h .loc  { color:var(--hint); font-size:11px; text-align:right; }
+.none { color:var(--dim); font-style:italic; padding:8px 4px; }
+</style></head><body>
+<div class="wrap">
+
+  <div class="hud">
+    <div><span class="lbl">RUN</span><span class="timer" id="timer">0:00:00</span></div>
+    <div>
+      <span class="lbl">LIFE</span><span class="stat life" id="hp">-</span>
+      <div class="meter life" id="hpmeter"></div>
+    </div>
+    <div>
+      <span class="lbl">MAGIC</span><span class="stat magic" id="mp">-</span>
+      <div class="meter magic" id="mpmeter"></div>
+    </div>
+    <div><span class="lbl">LIVES</span><span class="stat" id="lives">-</span></div>
+    <div><span class="lbl" id="deathlbl">DEATHS</span><span class="stat dead" id="deaths">-</span></div>
+    <div><span class="lbl">ATK/MAG/LIF</span><span class="stat" id="levels">-</span></div>
+    <div class="where"><b id="room">-</b><span id="seed"></span></div>
+  </div>
+
+  <div>
+    <div class="panel">
+      <h2>INVENTORY</h2>
+      <div class="board" id="items"></div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <h2>SPELLS</h2>
+      <div class="board spellboard" id="spells"></div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <h2>TECHNIQUES</h2>
+      <div class="board skillrow" id="skills"></div>
+    </div>
+
+
+    <div class="panel" style="margin-top:12px">
+      <h2>PALACE KEYS <span style="float:right;opacity:.7">USED / COLLECTED / TOTAL</span></h2>
+      <div class="keys" id="keys"></div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <h2>PALACE CRYSTALS &nbsp;·&nbsp; <span id="crystalcount" style="color:var(--got)"></span></h2>
+      <div class="keys" id="crystals"></div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <h2>CONTAINERS</h2>
+      <div style="display:flex;justify-content:space-between"><span>HEART</span><b id="hearts">-</b></div>
+      <div class="pips heart" id="heartpips"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:9px"><span>MAGIC</span><b id="magic">-</b></div>
+      <div class="pips mag" id="magpips"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:9px"><span>BOTTLE</span><b id="bottle">-</b></div>
+    </div>
+  </div>
+
+  <div>
+    <div class="panel hints">
+      <h2>HINTS <span class="hcount" id="hcount"></span></h2>
+      <div class="hlist" id="hints"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+const $ = id => document.getElementById(id);
+if (new URLSearchParams(location.search).has('obs')) document.body.classList.add('obs');
+
+// Bit constants read straight from macros.gml. These are 32-bit fields and the
+// last item (WATER) is bit 31 -- JavaScript's & operator is 32-bit SIGNED, so a
+// naive (v & 0x80000000) goes negative. Divide instead; it is exact for these.
+const has = (v, bit) => Math.floor((v || 0) / bit) % 2 === 1;
+
+// The 28 items that are ACTUALLY OBTAINABLE. Verified 2026-07-27 against the
+// pickup-object table in g_Create (`_obj=ItmXX; _bit=ITM_YYY`) -- every entry
+// below has a real pickup object in the game.
+//
+// FOUR bits are deliberately NOT here, because nothing can ever set them:
+//   ITM_AXE, ITM_FRY2, ITM_BTL2  -- zero references outside their #macro
+//   ITM_WATR                     -- its only two references are COMMENTED OUT
+// They exist as constants but no pickup, no quest and no dialogue grants them.
+// A slot that can never light up is worse than no slot: it reads as "you are
+// missing something" for the entire run. Do not add them back without first
+// finding the code that awards them.
+const ITEMS = [
+  ['CANDLE',1],['GLOVE',2],['RAFT',4],['BOOTS',8],
+  ['FLUTE',16],['CROSS',32],['HAMMER',64],['BRACE',128],
+  ['FAIRY',256],['MASK',512],['BOOK',1024],['MEAT',2048],
+  ['SHIELD',4096],['RING',8192],['NECKLC',16384],['SWORD',32768],
+  // ITM_MEDI is named "medicine" in code and the spawn is commented
+  // "MEDICINE/FLOWER", but the game shows the player a FLOWER -- confirmed in
+  // play 2026-07-27 in _WestA_5A. There is no flower->medicine conversion
+  // anywhere; you hand the flower straight to the woman for a spell. The tracker
+  // shows the game's word, not the constant's.
+  ['NOTE',65536],['MIRROR',131072],['TROPHY',262144],['FLOWER',524288],
+  ['CHILD',1048576],['BOTTLE',2097152],['S.KEY',4194304],['MAP 1',8388608],
+  // REMOVED 2026-07-27: TABLET (ItmK5) and FEATHER (ItmK7). Both have an object
+  // and an editor registration in GameObjectData_Create with a spr_Placement_*
+  // sprite, but NO data_spawn anywhere puts either in a room -- built and
+  // editor-ready, never deployed. Neither slot could ever light.
+  // Verify before re-adding: `grep -rn "ItmK5\|ItmK7" scripts/ --include=*.gml`
+  // returns only GameObjectData_Create and __global_object_depths. No spawn.
+  ['MAP 2',16777216],['MEDAL',67108864]
+];
+
+// The four bits with no known grant site. NOT deleted -- shown in their own row
+// so that if one ever lights up during play, we have caught the thing the static
+// search could not see. That is the whole point of keeping them visible: a grep
+// proves what the code says, not what the game does. Delete this row only after
+// a real run has failed to light any of them.
+const UNVERIFIED = [
+  ['AXE',268435456],['FAIRY 2',536870912],['BOTTLE 2',1073741824],['WATER',2147483648]
+];
+// NINE spells, not ten. SPL_CUCO (512) is deliberately absent: its registration
+// in g_Create (dl_Spell_STR / dm_Spell) is COMMENTED OUT, so it is never a
+// selectable spell. Cucco and Fairy are the same spell -- confirmed by the owner
+// 2026-07-27. A CUCCO chip here would be a slot that never lights.
+// Bit 8 is SPL_FARY in code but the in-game spell list calls it CUCCO -- owner
+// confirmed 2026-07-27. Same rule as FLOWER above: show the player's word, not
+// the constant's.
+const SPELLS = [
+  ['SHIELD',1],['JUMP',2],['LIFE',4],['CUCCO',8],['FIRE',16],
+  ['REFLECT',32],['SPELL',64],['THUNDER',128],['SUMMON',256]
+];
+
+// CUCCO TIER. f.Cucco_skills is a 5-bit field (THRUST_D, THRUST_U, BREAK1,
+// PROJ1, PROJ2) granted together by one dialogue (update_Dialogue.gml:622-626).
+//   Cucco I  = transform only: slow fall, ends on a screen change.
+//   Cucco II = persists across screens and can use Link's stabs.
+// There is no FLOAT bit -- the slow fall is inherent to the transform.
+//
+// DO NOT give this its own section again. It had one, and it was cut: tier 2's
+// abilities ARE Link's own skills, already listed under TECHNIQUES, so the panel
+// only repeated them. The tier is the single fact worth showing, and it belongs
+// on the Cucco spell chip.
+const SKILLS = [
+  ['DOWNSTAB',1],['UPSTAB',2],['BOUNCE',4],['CAST',8],['A.FIRE',16]
+];
+
+function board(el, defs, value) {
+  el.innerHTML = defs.map(([name, bit]) =>
+    '<div class="it' + (has(value, bit) ? ' on' : '') + '">' + name + '</div>').join('');
+}
+function pips(el, got, total, cls) {
+  let s = '';
+  for (let i = 0; i < total; i++) s += '<b class="' + (i < got ? 'on' : '') + '"></b>';
+  el.innerHTML = s;
+}
+function meter(el, cur, max, seg) {
+  seg = seg || 16;
+  const lit = max > 0 ? Math.round((cur / max) * seg) : 0;
+  let s = '';
+  for (let i = 0; i < seg; i++) s += '<i class="' + (i < lit ? 'on' : '') + '"></i>';
+  el.innerHTML = s;
+}
+
+async function load() {
+  let s;
+  try { s = await (await fetch('/tracker/state')).json(); } catch (e) { return; }
+
+  $('timer').textContent  = s.quest_timer_text || '0:00:00';
+  $('hp').textContent     = Math.round(s.hp) + '/' + Math.round(s.hp_max);
+  $('mp').textContent     = Math.round(s.mp) + '/' + Math.round(s.mp_max);
+  meter($('hpmeter'), s.hp, s.hp_max);
+  meter($('mpmeter'), s.mp, s.mp_max);
+  $('lives').textContent  = s.lives;
+  $('deaths').textContent = s.death_count;
+
+  // GAME OVER WARPING PENALTY changes what this number MEANS, so say which rule
+  // is in force. Penalty on: a quick game over charges every remaining life as a
+  // death, so the count can jump by 3 at once. Penalty off: quick reset is a free
+  // warp and only real deaths land here.
+  const pen = s.warp_penalty ? 1 : 0;
+  const warped = s.deaths_warped || 0;
+  if (warped > 0) {
+    // Split only once there IS a split -- "4 real + 0 warped" is noise.
+    $('deaths').innerHTML = (s.deaths_real || 0)
+      + ' <span style="font-size:12px;opacity:.6">+' + warped + ' warp</span>';
+    $('deathlbl').textContent = 'DEATHS · REAL + WARPED';
+  } else {
+    $('deaths').textContent = s.death_count;
+    $('deathlbl').textContent = pen ? 'DEATHS · WARP PENALTY ON' : 'DEATHS · REAL ONLY';
+  }
+  $('deathlbl').style.color = pen ? '' : 'var(--hint)';
+  $('levels').textContent = s.level_atk + '/' + s.level_mag + '/' + s.level_lif;
+  $('room').textContent   = (s.room_name || '').replace(/^rm[AB]?_?/, '');
+  $('seed').textContent   = s.is_rando ? ('SEED ' + s.seed + ' · Q' + s.quest_num)
+                                       : ('QUEST ' + s.quest_num);
+
+  board($('items'),  ITEMS,  s.items);
+  board($('skills'), SKILLS, s.skills);
+
+  // The Cucco TIER rides on the Cucco spell chip itself rather than getting its
+  // own section: tier 2's abilities are Link's own skills, already shown under
+  // TECHNIQUES, so a separate Cucco panel just repeated them. Any Cucco_skills
+  // bit set = tier 2.
+  const spells = SPELLS.map(function (e) {
+    if (e[1] !== 8) return e;
+    return ['CUCCO ' + (s.cucco_skills ? 'II' : 'I'), 8];
+  });
+  board($('spells'), spells, s.spells);
+
+  // START CONTAINERS are granted at file creation and pre-fill the piece string,
+  // so hearts_got is never 0 at the start of a run -- a default file already
+  // reads 9/27 and a max-start file reads 27/27 before you move. Show FOUND
+  // (since the run began) as the headline, with the handout called out, so the
+  // number tracks what you actually did.
+  const hStart = (s.start_containers_hp == null ? 3 : s.start_containers_hp) * 3;
+  const mStart = (s.start_containers_mp == null ? 3 : s.start_containers_mp) * 3;
+  const hFound = Math.max(0, s.hearts_got - hStart);
+  const mFound = Math.max(0, s.magic_got  - mStart);
+  $('hearts').innerHTML = hFound + ' / ' + (s.hearts_total - hStart)
+                        + ' <span style="opacity:.45;font-size:11px">+' + hStart + ' start</span>';
+  $('magic').innerHTML  = mFound + ' / ' + (s.magic_total - mStart)
+                        + ' <span style="opacity:.45;font-size:11px">+' + mStart + ' start</span>';
+  pips($('heartpips'), s.hearts_got, s.hearts_total);
+  pips($('magpips'),   s.magic_got,  s.magic_total);
+  $('bottle').textContent = s.bottle_acquired ? (s.bottle_full ? 'FULL' : 'EMPTY') : '—';
+  $('crystals').textContent = s.crystals;
+
+  // Three numbers per palace. COLLECTED never decrements (get_key_count_acquired),
+  // HELD is what is still in the pack (get_key_count), so USED = collected - held.
+  // TOTAL comes from dm_spawn and moves with the seed under rando.
+  let k = '';
+  for (let i = 1; i <= 6; i++) {
+    const held  = s['keys_held_p'  + i] || 0;
+    const got   = s['keys_found_p' + i] || 0;
+    const total = s['keys_total_p' + i] || 0;
+    const used  = Math.max(0, got - held);
+    // "done" = every key in this palace collected AND spent
+    const done = total > 0 && used === total;
+    k += '<div class="key' + (done ? ' on' : '') + '">P' + i
+       + '<b>' + used + '/' + got + '/' + total + '</b>'
+       + (held ? held + ' in bag' : '&nbsp;') + '</div>';
+  }
+  $('keys').innerHTML = k;
+
+  // Crystals are a bitfield, one bit per palace. The denominator is NOT 6: the
+  // seed's REQUIREMENTS setting decides how many the Great Palace barrier wants
+  // (Barrier_init2/update_2), and it is the one rando option changeable mid-run,
+  // so it is re-read every poll rather than assumed.
+  let c = '';
+  let cn = 0;
+  for (let i = 1; i <= 6; i++) {
+    const set = has(s.crystals, Math.pow(2, i - 1));
+    if (set) cn++;
+    c += '<div class="key' + (set ? ' on' : '') + '">P' + i
+       + '<b>' + (set ? '◆' : '◇') + '</b>' + (set ? 'set' : '&nbsp;') + '</div>';
+  }
+  $('crystals').innerHTML = c;
+  const req = (s.crystals_required == null) ? 6 : s.crystals_required;
+  $('crystalcount').textContent = cn + ' / ' + req + ' REQUIRED'
+                               + (req < 6 ? '  (seed needs ' + req + ' of 6)' : '');
+
+  // Hints are the single reason a runner looks at this page mid-run, so they get
+  // the whole right-hand column and stay pinned while everything else scrolls.
+  const h = s.hints || [];
+  $('hcount').textContent = (s.hints_found || 0) + '/' + (s.hints_total || 0);
+  if (!s.rando_hints_enabled)
+    $('hints').innerHTML = '<div class="none">Hints are off for this seed.</div>';
+  else if (!h.length)
+    $('hints').innerHTML = '<div class="none">No hints yet. Talk to villagers.</div>';
+  else
+    $('hints').innerHTML = h.map(x =>
+      '<div class="h"><span class="item">' + (x.item || '?') +
+      '</span><span class="loc">' + (x.location || '?') + '</span></div>').join('');
+}
+
+load();
+setInterval(load, 1000);
+</script></body></html>

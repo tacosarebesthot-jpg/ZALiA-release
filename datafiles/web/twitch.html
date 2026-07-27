@@ -1,0 +1,189 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>ZALiA Twitch Setup</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin:0; font:14px ui-monospace,Consolas,monospace; background:#2b2f4a; color:#e8e8f0; }
+header { padding:12px 16px; border-bottom:1px solid #4a4f75; display:flex; align-items:baseline; gap:12px; }
+h1 { font-size:15px; margin:0; letter-spacing:.08em; }
+main { padding:16px; max-width:820px; }
+section { border:1px solid #4a4f75; border-radius:6px; padding:14px 16px; margin-bottom:16px; }
+h2 { font-size:13px; margin:0 0 10px; letter-spacing:.06em; opacity:.85; }
+label { display:block; margin:10px 0 4px; font-size:12px; opacity:.7; }
+input[type=text] { width:100%; padding:8px 10px; font:inherit; border-radius:4px;
+                   border:1px solid #5b608c; background:#1f2338; color:#e8e8f0; }
+button { font:inherit; padding:9px 16px; border:1px solid #5b608c; border-radius:4px;
+         background:#3a3f63; color:#e8e8f0; cursor:pointer; margin-right:8px; }
+button:hover { background:#4a5080; }
+button.primary { background:#9146FF; border-color:#9146FF; color:#fff; font-weight:bold; }
+button.primary:hover { background:#a76bff; }
+.pill { font-size:11px; padding:3px 9px; border-radius:99px; border:1px solid #5b608c; }
+.ok   { color:#8ef7b0; border-color:#8ef7b0; }
+.bad  { color:#ff9a9a; border-color:#ff9a9a; }
+.note { opacity:.65; font-size:12px; line-height:1.5; margin-top:10px; }
+.note code { background:#1f2338; padding:1px 5px; border-radius:3px; }
+a { color:#9ecbff; }
+.statusline { margin-top:12px; min-height:1.3em; font-size:13px; }
+</style></head><body>
+<header><h1>ZALiA — TWITCH SETUP</h1><span id="conn" class="pill">…</span></header>
+<main>
+
+<section>
+  <h2>1. CONNECT YOUR TWITCH ACCOUNT</h2>
+  <p class="note" style="margin-top:0">
+    This opens <strong>Twitch's own login page in your normal browser</strong>. You sign in on
+    twitch.tv, not here — this page never sees your password, and there is no field on it
+    that asks for one. Twitch hands back a chat token, which is stored locally in
+    <code>%LOCALAPPDATA%\ZALiA\twitch_config.txt</code> and never leaves your machine.
+  </p>
+  <div style="margin-top:12px">
+    <button class="primary" onclick="login()">CONNECT WITH TWITCH</button>
+    <button onclick="clearToken()">FORGET TOKEN</button>
+  </div>
+  <div class="statusline" id="tokline"></div>
+</section>
+
+<section>
+  <h2>2. CHANNEL</h2>
+  <label>YOUR TWITCH USERNAME (the account the token belongs to)</label>
+  <input type="text" id="user" placeholder="yourname" autocomplete="off">
+  <label>CHANNEL TO JOIN (usually the same)</label>
+  <input type="text" id="channel" placeholder="yourchannel" autocomplete="off">
+  <div style="margin-top:14px">
+    <button onclick="saveChannel()">SAVE</button>
+    <button onclick="connect()">CONNECT TO CHAT</button>
+    <button onclick="disconnect()">DISCONNECT</button>
+  </div>
+  <div class="statusline" id="chanline"></div>
+</section>
+
+<section id="vsbox">
+  <h2>VS CHAT MODE — CHAT IS TRYING TO KILL YOU</h2>
+  <p class="note" style="margin-top:0">
+    Every helpful command is refused while this is on — no <code>!heal</code>, <code>!mp</code>,
+    <code>!refill</code>, <code>!1up</code>, <code>!fairy</code>, <code>!invuln</code>,
+    <code>!protect</code>, <code>!shield</code>, <code>!reflect</code> or summoned allies.
+    Chat can only hurt you. Turning it on also enables chat commands.
+  </p>
+  <div style="margin-top:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+    <button id="vsbtn" class="primary" onclick="toggleVs()">TURN VS CHAT ON</button>
+    <span style="font-size:12px;opacity:.7">CHAT KILLS</span>
+    <span id="vskills" style="font-size:26px;font-weight:bold;color:#ff9a9a">0</span>
+    <button onclick="resetVs()">RESET SCORE</button>
+  </div>
+</section>
+
+<section>
+  <h2>3. CHAT EFFECTS</h2>
+  <label>COOLDOWN BETWEEN VIEWER COMMANDS (seconds, 0 = none)
+         <span style="opacity:.5">— stored as frames; 60 frames = 1 second</span></label>
+  <input type="text" id="cooldown" placeholder="0" autocomplete="off">
+  <label>HOW LONG AN EFFECT LASTS (seconds)</label>
+  <input type="text" id="effect" placeholder="30" autocomplete="off">
+  <div style="margin-top:14px"><button onclick="saveEffects()">SAVE</button></div>
+  <div class="statusline" id="fxline"></div>
+</section>
+
+<section>
+  <h2>APP ID (one-time, only if CONNECT does nothing)</h2>
+  <p class="note" style="margin-top:0">
+    The CONNECT button needs a Twitch application ID. If ZALiA shipped with one this is
+    already filled in and you can ignore this box. Otherwise register a free app at
+    <a href="https://dev.twitch.tv/console/apps" target="_blank">dev.twitch.tv/console/apps</a>,
+    set its <strong>OAuth Redirect URL</strong> to exactly
+    <code id="rurl">http://localhost:8777/twitch/callback</code>, pick
+    <em>Application Integration</em>, then paste the Client ID here.
+  </p>
+  <label>CLIENT ID</label>
+  <input type="text" id="clientid" placeholder="paste your Twitch app Client ID" autocomplete="off">
+  <div style="margin-top:14px"><button onclick="saveClient()">SAVE</button></div>
+  <div class="statusline" id="cidline"></div>
+</section>
+
+</main>
+<script>
+// Scopes: read chat and send chat. Nothing else -- this app has no business
+// touching your channel settings, your email, or your stream.
+const SCOPES = 'chat:read chat:edit';
+
+let cfg = {};
+
+async function api(path) { return await (await fetch(path)).text(); }
+
+async function load() {
+  try { cfg = await (await fetch('/twitch/status')).json(); } catch (e) { return; }
+  user.value     = cfg.user     || '';
+  channel.value  = cfg.channel  || '';
+  // The game stores cooldown in FRAMES (60 = 1s) -- the readme flags this as an
+  // already-made mistake. Show the user seconds, store frames.
+  cooldown.value = cfg.cooldown ? (Number(cfg.cooldown) / 60) : 0;
+  effect.value   = cfg.effect   != null ? cfg.effect   : '';
+  clientid.value = cfg.client_id || '';
+  rurl.textContent = location.origin + '/twitch/callback';
+
+  // NEVER render the token itself -- only whether one exists.
+  tokline.innerHTML = cfg.has_token
+    ? '<span class="pill ok">TOKEN STORED</span>'
+    : '<span class="pill bad">NO TOKEN YET</span>';
+
+  vskills.textContent = cfg.vs_kills || 0;
+  vsbtn.textContent   = cfg.vs_mode ? 'TURN VS CHAT OFF' : 'TURN VS CHAT ON';
+  vsbtn.className     = cfg.vs_mode ? '' : 'primary';
+  vsbox.style.borderColor = cfg.vs_mode ? '#ff9a9a' : '#4a4f75';
+
+  conn.textContent = (cfg.status || 'idle').toUpperCase();
+  conn.className = 'pill ' + (cfg.status === 'connected' ? 'ok'
+                            : (cfg.status || '').indexOf('error') === 0 ? 'bad' : '');
+}
+
+function login() {
+  if (!clientid.value.trim()) {
+    cidline.textContent = 'Set a Client ID first (bottom box).';
+    clientid.focus(); return;
+  }
+  // Hand off to the GAME, which calls url_open() -- that launches the user's
+  // DEFAULT browser, where they are probably already signed in to Twitch.
+  // Opening it here would trap the login inside this isolated window instead.
+  fetch('/twitch/login?scope=' + encodeURIComponent(SCOPES));
+  tokline.textContent = 'Opening Twitch in your browser… approve there, then come back.';
+}
+
+async function clearToken() {
+  await api('/twitch/save?token=');
+  tokline.textContent = 'Token cleared.';
+  load();
+}
+
+async function saveChannel() {
+  await api('/twitch/save?user=' + encodeURIComponent(user.value.trim())
+          + '&channel=' + encodeURIComponent(channel.value.trim().replace(/^#/, '')));
+  chanline.textContent = 'Saved.';
+  load();
+}
+
+async function saveEffects() {
+  const secs   = Number(cooldown.value.trim() || 0);
+  const frames = Math.max(0, Math.round(secs * 60));   // game wants FRAMES
+  await api('/twitch/save?cooldown=' + frames
+          + '&effect=' + encodeURIComponent(effect.value.trim()));
+  fxline.textContent = 'Saved (' + secs + 's = ' + frames + ' frames).';
+}
+
+async function saveClient() {
+  await api('/twitch/save?client_id=' + encodeURIComponent(clientid.value.trim()));
+  cidline.textContent = 'Saved.';
+}
+
+async function toggleVs() {
+  await api('/twitch/vs?on=' + (cfg.vs_mode ? '0' : '1'));
+  setTimeout(load, 400);
+}
+async function resetVs() { await api('/twitch/vs?reset=1'); setTimeout(load, 400); }
+
+async function connect()    { await api('/twitch/connect');    setTimeout(load, 900); }
+async function disconnect() { await api('/twitch/disconnect'); setTimeout(load, 600); }
+
+load();
+setInterval(load, 4000);
+</script></body></html>

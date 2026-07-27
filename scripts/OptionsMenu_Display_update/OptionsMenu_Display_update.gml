@@ -68,7 +68,13 @@ function OptionsMenu_Display_update() {
 	// LEFT/RIGHT navigates on the MODE rows (acts like up/down), but on the FULLSCREEN and
 	// WINDOW SCALE rows LEFT/RIGHT is consumed by update_game_window_1a() (toggle fullscreen /
 	// cycle window scale), so it must NOT move the cursor there.
-	if (!_DIR
+	//
+	// MUST be "_DIR == 0", NOT "!_DIR". GML truthiness is (x > 0.5), so a value of
+	// -1 is FALSE and !(-1) is TRUE. Written as !_DIR, pressing UP computed -1 and
+	// then this branch decided "no vertical input" and overwrote it with the
+	// horizontal value (0) -- so UP silently did nothing while DOWN (+1) worked.
+	// That was the "up doesn't work in the DISPLAY menu" bug. (2026-07-27)
+	if (_DIR == 0
 	&&  Display_cursor!=Display.FULLSCREEN
 	&&  Display_cursor!=Display.WINDOW_SCALE )
 	{
@@ -77,7 +83,7 @@ function OptionsMenu_Display_update() {
 
 	if(!timer2)
 	{
-	    if (_DIR)
+	    if (_DIR != 0)   // NOT "if (_DIR)" -- see the GML truthiness note above
 	    {
 	        for(_i=0; _i<Display.COUNT; _i++)
 	        {

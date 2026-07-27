@@ -1,0 +1,58 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>ZALiA — Twitch connected</title>
+<style>
+:root { color-scheme: dark; }
+body { margin:0; font:15px ui-monospace,Consolas,monospace; background:#2b2f4a; color:#e8e8f0;
+       display:flex; align-items:center; justify-content:center; height:100vh; text-align:center; }
+.box { max-width:520px; padding:30px; }
+h1 { font-size:17px; letter-spacing:.06em; margin:0 0 14px; }
+.ok  { color:#8ef7b0; }
+.bad { color:#ff9a9a; }
+p { opacity:.75; line-height:1.6; }
+</style></head><body>
+<div class="box">
+  <h1 id="h">FINISHING UP…</h1>
+  <p id="m">Handing the token to ZALiA.</p>
+</div>
+<script>
+// Twitch's implicit flow returns the token in the URL FRAGMENT (#access_token=...).
+// A fragment is never sent to the server, so the game cannot read it from the
+// request -- this page has to pull it out of location.hash and hand it over.
+// That is the whole reason this page exists.
+(function () {
+  const frag = new URLSearchParams(location.hash.replace(/^#/, ''));
+  const qs   = new URLSearchParams(location.search);
+
+  const err = frag.get('error_description') || frag.get('error')
+           || qs.get('error_description')   || qs.get('error');
+  if (err) {
+    h.textContent = 'NOT CONNECTED';
+    h.className = 'bad';
+    m.textContent = err + ' — nothing was saved. You can close this tab and try again.';
+    return;
+  }
+
+  const token = frag.get('access_token');
+  if (!token) {
+    h.textContent = 'NOTHING TO SAVE';
+    h.className = 'bad';
+    m.textContent = 'Twitch did not return a token. Close this tab and try again.';
+    return;
+  }
+
+  fetch('/twitch/save?token=' + encodeURIComponent(token))
+    .then(function () {
+      // Drop the token out of the address bar so it is not left sitting in
+      // history or on screen.
+      history.replaceState(null, '', '/twitch/callback');
+      h.textContent = 'CONNECTED';
+      h.className = 'ok';
+      m.textContent = 'ZALiA has your chat token. You can close this tab and go back to the setup window.';
+    })
+    .catch(function () {
+      h.textContent = 'COULD NOT REACH ZALiA';
+      h.className = 'bad';
+      m.textContent = 'Is the game still running? Nothing was saved.';
+    });
+})();
+</script></body></html>

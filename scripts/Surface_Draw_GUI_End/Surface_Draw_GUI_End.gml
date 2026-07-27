@@ -449,7 +449,12 @@ function Surface_Draw_GUI_End() {
 	    if (variable_global_exists("jukebox_autoadvance") && global.jukebox_autoadvance
 	    &&  variable_global_exists("jukebox_inst")        && global.jukebox_inst)
 	    {
-	        var _jb_alive = audio_exists(global.jukebox_inst) && audio_is_playing(global.jukebox_inst);
+	        // A PAUSED track is not finished. audio_is_playing() is false while paused,
+        // so without the is_paused test auto-advance reads "pause" as "track ended"
+        // and skips to the next song the moment you pause. (2026-07-27)
+        var _jb_alive = audio_exists(global.jukebox_inst)
+                     && (audio_is_playing(global.jukebox_inst)
+                      || audio_is_paused(global.jukebox_inst));
 	        if (!_jb_alive && variable_global_exists("jukebox_count") && global.jukebox_count > 0)
 	        {
 	            global.jukebox_idx = (global.jukebox_idx + 1) mod global.jukebox_count;

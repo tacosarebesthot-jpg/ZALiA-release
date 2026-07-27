@@ -9,6 +9,15 @@ function DeathScreen_Step() {
 	    {
 	        f.death_count++;
 	            global.pc_lives--;
+
+	        // VS CHAT MODE scoreboard: a death while chat is hostile is a point
+	        // for chat. Counted here rather than derived from death_count so a
+	        // mid-run toggle can't retroactively award kills for earlier deaths.
+	        if (variable_global_exists("tw_vs_mode") && global.tw_vs_mode)
+	        {
+	            if (!variable_global_exists("tw_vs_kills")) global.tw_vs_kills = 0;
+	            global.tw_vs_kills++;
+	        }
 	        if (global.pc_lives>0) room_goto_(rmB_NextLife);
 	        else         room_goto_(rmB_GameOver);
 	    }

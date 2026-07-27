@@ -155,6 +155,12 @@ function update_QuitAppMenu() {
 	                        // dk_ForceQuitPenalty==0) we SKIP this -> the quick reset is a
 	                        // free warp: no death counted, no life lost. A NORMAL death
 	                        // (DeathScreen_Step, via rmB_Death) is unaffected.
+	                        // Record the WARPED portion alongside the total, so the
+	                        // companion can say "12 deaths (4 real, 8 warped)".
+	                        // Without this split death_count silently mixes "times
+	                        // you died" with "lives forfeited to a quick reset",
+	                        // and one warp can add 3 at once.
+	                        f.death_count_warped += global.pc_lives;
 	                        f.death_count += global.pc_lives;
 	                        global.pc_lives = 0;
 	                    }

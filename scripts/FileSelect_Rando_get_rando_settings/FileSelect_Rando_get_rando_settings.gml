@@ -17,8 +17,22 @@ function FileSelect_Rando_get_rando_settings() {
 	_dm_SETTINGS[?STR_Randomize+STR_Spell+STR_Locations]  = dg_RandoSPELL_Options[#RandoSPELL_LOCS,2];
 	_dm_SETTINGS[?STR_Randomize+STR_Spell+STR_Cost]       = dg_RandoSPELL_Options[#RandoSPELL_COST,2];
 
+	// DUNGEON ROOMS rando is disabled: its menu row is commented out in
+	// FileSelect_Create_Rando (marked "- CURRENTLY UNAVAILABLE"), which leaves
+	// RandoDUNGEON_ROOM == -1.
+	//
+	// The line below USED to be followed by:
+	//     _dm_SETTINGS[?...] = dg_RandoDUNGEON_Options[#RandoDUNGEON_ROOM,2];
+	// which read ds_grid COLUMN -1 -- out of range, undefined behaviour -- and
+	// overwrote this false. It is identical in HoverBat's 1.4 source, so it has
+	// shipped that way for a long time; on this runtime the bad read returns 0,
+	// so the two agreed by luck and nothing broke. Removed 2026-07-27 because
+	// "returns 0 today" is not a guarantee: the value feeds Rando_randomize_file
+	// and the is-this-a-rando-file test in FileSelect_register_file, so a runtime
+	// that returned garbage would silently flag every save as rando.
+	//
+	// Restore the read ONLY together with the menu row that defines the index.
 	_dm_SETTINGS[?STR_Randomize+STR_Dungeon+STR_Room]     = false;
-	_dm_SETTINGS[?STR_Randomize+STR_Dungeon+STR_Room]     = dg_RandoDUNGEON_Options[#RandoDUNGEON_ROOM,2];
 	_dm_SETTINGS[?STR_Randomize+STR_Dungeon+STR_Locations]= dg_RandoDUNGEON_Options[#RandoDUNGEON_LOCATION,2];
 	_dm_SETTINGS[?STR_Randomize+STR_Dungeon+STR_Boss]     = dg_RandoDUNGEON_Options[#RandoDUNGEON_BOSS,2];
 	_dm_SETTINGS[?STR_Randomize+STR_Town+STR_Locations]   = dg_RandoDUNGEON_Options[#RandoTOWN_LOCATION,2];

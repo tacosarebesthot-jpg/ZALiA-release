@@ -28,6 +28,10 @@ function konami_check() {
 	if (!variable_global_exists("konami_seq")) return;
 	if (!instance_exists(Input))               return;
 
+	// free-running frame counter, used by the bounce guard below
+	if (!variable_global_exists("konami_frame_ctr")) global.konami_frame_ctr = 0;
+	global.konami_frame_ctr++;
+
 	// brief re-trigger lockout after a fire
 	if (global.konami_cooldown > 0) global.konami_cooldown--;
 
@@ -52,8 +56,52 @@ function konami_check() {
 	// nothing relevant this frame -> leave the buffer as-is
 	if (_press == 0) return;
 
+	// DEV PROBE 2026-07-27: "entered the dev code 20+ times, never fires."
+	// Inputs and button mapping both check out on paper, so log what actually
+	// reaches the buffer. tokens: 1=UP 2=DOWN 3=LEFT 4=RIGHT 5=B 6=A
+	if (DEV)
+	{
+	    show_debug_message("[CODE] press=" + string(_press)
+	        + " multi=" + string(_multi)
+	        + " cooldown=" + string(global.konami_cooldown)
+	        + " buf=[" + string(global.konami_seq) + "]");
+	}
+
 	// ambiguous simultaneous press (e.g. a diagonal) -> treat as a wrong input, reset
-	if (_multi > 1) { global.konami_seq = []; return; }
+	if (_multi > 1)
+	{
+	    if (DEV) show_debug_message("[CODE]   RESET -- simultaneous press (multi=" + string(_multi) + ")");
+	    global.konami_seq = [];
+	    return;
+	}
+
+	// ---- BUTTON-BOUNCE GUARD (2026-07-27) ----------------------------------
+	// Measured on the owner's DS4: the A button (gp_face1) produces TWO or THREE
+	// pressed-edges for one physical press, because GP_Jump_held drops false for a
+	// frame and re-arms the edge. Logged 29 A-edges against 8 B-edges for buttons
+	// pressed the same number of times, and the dev code failed all 112 attempts:
+	// "5,5,6,6,1,2,1,2" always arrived as "5,5,6,6,6,1,2,1,2".
+	//
+	// Drop a repeat of the SAME token inside BOUNCE_FRAMES. A human double-tap of
+	// one button is far slower than this, so B,B and A,A still register; a driver
+	// bounce lands within a frame or two and is swallowed.
+	//
+	// This guards the CODE only. The underlying double-edge is still live for the
+	// rest of the game -- see the note in RESUME; it needs fixing at the input
+	// layer, not papered over here.
+	var _BOUNCE_FRAMES = 8;
+	if (!variable_global_exists("konami_last_tok")) { global.konami_last_tok = 0; global.konami_last_frame = -999; }
+
+	if (_press == global.konami_last_tok
+	&&  (global.konami_frame_ctr - global.konami_last_frame) <= _BOUNCE_FRAMES)
+	{
+	    if (DEV) show_debug_message("[CODE]   bounce ignored (tok " + string(_press)
+	        + ", " + string(global.konami_frame_ctr - global.konami_last_frame) + "f apart)");
+	    global.konami_last_frame = global.konami_frame_ctr;
+	    return;
+	}
+	global.konami_last_tok   = _press;
+	global.konami_last_frame = global.konami_frame_ctr;
 
 	// don't advance the buffer while still cooling down from the last fire
 	if (global.konami_cooldown > 0) return;
@@ -94,6 +142,13 @@ function konami_check() {
 
 	// DEV unlock first: if the two sequences ever share a suffix, the deliberate
 	// action should win over the easter egg.
+	if (DEV)
+	{
+	    show_debug_message("[CODE]   after push buf=[" + string(global.konami_seq)
+	        + "]  devtarget=[" + string(_d_target) + "]"
+	        + "  match=" + string(_dlen > 0 && _tail_matches(_d_target)));
+	}
+
 	if (_dlen > 0 && _tail_matches(_d_target))
 	{
 		dev_unlock_fire();

@@ -1,0 +1,206 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>ZALiA Jukebox</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+:root { color-scheme: dark; }
+* { box-sizing: border-box; }
+body { margin:0; font:14px ui-monospace,Consolas,monospace; background:#2b2f4a; color:#e8e8f0; }
+header { padding:10px 14px; display:flex; gap:12px; align-items:baseline;
+         border-bottom:1px solid #4a4f75; position:sticky; top:0; background:#2b2f4a; z-index:2; }
+h1 { font-size:15px; margin:0; letter-spacing:.08em; }
+.count { margin-left:auto; opacity:.7; }
+.row { display:flex; flex-wrap:wrap; gap:6px; padding:8px 14px; }
+button { font:inherit; padding:7px 12px; border:1px solid #5b608c; border-radius:4px;
+         background:#3a3f63; color:#e8e8f0; cursor:pointer; }
+button:hover { background:#4a5080; }
+button.on { background:#fff; color:#222; }
+#q { width:100%; padding:8px 10px; font:inherit; border-radius:4px;
+     border:1px solid #5b608c; background:#1f2338; color:#e8e8f0; }
+main { padding:0 14px 14px; }
+.t { display:grid; grid-template-columns:14px 180px 1fr 52px; gap:12px; align-items:baseline;
+     padding:6px 8px; border-radius:4px; cursor:pointer; }
+.t .len { opacity:.45; font-size:12px; text-align:right; }
+.seekrow { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.seekrow input[type=range] { flex:1; accent-color:#8ef7b0; }
+.time { opacity:.6; font-size:12px; min-width:38px; }
+.volrow { display:flex; align-items:center; gap:10px; margin-top:8px; }
+.volrow input[type=range] { width:150px; accent-color:#8ef7b0; }
+.volrow .lbl { opacity:.6; font-size:12px; }
+.t:hover { background:#3a3f63; }
+/* SELECTED (what a zone button will act on) and NOW PLAYING are different
+   things and must not look the same -- you can be assigning one track while
+   another is playing. */
+.t.sel { background:#5b6bb5; }
+.t.now .title { color:#8ef7b0; font-weight:bold; }
+.t .spk { color:#8ef7b0; font-size:11px; }
+.t .game { opacity:.6; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.t.sel .game { opacity:.85; }
+footer { position:sticky; bottom:0; background:#232741; border-top:1px solid #4a4f75; padding:10px 14px; }
+.hint { opacity:.8; margin-bottom:8px; min-height:1.2em; }
+.zones button { flex:1 1 90px; }
+.transport button { flex:1; }
+</style></head><body>
+<header><h1>ZALiA JUKEBOX</h1><span class="count" id="count"></span></header>
+<div class="row" id="playlists"></div>
+<div class="row"><input id="q" placeholder="type to search..." autocomplete="off"></div>
+<main id="list"></main>
+<footer>
+  <div class="seekrow">
+    <span id="tnow" class="time">0:00</span>
+    <input type="range" id="seek" min="0" max="1000" value="0" step="1">
+    <span id="tlen" class="time">0:00</span>
+  </div>
+  <div class="hint" id="hint">click a track, then pick a zone to assign it</div>
+  <div class="row zones" id="zones" style="padding:0"></div>
+  <div class="row transport" style="padding:0;margin-top:8px">
+    <button onclick="cmd('prev')">&lt;&lt; PREV</button>
+    <button id="pausebtn" onclick="togglePause()">PAUSE</button>
+    <button onclick="cmd('stop','stopped - no music playing')">STOP</button>
+    <button onclick="cmd('start','started')">START</button>
+    <button onclick="randomTrack()">RANDOM</button>
+    <button onclick="cmd('next')">NEXT &gt;&gt;</button>
+  </div>
+  <div class="row transport" style="padding:0;margin-top:6px">
+    <button onclick="cmd('off','jukebox off - the game\'s own music is back')"
+            title="leave jukebox mode and hand music back to the game">BACK TO GAME MUSIC</button>
+  </div>
+  <div class="volrow">
+    <span class="lbl">VOL</span>
+    <input type="range" id="vol" min="0" max="10" step="1" value="5">
+    <span class="lbl" id="volval">5</span>
+  </div>
+</footer>
+<script>
+const ZONES = ["TITLE","OVERWORLD","TOWN","DUNGEON","BOSS","ENDING","MINIGAME"];
+const PL    = ["OG","REMIX","MY MIX","ALL","FOLDER"];
+const MYMIX = 2;   // JukeboxPL.MY_NESMIX -- the owner's own imports
+
+let tracks = [], tags = {}, sel = null, playlist = 0, booted = false;
+let nowAsset = '', curLen = 0, seeking = false, isPaused = false;
+
+// PAUSE holds the playhead. STOP is silence and forgets it. "BACK TO GAME MUSIC"
+// is the only one that hands the soundtrack back to the game.
+function togglePause() {
+  cmd(isPaused ? 'resume' : 'pause', isPaused ? 'resumed' : 'paused');
+  isPaused = !isPaused;
+  pausebtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+}
+
+const label = t => (t.game ? t.game + ' - ' : '') + t.title;
+const mmss  = s => (s > 0 ? Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0') : '');
+
+async function cmd(c, human) {
+  await fetch('/cmd?c=' + encodeURIComponent(c));
+  if (human) hint.textContent = human;
+}
+
+async function load() {
+  if (!Object.keys(tags).length) {
+    try { tags = await (await fetch('/tags')).json(); } catch (e) { tags = {}; }
+  }
+  const d = await (await fetch('/list')).json();
+  playlist = d.playlist || 0;
+  tracks = (d.tracks || []).map(t => {
+    const g = tags[t.asset] || {};
+    return Object.assign({}, t, { game: g.game || '', title: g.title || t.name });
+  });
+  count.textContent = (d.count || 0) + ' tracks';
+  draw(); drawPlaylists();
+
+  // Land on MY MIX, not ALL: the packs that ship with the game are already
+  // playable in-game and just bury the owner's own imports.
+  if (!booted) {
+    booted = true;
+    if (playlist !== MYMIX) { await cmd('playlist ' + MYMIX); setTimeout(load, 700); }
+  }
+}
+
+function drawPlaylists() {
+  playlists.innerHTML = '';
+  PL.forEach((p, i) => {
+    const b = document.createElement('button');
+    b.textContent = p; if (i === playlist) b.className = 'on';
+    b.onclick = async () => { await cmd('playlist ' + i); setTimeout(load, 700); };
+    playlists.append(b);
+  });
+}
+
+function draw() {
+  const f = q.value.trim().toLowerCase();
+  list.innerHTML = '';
+  for (const t of tracks) {
+    if (f && !(t.game + ' ' + t.title).toLowerCase().includes(f)) continue;
+    const d = document.createElement('div');
+    const isNow = nowAsset && t.asset === nowAsset;
+    d.className = 't' + (sel === t.idx ? ' sel' : '') + (isNow ? ' now' : '');
+    d.innerHTML = '<span class="spk"></span><span class="game"></span>'
+                + '<span class="title"></span><span class="len"></span>';
+    d.querySelector('.spk').textContent   = isNow ? '▶' : '';
+    d.querySelector('.game').textContent  = t.game || '';
+    d.querySelector('.title').textContent = t.title;
+    d.querySelector('.len').textContent   = mmss(t.len || 0);
+    d.onclick = () => { sel = t.idx; cmd('play ' + t.idx, 'playing  ' + label(t)); draw(); };
+    list.append(d);
+  }
+}
+
+// Pick from what is ACTUALLY on screen: if a search is filtering the list,
+// "random" should mean random out of what you can see, not the whole playlist.
+function randomTrack() {
+  const f = q.value.trim().toLowerCase();
+  const pool = tracks.filter(t => !f || (t.game + ' ' + t.title).toLowerCase().includes(f));
+  if (!pool.length) { hint.textContent = 'nothing to pick from'; return; }
+  const t = pool[Math.floor(Math.random() * pool.length)];
+  sel = t.idx;
+  cmd('play ' + t.idx, 'random  ->  ' + label(t));
+  draw();
+}
+
+// Follow the game, not just our own clicks: next/prev on the controller, the
+// in-game jukebox HUD and auto-advance all move the track without us knowing.
+async function pollNow() {
+  try {
+    const n = await (await fetch('/now')).json();
+    const a = n.on ? (n.asset || '') : '';
+    if (a !== nowAsset) { nowAsset = a; draw(); }
+
+    curLen = n.len || 0;
+    tlen.textContent = mmss(curLen);
+    tnow.textContent = mmss(n.pos || 0);
+    // Don't fight the user's thumb while they are dragging.
+    if (!seeking && curLen > 0) seek.value = Math.round((n.pos / curLen) * 1000);
+
+    if (document.activeElement !== vol) { vol.value = n.vol; volval.textContent = n.vol; }
+
+    isPaused = !!n.paused;
+    pausebtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+  } catch (e) { /* game closed; keep the last view rather than blanking it */ }
+}
+
+seek.addEventListener('input',  () => { seeking = true;
+  if (curLen > 0) tnow.textContent = mmss((seek.value / 1000) * curLen); });
+seek.addEventListener('change', () => {
+  if (curLen > 0) cmd('seek ' + ((seek.value / 1000) * curLen).toFixed(2));
+  seeking = false;
+});
+
+vol.addEventListener('input', () => { volval.textContent = vol.value; });
+vol.addEventListener('change', () => cmd('vol ' + vol.value));
+
+setInterval(pollNow, 1000);
+
+ZONES.forEach((z, i) => {
+  const b = document.createElement('button');
+  b.textContent = z;
+  b.onclick = () => {
+    if (sel === null) { hint.textContent = 'pick a track first'; return; }
+    const t = tracks.find(x => x.idx === sel);
+    // by NAME, not index: an index is only valid for the playlist the game
+    // currently holds, and this page's copy can be stale.
+    cmd('assignname ' + t.asset + ' ' + i, label(t) + '   ->   plays in ' + z);
+  };
+  zones.append(b);
+});
+q.oninput = draw;
+load();
+</script></body></html>

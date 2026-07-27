@@ -1,0 +1,1562 @@
+{
+ "mus_Batman_Stage1": {
+  "game": "Batman",
+  "set": "_NESmix",
+  "title": "Stage 1"
+ },
+ "mus_Battle_Main_1a": {
+  "game": "Battle",
+  "set": "_Default",
+  "title": "Main 1a"
+ },
+ "mus_Battle_Main_Limited_1a": {
+  "game": "Battle",
+  "set": "",
+  "title": "Main Limited 1a"
+ },
+ "mus_BionicCommando_Area1": {
+  "game": "Bionic Commando",
+  "set": "_NESmix",
+  "title": "Area 1"
+ },
+ "mus_Blades_of_Steel_Menu_Theme": {
+  "game": "Blades of Steel",
+  "set": "_NESmix",
+  "title": "Menu Theme"
+ },
+ "mus_Blaster_Master_Area_1": {
+  "game": "Blaster Master",
+  "set": "_NESmix",
+  "title": "Area 1"
+ },
+ "mus_Broomietunes_DragmireTower": {
+  "game": "Broomietunes",
+  "set": "_Default",
+  "title": "Dragmire Tower"
+ },
+ "mus_Broomietunes_FileSelect01": {
+  "game": "Broomietunes",
+  "set": "_Default",
+  "title": "File Select 01"
+ },
+ "mus_Broomietunes_FileSelect02": {
+  "game": "Broomietunes",
+  "set": "",
+  "title": "File Select 02"
+ },
+ "mus_Broomietunes_darklink_Body": {
+  "game": "Broomietunes",
+  "set": "_Default",
+  "title": "darklink"
+ },
+ "mus_CV3_Clockwork": {
+  "game": "Castlevania III",
+  "set": "_NESmix",
+  "title": "Clockwork"
+ },
+ "mus_CV3_MadForest": {
+  "game": "Castlevania III",
+  "set": "_NESmix",
+  "title": "Mad Forest"
+ },
+ "mus_CV_Stage06OutOfTime": {
+  "game": "Castlevania",
+  "set": "_NESmix",
+  "title": "Stage 06Out Of Time"
+ },
+ "mus_CV_Stage07WickedChild": {
+  "game": "Castlevania",
+  "set": "_NESmix",
+  "title": "Stage 07Wicked Child"
+ },
+ "mus_CV_Stage13HeartOfFire": {
+  "game": "Castlevania",
+  "set": "_NESmix",
+  "title": "Stage 13Heart Of Fire"
+ },
+ "mus_Castlevania2_BloodyTears_Body": {
+  "game": "Castlevania 2",
+  "set": "_Castlevania2",
+  "title": "Bloody Tears"
+ },
+ "mus_Castlevania2_Dungeon_Body": {
+  "game": "Castlevania 2",
+  "set": "_Castlevania2",
+  "title": "Dungeon"
+ },
+ "mus_Castlevania2_Night_Body": {
+  "game": "Castlevania 2",
+  "set": "_NESmix",
+  "title": "Night"
+ },
+ "mus_Castlevania2_Town_Body": {
+  "game": "Castlevania 2",
+  "set": "_Castlevania2",
+  "title": "Town"
+ },
+ "mus_Castlevania_Battle_1a": {
+  "game": "Castlevania",
+  "set": "_NESmix",
+  "title": "Battle 1a"
+ },
+ "mus_Castlevania_Boss_Battle_Poison_Mind": {
+  "game": "Castlevania",
+  "set": "_NESmix",
+  "title": "Boss Battle Poison Mind"
+ },
+ "mus_Castlevania_Stage_01_Vampire_Killer": {
+  "game": "Castlevania",
+  "set": "_NESmix",
+  "title": "Stage 01 Vampire Killer"
+ },
+ "mus_Castlevania_Stage_04_Stalker": {
+  "game": "Castlevania",
+  "set": "_NESmix",
+  "title": "Stage 04 Stalker"
+ },
+ "mus_Commando_Area_Theme": {
+  "game": "Commando",
+  "set": "_NESmix",
+  "title": "Area Theme"
+ },
+ "mus_Commando_Underground_Bunker_1": {
+  "game": "Commando",
+  "set": "_NESmix",
+  "title": "Underground Bunker 1"
+ },
+ "mus_Contra_Boss_Battle": {
+  "game": "Contra",
+  "set": "_NESmix",
+  "title": "Boss Battle"
+ },
+ "mus_Contra_Enemy_Base": {
+  "game": "Contra",
+  "set": "_NESmix",
+  "title": "Enemy Base"
+ },
+ "mus_Contra_Jungle_Theme": {
+  "game": "Contra",
+  "set": "_NESmix",
+  "title": "Jungle Theme"
+ },
+ "mus_DarkLink_MortalKombatTheme": {
+  "game": "Dark Link",
+  "set": "_NESmix",
+  "title": "Mortal Kombat Theme"
+ },
+ "mus_DoubleDragon_Mission1": {
+  "game": "Double Dragon",
+  "set": "_NESmix",
+  "title": "Mission 1"
+ },
+ "mus_Dr_Mario_Chill_Theme": {
+  "game": "Dr. Mario",
+  "set": "_NESmix",
+  "title": "Chill Theme"
+ },
+ "mus_Dr_Mario_Fever": {
+  "game": "Dr. Mario",
+  "set": "_NESmix",
+  "title": "Fever"
+ },
+ "mus_Dr_Mario_Title_Theme": {
+  "game": "Dr. Mario",
+  "set": "_NESmix",
+  "title": "Title Theme"
+ },
+ "mus_DragonWarrior_Town_1a": {
+  "game": "Dragon Warrior",
+  "set": "_NESmix",
+  "title": "Town 1a"
+ },
+ "mus_Dragon_Warrior_Battle_Theme": {
+  "game": "Dragon Warrior",
+  "set": "_NESmix",
+  "title": "Battle Theme"
+ },
+ "mus_Dragon_Warrior_Castle_Theme": {
+  "game": "Dragon Warrior",
+  "set": "_NESmix",
+  "title": "Castle Theme"
+ },
+ "mus_Dragon_Warrior_Dragon_Lord_Theme": {
+  "game": "Dragon Warrior",
+  "set": "_NESmix",
+  "title": "Dragon Lord Theme"
+ },
+ "mus_Dragon_Warrior_Village_Theme": {
+  "game": "Dragon Warrior",
+  "set": "_NESmix",
+  "title": "Village Theme"
+ },
+ "mus_Drouble_Dribble_Menu": {
+  "game": "Double Dribble",
+  "set": "_NESmix",
+  "title": "Menu"
+ },
+ "mus_Duck_Tales_African_Mines_Stage": {
+  "game": "DuckTales",
+  "set": "_NESmix",
+  "title": "African Mines Stage"
+ },
+ "mus_Duck_Tales_Amazon_Stage": {
+  "game": "DuckTales",
+  "set": "_NESmix",
+  "title": "Amazon Stage"
+ },
+ "mus_Duck_Tales_Moon_Stage": {
+  "game": "DuckTales",
+  "set": "_NESmix",
+  "title": "Moon Stage"
+ },
+ "mus_Duck_Tales_Title_Theme": {
+  "game": "DuckTales",
+  "set": "_NESmix",
+  "title": "Title Theme"
+ },
+ "mus_Duck_Tales_Transylvania_Stage": {
+  "game": "DuckTales",
+  "set": "_NESmix",
+  "title": "Transylvania Stage"
+ },
+ "mus_End_Credits_1a": {
+  "game": "End",
+  "set": "_Default",
+  "title": "Credits 1a"
+ },
+ "mus_FF1_MatoyaCavern": {
+  "game": "Final Fantasy",
+  "set": "_NESmix",
+  "title": "Matoya Cavern"
+ },
+ "mus_FF2_VillageTheme": {
+  "game": "Final Fantasy II",
+  "set": "_NESmix",
+  "title": "Village Theme"
+ },
+ "mus_FestersQuest_Track04": {
+  "game": "Fester's Quest",
+  "set": "_NESmix",
+  "title": "Track 04"
+ },
+ "mus_FestersQuest_Track06": {
+  "game": "Fester's Quest",
+  "set": "_NESmix",
+  "title": "Track 06"
+ },
+ "mus_Ganon_Battle1_Body": {
+  "game": "Ganon",
+  "set": "_Default",
+  "title": "Battle 1"
+ },
+ "mus_Gauntlet_MenuTheme": {
+  "game": "Gauntlet",
+  "set": "_NESmix",
+  "title": "Menu Theme"
+ },
+ "mus_Ghosts_n_Goblins_Stage_Theme_01": {
+  "game": "Ghosts 'n Goblins",
+  "set": "_NESmix",
+  "title": "Stage Theme 01"
+ },
+ "mus_Ghosts_n_Goblins_Stage_Theme_03": {
+  "game": "Ghosts 'n Goblins",
+  "set": "_NESmix",
+  "title": "Stage Theme 03"
+ },
+ "mus_Great_Palace_Body_1a": {
+  "game": "Great",
+  "set": "_Default",
+  "title": "Palace Body 1a"
+ },
+ "mus_Great_Palace_Intro_1a": {
+  "game": "Great",
+  "set": "",
+  "title": "Palace Intro 1a"
+ },
+ "mus_Gyromite_GameABGM": {
+  "game": "Gyromite",
+  "set": "_NESmix",
+  "title": "Game ABGM"
+ },
+ "mus_IsabelleChiming_Basement01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Basement 01"
+ },
+ "mus_IsabelleChiming_Battle": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Battle"
+ },
+ "mus_IsabelleChiming_BattleJPN01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Battle JPN 01"
+ },
+ "mus_IsabelleChiming_BattleJPN_Body": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming2",
+  "title": "Battle JPN"
+ },
+ "mus_IsabelleChiming_Boss": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Boss"
+ },
+ "mus_IsabelleChiming_BossBattle01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Boss Battle 01"
+ },
+ "mus_IsabelleChiming_ContinueSave01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Continue Save 01"
+ },
+ "mus_IsabelleChiming_Credits": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Credits"
+ },
+ "mus_IsabelleChiming_DragmireTower01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Dragmire Tower 01"
+ },
+ "mus_IsabelleChiming_DragmireTower_Body": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Dragmire Tower"
+ },
+ "mus_IsabelleChiming_Dungeon1": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Dungeon 1"
+ },
+ "mus_IsabelleChiming_Dungeon2": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Dungeon 2"
+ },
+ "mus_IsabelleChiming_Dungeon3": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Dungeon 3"
+ },
+ "mus_IsabelleChiming_Dungeon4": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Dungeon 4"
+ },
+ "mus_IsabelleChiming_Dungeon5": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Dungeon 5"
+ },
+ "mus_IsabelleChiming_Dungeon6": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Dungeon 6"
+ },
+ "mus_IsabelleChiming_Dungeon7": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Dungeon 7"
+ },
+ "mus_IsabelleChiming_EvilHeart01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Evil Heart 01"
+ },
+ "mus_IsabelleChiming_EvilHeart_Body": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Evil Heart"
+ },
+ "mus_IsabelleChiming_FileSelect": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "File Select"
+ },
+ "mus_IsabelleChiming_FileSelect01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "File Select 01"
+ },
+ "mus_IsabelleChiming_FileSelect01_1": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "File Select 01 1"
+ },
+ "mus_IsabelleChiming_Ganon3": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Ganon 3"
+ },
+ "mus_IsabelleChiming_GanonFinalForm01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Ganon Final Form 01"
+ },
+ "mus_IsabelleChiming_GreatPalace01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Great Palace 01"
+ },
+ "mus_IsabelleChiming_HiddenPalace01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Hidden Palace 01"
+ },
+ "mus_IsabelleChiming_House01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "House 01"
+ },
+ "mus_IsabelleChiming_InDoors": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "In Doors"
+ },
+ "mus_IsabelleChiming_IslandPalace01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Island Palace 01"
+ },
+ "mus_IsabelleChiming_MazeIslandPalace01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Maze Island Palace 01"
+ },
+ "mus_IsabelleChiming_MidoroPalace01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Midoro Palace 01"
+ },
+ "mus_IsabelleChiming_Minigame01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Minigame 01"
+ },
+ "mus_IsabelleChiming_Minigame_Body": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Minigame"
+ },
+ "mus_IsabelleChiming_OldKasuto": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Old Kasuto"
+ },
+ "mus_IsabelleChiming_OldKasuto01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Old Kasuto 01"
+ },
+ "mus_IsabelleChiming_Overworld": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Overworld"
+ },
+ "mus_IsabelleChiming_OverworldDeathMountain01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Overworld Death Mountain 01"
+ },
+ "mus_IsabelleChiming_OverworldMazeIsland01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Overworld Maze Island 01"
+ },
+ "mus_IsabelleChiming_OverworldStandard01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Overworld Standard 01"
+ },
+ "mus_IsabelleChiming_Overworld_DeathMtn": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Overworld Death Mtn"
+ },
+ "mus_IsabelleChiming_Overworld_Dragmire_Body": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Overworld Dragmire"
+ },
+ "mus_IsabelleChiming_Overworld_MazeIsl": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Overworld Maze Isl"
+ },
+ "mus_IsabelleChiming_PalaceOnTheSea01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Palace On The Sea 01"
+ },
+ "mus_IsabelleChiming_ParapaPalace01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Parapa Palace 01"
+ },
+ "mus_IsabelleChiming_ShadowBoss": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Shadow Boss"
+ },
+ "mus_IsabelleChiming_ShadowBoss01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Shadow Boss 01"
+ },
+ "mus_IsabelleChiming_ThunderBird": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Thunder Bird"
+ },
+ "mus_IsabelleChiming_Thunderbird01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Thunderbird 01"
+ },
+ "mus_IsabelleChiming_Title": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Title"
+ },
+ "mus_IsabelleChiming_Title01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Title 01"
+ },
+ "mus_IsabelleChiming_Title_Intro_1": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Title Intro 1"
+ },
+ "mus_IsabelleChiming_Town": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Town"
+ },
+ "mus_IsabelleChiming_Town01": {
+  "game": "Isabelle Chiming",
+  "set": "",
+  "title": "Town 01"
+ },
+ "mus_IsabelleChiming_WakeZelda": {
+  "game": "Isabelle Chiming",
+  "set": "_IsabelleChiming",
+  "title": "Wake Zelda"
+ },
+ "mus_KickMaster_Sector4": {
+  "game": "Kick Master",
+  "set": "_NESmix",
+  "title": "Sector 4"
+ },
+ "mus_KidIcarus_Underworld_1a": {
+  "game": "Kid Icarus",
+  "set": "_NESmix",
+  "title": "Underworld 1a"
+ },
+ "mus_Kid_Icarus_Angel_Land": {
+  "game": "Kid Icarus",
+  "set": "_NESmix",
+  "title": "Angel Land"
+ },
+ "mus_Kid_Icarus_Castle_Theme": {
+  "game": "Kid Icarus",
+  "set": "_NESmix",
+  "title": "Castle Theme"
+ },
+ "mus_Kid_Icarus_Medusa_Fight": {
+  "game": "Kid Icarus",
+  "set": "_NESmix",
+  "title": "Medusa Fight"
+ },
+ "mus_Kid_Icarus_Sky_Palace": {
+  "game": "Kid Icarus",
+  "set": "_NESmix",
+  "title": "Sky Palace"
+ },
+ "mus_Kid_Icarus_Sky_World": {
+  "game": "Kid Icarus",
+  "set": "_NESmix",
+  "title": "Sky World"
+ },
+ "mus_Kid_Icarus_Title_Screen": {
+  "game": "Kid Icarus",
+  "set": "_NESmix",
+  "title": "Title Screen"
+ },
+ "mus_Kid_Icarus_Underworld_Theme": {
+  "game": "Kid Icarus",
+  "set": "_NESmix",
+  "title": "Underworld Theme"
+ },
+ "mus_MM1_CutmanStage": {
+  "game": "Mega Man",
+  "set": "_NESmix",
+  "title": "Cutman Stage"
+ },
+ "mus_MM2_IntroTheme": {
+  "game": "Mega Man 2",
+  "set": "_NESmix",
+  "title": "Intro Theme"
+ },
+ "mus_MM2_WoodManStage": {
+  "game": "Mega Man 2",
+  "set": "_NESmix",
+  "title": "Wood Man Stage"
+ },
+ "mus_Mega_Man_2_Crash_Man_Stage": {
+  "game": "Mega Man 2",
+  "set": "_NESmix",
+  "title": "Crash Man Stage"
+ },
+ "mus_Mega_Man_2_Flash_Man_Stage": {
+  "game": "Mega Man 2",
+  "set": "_NESmix",
+  "title": "Flash Man Stage"
+ },
+ "mus_Mega_Man_2_Heat_Man_Stage": {
+  "game": "Mega Man 2",
+  "set": "_NESmix",
+  "title": "Heat Man Stage"
+ },
+ "mus_Mega_Man_2_Metal_Man_Stage": {
+  "game": "Mega Man 2",
+  "set": "_NESmix",
+  "title": "Metal Man Stage"
+ },
+ "mus_Mega_Man_2_Wily_Fortress_1": {
+  "game": "Mega Man 2",
+  "set": "_NESmix",
+  "title": "Wily Fortress 1"
+ },
+ "mus_Metroid_KraidsHideout": {
+  "game": "Metroid",
+  "set": "_NESmix",
+  "title": "Kraids Hideout"
+ },
+ "mus_Metroid_TitleFDS": {
+  "game": "Metroid",
+  "set": "_NESmix",
+  "title": "Title FDS"
+ },
+ "mus_Mike_Tyson_s_Punch_Out_Fight_Theme": {
+  "game": "Mike Tyson's Punch-Out!!",
+  "set": "_NESmix",
+  "title": "Fight Theme"
+ },
+ "mus_Minigame1": {
+  "game": "Minigame 1",
+  "set": "_Default",
+  "title": "Main Theme"
+ },
+ "mus_NikoTengoku_Battle1": {
+  "game": "Niko Tengoku",
+  "set": "_Nikos8BitStereo",
+  "title": "Battle 1"
+ },
+ "mus_NikoTengoku_Battle1_2": {
+  "game": "Niko Tengoku",
+  "set": "_Other",
+  "title": "Battle 1 2"
+ },
+ "mus_NikoTengoku_Boss2": {
+  "game": "Niko Tengoku",
+  "set": "_Nikos8BitStereo",
+  "title": "Boss 2"
+ },
+ "mus_NikoTengoku_Dungeon1_2_Body": {
+  "game": "Niko Tengoku",
+  "set": "",
+  "title": "Dungeon 1 2"
+ },
+ "mus_NikoTengoku_Dungeon1_Body": {
+  "game": "Niko Tengoku",
+  "set": "_Nikos8BitStereo",
+  "title": "Dungeon 1"
+ },
+ "mus_NikoTengoku_Dungeon2_Body": {
+  "game": "Niko Tengoku",
+  "set": "_Nikos8BitStereo",
+  "title": "Dungeon 2"
+ },
+ "mus_NikoTengoku_EndCredits": {
+  "game": "Niko Tengoku",
+  "set": "_Nikos8BitStereo",
+  "title": "End Credits"
+ },
+ "mus_NikoTengoku_Overworld_Body": {
+  "game": "Niko Tengoku",
+  "set": "_Nikos8BitStereo",
+  "title": "Overworld"
+ },
+ "mus_NikoTengoku_Title_Body": {
+  "game": "Niko Tengoku",
+  "set": "_Nikos8BitStereo",
+  "title": "Title"
+ },
+ "mus_NikoTengoku_Town_Body": {
+  "game": "Niko Tengoku",
+  "set": "_Nikos8BitStereo",
+  "title": "Town"
+ },
+ "mus_NinjaGaiden_Act4Pt2": {
+  "game": "Ninja Gaiden",
+  "set": "_NESmix",
+  "title": "Act 4Pt 2"
+ },
+ "mus_OoT_Forest_Temple": {
+  "game": "Ocarina of Time",
+  "set": "_NESmix",
+  "title": "Forest Temple"
+ },
+ "mus_OoT_Gerudo_Valley_8bit": {
+  "game": "Ocarina of Time",
+  "set": "_NESmix",
+  "title": "Gerudo Valley 8bit"
+ },
+ "mus_OoT_Hyrule_Castle_Courtyard": {
+  "game": "Ocarina of Time",
+  "set": "_NESmix",
+  "title": "Hyrule Castle Courtyard"
+ },
+ "mus_OoT_Lon_Lon_Ranch": {
+  "game": "Ocarina of Time",
+  "set": "_NESmix",
+  "title": "Lon Lon Ranch"
+ },
+ "mus_OoT_Market": {
+  "game": "Ocarina of Time",
+  "set": "_NESmix",
+  "title": "Market"
+ },
+ "mus_OoT_Spirit_Temple": {
+  "game": "Ocarina of Time",
+  "set": "_NESmix",
+  "title": "Spirit Temple"
+ },
+ "mus_Overworld_Body_1a": {
+  "game": "Overworld",
+  "set": "_Default",
+  "title": "Body 1a"
+ },
+ "mus_Palace_Body_1a": {
+  "game": "Palace",
+  "set": "_Default",
+  "title": "Body 1a"
+ },
+ "mus_PunchOut_BicycleTraining": {
+  "game": "Punch-Out!!",
+  "set": "_NESmix",
+  "title": "Bicycle Training"
+ },
+ "mus_R_B_I_Baseball_Game_Theme": {
+  "game": "R.B.I. Baseball",
+  "set": "_NESmix",
+  "title": "Game Theme"
+ },
+ "mus_RushNAttack_StageTheme1": {
+  "game": "Rush'n Attack",
+  "set": "_NESmix",
+  "title": "Stage Theme 1"
+ },
+ "mus_SMB2_Overworld_1a": {
+  "game": "SMB 2",
+  "set": "_NESmix",
+  "title": "Overworld 1a"
+ },
+ "mus_SMB_CastleTheme": {
+  "game": "Super Mario Bros.",
+  "set": "_NESmix",
+  "title": "Castle Theme"
+ },
+ "mus_Shadow_Link_1a": {
+  "game": "Shadow",
+  "set": "_Default",
+  "title": "Link 1a"
+ },
+ "mus_Shatterhand_AreasEF": {
+  "game": "Shatterhand",
+  "set": "_NESmix",
+  "title": "Areas EF"
+ },
+ "mus_SteelCrescent2_Battle": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Battle"
+ },
+ "mus_SteelCrescent2_Boss": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Boss"
+ },
+ "mus_SteelCrescent2_ContinueSave": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Continue Save"
+ },
+ "mus_SteelCrescent2_Credits_Body": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Credits"
+ },
+ "mus_SteelCrescent2_DeathMountain": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Death Mountain"
+ },
+ "mus_SteelCrescent2_Dragmire": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Dragmire"
+ },
+ "mus_SteelCrescent2_DragmireTower": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Dragmire Tower"
+ },
+ "mus_SteelCrescent2_Dungeon2": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Dungeon 2"
+ },
+ "mus_SteelCrescent2_Dungeon_Body": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Dungeon"
+ },
+ "mus_SteelCrescent2_FileSelect": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "File Select"
+ },
+ "mus_SteelCrescent2_Ganon01_Body": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Ganon 01"
+ },
+ "mus_SteelCrescent2_Ganon02": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Ganon 02"
+ },
+ "mus_SteelCrescent2_GreatPalace_Body": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Great Palace"
+ },
+ "mus_SteelCrescent2_MazeIsland": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Maze Island"
+ },
+ "mus_SteelCrescent2_Minigame_Body": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Minigame"
+ },
+ "mus_SteelCrescent2_OldKasuto": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Old Kasuto"
+ },
+ "mus_SteelCrescent2_Overworld_Body": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Overworld"
+ },
+ "mus_SteelCrescent2_ShadowBoss": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Shadow Boss"
+ },
+ "mus_SteelCrescent2_SwordIsland": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Sword Island"
+ },
+ "mus_SteelCrescent2_Thunderbird": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Thunderbird"
+ },
+ "mus_SteelCrescent2_Title_Body": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Title"
+ },
+ "mus_SteelCrescent2_Town_Body": {
+  "game": "Steel Crescent 2",
+  "set": "_SteelCrescent2",
+  "title": "Town"
+ },
+ "mus_SteelCrescent3_Battle": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Battle"
+ },
+ "mus_SteelCrescent3_Credits_Body": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Credits"
+ },
+ "mus_SteelCrescent3_DeathMountain": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Death Mountain"
+ },
+ "mus_SteelCrescent3_Dragmire": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Dragmire"
+ },
+ "mus_SteelCrescent3_DragmireTower": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Dragmire Tower"
+ },
+ "mus_SteelCrescent3_Dungeon_Body": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Dungeon"
+ },
+ "mus_SteelCrescent3_FileSelect": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "File Select"
+ },
+ "mus_SteelCrescent3_Ganon1And2_Body": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Ganon 1And 2"
+ },
+ "mus_SteelCrescent3_GanonPhase03": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Ganon Phase 03"
+ },
+ "mus_SteelCrescent3_GreatPalace_Body": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Great Palace"
+ },
+ "mus_SteelCrescent3_MazeIsland": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Maze Island"
+ },
+ "mus_SteelCrescent3_OldKasuto": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Old Kasuto"
+ },
+ "mus_SteelCrescent3_Overworld_Body": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Overworld"
+ },
+ "mus_SteelCrescent3_ShadowBoss": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Shadow Boss"
+ },
+ "mus_SteelCrescent3_Thunderbird": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Thunderbird"
+ },
+ "mus_SteelCrescent3_Title_Body": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Title"
+ },
+ "mus_SteelCrescent3_Town_Body": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Town"
+ },
+ "mus_SteelCrescent3_WakeZelda": {
+  "game": "Steel Crescent 3",
+  "set": "_SteelCrescent3",
+  "title": "Wake Zelda"
+ },
+ "mus_SteelCrescent4_Battle": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Battle"
+ },
+ "mus_SteelCrescent4_Boss": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Boss"
+ },
+ "mus_SteelCrescent4_Credits": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Credits"
+ },
+ "mus_SteelCrescent4_DeathMountain": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Death Mountain"
+ },
+ "mus_SteelCrescent4_Dragmire": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Dragmire"
+ },
+ "mus_SteelCrescent4_DragmireTower": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Dragmire Tower"
+ },
+ "mus_SteelCrescent4_Dungeon_Body": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Dungeon"
+ },
+ "mus_SteelCrescent4_FileSelect": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "File Select"
+ },
+ "mus_SteelCrescent4_Ganon01": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Ganon 01"
+ },
+ "mus_SteelCrescent4_Ganon03": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Ganon 03"
+ },
+ "mus_SteelCrescent4_GreatPalace_Body": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Great Palace"
+ },
+ "mus_SteelCrescent4_MazeIsland": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Maze Island"
+ },
+ "mus_SteelCrescent4_MiniGame": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Mini Game"
+ },
+ "mus_SteelCrescent4_Overworld_Body": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Overworld"
+ },
+ "mus_SteelCrescent4_ShadowBoss": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Shadow Boss"
+ },
+ "mus_SteelCrescent4_Thunderbird": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Thunderbird"
+ },
+ "mus_SteelCrescent4_Title_Body": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Title"
+ },
+ "mus_SteelCrescent4_Town_Body": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Town"
+ },
+ "mus_SteelCrescent4_WakeZelda": {
+  "game": "Steel Crescent 4",
+  "set": "_SteelCrescent4",
+  "title": "Wake Zelda"
+ },
+ "mus_SteelCrescent5_Battle": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Battle"
+ },
+ "mus_SteelCrescent5_Boss": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Boss"
+ },
+ "mus_SteelCrescent5_Credits": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Credits"
+ },
+ "mus_SteelCrescent5_DeathMountain": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Death Mountain"
+ },
+ "mus_SteelCrescent5_Dragmire": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Dragmire"
+ },
+ "mus_SteelCrescent5_DragmireTower": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Dragmire Tower"
+ },
+ "mus_SteelCrescent5_DungeonTheme02": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent",
+  "title": "Dungeon Theme 02"
+ },
+ "mus_SteelCrescent5_Dungeon_Body": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Dungeon"
+ },
+ "mus_SteelCrescent5_FileSelect": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "File Select"
+ },
+ "mus_SteelCrescent5_Ganon01": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Ganon 01"
+ },
+ "mus_SteelCrescent5_Ganon03": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Ganon 03"
+ },
+ "mus_SteelCrescent5_GreatPalace_Body": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Great Palace"
+ },
+ "mus_SteelCrescent5_MazeIsland_Body": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Maze Island"
+ },
+ "mus_SteelCrescent5_MiniGame": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Mini Game"
+ },
+ "mus_SteelCrescent5_Overworld_Body": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Overworld"
+ },
+ "mus_SteelCrescent5_ShadowBoss": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Shadow Boss"
+ },
+ "mus_SteelCrescent5_SwordIsland": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Sword Island"
+ },
+ "mus_SteelCrescent5_Thunderbird": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Thunderbird"
+ },
+ "mus_SteelCrescent5_Title_Body": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Title"
+ },
+ "mus_SteelCrescent5_Town_Body": {
+  "game": "Steel Crescent 5",
+  "set": "_SteelCrescent5",
+  "title": "Town"
+ },
+ "mus_SteelCrescent_Battle": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Battle"
+ },
+ "mus_SteelCrescent_Boss": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Boss"
+ },
+ "mus_SteelCrescent_ContinueSave": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Continue Save"
+ },
+ "mus_SteelCrescent_Credits_Body": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Credits"
+ },
+ "mus_SteelCrescent_DarkLink": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Dark Link"
+ },
+ "mus_SteelCrescent_DeathMountain": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Death Mountain"
+ },
+ "mus_SteelCrescent_Dragmire": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Dragmire"
+ },
+ "mus_SteelCrescent_DragmireTower": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Dragmire Tower"
+ },
+ "mus_SteelCrescent_Dungeon_Body": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Dungeon"
+ },
+ "mus_SteelCrescent_FileSelect": {
+  "game": "Steel Crescent",
+  "set": "_Other",
+  "title": "File Select"
+ },
+ "mus_SteelCrescent_FileSelect2": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "File Select 2"
+ },
+ "mus_SteelCrescent_Ganon01": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Ganon 01"
+ },
+ "mus_SteelCrescent_Ganon_FinalPhase": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Ganon Final Phase"
+ },
+ "mus_SteelCrescent_GreatPalace2_Body": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Great Palace 2"
+ },
+ "mus_SteelCrescent_GreatPalace_Body": {
+  "game": "Steel Crescent",
+  "set": "_Other",
+  "title": "Great Palace"
+ },
+ "mus_SteelCrescent_Makarrha": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Makarrha"
+ },
+ "mus_SteelCrescent_MazeIsland": {
+  "game": "Steel Crescent",
+  "set": "",
+  "title": "Maze Island"
+ },
+ "mus_SteelCrescent_MiniGame_Body": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Mini Game"
+ },
+ "mus_SteelCrescent_OldKasuto": {
+  "game": "Steel Crescent",
+  "set": "_Other",
+  "title": "Old Kasuto"
+ },
+ "mus_SteelCrescent_OldKasuto2": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Old Kasuto 2"
+ },
+ "mus_SteelCrescent_Overworld_Body": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Overworld"
+ },
+ "mus_SteelCrescent_Thunderbird": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Thunderbird"
+ },
+ "mus_SteelCrescent_Title_Body": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Title"
+ },
+ "mus_SteelCrescent_Town_Body": {
+  "game": "Steel Crescent",
+  "set": "_SteelCrescent",
+  "title": "Town"
+ },
+ "mus_SteelCrescent_ValleyOfDeath": {
+  "game": "Steel Crescent",
+  "set": "",
+  "title": "Valley Of Death"
+ },
+ "mus_Super_Mario_Bros_2_Cave_Theme": {
+  "game": "Super Mario Bros. 2",
+  "set": "_NESmix",
+  "title": "Cave Theme"
+ },
+ "mus_Super_Mario_Bros_2_Overworld_Theme": {
+  "game": "Super Mario Bros. 2",
+  "set": "_NESmix",
+  "title": "Overworld Theme"
+ },
+ "mus_TMNT2_Arcade_Game": {
+  "game": "TMNT II",
+  "set": "_NESmix",
+  "title": "Arcade Game"
+ },
+ "mus_TMNT2_Scene3": {
+  "game": "TMNT II",
+  "set": "_NESmix",
+  "title": "Scene 3"
+ },
+ "mus_Title_Body_1a": {
+  "game": "Title",
+  "set": "_Default",
+  "title": "Body 1a"
+ },
+ "mus_TownCountrySurf_LevelMusic": {
+  "game": "T&C Surf Designs",
+  "set": "_NESmix",
+  "title": "Level Music"
+ },
+ "mus_Town_Body_1a": {
+  "game": "Town",
+  "set": "_Default",
+  "title": "Body 1a"
+ },
+ "mus_WW_MusicIntro": {
+  "game": "Wind Waker",
+  "set": "_NESmix",
+  "title": "Music Intro"
+ },
+ "mus_WizWarriors_Boss_1a": {
+  "game": "Wiz Warriors",
+  "set": "_NESmix",
+  "title": "Boss 1a"
+ },
+ "mus_Wizards_Warriors_Boss_Battle": {
+  "game": "Wizards & Warriors",
+  "set": "_NESmix",
+  "title": "Boss Battle"
+ },
+ "mus_Wizards_Warriors_Princess_Rescued": {
+  "game": "Wizards & Warriors",
+  "set": "_NESmix",
+  "title": "Princess Rescued"
+ },
+ "mus_Wizards_Warriors_Stage_1_Forest_of_Elrond_1": {
+  "game": "Wizards & Warriors",
+  "set": "_NESmix",
+  "title": "Stage 1 Forest of Elrond 1"
+ },
+ "mus_Wizards_Warriors_Stage_2_Ice_Caves": {
+  "game": "Wizards & Warriors",
+  "set": "_NESmix",
+  "title": "Stage 2 Ice Caves"
+ },
+ "mus_Wizards_Warriors_Stage_3_Fire_Caverns": {
+  "game": "Wizards & Warriors",
+  "set": "_NESmix",
+  "title": "Stage 3 Fire Caverns"
+ },
+ "mus_Wizards_Warriors_Stage_5_Forest_of_Elrond_2": {
+  "game": "Wizards & Warriors",
+  "set": "_NESmix",
+  "title": "Stage 5 Forest of Elrond 2"
+ },
+ "mus_Wizards_Warriors_Stage_7_Inner_Castle": {
+  "game": "Wizards & Warriors",
+  "set": "_NESmix",
+  "title": "Stage 7 Inner Castle"
+ },
+ "mus_Wizards_Warriors_Tree_Trunk_Level": {
+  "game": "Wizards & Warriors",
+  "set": "_NESmix",
+  "title": "Tree Trunk Level"
+ },
+ "mus_Wyng1_Battle1_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Battle 1"
+ },
+ "mus_Wyng1_Battle2_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Battle 2"
+ },
+ "mus_Wyng1_BossBattle01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Boss Battle 01"
+ },
+ "mus_Wyng1_Bulblin01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Bulblin 01"
+ },
+ "mus_Wyng1_Credits": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Credits"
+ },
+ "mus_Wyng1_DeathMountain01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Death Mountain 01"
+ },
+ "mus_Wyng1_DragmireTower01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Dragmire Tower 01"
+ },
+ "mus_Wyng1_Dungeon01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Dungeon 01"
+ },
+ "mus_Wyng1_FastTravelTunnels_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Fast Travel Tunnels"
+ },
+ "mus_Wyng1_FileSelect_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "File Select"
+ },
+ "mus_Wyng1_Ganon01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Ganon 01"
+ },
+ "mus_Wyng1_GreatPalace01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Great Palace 01"
+ },
+ "mus_Wyng1_House_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "House"
+ },
+ "mus_Wyng1_MazeIsland_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Maze Island"
+ },
+ "mus_Wyng1_Minigame_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Minigame"
+ },
+ "mus_Wyng1_OldKasuto_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Old Kasuto"
+ },
+ "mus_Wyng1_Overworld01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Overworld 01"
+ },
+ "mus_Wyng1_PrincessZeldaQuest1_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Princess Zelda Quest 1"
+ },
+ "mus_Wyng1_PrincessZeldaQuest2_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Princess Zelda Quest 2"
+ },
+ "mus_Wyng1_ShadowBoss_Body": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Shadow Boss"
+ },
+ "mus_Wyng1_Thunderbird01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Thunderbird 01"
+ },
+ "mus_Wyng1_Title01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Title 01"
+ },
+ "mus_Wyng1_Town01": {
+  "game": "Wyng 1",
+  "set": "_Wyng",
+  "title": "Town 01"
+ },
+ "mus_Z1_Credits_Body": {
+  "game": "Z 1",
+  "set": "_Zelda1",
+  "title": "Credits"
+ },
+ "mus_Z1_Dungeon2": {
+  "game": "Z 1",
+  "set": "_Zelda1",
+  "title": "Dungeon 2"
+ },
+ "mus_Z1_Dungeon_Body_1a": {
+  "game": "Z 1",
+  "set": "_Zelda1",
+  "title": "Dungeon Body 1a"
+ },
+ "mus_Z1_Dungeon_Triangle_1a": {
+  "game": "Z 1",
+  "set": "",
+  "title": "Dungeon Triangle 1a"
+ },
+ "mus_Z1_Overworld_Body": {
+  "game": "Z 1",
+  "set": "_Zelda1",
+  "title": "Overworld"
+ },
+ "mus_Z1_Title": {
+  "game": "Z 1",
+  "set": "_Zelda1",
+  "title": "Title"
+ },
+ "mus_ZeldaII_FDS_Battle": {
+  "game": "Zelda II",
+  "set": "_Zelda2_FDS",
+  "title": "FDS Battle"
+ },
+ "mus_ZeldaII_FDS_Dungeon": {
+  "game": "Zelda II",
+  "set": "_Zelda2_FDS",
+  "title": "FDS Dungeon"
+ },
+ "mus_ZeldaII_FDS_Overworld": {
+  "game": "Zelda II",
+  "set": "_Zelda2_FDS",
+  "title": "FDS Overworld"
+ },
+ "mus_ZeldaII_FDS_Title": {
+  "game": "Zelda II",
+  "set": "_Zelda2_FDS",
+  "title": "FDS Title"
+ },
+ "mus_ZeldaII_FDS_Town": {
+  "game": "Zelda II",
+  "set": "_Zelda2_FDS",
+  "title": "FDS Town"
+ }
+}

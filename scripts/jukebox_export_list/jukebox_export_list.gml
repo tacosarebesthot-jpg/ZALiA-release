@@ -62,9 +62,20 @@ function jukebox_export_list() {
         var _disp = string_replace_all(string(global.jukebox_names[_i]), "\\", "");
         _disp = string_replace_all(_disp, "\"", "'");
 
+        // Track length, so the companion can show a duration column. Streamed
+        // assets can report 0 or a non-real until loaded -- emit 0 and let the
+        // UI hide it rather than printing a bogus time.
+        var _len = 0;
+        if (_asset != -1 && audio_exists(_asset))
+        {
+            var _sl = audio_sound_length(_asset);
+            if (is_real(_sl) && _sl > 0) _len = _sl;
+        }
+
         _s += "    {\"idx\":" + string(_i)
             + ",\"name\":\"" + _disp + "\""
             + ",\"set\":\""  + _set + "\""
+            + ",\"len\":"    + string(_len)
             + ",\"asset\":\"" + _aname + "\"}";
         if (_i < _n - 1) _s += ",";
         _s += "\n";

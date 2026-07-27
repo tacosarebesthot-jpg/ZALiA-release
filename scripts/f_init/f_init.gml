@@ -30,6 +30,7 @@ function f_init() {
 
 	SDNAME_questNum             = "quest_num";
 	SDNAME_deathCount           = "death_count";
+	SDNAME_deathCountWarped     = "death_count_warped";
 
 	SDNAME_level_atk            = "level_atk";
 	SDNAME_level_mag            = "level_mag";
@@ -126,6 +127,15 @@ function f_init() {
 	quest_num = 1; // 1: first game play-through, 2: beat game once (new game +)
 	game_completed_count = 0;
 	death_count = 0;
+
+	// Of death_count, how many were LIVES FORFEITED to a forced ("quick") game
+	// over rather than actually dying. update_QuitAppMenu charges every remaining
+	// life as a death when GAME OVER WARPING PENALTY is on, so one warp can add 3
+	// at once and death_count stops meaning "times you died". Tracking the warped
+	// portion separately lets the companion show "12 deaths (4 real, 8 warped)".
+	// Counts from this build onward -- existing saves report 0 warped, which is
+	// under-reporting, not wrong data.
+	death_count_warped = 0;
 
 
  

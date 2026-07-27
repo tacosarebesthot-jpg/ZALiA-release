@@ -232,6 +232,16 @@ function g_Step() {
 	    jukebox_load_zones();     // replay saved zone assignments BEFORE the rebuild,
 	                              // so the exported list reflects them
 	    jukebox_build_playlist();
+
+	    // Built-in web companion. Started here, not in g_Create, because its very
+	    // first request is /list -- which needs Audio.dm populated, same reason
+	    // this one-shot exists at all.
+	    if (!instance_exists(obj_zalia_web)) instance_create_depth(0, 0, 0, obj_zalia_web);
+
+	    // DEV: unattended zone-assignment test. Same flag shape as _sweep_*.flag.
+	    // Runs here because this is the first point where Audio.dm is real; it
+	    // writes a result file and quits, so a headless Igor run terminates.
+	    if (DEV && file_exists(working_directory + "_jukebox_selftest.flag")) jukebox_selftest();
 	}
 
 

@@ -1,4 +1,4 @@
-{
+﻿{
   "$GMProject":"v1",
   "%Name":"ZALiA",
   "AudioGroups":[
@@ -527,6 +527,11 @@
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
     {"$GMIncludedFile":"","%Name":"gamecontrollerdb.txt","CopyToMask":9223372036854775807,"filePath":"datafiles","name":"gamecontrollerdb.txt","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"jukebox.html","CopyToMask":9223372036854775807,"filePath":"datafiles/web","name":"jukebox.html","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"jukebox_tags.json","CopyToMask":9223372036854775807,"filePath":"datafiles/web","name":"jukebox_tags.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"twitch.html","CopyToMask":9223372036854775807,"filePath":"datafiles/web","name":"twitch.html","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"twitch_callback.html","CopyToMask":9223372036854775807,"filePath":"datafiles/web","name":"twitch_callback.html","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
+    {"$GMIncludedFile":"","%Name":"tracker.html","CopyToMask":9223372036854775807,"filePath":"datafiles/web","name":"tracker.html","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"automate_code01.txt","CopyToMask":9223372036854775807,"filePath":"datafiles/other","name":"automate_code01.txt","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"RandoPalettes01.json","CopyToMask":9223372036854775807,"filePath":"datafiles/other","name":"RandoPalettes01.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"RandoPalettes02.json","CopyToMask":9223372036854775807,"filePath":"datafiles/other","name":"RandoPalettes02.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
@@ -1440,6 +1445,7 @@
     {"id":{"name":"obj_start","path":"objects/obj_start/obj_start.yy",},},
     {"id":{"name":"obj_twitch_irc","path":"objects/obj_twitch_irc/obj_twitch_irc.yy",},},
     {"id":{"name":"obj_view_init","path":"objects/obj_view_init/obj_view_init.yy",},},
+    {"id":{"name":"obj_zalia_web","path":"objects/obj_zalia_web/obj_zalia_web.yy",},},
     {"id":{"name":"Octorok01","path":"objects/Octorok01/Octorok01.yy",},},
     {"id":{"name":"OptionsMenu","path":"objects/OptionsMenu/OptionsMenu.yy",},},
     {"id":{"name":"Overworld","path":"objects/Overworld/Overworld.yy",},},
@@ -3808,7 +3814,6 @@
     {"id":{"name":"mus_NikoTengoku_WakeZelda","path":"sounds/mus_NikoTengoku_WakeZelda/mus_NikoTengoku_WakeZelda.yy",},},
     {"id":{"name":"mus_Overworld_Body_1a","path":"sounds/mus_Overworld_Body_1a/mus_Overworld_Body_1a.yy",},},
     {"id":{"name":"mus_SMB2_Overworld_1a","path":"sounds/mus_SMB2_Overworld_1a/mus_SMB2_Overworld_1a.yy",},},
-    {"id":{"name":"mus_KidIcarus_Underworld_1a","path":"sounds/mus_KidIcarus_Underworld_1a/mus_KidIcarus_Underworld_1a.yy",},},
     {"id":{"name":"mus_Castlevania_Battle_1a","path":"sounds/mus_Castlevania_Battle_1a/mus_Castlevania_Battle_1a.yy",},},
     {"id":{"name":"mus_DragonWarrior_Town_1a","path":"sounds/mus_DragonWarrior_Town_1a/mus_DragonWarrior_Town_1a.yy",},},
     {"id":{"name":"mus_WizWarriors_Boss_1a","path":"sounds/mus_WizWarriors_Boss_1a/mus_WizWarriors_Boss_1a.yy",},},

@@ -27,9 +27,45 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	var _who_s = string(_who);
 	if (_who_s == "") _who_s = "chat";
 
-	// duration (frames) for timed effects; default 5s @60fps when unspecified/garbage
+	// ---- VS CHAT MODE (2026-07-27) -----------------------------------------
+	// Chat's goal is to kill the runner. Blocks every verb that HELPS -- healing,
+	// mana, extra lives, shields, invulnerability, the summonable allies -- so
+	// nobody can undo the damage their chat is doing.
+	//
+	// Deliberately a DENY list, not an allow list: there are ~50 verbs and more
+	// get added, and a new hostile verb should work in vs mode the day it lands.
+	// The failure mode of a missed entry is "one helpful verb slips through",
+	// not "every new effect is silently dead".
+	if (variable_global_exists("tw_vs_mode") && global.tw_vs_mode)
+	{
+	    switch (_v)
+	    {
+	        case "heal": case "mp": case "refill": case "1up": case "life":
+	        case "fairy": case "fary": case "invuln": case "protect": case "prtc":
+	        case "shield": case "reflect": case "rflc": case "arise":
+	        case "cucco": case "cuco": case "chicken":
+	            global.tw_toast       = _who_s + " -> " + _v + " BLOCKED (VS CHAT)";
+	            global.tw_toast_timer = 180;
+	            return;
+	    }
+	}
+
+	// Duration (FRAMES) for timed effects. An explicit dur from the drop-file/bot
+	// API still wins; when it is absent -- which is EVERY plain chat "!confuse" --
+	// fall back to the owner's EFFECT LENGTH setting instead of a hardcoded 5s.
+	//
+	// This was the gap behind Lane's 2026-07-11 note: "some of the effects like
+	// !confuse and !party didn't last long enough to do much to me". The options
+	// menu let you set 5-60s, twitch_config.txt stored it, OptionsMenu_Twitch_update
+	// even claimed "twitch_apply reads global.tw_effect_secs" -- but nothing here
+	// ever read it, so the slider did nothing and every effect was always 5s.
 	var _frames = tw_num(_dur, 0);
-	if (_frames <= 0) _frames = 300;
+	if (_frames <= 0)
+	{
+	    var _secs = variable_global_exists("tw_effect_secs") ? global.tw_effect_secs : 5;
+	    if (_secs <= 0) _secs = 5;
+	    _frames = _secs * game_get_speed(gamespeed_fps);
+	}
 
 	// numeric amount for stat verbs (defensive: tw_num never throws on a bad string)
 	var _amt = tw_num(_arg, 0);

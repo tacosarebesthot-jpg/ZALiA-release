@@ -113,6 +113,7 @@ function file_save() {
 	_dm_save_data[?f.SDNAME_questNum]               = f.quest_num;
 	_dm_save_data[?STR_Game+STR_Complete+STR_Count] = f.game_completed_count;
 	_dm_save_data[?f.SDNAME_deathCount]             = f.death_count;
+	_dm_save_data[?f.SDNAME_deathCountWarped]       = f.death_count_warped;
 
 	_dm_save_data[?f.SDNAME_level_atk]              = f.level_atk;
 	_dm_save_data[?f.SDNAME_level_mag]              = f.level_mag;

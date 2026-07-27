@@ -64,7 +64,48 @@ function jukebox_poll_cmd() {
             }
         break;
 
+        // STOP means SILENCE (2026-07-27, owner's call). It used to mean "leave
+        // jukebox mode", which handed control straight back to the area music --
+        // so pressing STOP started the game's music playing instead of stopping
+        // anything. Staying in jukebox mode keeps the area music gated off
+        // (Audio_update_2's restart checks !global.jukebox_on), so nothing plays
+        // at all. Use "off" to actually hand music back to the game.
         case "stop":
+            if (global.jukebox_inst && audio_exists(global.jukebox_inst))
+                audio_stop_sound(global.jukebox_inst);
+            global.jukebox_inst = 0;
+            global.jukebox_on   = true;   // stay in jukebox mode = stay silent
+            audio_group_stop_all(audiogroup_mus);
+            if (instance_exists(Audio)) Audio.mus_rm_inst = 0;
+        break;
+
+        // START -- play the current track again after a STOP.
+        case "start":
+            if (global.jukebox_count > 0)
+            {
+                global.jukebox_on = true;
+                jukebox_play();
+                global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps);
+            }
+        break;
+
+        // PAUSE / RESUME -- hold the playhead where it is. Distinct from STOP:
+        // stop discards the position, pause keeps it.
+        case "pause":
+            if (global.jukebox_inst && audio_exists(global.jukebox_inst)
+            &&  audio_is_playing(global.jukebox_inst))
+                audio_pause_sound(global.jukebox_inst);
+        break;
+
+        case "resume":
+            if (global.jukebox_inst && audio_exists(global.jukebox_inst)
+            &&  audio_is_paused(global.jukebox_inst))
+                audio_resume_sound(global.jukebox_inst);
+        break;
+
+        // OFF -- leave jukebox mode entirely; the area music takes over again.
+        // This is what "stop" used to do.
+        case "off":
             if (global.jukebox_on)
             {
                 global.jukebox_on = false;
@@ -103,7 +144,59 @@ function jukebox_poll_cmd() {
             }
         break;
 
-        // assign <trackIdx> <zone 0-6> -- bind a track to a zone for real
+        // vol <0-10> -- music volume, the same value the options menu writes, so the
+        // companion and the in-game slider cannot disagree.
+        case "vol":
+            if (instance_exists(Audio))
+            {
+                Audio.mus_vol = clamp(real(_arg), 0, 10);
+                audio_group_set_gain(audiogroup_mus, Audio.mus_vol / 10, 0);
+                save_game_pref();
+            }
+        break;
+
+        // seek <seconds> -- move the playhead of the CURRENTLY PLAYING jukebox track
+        case "seek":
+            if (global.jukebox_inst && audio_exists(global.jukebox_inst)
+            &&  audio_is_playing(global.jukebox_inst))
+            {
+                audio_sound_set_track_position(global.jukebox_inst, max(0, real(_arg)));
+            }
+        break;
+
+        // assignname <mus_asset> <zone 0-6> -- bind a track to a zone BY NAME.
+        //
+        // Prefer this over "assign". An index only means anything relative to the
+        // playlist the game currently holds; a companion showing a stale list will
+        // happily assign a completely different track and look like it worked.
+        // Observed for real 2026-07-27. A name cannot drift.
+        case "assignname":
+            var _sp3 = string_pos(" ", _arg);
+            if (_sp3 > 0)
+            {
+                var _nm = string_copy(_arg, 1, _sp3 - 1);
+                var _nz = clamp(real(string_copy(_arg, _sp3 + 1, string_length(_arg) - _sp3)), 0, 6);
+
+                // the command file is lowercased on read, so recover the real asset
+                // name by case-insensitive match against the audiogroup
+                var _all = audio_group_get_assets(audiogroup_mus);
+                var _hit = -1;
+                for (var _k = 0; _k < array_length(_all); _k++)
+                {
+                    if (string_lower(audio_get_name(_all[_k])) == _nm) { _hit = _all[_k]; break; }
+                }
+
+                if (_hit != -1)
+                {
+                    jukebox_assign_zone(audio_get_name(_hit), _nz);
+                    global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps);
+                }
+                else if (DEV) show_debug_message("[JUKEBOX] assignname: no asset " + _nm);
+            }
+        break;
+
+        // assign <trackIdx> <zone 0-6> -- bind a track to a zone by playlist index.
+        // Kept for the in-game companion; see assignname for the safe form.
         case "assign":
             var _sp2 = string_pos(" ", _arg);
             if (_sp2 > 0 && global.jukebox_count > 0)

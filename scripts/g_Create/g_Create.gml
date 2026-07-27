@@ -4203,6 +4203,16 @@ function g_Create() {
 	global.tw_confuse     = false; // swap LEFT<->RIGHT player input    (Input_update2a)
 	global.tw_disco       = false; // HSV-cycling translucent overlay   (Surface_Draw_End)
 
+	// ── VS CHAT MODE ────────────────────────────────────────────────────────────
+	// Chat versus the runner: every helpful verb is refused (see the deny list at
+	// the top of twitch_apply) so chat can only hurt. Scoreboard is deaths while
+	// the mode is ON -- that is chat's kill count, and it is the whole point of
+	// the mode being visible on stream. OFF by default; nothing changes until the
+	// setup page or the options menu turns it on.
+	global.tw_vs_mode     = false;
+	global.tw_vs_kills    = 0;     // deaths scored by chat this session
+	global.tw_vs_deaths_at_start = -1; // f.death_count when the mode was switched on
+
 	// ── KONAMI CODE easter egg globals ──────────────────────────────────────────
 	// Detect UP UP DOWN DOWN LEFT RIGHT LEFT RIGHT B A on Player 1 (konami_check in
 	// g_Step) -> harmless, runtime-only egg (full heal + a few lives + toast + SFX);

@@ -71,24 +71,45 @@ function Surface_Draw_End() {
 	        // the surface centre instead.
 	        if (variable_global_exists("tw_flip") && global.tw_flip)
 	        {
-	            var _vx = viewXL(), _vy = viewYT(), _vw = viewW(), _vh = viewH();
+	            // FIXED 2026-07-27. The old version left PERMANENT screen corruption --
+	            // garbage that outlived the effect. Two bugs, and the caveat comment
+	            // above had already predicted the first one:
+	            //
+	            // 1. WRONG COORDINATE SPACE. It sampled with viewXL()/viewYT()/viewW()/
+	            //    viewH(), which are ROOM coordinates, while draw_surface_part_ext
+	            //    samples in application_surface PIXELS. Those agree only while the
+	            //    view sits at the room origin; anywhere else it grabbed the wrong
+	            //    slice and stamped it in the wrong place -- which is why mirrored
+	            //    scraps of HUD text ("0120", "FF") landed in the middle of the room.
+	            //
+	            // 2. IT WROTE THE MISTAKE BACK. The else-branch copied the composite into
+	            //    application_surface. Anything the game does not redraw every frame
+	            //    keeps that garbage FOREVER. Measured: artifacts still on screen 34s
+	            //    after a 30s flip had expired.
+	            //
+	            // Now: mirror the WHOLE surface about its own centre in pixel space (no
+	            // room/pixel mismatch is possible), and fully cover the destination so no
+	            // stale pixel can survive. Partial-region mirroring caused this; don't
+	            // reintroduce it without solving the coordinate-space problem first.
+	            var _sw = application_surface_w;
+	            var _sh = application_surface_h;
 
-	            var          _FSURF = surface_create(application_surface_w,application_surface_h);
+	            var          _FSURF = surface_create(_sw, _sh);
 	            surface_copy(_FSURF, 0,0, application_surface); // pristine copy to sample from
 
 	            if (global.application_surface_draw_enable_state)
 	            {
+	                // Draw-time only -- never touches application_surface, so nothing persists.
 	                draw_clear_alpha(c_black,0);
-	                draw_surface(_FSURF, 0,0); // everything, unmirrored
-	                // then overdraw JUST the play area, mirrored in place
-	                draw_surface_part_ext(_FSURF, _vx,_vy,_vw,_vh, _vx+_vw,_vy, -1,1, c_white,1);
+	                draw_surface_ext(_FSURF, _sw,0, -1,1, 0, c_white,1);
 	            }
 	            else
 	            {
-	                // _FSURF already holds the full frame; overdraw the mirrored view box onto
-	                // it, then copy the composite back. No clear -- the surround must survive.
+	                // Full-surface overwrite. The draw_clear_alpha is what stops corruption
+	                // sticking: every pixel of the target is written this frame.
 	                surface_set_target(_FSURF);
-	                draw_surface_part_ext(application_surface, _vx,_vy,_vw,_vh, _vx+_vw,_vy, -1,1, c_white,1);
+	                draw_clear_alpha(c_black,0);
+	                draw_surface_ext(application_surface, _sw,0, -1,1, 0, c_white,1);
 	                surface_reset_target();
 	                surface_copy(application_surface, 0,0, _FSURF);
 	            }

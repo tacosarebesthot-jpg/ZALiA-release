@@ -62,6 +62,10 @@ function file_load(argument0) {
 
 	f.game_completed_count  =       val(_dm_file_data[?STR_Game+STR_Complete+STR_Count]);
 	f.death_count           =       val(_dm_file_data[?f.SDNAME_deathCount]);
+	// Absent on saves made before this field existed -> val() gives 0, which reads
+	// as "none of these deaths were warps". Under-reports old saves rather than
+	// inventing a split, which is the safer direction to be wrong in.
+	f.death_count_warped    =       val(_dm_file_data[?f.SDNAME_deathCountWarped]);
 	//                                                                              // 
 	f.level_atk             = clamp(val(_dm_file_data[?f.SDNAME_level_atk]), 1,STAT_LEVEL_MAX);
 	f.level_mag             = clamp(val(_dm_file_data[?f.SDNAME_level_mag]), 1,STAT_LEVEL_MAX);
