@@ -149,12 +149,6 @@ function update_change_room() {
             
             
             
-	            // PERF PROBE (2026-07-26): CHANGEROOM measured 10.57s / 8.03s on the fall
-	            // TRIGGER frame (fallT=110), while g_Room_Start was only 0.11s -- so the cost is
-	            // in THIS block, not in loading. Palette is already ruled out by PALSPLIT
-	            // (2.6ms). Time the four remaining candidates in ONE run instead of one
-	            // rebuild per suspect: surfaces, tile_delete_all, audio stop, audio play.
-	            var _ft0 = (DEV ? get_timer() : 0);
 
 	            _dk0 = STR_Current+STR_Image; // image that will be used for this fall scene
 	            _dk1 = _TYPE_+STR_Image;      // image that this `_TYPE_` of fall scene uses
@@ -162,7 +156,6 @@ function update_change_room() {
 	            if (surface_exists(val(global.FallScene_dm[?_dk1],-1))) surface_copy(global.FallScene_dm[?_dk0], 0,0, global.FallScene_dm[?_dk1]);
 	            global.FallScene_dm[?STR_Current+STR_Image+STR_Width]  = surface_get_width( global.FallScene_dm[?_dk0]);
 	            global.FallScene_dm[?STR_Current+STR_Image+STR_Height] = surface_get_height(global.FallScene_dm[?_dk0]);
-	            var _ft1 = (DEV ? get_timer() : 0); // end of surface create/copy
             
             
             
@@ -181,43 +174,9 @@ function update_change_room() {
 	            // update_scene_palette does string_copy/string_pos against p.pal_rm_new, and
 	            // PaletteData01.txt is ~135KB -- GML string indexing is O(n) on large strings,
 	            // inside a nested loop. Split the cost so we know which half it is.
-	            var _pt0 = (DEV ? get_timer() : 0);
 	            var _PAL_NEW = strReplaceAt(p.pal_rm_new, get_pal_pos(_PARENT_PI), string_length(_PALETTE), _PALETTE);
-	            var _pt1 = (DEV ? get_timer() : 0);
 	            change_pal(_PAL_NEW);
-	            if (DEV) {
-	                var _ptf = file_text_open_append(working_directory + "fall_hitch.txt");
-	                file_text_write_string(_ptf,
-	                      "PALSPLIT scene=" + string(g.rm_name)
-	                    + " | strReplaceAt=" + string(_pt1 - _pt0) + " us"
-	                    + " | change_pal=" + string(get_timer() - _pt1) + " us"
-	                    + " | pal_len=" + string(string_length(p.pal_rm_new)));
-	                file_text_writeln(_ptf);
-	                file_text_close(_ptf);
-	            }
 
-		            // DIAG (DEV only): the fall shows BLACK with only a brief PC because the STRIPE
-		            // layer isn't rendering. draw_falling_scene() draws the PC OUTSIDE the
-		            // surface_exists() guard but the stripe surface INSIDE it -> if the type surface
-		            // is missing (Current copy stays black) OR the fall palette index resolves to the
-		            // PI_GUI2 fallback, the stripes render black. Log both so we know which. Writes to
-		            // working_directory\fall_diag.txt. Delete this block once solved.
-		            if (DEV) {
-		                var _tImg = val(global.FallScene_dm[?_TYPE_+STR_Image], -1);
-		                var _cImg = val(global.FallScene_dm[?STR_Current+STR_Image], -1);
-		                var _cPI  = val(global.FallScene_dm[?STR_Current+dk_PI], -999);
-		                var _flog = file_text_open_append(working_directory + "fall_diag.txt");
-		                file_text_write_string(_flog,
-		                    "FALLTRIG scene=" + string(g.rm_name)
-		                    + " type=" + string(_TYPE_) + " dir=$" + hex_str(_FALL_DIR)
-		                    + " typeSurfExists=" + string(surface_exists(_tImg))
-		                    + " curSurfExists=" + string(surface_exists(_cImg))
-		                    + " curPI=" + string(_cPI) + " (PI_GUI2=" + string(global.PI_GUI2) + ")"
-		                    + " palDefined=" + string(!is_undefined(global.FallScene_dm[?_TYPE_+STR_Palette]))
-		                    + " imgW=" + string(_Image_W) + " imgH=" + string(_Image_H));
-		                file_text_writeln(_flog);
-		                file_text_close(_flog);
-		            }
             
             
             
@@ -229,30 +188,13 @@ function update_change_room() {
             
             
 	            // delete all room tiles so falling scene has a clear screen to draw on
-	            var _ft2 = (DEV ? get_timer() : 0);
 	            tile_delete_all();
-	            var _ft3 = (DEV ? get_timer() : 0);
             
 	            audio_group_stop_all(audiogroup_mus);
 	            Audio.can_play_mus_rm_body = false;
 	            Audio.can_play_boss_music  = false;
-	            var _ft4 = (DEV ? get_timer() : 0);
 	            aud_play_sound(get_audio_theme_track(dk_FallScene+STR_Sound));
-	            var _ft5 = (DEV ? get_timer() : 0);
 
-	            if (DEV) {
-	                var _fpf = file_text_open_append(working_directory + "fall_hitch.txt");
-	                file_text_write_string(_fpf,
-	                      "FALLPARTS scene=" + string(g.rm_name)
-	                    + " | surfaces="       + string(_ft1 - _ft0)
-	                    + " | pal+diag="       + string(_ft2 - _ft1)
-	                    + " | tile_delete_all="+ string(_ft3 - _ft2)
-	                    + " | audio_stop="     + string(_ft4 - _ft3)
-	                    + " | audio_play="     + string(_ft5 - _ft4)
-	                    + "  (all us)");
-	                file_text_writeln(_fpf);
-	                file_text_close(_fpf);
-	            }
 	        }
 	        else
 	        {   // Triggers room_goto() ------------------------------------------
