@@ -8,6 +8,22 @@
    red life bar and the blue magic bar. Items you do not have are GHOSTED
    OUTLINES rather than hidden -- the board shows the shape of the whole run
    from the first second, which is the thing a viewer wants to read at a glance.
+
+   RESTRUCTURED (option 1b, "palace ledger"):
+   - HINTS come FIRST after the HUD in source order, so the narrow single-column
+     case -- the one that actually ships on stream -- reads HUD, HINTS, boards.
+   - KEYS and CRYSTALS fused into one PALACES ledger: they are both per-palace
+     facts, and two panels saying "P1..P6" twice was the single biggest density
+     cost on the page.
+   - The three spell-derived "techniques" folded back into their spells (the
+     spell chip already pulses when active); the two real stabs joined the
+     spell board. A whole panel gone, no information lost.
+   - 54 container tiles became two 27-notch bars with the sprite as the bar
+     label -- the tally is a tally, not a headline.
+   - State vocabulary shrank to CORNER BADGES on the lit/unlit base:
+     selected = cursor, active = blinking dot, filled bottle = red dot.
+     One visual axis (possession) plus one badge slot, instead of five
+     competing whole-tile treatments.
    --------------------------------------------------------------------------- */
 :root {
   --void:#0b0b12; --stone:#1b1830; --edge:#332c56;
@@ -26,7 +42,9 @@
      crystal are exported through the pal-swap shader at PI_GUI1, which is what
      the game's own HUD draws them at (draw_key_stats.gml:81). The raw sprite
      files are unusable: spr_HUD_life_container is a blank meter bar and
-     spr_Item_Heart_container is stored blue in the base palette. */
+     spr_Item_Heart_container is stored blue in the base palette.
+     The key glyph is still here even though the merged ledger leads with the
+     crystal: themes and future panels may want it. */
   --ico-heart:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAfUlEQVR4nM2TQQqAIBBFZ+QfpUWL7n+SFi06ykChNDGZjgy06IGofP9XB2W6EJGDDADYzns6VNyXMnwYdJGnc0tUplVK7+kgh57RkoYr/h8AgLVYEUoBAf7mCgieQne/AyIh1pxJVhyF1OZXgBfSMrvkJ77NVFr9kUIhI/MJG15M7mJTZygAAAAASUVORK5CYII=');
   --ico-magic:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAQCAYAAAAiYZ4HAAAAiklEQVR4nGNkQAJ//vz5z4AFsLCwMMLZyIrv6MC5KODPnz//YZqYkE1RufIHQ7HKlT8oNsAZuJzFgqQYxQZkAHIaLucxMZAImGiugYVQHPyBisM8z0goDtCDl5EYxQxImsjztEqBBcQEJBqbGAjA/cAwxwa/0SlHwH4A2wAOgZQjBBXDbYABYpI3AGTqPlCxdV9sAAAAAElFTkSuQmCC');
   --ico-key:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAVUlEQVQYlY2NsQ2AMAwEz9IPwAgpGCIF4zMGI6RggJdClcgRBVzjl896BwnbfWRJARBZ7scNwHVuyxEApbY+GnJesD3FmLLdJUV+kfNclNrelZ/yDw+sTz4+EJuSFQAAAABJRU5ErkJggg==');
@@ -41,15 +59,25 @@ body { margin:0; background:var(--void); color:var(--ink);
 body.obs { background:transparent; }
 body.obs .panel { background:rgba(11,11,18,.72); backdrop-filter:blur(2px); }
 
+/* Layout: hints live in .side, which sits BEFORE .main in the source. Wide
+   viewports place it as a sticky right column; below 900px everything stacks
+   in source order, which is exactly the priority order a viewer needs. */
 .wrap { display:grid; grid-template-columns:1fr 340px; gap:12px; padding:12px;
         min-height:100%; align-content:start; }
-@media (max-width:900px){ .wrap { grid-template-columns:1fr; } }
+.hud  { grid-column:1/-1; }
+.side { grid-column:2; grid-row:2; }
+.main { grid-column:1; grid-row:2; }
+@media (max-width:900px){
+  .wrap { grid-template-columns:1fr; }
+  .side { grid-column:1; grid-row:2; }
+  .main { grid-column:1; grid-row:3; }
+}
 
 .panel { border:1px solid var(--edge); background:var(--stone); padding:11px 13px; }
 h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); font-weight:700; }
 
 /* ---- status bar: the game's own HUD, not a card grid ---------------------- */
-.hud { grid-column:1/-1; display:flex; gap:26px; align-items:center; flex-wrap:wrap;
+.hud { display:flex; gap:26px; align-items:center; flex-wrap:wrap;
        border:1px solid var(--edge); background:var(--hudbg); padding:10px 14px; }
 .hud .lbl { font-size:9px; letter-spacing:.2em; color:var(--dim); display:block; }
 .timer { font-size:34px; font-weight:700; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
@@ -60,12 +88,11 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
 .where { margin-left:auto; text-align:right; color:var(--dim); font-size:11px; }
 .where b { color:var(--ink); font-size:14px; display:block; }
 
-/* ---- VS CHAT: the one panel meant to be read by the audience -------------- */
-.panel.vs { border-color:var(--life); }
-.vsrow { display:flex; align-items:baseline; justify-content:space-between; }
-.vsrow .lbl { font-size:9px; letter-spacing:.2em; color:var(--dim); }
-.vsnum { font-size:38px; font-weight:700; color:var(--life); font-variant-numeric:tabular-nums; line-height:1; }
-.vsoff { margin-top:7px; font-size:9px; letter-spacing:.18em; color:var(--dim); }
+/* VS CHAT: was its own red panel in the side column, which meant the loudest
+   border on the page sat next to the hints and fought them. It is one number,
+   so it is now one HUD stat -- still red, still impossible to miss, no longer
+   a rival panel. Hidden entirely on a run that never used the mode. */
+.vsstat b { font-size:20px; font-weight:700; color:var(--life); font-variant-numeric:tabular-nums; }
 
 /* ---- meters: segmented like the NES bar, not a smooth CSS gradient -------- */
 .meter { display:flex; gap:2px; margin-top:4px; }
@@ -73,161 +100,133 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
 .meter.life  i.on { background:var(--life); }
 .meter.magic i.on { background:var(--magic); }
 
-/* ---- container pips: 27 discrete things, so show 27 discrete pips ---------
-   HEARTS ARE HEART-SHAPED and magic containers are the magic jar's silhouette.
-   These were plain circles, which told a viewer nothing -- two identical rows of
-   dots that had to be read by their label. The shape carries the meaning before
-   the colour does, exactly like the NES status bar, and it survives being seen
-   small on a stream. clip-path keeps it pure CSS: no image, no asset, no request. */
-/* 27 hearts and 27 magic jars is a LOT of tiles. At 14 across they came out huge
-   and dominated the panel; the containers are a tally, not the headline. Packed to
-   the natural NES row length instead and capped so they never balloon on a wide
-   panel. */
-.pips { display:grid; grid-template-columns:repeat(14,minmax(0,14px));
-        gap:2px; margin-top:5px; justify-content:start; }
-/* Real NES artwork, not clip-path silhouettes I drew. Unfound pips are the SAME
-   art drained of colour, so the row reads as "these are hearts, some not yet
-   found" rather than two rows of anonymous blobs. */
-.pips b { aspect-ratio:1; background:center/contain no-repeat; image-rendering:pixelated;
-          filter:grayscale(1) brightness(.38); }
-.pips.heart b { background-image:var(--ico-heart); }
-.pips.mag   b { background-image:var(--ico-magic); }
-.pips b.on { filter:none; }
-
 /* ---- the inventory board: the signature element --------------------------
    THE RULE EVERY TRACKER LIVES BY: an unfound item is DIMMED, NOT HIDDEN, and it
    keeps its own artwork. A viewer learns the board's shape once and then reads it
-   by position and silhouette, at a glance, from across a room. Blank boxes with
-   text labels force them to actually read -- which is what this looked like
-   before the real sprites went in.
+   by position and silhouette, at a glance, from across a room.
 
    The art is HoverBat's own item sprites (see the ICONS map in the script). They
    are 8x8/16x16 NES tiles, so they MUST be scaled with image-rendering:pixelated;
    the browser's default smoothing turns them into mush at this size. */
 .board { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
-.it { border:1px solid var(--pip-off); color:var(--ghost); background:rgba(0,0,0,.25);
-      padding:6px 2px 4px; text-align:center; font-size:8px; letter-spacing:.03em;
-      line-height:1.1; min-height:56px; display:flex; flex-direction:column;
-      align-items:center; justify-content:center; gap:4px; transition:none; }
+.it { position:relative; border:1px solid var(--pip-off); color:var(--ghost);
+      background:rgba(0,0,0,.25); padding:6px 2px 4px; text-align:center;
+      font-size:8px; letter-spacing:.03em; line-height:1.1; min-height:56px;
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      gap:4px; transition:none; }
 .it img { width:32px; height:32px; object-fit:contain;
           image-rendering:pixelated; image-rendering:crisp-edges;
           /* Unfound: drained of colour and dropped back, but the SHAPE stays
              fully legible. This is the whole readability trick. */
           filter:grayscale(1) brightness(.45); opacity:.5; }
 .it span { opacity:.75; }
-.it .noicon { font-size:9px; padding:8px 0; }   /* FAIRY: animated in-game, no static sprite */
+.it .noicon { font-size:9px; padding:8px 0; }
 .it.on { border-color:var(--got); background:rgba(255,210,63,.14); color:var(--got); font-weight:700; }
 .it.on img { filter:none; opacity:1; }
 .it.on span { opacity:1; }
 
-/* BOTTLE FILLED (Dark Link blood, gates the extra ending). A third state on one
-   tile, so it must not read as merely "lit brighter" -- the red edge and glow say
-   "this is different from owning the bottle", which is the whole point. */
-.it.on.filled { border-color:var(--life); background:rgba(232,72,76,.22);
-                box-shadow:inset 0 0 10px rgba(232,72,76,.35); }
-.it.on.filled span { color:var(--life); }
+/* ---- STATE BADGES ---------------------------------------------------------
+   One base axis (lit/unlit) plus ONE badge corner. The old vocabulary spent a
+   whole-tile treatment on every extra fact -- outline for selected, animated
+   glow for active, red fill for the bottle -- and five of those at once read
+   as noise from across the room. A badge says "something extra here" without
+   changing what the tile IS. */
 
-/* SELECTED spell. Marks intent, not possession, so it is an OUTLINE rather than a
-   fill -- otherwise it would compete with the lit/unlit language everywhere else. */
-.it.sel { outline:2px solid var(--ink); outline-offset:-2px; }
-
+/* SELECTED spell: marks intent, not possession. The FF-style cursor. */
+.it.sel::before { content:"\25B6"; position:absolute; top:2px; left:3px;
+                  font-size:7px; color:var(--ink); }
 /* ACTIVE spell -- running on the character RIGHT NOW. The only animation on the
-   board, because it is the only thing here that changes second to second; a
-   static treatment would read as another kind of "owned". */
-.it.active { border-color:var(--hint); box-shadow:0 0 0 1px var(--hint), 0 0 12px rgba(125,255,176,.45); }
-.it.active span { color:var(--hint); }
-@keyframes zal-pulse { 50% { box-shadow:0 0 0 1px var(--hint), 0 0 4px rgba(125,255,176,.25); } }
-.it.active { animation:zal-pulse 1.1s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .it.active { animation:none; } }
+   board, because it is the only thing here that changes second to second. */
+.it.active::after { content:""; position:absolute; top:3px; right:3px;
+                    width:5px; height:5px; border-radius:50%; background:var(--hint);
+                    animation:zal-blink 1s steps(1) infinite; }
+@keyframes zal-blink { 50% { opacity:.15; } }
+@media (prefers-reduced-motion: reduce) { .it.active::after { animation:none; } }
+/* BOTTLE FILLED (Dark Link blood, gates the extra ending). Red dot in the same
+   badge corner, plus a red edge -- at 32px a dot alone was too easy to miss,
+   and "this is different from owning the bottle" is the whole point. */
+.it.on.filled { border-color:var(--life); }
+.it.on.filled::after { content:""; position:absolute; top:3px; right:3px;
+                       width:5px; height:5px; border-radius:50%; background:var(--life); }
 
 /* SMALL-SOURCE MODE. An OBS browser source has its OWN viewport, so its width is
    literally how big the overlay is on stream -- a media query is the right lever.
    Below 620px the text labels are unreadable anyway, so drop them entirely and
-   spend every pixel on the artwork. That is how EmoTracker reads at a glance: you
-   learn the grid by position and silhouette, not by reading 8px captions.
-   The label stays in the title attribute, so hovering still identifies a slot. */
+   spend every pixel on the artwork. The label stays in the title attribute. */
 @media (max-width:620px) {
   .board { grid-template-columns:repeat(8,1fr); gap:4px; }
   .it { min-height:0; padding:4px 2px; gap:0; }
   .it span { display:none; }
   .it img { width:100%; height:auto; aspect-ratio:1; }
   .it .noicon { display:block; font-size:8px; padding:2px 0; }
-  .spellboard .it, .skillrow .it { min-height:26px; font-size:8px; }
-  .spellboard .it span, .skillrow .it span { display:block; }  /* text-only boards keep their text */
-  .hud { gap:12px; padding:7px 9px; }
+  .spellboard .it { min-height:26px; font-size:8px; }
+  .spellboard .it span { display:block; }  /* text-only chips keep their text */
+  .hud { gap:10px 12px; padding:7px 9px; }
   .timer { font-size:24px; }
   .stat { font-size:15px; }
   .wrap { padding:6px; gap:6px; }
   .panel { padding:7px 8px; }
+  .h .loc { font-size:15px; }
 }
 
-/* Spells and techniques have no sprite set, so they stay text -- but they get the
-   same lit/unlit language so the three boards read as one system. */
-.spellboard { grid-template-columns:repeat(5,1fr); }
+/* Spells and stabs have no sprite set, so they stay text -- but they get the
+   same lit/unlit language so the boards read as one system. Stabs are the two
+   real f.skills bits; they lit green under the old TECHNIQUES panel and keep
+   that green here so nothing changes meaning, only address. */
+.spellboard { grid-template-columns:repeat(6,1fr); }
 .spellboard .it { min-height:38px; font-size:9px; }
 .spellboard .it.on { background:var(--magic); border-color:var(--magic); color:#001222; }
-.skillrow { grid-template-columns:repeat(5,1fr); }
-.skillrow .it { min-height:38px; font-size:9px; }
-.skillrow .it.on { background:var(--hint); border-color:var(--hint); color:#00220f; }
+.spellboard .it.stab.on { background:var(--hint); border-color:var(--hint); color:#00220f; }
 
-/* ---- keys + crystals ------------------------------------------------------
-   Both now carry the game's own symbol above their text, so a glance says "keys"
-   and "crystals" without reading the panel heading. The symbol greys out with the
-   cell, same language as the item board and the container pips. */
+/* ---- PALACES: keys + crystals, one ledger ---------------------------------
+   Keys and crystals are both per-palace facts. Two panels meant the viewer
+   cross-referenced "P3" in two places; one column per palace answers "how is
+   P3 going" in a single look: crystal placed? keys found? palace behind us?
+   The crystal leads because it is the milestone; keys are the running count. */
 .keys { display:grid; grid-template-columns:repeat(6,1fr); gap:5px; }
-.key { border:1px solid var(--pip-off); text-align:center; padding:5px 2px 6px; font-size:10px;
-       color:var(--ghost); display:flex; flex-direction:column; align-items:center; gap:3px; }
-.key::before { content:""; width:20px; height:20px; background:center/contain no-repeat;
-               background-image:var(--ico-key); image-rendering:pixelated;
-               filter:grayscale(1) brightness(.4); }
-#crystals .key::before { background-image:var(--ico-crystal); }
-.key b { display:block; font-size:15px; line-height:1; }
+.key { border:1px solid var(--pip-off); background:rgba(0,0,0,.2); text-align:center;
+       padding:6px 2px; font-size:10px; color:var(--ghost);
+       display:flex; flex-direction:column; align-items:center; gap:3px; }
+.key .plbl { font-size:8px; letter-spacing:.1em; opacity:.85; }
+.key .cico { width:18px; height:18px; background:center/contain no-repeat;
+             background-image:var(--ico-crystal); image-rendering:pixelated;
+             filter:grayscale(1) brightness(.4); }
+.key.cry .cico { filter:none; }
+.key b { display:block; font-size:14px; line-height:1; }
 .key.on { border-color:var(--got); color:var(--got); }
-.key.on::before { filter:none; }
-/* DONE = palace finished: every key found and spent. Distinct from merely lit,
-   because "I have keys" and "this palace is behind me" are different facts. */
-.key.done { border-color:var(--hint); color:var(--hint); background:rgba(125,255,176,.10); }
+/* DONE = every key found and spent: this palace is behind you. Different fact
+   from "I have keys", so it keeps its own (green) treatment. */
+.key.done { border-color:var(--hint); color:var(--hint); background:rgba(125,255,176,.08); }
 .ksub { font-size:9px; opacity:.7; letter-spacing:.02em; }
 
-/* ---- hints: the reason this page exists ---------------------------------- */
+/* ---- CONTAINERS: two notch bars, not 54 tiles ------------------------------
+   27 discrete things still get 27 discrete notches -- but as a bar with the
+   real sprite as its label, the way the game's own status bar labels its
+   meters. The heart-shaped-pip idea moved into the label; the tally stopped
+   being the tallest panel on the page. Reuses .meter, so every theme's meter
+   treatment applies for free. */
+.cbar { display:flex; align-items:center; gap:7px; }
+.cbar img { width:14px; image-rendering:pixelated; flex:none; }
+.cbar .meter { flex:1; margin:0; }
+
+/* ---- hints: the reason this page exists ------------------------------------
+   Now it acts like it: first panel after the HUD, and the LOCATION is the big
+   ink. The item's identity is carried by its own sprite -- the same silhouette
+   language as the board -- so the words "where do I go" get the type size.
+   Villager hints are what a runner actually mid-run scans this page for. */
 .hints { position:sticky; top:12px; }
 .hints h2 { color:var(--hint); }
 .hcount { float:right; color:var(--hint); }
-.hlist { display:flex; flex-direction:column; gap:1px; }
-.h { display:grid; grid-template-columns:1fr auto; gap:8px; padding:6px 7px;
-     background:var(--card); border-left:3px solid var(--hint); align-items:baseline; }
-.h .item { font-weight:700; font-size:14px; letter-spacing:.03em; }
-.h .loc  { color:var(--hint); font-size:11px; text-align:right; }
-/* Source town, under the ITEM on the left -- it answers "who told me", which
-   belongs with the item, not with the destination. Dimmer because it is where you
-   have BEEN, not where to go. */
-.hfrom { display:block; color:var(--dim); font-size:9px; letter-spacing:.08em;
-         font-weight:400; }
-/* The specific screen, under the area on the right. "WESTERN HYRULE" alone is not
-   an answer; the scene name at least names the screen. */
-.hscene { display:block; color:var(--dim); font-size:9px; letter-spacing:.04em; }
-/* The villager's actual words. Full width under the item row, because it is the
-   part you act on. */
-.htext { grid-column:1/-1; color:var(--ink); opacity:.8; font-size:10px;
-         line-height:1.35; margin-top:3px; }
-.none { color:var(--dim); font-style:italic; padding:8px 4px; }
-
-/* BOULDER CIRCLE. Eight slots always drawn, filled as each town's wizard tells
-   you one -- the empty slots ARE the information ("three still to ask"), which a
-   list of only-what-you-have cannot show. Ordered by push position, not by the
-   order you happened to hear them, because the sequence is what you act on. */
-.bould { margin-top:12px; }
-/* Hidden by the toggles. A data attribute rather than [hidden] because the boulder
-   panel already drives [hidden] itself for "no hints yet" -- two things fighting
-   over one attribute is how a panel ends up stuck. */
-[data-hidden="1"] { display:none; }
-.bseq { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
-.bstep { border:1px solid var(--pip-off); padding:5px 2px; text-align:center;
-         color:var(--ghost); font-size:9px; letter-spacing:.06em; }
-.bstep b { display:block; font-size:15px; line-height:1.15; font-weight:700; }
-.bstep.on { border-color:var(--got); color:var(--got); }
-.bould.done { border-color:var(--hint); }
-.bould.done h2 { color:var(--hint); }
+.hlist { display:flex; flex-direction:column; gap:3px; }
+.h { display:grid; grid-template-columns:26px 1fr; gap:9px; padding:7px 9px;
+     background:var(--card); border-left:3px solid var(--hint); align-items:center; }
+.h .hicon { width:22px; height:22px; object-fit:contain; image-rendering:pixelated; }
+.h span.hicon { border:1px dashed var(--pip-off); }  /* hinted item with no sprite */
+.h .hbody { display:flex; align-items:baseline; justify-content:space-between; gap:8px; }
+.h .item { font-size:10px; letter-spacing:.12em; color:var(--dim); }
+.h .loc  { font-size:16px; font-weight:700; color:var(--hint); text-align:right; }
+.none, .hmore { color:var(--dim); font-style:italic; padding:8px 4px; }
+.hmore { font-size:10px; padding:4px; }
 
 /* ---- theme picker -------------------------------------------------------- */
 /* Hidden in OBS mode: the overlay is output, not a control panel. Pick the theme
@@ -238,18 +237,43 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
 #themebar select { font:inherit; letter-spacing:.08em; background:var(--void); color:var(--ink);
                    border:1px solid var(--edge); padding:3px 5px; }
 body.obs #themebar { display:none; }
-/* Collapse control, sat in the panel's own heading. A plus/minus rather than a
-   checkbox in a corner bar: the control belongs on the thing it hides, and the
-   glyph says which way it goes without a label. */
+
+/* Collapse control, in the panel's own heading. Plus/minus rather than a checkbox
+   in a corner bar: the control belongs on the thing it hides. */
 .hidebtn { float:right; cursor:pointer; user-select:none; color:var(--dim);
            font-size:13px; line-height:1; padding:0 2px; font-weight:700; }
 .hidebtn:hover { color:var(--ink); }
-body.obs .hidebtn { display:none; }   /* overlay is output, not a control panel */
+body.obs .hidebtn { display:none; }
+[data-hidden="1"] { display:none; }
+
+/* BOULDER CIRCLE. Eight slots always drawn, filled as each town's wizard tells you
+   one -- the EMPTY slots are information ("three still to ask"), which a list that
+   only grows cannot express. Ordered by push position, not by when you heard it. */
+.bould { margin-bottom:12px; }
+.bseq { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+.bstep { border:1px solid var(--pip-off); padding:5px 2px; text-align:center;
+         color:var(--ghost); font-size:9px; letter-spacing:.06em; }
+.bstep b { display:block; font-size:15px; line-height:1.15; font-weight:700; }
+.bstep.on { border-color:var(--got); color:var(--got); }
+.bould.done { border-color:var(--hint); }
+.bould.done h2 { color:var(--hint); }
+
+/* Source town, under the ITEM -- it answers "who told me", which belongs with the
+   item, not with the destination. Dimmer: it is where you have BEEN. */
+.hfrom { display:block; color:var(--dim); font-size:9px; letter-spacing:.08em;
+         font-weight:400; }
+/* The specific screen, under the area. "WESTERN HYRULE" alone is not an answer. */
+.hscene { display:block; color:var(--dim); font-size:9px; letter-spacing:.04em; }
+/* The villager's actual words -- the part you act on. */
+.htext { grid-column:1/-1; color:var(--ink); opacity:.8; font-size:10px;
+         line-height:1.35; margin-top:3px; }
 
 /* ===========================================================================
    THEMES. Each is a self-contained body[data-theme="..."] block: variable
    overrides first, then any rules that need more than a recolor. Adding one is
    a new block plus a new <option> -- no JS change, no structural change.
+   Ledger note: the old .skillrow rules moved to .spellboard .it.stab and the
+   .pips rules died with the pip grids (the bars reuse .meter).
    =========================================================================== */
 
 /* ---- ZELDA 1 ------------------------------------------------------------- */
@@ -264,9 +288,7 @@ body[data-theme="zelda1"] {
   --ghost:#a8925c; --card:rgba(0,0,0,.5); --hudbg:#000;
 }
 /* NES dialog boxes fake a rounded corner by notching one pixel off each corner
-   rather than curving anything -- the hardware has no rounded-rect primitive.
-   clip-path reproduces that trick; border-radius would read as a modern card
-   sitting on top of an 8-bit HUD. */
+   rather than curving anything -- the hardware has no rounded-rect primitive. */
 body[data-theme="zelda1"] .panel,
 body[data-theme="zelda1"] .hud {
   clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px),
@@ -283,8 +305,6 @@ body[data-theme="zelda1"].obs .panel {
   background-color: rgba(10,8,4,.8);
   background-image: none;
 }
-/* The one splash of color on an otherwise monochrome bar is the gold label text
-   ("LIFE", "1UP"). Everything playing that role gets the same gold ink. */
 body[data-theme="zelda1"] h2,
 body[data-theme="zelda1"] .hud .lbl {
   color: var(--got); font-weight:900; text-shadow:1px 1px 0 #000;
@@ -295,25 +315,11 @@ body[data-theme="zelda1"] .timer {
 body[data-theme="zelda1"] .it,
 body[data-theme="zelda1"] .key { border-width:2px; border-color:var(--edge); }
 body[data-theme="zelda1"] .it { background:var(--pip-off); }
-/* A heart is a heart, not a dot: Zelda 1 draws the same blocky 8x8 heart tile
-   full or empty, so the shape carries the meaning before the color does.
-   Straight edges only -- no curve the NES could not draw. */
-body[data-theme="zelda1"] .pips b { border-radius:0; }
-body[data-theme="zelda1"] .pips.heart b {
-  clip-path: polygon(20% 0%, 50% 18%, 80% 0%, 100% 30%, 100% 50%, 50% 100%, 0% 50%, 0% 30%);
-}
-/* Magic has no Zelda 1 equivalent, so it borrows the other iconic gem -- the
-   rupee -- rather than inventing a generic pip. */
-body[data-theme="zelda1"] .pips.mag b {
-  clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
-}
 
 /* ---- ILLUMINATED TOME (the one LIGHT theme) ------------------------------ */
 body[data-theme="tome"] {
   /* Aged vellum ground, iron-gall ink, oxblood and lapis for the two vital
-     stats, verdigris for hints, antique gold for the numbers that matter.
-     --ink/--dim flip DARK and --void/--stone flip LIGHT; every other variable
-     keeps its job, just re-pigmented. */
+     stats, verdigris for hints, antique gold for the numbers that matter. */
   --void:#e9dfc4; --stone:#e2d3a9; --edge:#8a7040;
   --ink:#241a10; --dim:#6b5a3c;
   --life:#7a1f1f; --magic:#2c4c86; --got:#8a6a12; --hint:#3d6b3f;
@@ -322,7 +328,6 @@ body[data-theme="tome"] {
 }
 body[data-theme="tome"] {
   font-family:Georgia,"Times New Roman",serif;
-  /* Vellum grain under a faint vignette -- the page should look handled. */
   background-color:var(--void);
   background-image:
     radial-gradient(ellipse at center, transparent 55%, rgba(90,65,25,.08) 100%),
@@ -342,71 +347,54 @@ body[data-theme="tome"] .panel::before {
   background:linear-gradient(90deg, transparent, var(--got) 15%, var(--got) 85%, transparent);
   opacity:.55;
 }
-/* Small-caps rubric headings. Left un-colored so the more specific .hints h2
-   rule keeps its green. */
 body[data-theme="tome"] h2 {
   font-family:Palatino,"Palatino Linotype","Book Antiqua",Georgia,serif;
   font-variant:small-caps; font-weight:700; letter-spacing:.16em;
   border-bottom:1px solid var(--edge); padding-bottom:6px;
 }
-/* The drop-cap sensibility without touching markup: one illuminated initial per
-   heading, gold regardless of the heading's own ink -- the way a rubricator's
-   gold leaf ignores the color of the surrounding hand. */
 body[data-theme="tome"] h2::first-letter { font-size:1.55em; color:var(--got); font-weight:700; }
-/* HUD becomes an incipit plate. A black field here would force --ink, --life and
-   --magic into low-contrast overrides just to stay legible in this one bar. */
 body[data-theme="tome"] .hud {
   background:linear-gradient(180deg,#f1e8d2,#e6d7ae);
   border-top:3px double var(--got); border-bottom:3px double var(--got);
 }
-/* GHOSTED OUTLINES, the real fix: on vellum a dark ghost reads as a muddy blot.
-   Faded sepia + a dashed hairline gives "drawn but not yet inked in gold". */
+/* GHOSTED OUTLINES on vellum: faded sepia + a dashed hairline reads as "drawn
+   but not yet inked in gold" where a dark ghost would read as a muddy blot. */
 body[data-theme="tome"] .it, body[data-theme="tome"] .key {
   border-style:dashed; font-weight:600;
 }
 body[data-theme="tome"] .it.on, body[data-theme="tome"] .key.on { border-style:solid; }
 body[data-theme="tome"] .key.on b { text-shadow:0 0 3px rgba(138,106,18,.45); }
 body[data-theme="tome"] .h { box-shadow:inset 0 0 0 1px rgba(138,106,18,.15); }
-/* Unlit pips sit close in lightness to the panel ground -- both warm tans -- so
-   a hairline ring keeps the tally visible without darkening the variable, which
-   also has to work as a plain border color. */
-body[data-theme="tome"] .meter i, body[data-theme="tome"] .pips b {
+/* Unlit notches sit close in lightness to the panel ground -- both warm tans --
+   so a hairline ring keeps the tally visible without darkening the variable. */
+body[data-theme="tome"] .meter i {
   box-shadow:inset 0 0 0 1px rgba(90,65,25,.25);
 }
 /* SIGNATURE: the run timer in gold leaf. One number on the page gets the full
    illumination treatment; everything else stays disciplined. */
 body[data-theme="tome"] .timer {
-  color:var(--got);
   background:linear-gradient(180deg,#b8912c,#6e5209);
   -webkit-background-clip:text; background-clip:text; color:transparent;
   text-shadow:0 1px 0 rgba(255,255,255,.35);
 }
-body[data-theme="tome"] .panel.vs { border-width:2px; }
 
 /* ---- FINAL FANTASY (the command window) ---------------------------------- */
 body[data-theme="ff"] {
-  /* PS1/SNES command-window palette: pale sky-blue bleeding into deep navy,
-     chromed in silver. --got stays the "important number" gold; --hint moves to
-     a menu-cursor teal so it never fights --got for attention. */
   --void:#0a1030; --stone:#1c3f8a; --edge:#eef2ff;
   --ink:#ffffff; --dim:#9db4e8;
   --life:#ff5568; --magic:#55c8ff; --got:#ffd657; --hint:#7cf0d2;
   --pip-off:#16224f;
   --ghost:#5a6fa8; --card:rgba(6,10,30,.55); --hudbg:#0d1642;
-  /* Every FF menu font is white with a hard 1px drop shadow, no blur -- that is
-     what makes text read as "menu chrome" rather than "web page". The lit chip
-     states below cancel it, because a light shadow under dark ink looks muddy. */
+  /* Every FF menu font is white with a hard 1px drop shadow, no blur. The lit
+     chip states below cancel it, because a light shadow under dark ink looks
+     muddy. */
   text-shadow: 1px 1px 0 rgba(0,0,20,.75);
 }
-/* :not(.obs) rather than source order -- body.obs has equal specificity, so
-   without this the backdrop would win over transparency by position alone. */
 body[data-theme="ff"]:not(.obs) {
   background: radial-gradient(ellipse at 50% -10%, #1c2f6e 0%, #060912 60%);
 }
-/* THE SIGNATURE: `border: 4px double` is a real border-style that draws two
-   parallel rules with a gap for free -- exactly the FF window edge, no layered
-   box-shadow trickery. The four corner studs are tiny radial-gradient dots; that
-   hint of gold rivet is what sells "command window" over "card". */
+/* THE SIGNATURE: `border: 4px double` draws the FF window edge for free; the
+   four corner studs are tiny radial-gradient dots. */
 body[data-theme="ff"] .panel {
   background-image:
     radial-gradient(circle at 7px 7px, var(--got) 0 1.3px, transparent 1.6px),
@@ -416,14 +404,11 @@ body[data-theme="ff"] .panel {
     linear-gradient(to bottom, #4d78d6 0%, #1a2f78 55%, #0d1642 100%);
   background-repeat: no-repeat;
   border: 4px double var(--edge); border-radius: 8px;
-  padding: 12px 14px;  /* the thicker double border eats into the base padding */
+  padding: 12px 14px;
   box-shadow: inset 0 1px 0 rgba(255,255,255,.55),
               inset 0 0 26px rgba(120,170,255,.22),
               0 3px 10px rgba(0,0,0,.5);
 }
-/* Restated at higher specificity so the alert border survives the reskin
-   instead of getting silvered over like every other panel. */
-body[data-theme="ff"] .panel.vs { border-color: var(--life); }
 body[data-theme="ff"].obs .panel {
   background-image:
     radial-gradient(circle at 7px 7px, var(--got) 0 1.2px, transparent 1.5px),
@@ -442,8 +427,7 @@ body[data-theme="ff"] .hud {
 }
 body[data-theme="ff"] h2 { border-bottom:1px solid rgba(255,255,255,.22); padding-bottom:5px; }
 /* THE RISK: a real FF command cursor, blinking, on the one panel this page
-   exists for. Everything else stays still -- spending the single animation here
-   is what keeps it from reading as decoration scattered everywhere. */
+   exists for. Everything else stays still. */
 body[data-theme="ff"] .hints h2 { position:relative; padding-left:16px; }
 body[data-theme="ff"] .hints h2::before {
   content:"\25B6"; position:absolute; left:0; color:var(--got);
@@ -464,7 +448,7 @@ body[data-theme="ff"] .spellboard .it.on {
   border-color:#eaf7ff; color:#00182c; text-shadow:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.25);
 }
-body[data-theme="ff"] .skillrow .it.on {
+body[data-theme="ff"] .spellboard .it.stab.on {
   background:linear-gradient(to bottom,#c9ffe9,var(--hint) 55%,#1c9a72);
   border-color:#eafff5; color:#00220f; text-shadow:none;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.25);
@@ -472,31 +456,23 @@ body[data-theme="ff"] .skillrow .it.on {
 body[data-theme="ff"] .meter { border:1px solid rgba(238,242,255,.35); border-radius:2px; padding:2px; }
 body[data-theme="ff"] .meter i { border-radius:1px; }
 body[data-theme="ff"] .meter i.on { box-shadow:inset 0 1px 0 rgba(255,255,255,.5); }
-body[data-theme="ff"] .pips b.on {
-  box-shadow:0 0 4px rgba(255,255,255,.5), inset 0 1px 0 rgba(255,255,255,.6);
-}
 body[data-theme="ff"] .key { border-color:rgba(238,242,255,.3); border-radius:3px; }
 body[data-theme="ff"] .key.on { border-color:var(--got); box-shadow:inset 0 0 6px rgba(255,214,87,.3); }
 body[data-theme="ff"] ::selection { background:var(--got); color:#241800; }
 
 /* ---- CASTLEVANIA / GOTHIC ------------------------------------------------ */
 body[data-theme="gothic"] {
-  /* Dracula's castle rather than an NES palette: candlelit aubergine stone, a
-     tarnished gold-bronze frame, ruby/sapphire stained glass for life/magic.
-     --got doubles as "gilt" -- acquired items, spent crystals and the corner
-     filigree all use it, so from across the room "gold = yours" reads the same
-     way "yellow bar = life" reads in the original. */
+  /* Candlelit aubergine stone, a tarnished gold-bronze frame, ruby/sapphire
+     stained glass for life/magic. --got doubles as "gilt" -- from across the
+     room "gold = yours" reads the way "yellow bar = life" reads in the
+     original. */
   --void:#0a0609; --stone:#221521; --edge:#8a6d3a;
   --ink:#ede0c8; --dim:#8d7a93;
   --life:#c8283f; --magic:#4a7fd0; --got:#d8b34a; --hint:#4fcf8f;
   --pip-off:#2c2030;
   --ghost:#6b5d76; --card:#171019; --hudbg:#060305;
-  /* One corner-scroll motif, used top-left as-is and bottom-right rotated 180
-     -- a matching pair of frame corners from a single asset. */
   --gothic-corner: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke='%23d8b34a' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M3 15 V3 H15'/%3E%3Cpath d='M3 3 Q13 3 13 13'/%3E%3C/g%3E%3Ccircle cx='3' cy='3' r='2.2' fill='%23d8b34a'/%3E%3C/svg%3E");
 }
-/* Candle glow, not a flat void. Skipped in OBS mode -- that background must
-   stay genuinely transparent, not "our transparent". */
 body[data-theme="gothic"]:not(.obs) {
   background:
     radial-gradient(ellipse 60% 40% at 15% -10%, rgba(216,179,74,.09), transparent 60%),
@@ -510,8 +486,7 @@ body[data-theme="gothic"] .panel {
   box-shadow:inset 0 0 0 1px rgba(0,0,0,.5), 0 3px 10px rgba(0,0,0,.45);
 }
 /* Filigree sits ON the frame, not inside the content box -- ornament belongs at
-   the edges so it never competes with the numbers. This is the whole reason the
-   theme stays legible while being ornate. */
+   the edges so it never competes with the numbers. */
 body[data-theme="gothic"] .panel::before,
 body[data-theme="gothic"] .panel::after,
 body[data-theme="gothic"] .hud::before,
@@ -529,29 +504,15 @@ body[data-theme="gothic"] h2 {
   text-shadow:0 1px 0 rgba(0,0,0,.7), 0 0 10px rgba(216,179,74,.25);
   border-bottom:1px solid var(--edge); padding-bottom:6px;
 }
-/* The room nameplate is the one piece of prose on the page -- everything else
-   is a number -- so it gets the serif too. */
 body[data-theme="gothic"] .where b { font-family:Georgia,"Times New Roman",serif; letter-spacing:.02em; }
 body[data-theme="gothic"] .hud { position:relative;
   box-shadow:inset 0 2px 0 rgba(0,0,0,.6), inset 0 -2px 0 rgba(0,0,0,.6); }
 body[data-theme="gothic"] .timer { text-shadow:0 0 10px rgba(216,179,74,.35); }
 body[data-theme="gothic"] .stat.life  { text-shadow:0 0 8px rgba(200,40,63,.45); }
 body[data-theme="gothic"] .stat.magic { text-shadow:0 0 8px rgba(74,127,208,.45); }
-body[data-theme="gothic"] .panel.vs {
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.5), 0 0 16px rgba(200,40,63,.2);
-}
-body[data-theme="gothic"] .vsnum { text-shadow:0 0 14px rgba(200,40,63,.5); }
+body[data-theme="gothic"] .vsstat b { text-shadow:0 0 14px rgba(200,40,63,.5); }
 body[data-theme="gothic"] .meter i.on {
   box-shadow:inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.35);
-}
-/* Cut gems, not filled dots. */
-body[data-theme="gothic"] .pips.heart b.on {
-  background:radial-gradient(circle at 32% 28%, #ff8a93, var(--life) 55%, #4a0812 100%);
-  box-shadow:0 0 4px rgba(200,40,63,.6);
-}
-body[data-theme="gothic"] .pips.mag b.on {
-  background:radial-gradient(circle at 32% 28%, #b9d3ff, var(--magic) 55%, #14285a 100%);
-  box-shadow:0 0 4px rgba(74,127,208,.6);
 }
 body[data-theme="gothic"] .it { box-shadow:inset 0 1px 3px rgba(0,0,0,.5); }
 body[data-theme="gothic"] .it.on {
@@ -564,7 +525,7 @@ body[data-theme="gothic"] .spellboard .it.on {
   border-color:#7ea8e6; color:#f4f8ff;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -2px 3px rgba(0,0,0,.35);
 }
-body[data-theme="gothic"] .skillrow .it.on {
+body[data-theme="gothic"] .spellboard .it.stab.on {
   background:linear-gradient(155deg,#9be8bb 0%,#3fae74 45%,#164f34 100%);
   border-color:#7cd9a4; color:#062015;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -2px 3px rgba(0,0,0,.35);
@@ -603,71 +564,52 @@ body[data-theme="gothic"] .h { box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
     <div><span class="lbl">LIVES</span><span class="stat" id="lives">-</span></div>
     <div><span class="lbl" id="deathlbl">DEATHS</span><span class="stat dead" id="deaths">-</span></div>
     <div><span class="lbl">ATK/MAG/LIF</span><span class="stat" id="levels">-</span></div>
+    <!-- VS CHAT: one number, so one HUD stat, not a rival panel next to the
+         hints. Hidden entirely on a run that never used the mode. -->
+    <div class="vsstat" id="vspanel" hidden><span class="lbl" id="vslbl">VS CHAT KILLS</span><b id="vskills">0</b></div>
     <div class="where"><b id="room">-</b><span id="seed"></span></div>
   </div>
 
-  <div>
-    <div class="panel">
-      <h2>INVENTORY</h2>
-      <div class="board" id="items"></div>
-    </div>
-
-    <div class="panel" style="margin-top:12px">
-      <h2>SPELLS</h2>
-      <div class="board spellboard" id="spells"></div>
-    </div>
-
-    <div class="panel" style="margin-top:12px">
-      <h2>TECHNIQUES</h2>
-      <div class="board skillrow" id="skills"></div>
-    </div>
-
-
-    <div class="panel" style="margin-top:12px">
-      <h2>PALACE KEYS <span style="float:right;opacity:.7">USED / COLLECTED / TOTAL</span></h2>
-      <div class="keys" id="keys"></div>
-    </div>
-
-    <div class="panel" style="margin-top:12px">
-      <h2>PALACE CRYSTALS &nbsp;·&nbsp; <span id="crystalcount" style="color:var(--got)"></span></h2>
-      <div class="keys" id="crystals"></div>
-    </div>
-
-    <div class="panel" style="margin-top:12px">
-      <h2>CONTAINERS</h2>
-      <div style="display:flex;justify-content:space-between"><span>HEART</span><b id="hearts">-</b></div>
-      <div class="pips heart" id="heartpips"></div>
-      <div style="display:flex;justify-content:space-between;margin-top:9px"><span>MAGIC</span><b id="magic">-</b></div>
-      <div class="pips mag" id="magpips"></div>
-      <div style="display:flex;justify-content:space-between;margin-top:9px"><span>BOTTLE</span><b id="bottle">-</b></div>
-    </div>
-  </div>
-
-  <div>
-    <!-- VS CHAT: hidden entirely unless the mode is on or chat has scored. This is the
-         viewer-facing half of the Twitch feature; the controls live on the setup page,
-         which is not something to put on stream. -->
-    <div class="panel vs" id="vspanel" hidden>
-      <h2>VS CHAT</h2>
-      <div class="vsrow">
-        <span class="lbl">CHAT KILLS</span>
-        <b class="vsnum" id="vskills">0</b>
-      </div>
-      <div class="vsoff" id="vsoff" hidden>MODE OFF — SCORE STANDS</div>
-    </div>
-
-    <!-- BOULDER CIRCLE. The other hint system, and the one that exists in EVERY
-         mode -- it is a quest puzzle, not a randomizer feature. Shown as the push
-         SEQUENCE rather than a list of dialogue, because the order is the answer. -->
+  <!-- .side comes BEFORE .main: on a narrow OBS source the stack order IS the
+       priority order, and hints are the reason the page exists. -->
+  <div class="side">
+    <!-- BOULDER CIRCLE above item hints: it works in EVERY mode (the circle is a
+         quest puzzle, not a randomizer feature) whereas item hints are rando-only,
+         so it is the one more players will actually see. -->
     <div class="panel bould" id="bouldpanel" hidden>
       <h2><span class="hidebtn" id="btn_boulder" onclick="setPanel('boulder',!panelOn.boulder)">&minus;</span>BOULDER CIRCLE <span class="hcount" id="bcount"></span></h2>
       <div class="bseq" id="boulders"></div>
     </div>
 
-    <div class="panel hints" id="hintpanel" style="margin-top:12px">
-      <h2><span class="hidebtn" id="btn_hints" onclick="setPanel('hints',!panelOn.hints)">&minus;</span>ITEM HINTS <span class="hcount" id="hcount"></span></h2>
+    <div class="panel hints" id="hintpanel" hidden>
+      <h2><span class="hidebtn" id="btn_hints" onclick="setPanel('hints',!panelOn.hints)">&minus;</span>HINTS <span class="hcount" id="hcount"></span></h2>
       <div class="hlist" id="hints"></div>
-      <div class="none" id="hnote" hidden></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="panel">
+      <h2>PALACES <span style="float:right;opacity:.85">CRYSTALS <span id="crystalcount" style="color:var(--got)"></span> &nbsp;·&nbsp; KEYS FOUND/TOTAL</span></h2>
+      <div class="keys" id="keys"></div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <h2>INVENTORY</h2>
+      <div class="board" id="items"></div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <h2>SPELLS &amp; STABS</h2>
+      <div class="board spellboard" id="spells"></div>
+    </div>
+
+    <div class="panel" style="margin-top:12px">
+      <h2>CONTAINERS</h2>
+      <div style="display:flex;justify-content:space-between"><span>HEART</span><b id="hearts">-</b></div>
+      <div class="cbar"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAfUlEQVR4nM2TQQqAIBBFZ+QfpUWL7n+SFi06ykChNDGZjgy06IGofP9XB2W6EJGDDADYzns6VNyXMnwYdJGnc0tUplVK7+kgh57RkoYr/h8AgLVYEUoBAf7mCgieQne/AyIh1pxJVhyF1OZXgBfSMrvkJ77NVFr9kUIhI/MJG15M7mJTZygAAAAASUVORK5CYII=" alt=""><div class="meter life" id="hbar"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:9px"><span>MAGIC</span><b id="magic">-</b></div>
+      <div class="cbar"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAQCAYAAAAiYZ4HAAAAiklEQVR4nGNkQAJ//vz5z4AFsLCwMMLZyIrv6MC5KODPnz//YZqYkE1RufIHQ7HKlT8oNsAZuJzFgqQYxQZkAHIaLucxMZAImGiugYVQHPyBisM8z0goDtCDl5EYxQxImsjztEqBBcQEJBqbGAjA/cAwxwa/0SlHwH4A2wAOgZQjBBXDbYABYpI3AGTqPlCxdV9sAAAAAElFTkSuQmCC" alt=""><div class="meter magic" id="mbar"></div></div>
+      <div style="display:flex;justify-content:space-between;margin-top:9px"><span>BOTTLE</span><b id="bottle">-</b></div>
     </div>
   </div>
 
@@ -693,16 +635,15 @@ function setTheme(name, remember) {
     try { localStorage.setItem('zalia_theme', name || ''); } catch (e) {}
   }
 }
-// PANEL VISIBILITY. Hints are spoilers -- a streamer may not want either panel on
-// screen. Same precedence rule as the theme: ?hints=0 / ?boulder=0 in the URL beats
-// the saved choice, because an OBS browser source runs in its own profile and
-// cannot see anything you clicked in a normal tab.
+// PANEL VISIBILITY. Hints are spoilers: some people play blind, others think
+// hints make a rando run too easy. ?hints=0 / ?boulder=0 beats the saved choice,
+// because an OBS source runs in its own profile and cannot see what you clicked.
 const PANELS = { hints: 'hintpanel', boulder: 'bouldpanel' };
+const PANEL_BODY = { hints: ['hints'], boulder: ['boulders'] };
 const panelOn = { hints: true, boulder: true };
 
-// Collapse the panel BODY, never the panel -- hiding the heading too would take
-// the only control for getting it back with it.
-const PANEL_BODY = { hints: ['hints', 'hnote'], boulder: ['boulders'] };
+// Collapse the panel BODY, never the panel -- hiding the heading would take the
+// only control for getting it back with it.
 function applyPanels() {
   Object.keys(PANELS).forEach(function (k) {
     PANEL_BODY[k].forEach(function (id) {
@@ -729,8 +670,6 @@ function setPanel(which, on) {
 
 (function initTheme() {
   let t = QS.get('theme');
-  // Only fall back to the stored choice when the URL did not specify one --
-  // otherwise an OBS source would drift to whatever was last clicked elsewhere.
   if (t === null) { try { t = localStorage.getItem('zalia_theme'); } catch (e) { t = null; } }
   setTheme(t || '', false);
 })();
@@ -740,7 +679,7 @@ function setPanel(which, on) {
 // naive (v & 0x80000000) goes negative. Divide instead; it is exact for these.
 const has = (v, bit) => Math.floor((v || 0) / bit) % 2 === 1;
 
-// The 28 items that are ACTUALLY OBTAINABLE. Verified 2026-07-27 against the
+// The 25 items that are ACTUALLY OBTAINABLE. Verified 2026-07-27 against the
 // pickup-object table in g_Create (`_obj=ItmXX; _bit=ITM_YYY`) -- every entry
 // below has a real pickup object in the game.
 //
@@ -763,108 +702,54 @@ const ITEMS = [
   // shows the game's word, not the constant's.
   ['NOTE',65536],['MIRROR',131072],['TROPHY',262144],['FLOWER',524288],
   ['CHILD',1048576],['BOTTLE',2097152],['S.KEY',4194304],['MAP 1',8388608],
-  // REMOVED 2026-07-27: the three items that are registered but UNOBTAINABLE.
-  // Each has an object + sprite registration in g_Create, but NO data_spawn
-  // anywhere puts it in a room -- built and editor-ready, never deployed. A slot
-  // that can never light is worse than a missing slot: it reads as "still to find".
-  //
-  //   ITM_TBLT (ItmK5)  bit 25  TABLET
-  //   ITM_MEL1 (ItmKB)  bit 26  MELODY   <- was in this list mislabelled "MEDAL"
-  //   ITM_FTHR (ItmK7)  bit 27  FEATHER
-  //
-  // The MEDAL entry was the sneaky one: 67108864 is 2^26 = ITM_MEL1, so the row
-  // was showing a melody under a medal's name and could never tick either way.
-  //
-  // Re-verify before re-adding any of them -- the audit is
-  // scratchpad\item_spawn_audit.py, which cross-references every g_Create item
-  // registration against every data_spawn in the rm_data_init_* files.
-  //
-  // NOT removed: ITM_MEDI. It IS spawned, and it is the FLOWER the tracker already
-  // shows -- "medicine" is only the constant's name. See the note above.
+  // REMOVED 2026-07-27: the three items that are registered but UNOBTAINABLE
+  // (ITM_TBLT bit 25, ITM_MEL1 bit 26 -- was mislabelled "MEDAL", ITM_FTHR
+  // bit 27). Each has an object + sprite registration in g_Create, but NO
+  // data_spawn anywhere puts it in a room. Re-verify with
+  // scratchpad\item_spawn_audit.py before re-adding any of them.
   ['MAP 2',16777216]
 ];
 
-// The four bits with no known grant site. NOT deleted -- shown in their own row
-// so that if one ever lights up during play, we have caught the thing the static
-// search could not see. That is the whole point of keeping them visible: a grep
-// proves what the code says, not what the game does. Delete this row only after
-// a real run has failed to light any of them.
+// The four bits with no known grant site. NOT deleted -- kept so that if one
+// ever lights up during play, we have caught the thing the static search could
+// not see. Not rendered; delete only after a real run has failed to light any.
 const UNVERIFIED = [
   ['AXE',268435456],['FAIRY 2',536870912],['BOTTLE 2',1073741824],['WATER',2147483648]
 ];
 // NINE spells, not ten. SPL_CUCO (512) is deliberately absent: its registration
 // in g_Create (dl_Spell_STR / dm_Spell) is COMMENTED OUT, so it is never a
 // selectable spell. Cucco and Fairy are the same spell -- confirmed by the owner
-// 2026-07-27. A CUCCO chip here would be a slot that never lights.
-// Bit 8 is SPL_FARY in code but the in-game spell list calls it CUCCO -- owner
-// confirmed 2026-07-27. Same rule as FLOWER above: show the player's word, not
-// the constant's.
+// 2026-07-27.
 // Bits verified against macros.gml 2026-07-27:
 //   PRTC 1  JUMP 2  LIFE 4  FARY 8  FIRE 16  RFLC 32  SPEL 64  THUN 128  SUMM 256
 //
-// DO NOT "fix" bit 8 to FAIRY. It was renamed to FAIRY on 2026-07-27 on the
-// reasoning that the macro is SPL_FARY, and that was WRONG and had already been
-// settled earlier the same day: in this hack the fairy spell IS the Cucco
-// transform, so CUCCO is the player's word for bit 8 and the label is correct.
-// The renderer overrides this label anyway (see the CUCCO TIER note below), so
-// the rename was silently pointless as well as wrong.
+// DO NOT "fix" bit 8 to FAIRY: in this hack the fairy spell IS the Cucco
+// transform, so CUCCO is the player's word for bit 8. The renderer overrides
+// this label anyway (see the CUCCO TIER note below).
 //
-// Bit 1 is PROTECT, not "SHIELD". It was labelled SHIELD on the reasoning that
-// vanilla Zelda II players call it that -- wrong for THIS game, and actively
-// confusing: ZALiA has a SHIELD *item* (ITM_SHLD, bit 4096) sitting on the
-// INVENTORY board, so two different boards showed a "SHIELD" that meant different
-// things. The game's own name list is STR_PROTECT (g_Create.gml:3437).
-// Same show-the-player's-word rule as FLOWER, CUCCO and HEAL.
-//
-// ENIGMA is still shown as SPELL -- that one has no competing item to confuse it.
+// Bit 1 is PROTECT, not "SHIELD": ZALiA has a SHIELD *item* (ITM_SHLD, 4096) on
+// the INVENTORY board, and two boards showing a "SHIELD" that meant different
+// things was actively confusing. The game's own name list is STR_PROTECT
+// (g_Create.gml:3437). Show the player's word, not the constant's.
 const SPELLS = [
   ['PROTECT',1],['JUMP',2],['HEAL',4],['CUCCO',8],['FIRE',16],
   ['REFLECT',32],['SPELL',64],['THUNDER',128],['SUMMON',256]
 ];
 
-// CUCCO TIER. f.Cucco_skills is a 5-bit field (THRUST_D, THRUST_U, BREAK1,
-// PROJ1, PROJ2) granted together by one dialogue (update_Dialogue.gml:622-626).
-//   Cucco I  = transform only: slow fall, ends on a screen change.
-//   Cucco II = persists across screens and can use Link's stabs.
-// There is no FLOAT bit -- the slow fall is inherent to the transform.
+// THE STABS. Two techniques, not five: SKILL_BNC (4), SKILL_CST (8) and
+// SKILL_AFR (16) are declared in macros.gml and referenced NOWHERE ELSE --
+// nothing grants them (RandoOTHER_SKILLS has only STABDOWN and STABUP). Verify
+// with `grep -rn "SKILL_BNC\|SKILL_CST\|SKILL_AFR"` before re-adding.
 //
-// DO NOT give this its own section again. It had one, and it was cut: tier 2's
-// abilities ARE Link's own skills, already listed under TECHNIQUES, so the panel
-// only repeated them. The tier is the single fact worth showing, and it belongs
-// on the Cucco spell chip.
-// TWO techniques, not five. SKILL_BNC (4), SKILL_CST (8) and SKILL_AFR (16) are
-// declared in macros.gml and referenced NOWHERE ELSE in the codebase -- nothing
-// grants them, no rando toggle offers them (RandoOTHER_SKILLS has only STABDOWN
-// and STABUP), and Dev_StabToCheat's skill zones only cover THD/THU.
-//
-// They were showing as BOUNCE / CAST / A.FIRE, which read as real unfound
-// techniques. Same class of lie as the "MEDAL" item and the three unobtainable
-// items -- a slot that can never light tells a viewer there is something left to
-// find. Verify with `grep -rn "SKILL_BNC\|SKILL_CST\|SKILL_AFR"` before re-adding.
-const SKILLS = [
-  ['DOWN STAB',1],['UP STAB',2]
-];
-
-// SPELL-DERIVED TECHNIQUES. These are things your CHARACTER can do, but none of
-// them is an f.skills bit -- the ability comes from having a spell active, so no
-// amount of reading the skills field finds them. That is why the tracker showed
-// only two techniques for so long, and why SKILL_BNC ("bounce") looks like a
-// never-wired-up attempt at the reflect one.
-//
-//   FIRE    -- sword throws fireballs
-//   JUMP    -- jump higher
-//   REFLECT -- bounces projectiles back
-//
-// Synthetic bits, deliberately far clear of the real skills bits (1 and 2) so they
-// can share the board renderer without ever colliding with f.skills.
-//
-// Three states each, matching the spell chips: dark = spell not learned;
-// lit = learned, you can use it; pulsing = active on you right now, which is the
-// state that actually matters mid-fight.
-const SPELL_TECHS = [
-  ['FIRE',    16,  4096],   // [label, SPL_ bit, synthetic tech bit]
-  ['JUMP',     2,  8192],
-  ['REFLECT', 32, 16384]
+// LEDGER CHANGE (1b): the TECHNIQUES panel is gone. The three spell-derived
+// abilities it also listed (fire sword / high jump / reflect) were the spells
+// themselves wearing a second label -- the spell chip already lights when
+// learned and pulses when active, so the panel repeated a fact the board
+// showed. The two REAL f.skills bits move onto the spell board as chips with
+// their own (green) lit state. Do not resurrect SPELL_TECHS: it was the
+// duplication, not the fix.
+const STABS = [
+  ['\u2193 STAB',1,'stab'],['\u2191 STAB',2,'stab']
 ];
 
 // GENERATED by _scripts\audits\build_icon_map.py -- do not hand-edit.
@@ -899,8 +784,10 @@ const ICONS = {
   'TROPHY'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAxUlEQVQ4jbVSsQ3DMAxjCp3iwUMOyNBzckBO6dih52TIARk8+BQB7tDIUWQZ6NASMBDLFMVIAn4FZi42liJKimjimjvYABENkqyTYvK5t8p43Rv1sDPCzm3lgwsAp4B56MJwToF5bSrlkZBHapxp7tXBgTwSwjLVe1imKuSCmYtUSBGFn9PnHHG5S2M133UAAPmxud8W1ZeMz/6Km0Q0iIM6W2/+0gftQO9D3QNdXQge9JvkdHtgp9BDV+Bb/FlgXi9b5+ENUo56jPat8bQAAAAASUVORK5CYII=',
 };
 
-function board(el, defs, value) {
-  el.innerHTML = defs.map(function(d) {
+// Renders one chip list; boards that mix value fields (spells + stabs) can
+// concatenate two calls' HTML into one grid.
+function chipHTML(defs, value) {
+  return defs.map(function(d) {
     var name = d[0], bit = d[1];
     var extra = d[2] || '';          // optional 3rd element: extra css class(es)
     var on   = has(value, bit);
@@ -908,13 +795,8 @@ function board(el, defs, value) {
     var body = src
       ? '<img src="' + src + '" alt="' + name + '" title="' + name + '"><span>' + name + '</span>'
       : '<span class="noicon">' + name + '</span>';
-    return '<div class="it' + (on ? ' on' : '') + (extra ? ' ' + extra : '') + '">' + body + '</div>';
+    return '<div class="it' + (on ? ' on' : '') + (extra ? ' ' + extra : '') + '" title="' + name + '">' + body + '</div>';
   }).join('');
-}
-function pips(el, got, total, cls) {
-  let s = '';
-  for (let i = 0; i < total; i++) s += '<b class="' + (i < got ? 'on' : '') + '"></b>';
-  el.innerHTML = s;
 }
 function meter(el, cur, max, seg) {
   seg = seg || 16;
@@ -934,7 +816,6 @@ async function load() {
   meter($('hpmeter'), s.hp, s.hp_max);
   meter($('mpmeter'), s.mp, s.mp_max);
   $('lives').textContent  = s.lives;
-  $('deaths').textContent = s.death_count;
 
   // GAME OVER WARPING PENALTY changes what this number MEANS, so say which rule
   // is in force. Penalty on: a quick game over charges every remaining life as a
@@ -959,45 +840,31 @@ async function load() {
   const vsOn = !!s.vs_mode, vsKills = s.vs_kills || 0;
   $('vspanel').hidden = !(vsOn || vsKills > 0);
   $('vskills').textContent = vsKills;
-  $('vsoff').hidden = vsOn;
+  $('vslbl').textContent = vsOn ? 'VS CHAT KILLS' : 'VS · OFF — SCORE STANDS';
   $('levels').textContent = s.level_atk + '/' + s.level_mag + '/' + s.level_lif;
   $('room').textContent   = (s.room_name || '').replace(/^rm[AB]?_?/, '');
   $('seed').textContent   = s.is_rando ? ('SEED ' + s.seed + ' · Q' + s.quest_num)
                                        : ('QUEST ' + s.quest_num);
 
   // BOTTLE has THREE states, not two. Quest 2's bottle is filled with blood by
-  // killing Dark Link (Cutscene_ShadowBoss_2_update.gml:489) and that fill is what
-  // gates the mod's extra ending (Ganon1_update.gml:20). "Have bottle" and "have
-  // FILLED bottle" are completely different progress, so they cannot share one lit
-  // state -- the tracker was exporting bottle_full already and showing nothing.
+  // killing Dark Link (Cutscene_ShadowBoss_2_update.gml:489) and that fill gates
+  // the mod's extra ending (Ganon1_update.gml:20). "Have bottle" and "have
+  // FILLED bottle" are different progress; the filled tile carries the red
+  // badge + red edge instead of the old whole-tile red fill.
   const items = ITEMS.map(function (e) {
     if (e[1] !== 2097152) return e;
     return s.bottle_full ? ['BOTTLE', 2097152, 'filled'] : e;
   });
-  board($('items'),  items,  s.items);
-  // TECHNIQUES = the two stabs (real f.skills bits) + the spell-derived abilities.
-  const act = s.spells_active || 0;
-  let techVal = s.skills;
-  const techDefs = SKILLS.concat(SPELL_TECHS.map(function (t) {
-    const label = t[0], spellBit = t[1], techBit = t[2];
-    if (has(s.spells, spellBit)) techVal |= techBit;     // learned -> lit
-    return has(act, spellBit) ? [label, techBit, 'active'] : [label, techBit];
-  }));
-  board($('skills'), techDefs, techVal);
+  $('items').innerHTML = chipHTML(items, s.items);
 
-  // The Cucco TIER rides on the Cucco spell chip itself rather than getting its
-  // own section: tier 2's abilities are Link's own skills, already shown under
-  // TECHNIQUES, so a separate Cucco panel just repeated them. Any Cucco_skills
-  // bit set = tier 2.
-  // SELECTED spell gets marked. The state already carried spell_selected; showing
-  // it means a viewer can see what will fire without reading the game's own HUD.
-  // Three separate things on one chip, deliberately:
+  // SPELLS & STABS, one board. Three separate things on a spell chip:
   //   OWNED    -- lit, the normal have/have-not state
-  //   SELECTED -- outlined, what will fire if you cast
-  //   ACTIVE   -- pulsing, currently running on the character right now
-  // ACTIVE is the one a viewer cares about mid-fight: fire active means fireballs
-  // are available this second. It is cleared on room change by the game, so it is
-  // genuinely live rather than sticky.
+  //   SELECTED -- corner cursor, what will fire if you cast
+  //   ACTIVE   -- blinking corner dot, running on the character right now
+  // ACTIVE is the one a viewer cares about mid-fight; it is cleared on room
+  // change by the game, so it is genuinely live rather than sticky.
+  // The Cucco TIER rides on the Cucco spell chip itself (tier 2's abilities are
+  // Link's own stabs, shown two chips over). Any Cucco_skills bit set = tier 2.
   const spells = SPELLS.map(function (e) {
     let out = e, cls = [];
     if (e[1] === 8) out = ['CUCCO ' + (s.cucco_skills ? 'II' : 'I'), 8];
@@ -1005,13 +872,11 @@ async function load() {
     if (has(s.spells_active || 0, e[1]))    cls.push('active');
     return cls.length ? [out[0], out[1], cls.join(' ')] : out;
   });
-  board($('spells'), spells, s.spells);
+  $('spells').innerHTML = chipHTML(spells, s.spells) + chipHTML(STABS, s.skills);
 
   // START CONTAINERS are granted at file creation and pre-fill the piece string,
-  // so hearts_got is never 0 at the start of a run -- a default file already
-  // reads 9/27 and a max-start file reads 27/27 before you move. Show FOUND
-  // (since the run began) as the headline, with the handout called out, so the
-  // number tracks what you actually did.
+  // so hearts_got is never 0 at the start of a run. Show FOUND (since the run
+  // began) as the headline, with the handout called out.
   const hStart = (s.start_containers_hp == null ? 3 : s.start_containers_hp) * 3;
   const mStart = (s.start_containers_mp == null ? 3 : s.start_containers_mp) * 3;
   const hFound = Math.max(0, s.hearts_got - hStart);
@@ -1020,98 +885,84 @@ async function load() {
                         + ' <span style="opacity:.45;font-size:11px">+' + hStart + ' start</span>';
   $('magic').innerHTML  = mFound + ' / ' + (s.magic_total - mStart)
                         + ' <span style="opacity:.45;font-size:11px">+' + mStart + ' start</span>';
-  pips($('heartpips'), s.hearts_got, s.hearts_total);
-  pips($('magpips'),   s.magic_got,  s.magic_total);
+  // One notch per container: still 27 discrete things, now one row tall.
+  meter($('hbar'), s.hearts_got, s.hearts_total, s.hearts_total);
+  meter($('mbar'), s.magic_got,  s.magic_total,  s.magic_total);
   $('bottle').textContent = s.bottle_acquired ? (s.bottle_full ? 'FULL' : 'EMPTY') : '—';
-  $('crystals').textContent = s.crystals;
 
-  // Three numbers per palace. COLLECTED never decrements (get_key_count_acquired),
-  // HELD is what is still in the pack (get_key_count), so USED = collected - held.
-  // TOTAL comes from dm_spawn and moves with the seed under rando.
+  // PALACES: one ledger cell per palace -- crystal placed (icon in colour),
+  // keys found/total, and how many are still in the pack. COLLECTED never
+  // decrements (get_key_count_acquired), HELD is what is in the pack
+  // (get_key_count), so USED = collected - held. TOTAL comes from dm_spawn and
+  // moves with the seed under rando.
+  //   dark  = no keys found here
+  //   lit   = at least one found (LIGHT AS SOON AS YOU FIND ONE -- a panel that
+  //           does not visibly react is the same as a broken one)
+  //   done  = all found and all spent: this palace is behind you
+  //   cry   = crystal placed (independent fact, carried by the icon)
   let k = '';
+  let cn = 0;
   for (let i = 1; i <= 6; i++) {
     const held  = s['keys_held_p'  + i] || 0;
     const got   = s['keys_found_p' + i] || 0;
     const total = s['keys_total_p' + i] || 0;
     const used  = Math.max(0, got - held);
-    // LIGHT AS SOON AS YOU FIND ONE. This used to require every key in the palace
-    // collected AND spent, which almost never happens -- so the tile sat dark all
-    // run and the only thing that moved was three tiny numbers. A panel that does
-    // not visibly react is the same as a broken one.
-    //   dark  = none found here
-    //   lit   = at least one found
-    //   done  = all found and all spent (palace finished)
-    const done = total > 0 && used === total;
-    const any  = got > 0;
-    k += '<div class="key' + (any ? ' on' : '') + (done ? ' done' : '') + '">P' + i
+    const done  = total > 0 && used === total;
+    const any   = got > 0;
+    const set   = has(s.crystals, Math.pow(2, i - 1));
+    if (set) cn++;
+    k += '<div class="key' + (any ? ' on' : '') + (done ? ' done' : '') + (set ? ' cry' : '') + '">'
+       + '<span class="plbl">P' + i + (done ? ' \u2713' : '') + '</span>'
+       + '<i class="cico"></i>'
        + '<b>' + got + '/' + total + '</b>'
-       + '<span class="ksub">' + (held ? held + ' held' : (done ? 'clear' : '&nbsp;'))
-       + (used ? ' · ' + used + ' used' : '') + '</span></div>';
+       + '<span class="ksub">' + (done ? 'clear' : (held ? held + ' held' : '&nbsp;')) + '</span></div>';
   }
   $('keys').innerHTML = k;
 
-  // Crystals are a bitfield, one bit per palace. The denominator is NOT 6: the
-  // seed's REQUIREMENTS setting decides how many the Great Palace barrier wants
-  // (Barrier_init2/update_2), and it is the one rando option changeable mid-run,
-  // so it is re-read every poll rather than assumed.
-  let c = '';
-  let cn = 0;
-  for (let i = 1; i <= 6; i++) {
-    const set = has(s.crystals, Math.pow(2, i - 1));
-    if (set) cn++;
-    // No caption. The filled vs hollow diamond already says whether it is placed,
-    // and the word "set" underneath was just repeating it in a second language.
-    c += '<div class="key' + (set ? ' on' : '') + '">P' + i
-       + '<b>' + (set ? '◆' : '◇') + '</b></div>';
-  }
-  $('crystals').innerHTML = c;
+  // The crystal denominator is NOT 6: the seed's REQUIREMENTS setting decides
+  // how many the Great Palace barrier wants (Barrier_init2/update_2), and it is
+  // the one rando option changeable mid-run, so it is re-read every poll.
   const req = (s.crystals_required == null) ? 6 : s.crystals_required;
-  $('crystalcount').textContent = cn + ' / ' + req + ' REQUIRED'
-                               + (req < 6 ? '  (seed needs ' + req + ' of 6)' : '');
+  $('crystalcount').textContent = cn + ' / ' + req
+                               + (req < 6 ? ' (seed needs ' + req + ' of 6)' : '');
 
-  // Hints are the single reason a runner looks at this page mid-run, so they get
-  // the whole right-hand column and stay pinned while everything else scrolls.
+  // Hints are the single reason a runner looks at this page mid-run: first
+  // panel after the HUD, LOCATION in the big type. The item's identity is
+  // carried by its own sprite -- same silhouette language as the board.
   const h = s.hints || [];
-  // Same rule as the boulder panel: no hints in hand, no panel. The old "No hints
-  // yet. Talk to villagers." placeholder told a first-time player that hint NPCs
-  // exist and are worth hunting -- which is exactly the thing some people are
-  // playing blind to avoid. Once a villager has actually told you something, the
-  // panel appears and the +/- takes over.
+  // NO PANEL UNTIL YOU HAVE ONE. The heading is itself a spoiler -- a first-time
+  // player who sees "HINTS", or "No hints yet, talk to villagers", has just learned
+  // that hint NPCs exist and are worth hunting, which is the exact thing someone
+  // playing blind is avoiding. Once a villager has told you something it appears,
+  // and the +/- takes over from there.
   $('hintpanel').hidden = (h.length === 0);
   $('hcount').textContent = (s.hints_found || 0) + '/' + (s.hints_total || 0);
+  const left = Math.max(0, (s.hints_total || 0) - (s.hints_found || 0));
   if (h.length)
-    $('hints').innerHTML = h.map(function (x) {
-      // ITEM + where it is + WHICH TOWN TOLD YOU. The source town is what stops you
-      // walking a town twice looking for a villager you already exhausted, and the
-      // sentence is the game's own wording -- the area label alone only ever gets
-      // as precise as "WESTERN HYRULE", which is not actionable.
-      // LEFT = the item, and under it WHERE YOU HEARD IT (which town's villager).
-      // RIGHT = where the item IS. Those are two different questions and they were
-      // stacked in the same column, which read as one confused address.
+    $('hints').innerHTML = h.map(x => {
+      const ico = ICONS[x.item];
+      // Three facts, three places: WHO told you (under the item), WHERE it is
+      // (the area, plus the specific screen), and WHAT THE VILLAGER SAID. The
+      // derived area label never beats "WESTERN HYRULE" -- a third of the map --
+      // so the game's own sentence is what makes a hint actionable.
       const from  = x.from  ? '<span class="hfrom">from ' + x.from + '</span>' : '';
       const scene = x.scene ? '<span class="hscene">' + x.scene + '</span>' : '';
       const txt   = x.text  ? '<div class="htext">' + x.text + '</div>' : '';
       return '<div class="h">'
-           + '<span class="item">' + (x.item || '?') + from + '</span>'
-           + '<span class="loc">'  + (x.location || '?') + scene + '</span>'
-           + txt + '</div>';
-    }).join('');
+        + (ico ? '<img class="hicon" src="' + ico + '" alt="">' : '<span class="hicon"></span>')
+        + '<span class="hbody"><span class="item">' + (x.item || '?') + from + '</span>'
+        + '<span class="loc">' + (x.location || '?') + scene + '</span></span>'
+        + txt + '</div>';
+    }).join('')
+    + (left > 0 ? '<div class="hmore">' + left + ' hint' + (left > 1 ? 's' : '') + ' still out there</div>' : '');
 
-  // BOULDER CIRCLE -- the hint system that works in every mode. Drawn as the push
-  // SEQUENCE: eight fixed slots in push order, filled in as each town's wizard
-  // tells you one. The blanks carry as much information as the answers, so they
-  // are always drawn rather than the list growing from nothing.
-  //
-  // Note the wizard gives you the Nth direction based on WHICH TOWN he is in
-  // (update_Dialogue.gml:300), not the order you visit -- so a hint heard third
-  // can belong at position seven. Sorting by step is the whole point.
+  // BOULDER CIRCLE. Same "no panel until earned" rule. The wizard gives you the
+  // direction for HIS town's position in the sequence, not the next one -- so a
+  // hint heard third can belong at position seven, and sorting by push order is
+  // the entire point of drawing it as a sequence.
   const bh    = s.boulder_hints || [];
   const btot  = s.boulder_total || 8;
   const bdone = !!s.boulder_complete;
-  // ONLY EXISTS ONCE YOU HAVE ONE. The heading itself is a spoiler: a first-time
-  // player who sees "BOULDER CIRCLE" has just learned there is a boulder puzzle and
-  // that it matters, before any villager told them. No hints received -> no panel,
-  // so the tracker never reveals a system the player has not met yet.
   $('bouldpanel').hidden = (bh.length === 0);
   $('bouldpanel').className = 'panel bould' + (bdone ? ' done' : '');
   $('bcount').textContent = bh.length + '/' + btot + (bdone ? ' · SOLVED' : '');

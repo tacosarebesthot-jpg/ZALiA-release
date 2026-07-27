@@ -320,10 +320,16 @@ function tracker_state_write() {
 	            if (string_length(_from) > 0 && string_char_at(_from, 1) == "_")
 	                _from = string_delete(_from, 1, 1);
 
-	            // The SCENE the item is actually in. "WESTERN HYRULE" is the area and
-	            // that is as vague as it sounds; data_spawn records the real room name
-	            // per hint, which at least names the specific screen.
-	            var _hrm = val(g.dm_RandoHints[? _num_ + STR_Rm + STR_Name], "");
+	            // The SCENE THE ITEM IS IN. Take it from the item's own randomized spawn
+	            // datakey -- the same string the area label above is derived from -- whose
+	            // first RmName_LEN chars are area+room.
+	            //
+	            // NOT from dm_RandoHints[<n>_Rm_Name]: that is recorded when the HINT NPC
+	            // spawns, so it is the NPC's room, not the item's. Using it printed
+	            // "CHILD ... PALACE 4 / TownA_01" -- a town room under a palace heading,
+	            // duplicating the source town in the column that answers "where do I go".
+	            var _hrm = "";
+	            if (!is_undefined(_sdk)) _hrm = string_copy(_sdk, 1, RmName_LEN);
 	            if (string_length(_hrm) > 0 && string_char_at(_hrm, 1) == "_")
 	                _hrm = string_delete(_hrm, 1, 1);
 
