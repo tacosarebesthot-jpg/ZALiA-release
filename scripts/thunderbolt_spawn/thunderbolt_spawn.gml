@@ -38,7 +38,8 @@ function thunderbolt_spawn(_x, _y, _delay) {
         x     : _x,
         y     : _y,
         delay : _delay,
-        life  : 14,                 // frames the bolt is visible after its delay
+        life  : 9,                  // 3 hot frames + a fast decay (was 14 with a smooth fade,
+                                    // which gave the eye long enough to read it as a drawn line)
         seed  : irandom(100000),    // fixed per bolt -> stable zigzag
     });
 
