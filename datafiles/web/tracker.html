@@ -126,6 +126,15 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
    fill -- otherwise it would compete with the lit/unlit language everywhere else. */
 .it.sel { outline:2px solid var(--ink); outline-offset:-2px; }
 
+/* ACTIVE spell -- running on the character RIGHT NOW. The only animation on the
+   board, because it is the only thing here that changes second to second; a
+   static treatment would read as another kind of "owned". */
+.it.active { border-color:var(--hint); box-shadow:0 0 0 1px var(--hint), 0 0 12px rgba(125,255,176,.45); }
+.it.active span { color:var(--hint); }
+@keyframes zal-pulse { 50% { box-shadow:0 0 0 1px var(--hint), 0 0 4px rgba(125,255,176,.25); } }
+.it.active { animation:zal-pulse 1.1s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .it.active { animation:none; } }
+
 /* SMALL-SOURCE MODE. An OBS browser source has its OWN viewport, so its width is
    literally how big the overlay is on stream -- a media query is the right lever.
    Below 620px the text labels are unreadable anyway, so drop them entirely and
@@ -778,8 +787,6 @@ const ICONS = {
   'SHIELD'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAdUlEQVQokWNgIAAY/8yw+H9nwgmcClhgDJUrfzAk7+iwMDBhiM6xYbijA9eHRQEaIKgAYdYcGwZkx8KsIcGKlCMMKlf+MKgUWDAwMCB8RbkjKVfAwMDAwPBnhsX/GxoM///8+fMfmY3dBKhvkIMbxRQYhokDAIHdMl9YvWU6AAAAAElFTkSuQmCC',
   'SWORD'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAS0lEQVQokWNgQAN//vz5j8xnwieJoQAbGEkKsAXQnxkW/xkYGBgY0QUYGBgY7kw4waBxAyGH0PXnz39khZgKZlj8v6HBgEcBOSYAAOnTK8qMl3eoAAAAAElFTkSuQmCC',
   'TROPHY'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAxUlEQVQ4jbVSsQ3DMAxjCp3iwUMOyNBzckBO6dih52TIARk8+BQB7tDIUWQZ6NASMBDLFMVIAn4FZi42liJKimjimjvYABENkqyTYvK5t8p43Rv1sDPCzm3lgwsAp4B56MJwToF5bSrlkZBHapxp7tXBgTwSwjLVe1imKuSCmYtUSBGFn9PnHHG5S2M133UAAPmxud8W1ZeMz/6Km0Q0iIM6W2/+0gftQO9D3QNdXQge9JvkdHtgp9BDV+Bb/FlgXi9b5+ENUo56jPat8bQAAAAASUVORK5CYII=',
-  '_HEARTC' :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAfUlEQVR4nM2TQQqAIBBFZ+QfpUWL7n+SFi06ykChNDGZjgy06IGofP9XB2W6EJGDDADYzns6VNyXMnwYdJGnc0tUplVK7+kgh57RkoYr/h8AgLVYEUoBAf7mCgieQne/AyIh1pxJVhyF1OZXgBfSMrvkJ77NVFr9kUIhI/MJG15M7mJTZygAAAAASUVORK5CYII=',
-  '_MAGICC' :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAQCAYAAAAiYZ4HAAAAiklEQVR4nGNkQAJ//vz5z4AFsLCwMMLZyIrv6MC5KODPnz//YZqYkE1RufIHQ7HKlT8oNsAZuJzFgqQYxQZkAHIaLucxMZAImGiugYVQHPyBisM8z0goDtCDl5EYxQxImsjztEqBBcQEJBqbGAjA/cAwxwa/0SlHwH4A2wAOgZQjBBXDbYABYpI3AGTqPlCxdV9sAAAAAElFTkSuQmCC',
 };
 
 function board(el, defs, value) {
@@ -866,11 +873,19 @@ async function load() {
   // bit set = tier 2.
   // SELECTED spell gets marked. The state already carried spell_selected; showing
   // it means a viewer can see what will fire without reading the game's own HUD.
+  // Three separate things on one chip, deliberately:
+  //   OWNED    -- lit, the normal have/have-not state
+  //   SELECTED -- outlined, what will fire if you cast
+  //   ACTIVE   -- pulsing, currently running on the character right now
+  // ACTIVE is the one a viewer cares about mid-fight: fire active means fireballs
+  // are available this second. It is cleared on room change by the game, so it is
+  // genuinely live rather than sticky.
   const spells = SPELLS.map(function (e) {
-    let out = e;
+    let out = e, cls = [];
     if (e[1] === 8) out = ['CUCCO ' + (s.cucco_skills ? 'II' : 'I'), 8];
-    if (e[1] === s.spell_selected) out = [out[0], out[1], 'sel'];
-    return out;
+    if (e[1] === s.spell_selected)          cls.push('sel');
+    if (has(s.spells_active || 0, e[1]))    cls.push('active');
+    return cls.length ? [out[0], out[1], cls.join(' ')] : out;
   });
   board($('spells'), spells, s.spells);
 

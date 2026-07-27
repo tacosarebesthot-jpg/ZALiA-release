@@ -78,6 +78,8 @@ switch (_path)
             f.items = 0; f.spells = 0; f.skills = 0;
             f.Cucco_skills = 0; f.crystals = 0;
             g.CuccoSpell2_Acquired = 0;
+            g.spells_active = 0;
+            f.dm_quests[? STR_Bottle + "01" + STR_State] = 0;
 
             var _cd, _ck, _ckid, _ckc;
             for (_cd = 1; _cd <= 6; _cd++)
@@ -108,6 +110,12 @@ switch (_path)
                            | f.CuccoSkill_BREAK1|f.CuccoSkill_PROJ1|f.CuccoSkill_PROJ2;
             g.CuccoSpell2_Acquired = 1;
             f.crystals     = $3F; // all six placed
+
+            // Bottle FILLED with blood -- normally only from killing Dark Link
+            // (Cutscene_ShadowBoss_2_update.gml:489) and it gates the extra ending.
+            // Without this ?all=1 leaves the bottle in its unfilled state and the
+            // tracker's third bottle state can never be seen.
+            f.dm_quests[? STR_Bottle + "01" + STR_State] = 1;
 
             // every key found, none spent -- the state a full clear leaves you in
             var _ad, _ak, _akid, _akc;
@@ -154,6 +162,16 @@ switch (_path)
         if (zweb_qs_has(_query, "skills"))   f.skills       |= tw_num(zweb_qs(_query,"skills"), 0);
         if (zweb_qs_has(_query, "cucco"))    f.Cucco_skills |= tw_num(zweb_qs(_query,"cucco"), 0);
         if (zweb_qs_has(_query, "crystals")) f.crystals      = tw_num(zweb_qs(_query,"crystals"), 0);
+
+        // ?active=N -- fake ACTIVE spell effects so the tracker's pulse can be
+        // checked without standing in a fight casting things. The game clears this
+        // on every room change, so it will not stick; that is correct behaviour, not
+        // a bug in the route.
+        if (zweb_qs_has(_query, "active"))   g.spells_active = tw_num(zweb_qs(_query,"active"), 0);
+
+        // ?bottle=1 / 0 -- the blood fill on its own.
+        if (zweb_qs_has(_query, "bottle"))
+            f.dm_quests[? STR_Bottle + "01" + STR_State] = (zweb_qs(_query,"bottle") != "0");
 
         zweb_send(_sock, "200 OK", "text/plain",
             "items="   + string(f.items)

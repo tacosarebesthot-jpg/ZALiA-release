@@ -137,6 +137,14 @@ function tracker_state_write() {
 	    spell_selected      : g.spell_selected,
 	    spell_selected_name : _sel_name,
 
+	    // ACTIVE spells -- what is currently running ON the character, not what is
+	    // merely learned. FIRE active means you can throw fireballs right now; SHIELD
+	    // active is the defence buff; FAIRY active is the Cucco transform. This is a
+	    // live, moment-to-moment state that the owned/unowned spell chips cannot
+	    // express, and it is exactly what a viewer wants to see. Cleared on room
+	    // change (g_Room_Start), so it genuinely tracks the current screen.
+	    spells_active       : g.spells_active,
+
 	    quest_timer_text    : global.QuestTimer_text,
 	    quest_timer_us      : global.QuestTimer_time,
 	    rando_hints_enabled : global.RandoHints_enabled,
