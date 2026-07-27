@@ -71,24 +71,37 @@ function thunderbolt_draw() {
         if (_span < _MIN_DROP) _span = _MIN_DROP;
         var _y0 = _b.y - _span;   // start point, always above the enemy
 
-        // SHAPE. Earlier passes read as a Contra laser -- thick, smooth, constant
-        // width, gently curving. Lightning is the opposite: THIN, sharply angular, and
-        // FORKED. The branching is most of what sells it, and it was missing entirely.
+        // SHAPE. Two earlier attempts failed in opposite directions: thick and smooth
+        // read as "the Contra laser", then thin-but-evenly-alternating read as "a line
+        // on a point graph". Both were too REGULAR -- equal row spacing plus a forced
+        // left-right-left flip is literally a sawtooth, which is what a plotted chart
+        // looks like.
         //
-        // Sharp angles come from large horizontal deviation over SHORT vertical steps,
-        // so segments are kept short and the sideways throw is big relative to them.
-        var _side = (irandom(1) * 2) - 1;
+        // Real lightning is an irregular WALK: it mostly runs near-vertical, wanders a
+        // little, occasionally throws a hard jag, and the steps are all different
+        // lengths. So: random vertical step sizes, and a horizontal random walk that is
+        // pulled gently back toward the target rather than flipped every step.
+        var _off = 0;              // current horizontal offset from the strike line
+        var _acc = 0;              // accumulated vertical distance
         for (var _s = 0; _s <= _segs; _s++)
         {
-            var _f = _s / _segs;
+            var _f = _acc / _span;
+            if (_f > 1) _f = 1;
+
             _py[_s] = _y0 + (_span * _f);
-            // amplitude stays wide most of the way down, then snaps to the target in
-            // the last fifth -- a bolt does not funnel smoothly, it jags then hits
-            var _amp = (_f > 0.8) ? (1 - _f) * 5 * 18 : 18;
-            _px[_s]  = _b.x + (_side * irandom_range(_amp * 0.55, _amp));
-            _side   *= -1;
+            _px[_s] = _b.x + _off;
+
+            // uneven vertical steps -- some short and choppy, some long and smooth
+            _acc += (_span / _segs) * random_range(0.45, 1.75);
+
+            // horizontal random walk. Occasional big jag (1 in 5), otherwise small
+            // drift, and always a pull back toward centre so it converges on the enemy.
+            var _kick = (irandom(4) == 0) ? irandom_range(9, 20) : irandom_range(1, 6);
+            _off += _kick * ((irandom(1) * 2) - 1);
+            _off -= _off * 0.30;                       // restoring pull
+            var _lim = (1 - _f) * 26;                  // allowed wander, tightens near the target
+            _off = clamp(_off, -_lim, _lim);
         }
-        _px[0]     = _b.x + (_side * irandom_range(12, 30));
         _px[_segs] = _b.x;
         _py[_segs] = _b.y;
 
@@ -106,23 +119,35 @@ function thunderbolt_draw() {
             _fork_dy[_k] = irandom_range(12, 26);
         }
 
-        // --- three passes: weight, glow, core. THIN -- the core is 1px, which is what
-        // an NES bolt actually is; the wider strokes only give it a faint halo.
-        var _passes = [[3, c_navy, 0.30], [2, c_aqua, 0.55], [1, c_white, 1.0]];
+        // ONE PIXEL. No halo strokes at all.
+        //
+        // This is the third go at thickness and the halo was the whole problem. The game
+        // renders at NES resolution and the window scales it up ~6x, so a "3px" stroke
+        // lands as roughly EIGHTEEN screen pixels -- which is precisely the fat, even
+        // beam the owner kept calling the Contra laser. The 1px core was never the issue;
+        // the two wide passes behind it were.
+        //
+        // A NES lightning bolt is a single-pixel line. The only concession is one
+        // pale-blue pass drawn 1px to the side, which tints the edge without adding
+        // measurable width.
+        var _passes = [[1, c_aqua, 0.60], [1, c_white, 1.0]];
 
-        for (var _p = 0; _p < 3; _p++)
+        for (var _p = 0; _p < 2; _p++)
         {
             var _w = _passes[_p][0];
             draw_set_colour(_passes[_p][1]);
             draw_set_alpha(_alpha * _passes[_p][2]);
 
+            // pass 0 (aqua) is nudged 1px sideways so it edges the core rather than
+            // fattening it; pass 1 (white) is the bolt itself
+            var _ox = (_p == 0) ? 1 : 0;
             for (var _s2 = 0; _s2 < _segs; _s2++)
             {
-                draw_line_width(_px[_s2], _py[_s2], _px[_s2 + 1], _py[_s2 + 1], _w);
+                draw_line_width(_px[_s2] + _ox, _py[_s2], _px[_s2 + 1] + _ox, _py[_s2 + 1], _w);
             }
 
             // forks drawn one step thinner so they read as secondary
-            var _fw = max(1, _w - 1);
+            var _fw = 1;   // forks are 1px too -- everything is 1px now
             for (var _k2 = 0; _k2 < _forks; _k2++)
             {
                 var _fi = _fork_pt[_k2];
@@ -136,10 +161,10 @@ function thunderbolt_draw() {
         // --- impact flash on the enemy, only for the first few frames ---
         if (_t > 0.55)
         {
-            var _r = 7 * (1 - _t) * 4;   // smaller: a thin bolt with a huge ring looked wrong
+            var _r = 5 * (1 - _t) * 4;   // smaller: a thin bolt with a huge ring looked wrong
             draw_set_colour(c_white);
             draw_set_alpha(_alpha * 0.8);
-            draw_circle(_b.x, _b.y, _r, false);
+            draw_circle(_b.x, _b.y, _r, true);   // outline -- a filled disc read as a blob
         }
 
         array_push(_keep, _b);
