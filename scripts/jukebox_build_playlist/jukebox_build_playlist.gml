@@ -112,6 +112,40 @@ function jukebox_build_playlist() {
         if (!_skip && string_length(_name) > 6
         &&  string_copy(_name, string_length(_name) - 5, 6) == "_Intro") _skip = true;
 
+        // STINGER SUFFIX FILTER (2026-07-26). The duration test above is the right idea
+        // but it only fires when audio_sound_length() returns a real number, and for a
+        // lot of these it does not -- so ~50 jingles were reaching the jukebox and the
+        // owner heard them as "sound effects in the music list".
+        //
+        // Matched on the END of the name (after any trailing digits), NOT anywhere in it.
+        // That distinction matters: a plain substring test for "Heart" would kill
+        // mus_IsabelleChiming_EvilHeart, which is a real song. A suffix test cannot,
+        // because these jingles are always named <set>_<Event>.
+        if (!_skip)
+        {
+            var _base = _name;
+            while (string_length(_base) > 0
+            &&     string_digits(string_char_at(_base, string_length(_base))) != "")
+            {   _base = string_copy(_base, 1, string_length(_base) - 1);  }
+
+            var _stingers = ["GetItem","Get_Spell","GetSpell","Fanfare","DungeonClear",
+                             "GameClear","GameOver","GameStart","LevelUp","PlaceCrystal",
+                             "SecretFound","Jingle","Victory","Triforce",
+                             // Flute is the WARP FLUTE cue -- a sound effect that happens
+                             // to carry a mus_ prefix, so the audiogroup scan picks it up.
+                             "Flute"];
+
+            for (var _st = 0; _st < array_length(_stingers); _st++)
+            {
+                var _tk = _stingers[_st];
+                var _tl = string_length(_tk);
+                if (string_length(_base) < _tl) continue;
+                if (string_lower(string_copy(_base, string_length(_base) - _tl + 1, _tl))
+                 == string_lower(_tk))
+                {   _skip = true; break;  }
+            }
+        }
+
         if (!_skip)
         {
             // ASSIGNED = sound was registered in Audio.dm via add_sound_data().
