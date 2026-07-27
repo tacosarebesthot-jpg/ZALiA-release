@@ -294,18 +294,87 @@ function tracker_state_write() {
 	            // Item display name: letters only, e.g. "CANDLE".
 	            var _it = string_letters(val(g.dm_RandoHintsRecorder[? STR_Hint + _num_ + STR_Item], ""));
 
-	            // Location: look up this item id's randomized spawn datakey; its first
-	            // AreaID_LEN chars are the area prefix, mapped to a clean label above.
+	            // Coarse area, from the item's randomized spawn datakey. Kept, but it is
+	            // only ever as precise as "WESTERN HYRULE" -- see the real text below.
 	            var _sdk = g.dm_spawn[? _item + STR_Spawn + STR_Datakey + STR_Randomized];
 	            var _loc = "?";
 	            if (!is_undefined(_sdk))
 	                _loc = _area_label(string_copy(_sdk, 1, AreaID_LEN));
 
-	            array_push(_hints, { item : _it, location : _loc });
+	            // THE GAME'S OWN SENTENCE. update_Dialogue splits the NPC's line around
+	            // the item name and stores the halves, so Text01 + ITEM + Text02
+	            // rebuilds exactly what the villager said ("PUSH SOME STATUES TO GET
+	            // THE CANDLE"). That is the actual clue; the area label alone is too
+	            // vague to act on -- owner's words: "Western Hyrule is not very
+	            // specific". The "<" and ">" are the dialogue engine's line breaks.
+	            var _t1 = val(g.dm_RandoHintsRecorder[? STR_Hint + _num_ + STR_Text + "01"], "");
+	            var _t2 = val(g.dm_RandoHintsRecorder[? STR_Hint + _num_ + STR_Text + "02"], "");
+	            var _full = _t1 + _it + _t2;
+	            _full = string_replace_all(_full, "<", " ");
+	            _full = string_replace_all(_full, ">", " ");
+
+	            // WHICH TOWN GAVE IT. data_spawn records the source town per hint
+	            // (STR_Other when it is not a town). Without this you cannot tell which
+	            // villagers you have already exhausted, and you walk a town twice.
+	            var _from = val(g.dm_RandoHints[? _num_ + STR_Area], "");
+	            if (string_length(_from) > 0 && string_char_at(_from, 1) == "_")
+	                _from = string_delete(_from, 1, 1);
+
+	            // The SCENE the item is actually in. "WESTERN HYRULE" is the area and
+	            // that is as vague as it sounds; data_spawn records the real room name
+	            // per hint, which at least names the specific screen.
+	            var _hrm = val(g.dm_RandoHints[? _num_ + STR_Rm + STR_Name], "");
+	            if (string_length(_hrm) > 0 && string_char_at(_hrm, 1) == "_")
+	                _hrm = string_delete(_hrm, 1, 1);
+
+	            array_push(_hints, {
+	                item     : _it,
+	                location : _loc,
+	                scene    : _hrm,
+	                text     : _full,
+	                from     : _from
+	            });
 	        }
 	    }
 	    _s.hints = _hints;
 	}
+
+	// ── BOULDER CIRCLE HINTS ────────────────────────────────────────────────────
+	// The SECOND hint system, and the one the tracker was blind to. These exist in
+	// EVERY game mode -- vanilla included -- because the boulder circle is a quest
+	// puzzle, not a randomizer feature. Owner hit this: he got a boulder hint on a
+	// vanilla file and the tracker showed nothing, because it only ever read
+	// g.dm_RandoHintsRecorder (rando item locations).
+	//
+	// Model (new_quest_init_puzzles.gml): the eight compass directions are shuffled
+	// per file. `..._Received` is a hex string of the hint numbers collected so far,
+	// two chars each, in the order they were GIVEN. For each, `..._Dialogue` is the
+	// direction word and the bare key is its position in the push sequence.
+	var _b_order = STR_Boulder + STR_Circle + STR_Order;
+	var _b_recv  = val(f.dm_quests[? _b_order + "_Received"], "");
+	var _b_cnt   = string_length(_b_recv) >> 1;
+	var _boulders = [];
+	for (var _bi = 0; _bi < _b_cnt; _bi++)
+	{
+	    var _bnum = string_copy(_b_recv, (_bi << 1) + 1, 2);
+	    var _bdir = val(f.dm_quests[? _b_order + _bnum + STR_Dialogue], "");
+
+	    // PUSH ORDER IS _bnum, NOT the value stored at the bare key. Got this wrong
+	    // first time: `Order<n>` holds the COMPASS INDEX of that direction (SOUTH is
+	    // 5th on the compass), while `<n>` itself is the position in the push
+	    // sequence. Rauru is town 1 and reported step 5, which is how it surfaced.
+	    // Overworld_Draw wants the compass index because it maps to a physical
+	    // boulder; the tracker wants the ORDER, because the order is the answer.
+	    var _bstep    = str_hex(_bnum);
+	    var _bcompass = val(f.dm_quests[? _b_order + _bnum]);
+	    if (_bdir != "" && _bstep)
+	    {
+	        array_push(_boulders, { step : _bstep, dir : _bdir, compass : _bcompass });
+	    }
+	}
+	_s.boulder_hints    = _boulders;
+	_s.boulder_total    = val(f.dm_quests[? _b_order + STR_Count], 8);
+	_s.boulder_complete = val(f.dm_quests[? STR_Boulder + STR_Circle + STR_Complete]) ? 1 : 0;
 
 	// ── write ───────────────────────────────────────────────────────────────────
 	var _fh = file_text_open_write("tracker_state.json");

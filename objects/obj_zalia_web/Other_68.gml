@@ -329,6 +329,18 @@ switch (_path)
             goToExitNum  = str_hex(string_copy(goToExitName, RmName_LEN-1, 2));
             goToRoom     = string_copy(goToExitName, 1, RmName_LEN);
         }
+
+        // SPAWN AT THE DOOR, NOT AT 0,0.
+        //
+        // set_pc_spawn_xy() looks the position up as
+        //   g.dm_rm[ scene + strR(f.reen, RmName_LEN+1) + STR_Spawn_x/y ]
+        // and data_exit stores it under area+roomhex+exithex -- exactly the string
+        // we were handed. But f.reen is only assigned inside the _EXITING_RM branch
+        // of update_change_room_1a, and fabricating an exit here never trips that
+        // path. So the lookup used a stale reen, val() defaulted to 0, and the
+        // player materialised at literal 0,0 -- the top-left corner, inside the
+        // wall, having to jump out and re-enter through the door every single warp.
+        f.reen = _rmn;
         if (DEV) show_debug_message("[ZWEB] warp -> " + _rmn);
         zweb_send(_sock, "200 OK", "text/plain", "warping to " + _rmn);
     break;

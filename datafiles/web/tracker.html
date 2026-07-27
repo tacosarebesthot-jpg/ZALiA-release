@@ -198,7 +198,36 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
      background:var(--card); border-left:3px solid var(--hint); align-items:baseline; }
 .h .item { font-weight:700; font-size:14px; letter-spacing:.03em; }
 .h .loc  { color:var(--hint); font-size:11px; text-align:right; }
+/* Source town, under the ITEM on the left -- it answers "who told me", which
+   belongs with the item, not with the destination. Dimmer because it is where you
+   have BEEN, not where to go. */
+.hfrom { display:block; color:var(--dim); font-size:9px; letter-spacing:.08em;
+         font-weight:400; }
+/* The specific screen, under the area on the right. "WESTERN HYRULE" alone is not
+   an answer; the scene name at least names the screen. */
+.hscene { display:block; color:var(--dim); font-size:9px; letter-spacing:.04em; }
+/* The villager's actual words. Full width under the item row, because it is the
+   part you act on. */
+.htext { grid-column:1/-1; color:var(--ink); opacity:.8; font-size:10px;
+         line-height:1.35; margin-top:3px; }
 .none { color:var(--dim); font-style:italic; padding:8px 4px; }
+
+/* BOULDER CIRCLE. Eight slots always drawn, filled as each town's wizard tells
+   you one -- the empty slots ARE the information ("three still to ask"), which a
+   list of only-what-you-have cannot show. Ordered by push position, not by the
+   order you happened to hear them, because the sequence is what you act on. */
+.bould { margin-top:12px; }
+/* Hidden by the toggles. A data attribute rather than [hidden] because the boulder
+   panel already drives [hidden] itself for "no hints yet" -- two things fighting
+   over one attribute is how a panel ends up stuck. */
+[data-hidden="1"] { display:none; }
+.bseq { display:grid; grid-template-columns:repeat(4,1fr); gap:4px; }
+.bstep { border:1px solid var(--pip-off); padding:5px 2px; text-align:center;
+         color:var(--ghost); font-size:9px; letter-spacing:.06em; }
+.bstep b { display:block; font-size:15px; line-height:1.15; font-weight:700; }
+.bstep.on { border-color:var(--got); color:var(--got); }
+.bould.done { border-color:var(--hint); }
+.bould.done h2 { color:var(--hint); }
 
 /* ---- theme picker -------------------------------------------------------- */
 /* Hidden in OBS mode: the overlay is output, not a control panel. Pick the theme
@@ -209,6 +238,13 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
 #themebar select { font:inherit; letter-spacing:.08em; background:var(--void); color:var(--ink);
                    border:1px solid var(--edge); padding:3px 5px; }
 body.obs #themebar { display:none; }
+/* Collapse control, sat in the panel's own heading. A plus/minus rather than a
+   checkbox in a corner bar: the control belongs on the thing it hides, and the
+   glyph says which way it goes without a label. */
+.hidebtn { float:right; cursor:pointer; user-select:none; color:var(--dim);
+           font-size:13px; line-height:1; padding:0 2px; font-weight:700; }
+.hidebtn:hover { color:var(--ink); }
+body.obs .hidebtn { display:none; }   /* overlay is output, not a control panel */
 
 /* ===========================================================================
    THEMES. Each is a self-contained body[data-theme="..."] block: variable
@@ -620,9 +656,18 @@ body[data-theme="gothic"] .h { box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
       <div class="vsoff" id="vsoff" hidden>MODE OFF — SCORE STANDS</div>
     </div>
 
-    <div class="panel hints" style="margin-top:12px">
-      <h2>HINTS <span class="hcount" id="hcount"></span></h2>
+    <!-- BOULDER CIRCLE. The other hint system, and the one that exists in EVERY
+         mode -- it is a quest puzzle, not a randomizer feature. Shown as the push
+         SEQUENCE rather than a list of dialogue, because the order is the answer. -->
+    <div class="panel bould" id="bouldpanel" hidden>
+      <h2><span class="hidebtn" id="btn_boulder" onclick="setPanel('boulder',!panelOn.boulder)">&minus;</span>BOULDER CIRCLE <span class="hcount" id="bcount"></span></h2>
+      <div class="bseq" id="boulders"></div>
+    </div>
+
+    <div class="panel hints" id="hintpanel" style="margin-top:12px">
+      <h2><span class="hidebtn" id="btn_hints" onclick="setPanel('hints',!panelOn.hints)">&minus;</span>ITEM HINTS <span class="hcount" id="hcount"></span></h2>
       <div class="hlist" id="hints"></div>
+      <div class="none" id="hnote" hidden></div>
     </div>
   </div>
 
@@ -648,6 +693,40 @@ function setTheme(name, remember) {
     try { localStorage.setItem('zalia_theme', name || ''); } catch (e) {}
   }
 }
+// PANEL VISIBILITY. Hints are spoilers -- a streamer may not want either panel on
+// screen. Same precedence rule as the theme: ?hints=0 / ?boulder=0 in the URL beats
+// the saved choice, because an OBS browser source runs in its own profile and
+// cannot see anything you clicked in a normal tab.
+const PANELS = { hints: 'hintpanel', boulder: 'bouldpanel' };
+const panelOn = { hints: true, boulder: true };
+
+// Collapse the panel BODY, never the panel -- hiding the heading too would take
+// the only control for getting it back with it.
+const PANEL_BODY = { hints: ['hints', 'hnote'], boulder: ['boulders'] };
+function applyPanels() {
+  Object.keys(PANELS).forEach(function (k) {
+    PANEL_BODY[k].forEach(function (id) {
+      const b = $(id);
+      if (b) b.dataset.hidden = panelOn[k] ? '' : '1';
+    });
+    const btn = $('btn_' + k);
+    if (btn) btn.innerHTML = panelOn[k] ? '&minus;' : '+';
+  });
+}
+function setPanel(which, on) {
+  panelOn[which] = !!on;
+  try { localStorage.setItem('zalia_panel_' + which, on ? '1' : '0'); } catch (e) {}
+  applyPanels();
+}
+(function initPanels() {
+  Object.keys(PANELS).forEach(function (k) {
+    let v = QS.get(k);
+    if (v === null) { try { v = localStorage.getItem('zalia_panel_' + k); } catch (e) { v = null; } }
+    panelOn[k] = (v === null) ? true : (v !== '0');
+  });
+  applyPanels();
+})();
+
 (function initTheme() {
   let t = QS.get('theme');
   // Only fall back to the stored choice when the URL did not specify one --
@@ -993,15 +1072,59 @@ async function load() {
   // Hints are the single reason a runner looks at this page mid-run, so they get
   // the whole right-hand column and stay pinned while everything else scrolls.
   const h = s.hints || [];
+  // Same rule as the boulder panel: no hints in hand, no panel. The old "No hints
+  // yet. Talk to villagers." placeholder told a first-time player that hint NPCs
+  // exist and are worth hunting -- which is exactly the thing some people are
+  // playing blind to avoid. Once a villager has actually told you something, the
+  // panel appears and the +/- takes over.
+  $('hintpanel').hidden = (h.length === 0);
   $('hcount').textContent = (s.hints_found || 0) + '/' + (s.hints_total || 0);
-  if (!s.rando_hints_enabled)
-    $('hints').innerHTML = '<div class="none">Hints are off for this seed.</div>';
-  else if (!h.length)
-    $('hints').innerHTML = '<div class="none">No hints yet. Talk to villagers.</div>';
-  else
-    $('hints').innerHTML = h.map(x =>
-      '<div class="h"><span class="item">' + (x.item || '?') +
-      '</span><span class="loc">' + (x.location || '?') + '</span></div>').join('');
+  if (h.length)
+    $('hints').innerHTML = h.map(function (x) {
+      // ITEM + where it is + WHICH TOWN TOLD YOU. The source town is what stops you
+      // walking a town twice looking for a villager you already exhausted, and the
+      // sentence is the game's own wording -- the area label alone only ever gets
+      // as precise as "WESTERN HYRULE", which is not actionable.
+      // LEFT = the item, and under it WHERE YOU HEARD IT (which town's villager).
+      // RIGHT = where the item IS. Those are two different questions and they were
+      // stacked in the same column, which read as one confused address.
+      const from  = x.from  ? '<span class="hfrom">from ' + x.from + '</span>' : '';
+      const scene = x.scene ? '<span class="hscene">' + x.scene + '</span>' : '';
+      const txt   = x.text  ? '<div class="htext">' + x.text + '</div>' : '';
+      return '<div class="h">'
+           + '<span class="item">' + (x.item || '?') + from + '</span>'
+           + '<span class="loc">'  + (x.location || '?') + scene + '</span>'
+           + txt + '</div>';
+    }).join('');
+
+  // BOULDER CIRCLE -- the hint system that works in every mode. Drawn as the push
+  // SEQUENCE: eight fixed slots in push order, filled in as each town's wizard
+  // tells you one. The blanks carry as much information as the answers, so they
+  // are always drawn rather than the list growing from nothing.
+  //
+  // Note the wizard gives you the Nth direction based on WHICH TOWN he is in
+  // (update_Dialogue.gml:300), not the order you visit -- so a hint heard third
+  // can belong at position seven. Sorting by step is the whole point.
+  const bh    = s.boulder_hints || [];
+  const btot  = s.boulder_total || 8;
+  const bdone = !!s.boulder_complete;
+  // ONLY EXISTS ONCE YOU HAVE ONE. The heading itself is a spoiler: a first-time
+  // player who sees "BOULDER CIRCLE" has just learned there is a boulder puzzle and
+  // that it matters, before any villager told them. No hints received -> no panel,
+  // so the tracker never reveals a system the player has not met yet.
+  $('bouldpanel').hidden = (bh.length === 0);
+  $('bouldpanel').className = 'panel bould' + (bdone ? ' done' : '');
+  $('bcount').textContent = bh.length + '/' + btot + (bdone ? ' · SOLVED' : '');
+  const bmap = {};
+  bh.forEach(function (x) { bmap[x.step] = x.dir; });
+  let bs = '';
+  for (let i = 1; i <= btot; i++) {
+    const dir = bmap[i];
+    const abbr = dir ? dir.split(' ').map(w => w[0]).join('') : '—';
+    bs += '<div class="bstep' + (dir ? ' on' : '') + '">' + i
+        + '<b>' + abbr + '</b>' + (dir ? dir : 'unknown') + '</div>';
+  }
+  $('boulders').innerHTML = bs;
 }
 
 load();

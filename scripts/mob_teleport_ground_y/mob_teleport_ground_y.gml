@@ -33,6 +33,25 @@ function mob_teleport_ground_y(_x, _y, _hh) {
     // No solid below (elevator shafts, bottomless rooms) -> leave the mob alone.
     if (_ground == _y) return _y;
 
+    // NEVER DROP BELOW THE ROOM'S OWN GROUND ROW. (Owner report, 2026-07-27.)
+    //
+    // "First solid surface below" is not the same as "the floor the player is on".
+    // _EastA_59 has a lower deck beneath the main floor, so a Wizard teleporting
+    // over a gap fell through to it and became unkillable -- and that room is a
+    // REQUIRED quest fight, so the run simply stops. Trading a floating mob for an
+    // unreachable one is not a fix.
+    //
+    // Rooms declare their intended floor as `<scene>_Ground_Row` (set in the
+    // rm_data_init files, read the same way Leever_init2 does it). Where a room
+    // declares one, clamp to it: a teleporting mob may land on a platform ABOVE the
+    // ground, never below it. Rooms without the key keep the plain search.
+    var _grow = g.dm_rm[? g.rm_name + STR_Ground + STR_Row];
+    if (!is_undefined(_grow))
+    {
+        var _floor = _grow << 3;              // row -> pixels
+        if (_ground > _floor) _ground = _floor;
+    }
+
     // get_ground_y already returns pixels. Do NOT shift it again.
     return _ground - _hh;
 
