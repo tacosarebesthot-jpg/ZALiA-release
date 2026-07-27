@@ -154,13 +154,18 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
-	    // HOW TO SET UP: read-only pointer at the setup files that ship with the game.
-	    // Named rather than described because a first-time user has no idea either
-	    // Twitch route needs anything outside the game at all.
+	    // OPEN SETUP PAGE: hands the setup page to the player's own browser.
+	    // This used to be a read-only "HOW TO SET UP" row pointing at a .bat file, which
+	    // is exactly the friction that stopped people connecting chat at all.
+	    //
+	    // Login happens on twitch.tv, NOT here -- the page has no password field. A
+	    // failed open plays the back sound instead of the confirm sound, so a busy port
+	    // is audible rather than silent.
 	    case Twitch.SETUP:{ if (timer) break;
 	    if (_InputConfirm_pressed2)
 	    {
-	        aud_play_sound(BACK_SOUND1);
+	        if (zweb_open_page("/twitch")) aud_play_sound(_SOUND2);
+	        else                           aud_play_sound(BACK_SOUND1);
 	        timer = DURATION1;
 	    }
 	    break;}

@@ -144,6 +144,17 @@ function FileSelect_register_file(argument0) {
 	    if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_ENIGMA, 2]) _START_SPELLS |= SPL_SPEL;
 	    if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_THUNDER,2]) _START_SPELLS |= SPL_THUN;
 	    //if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_SUMMON, 2]) _START_SPELLS |= SPL_SUMM;
+
+	    // START REFLECT (the RandoOTHER MAIN row, backed by the persistent
+	    // global.start_with_reflect). MOVED IN HERE 2026-07-27 -- it used to live in an
+	    // `else` branch that fired on NON-rando files, so once the toggle had ever been
+	    // set every plain vanilla new game silently started with Reflect.
+	    //
+	    // The option still WORKS, it is just gated on rando now: rando on + toggle on
+	    // grants it, rando off never does. The preference stays persistent so the choice
+	    // survives between rando runs, which is the point of it.
+	    if (global.start_with_reflect) _START_SPELLS |= SPL_RFLC;
+
 	    _dm_save_file[?_datakey] = _START_SPELLS;
     
     
@@ -170,15 +181,21 @@ function FileSelect_register_file(argument0) {
 	        _dm_save_file[?f.SDNAME_linkDolls] = _val;
 	    }
 	}
-	else
-	{
-	    // Vanilla "Start With Reflect" (non-rando new game). Mirrors the rando REFLECT grant,
-	    // but applies ONLY when this is NOT a rando file, so the rando path is left untouched.
-	    if (global.start_with_reflect)
-	    {
-	        _dm_save_file[?f.SDNAME_spells] = val(_dm_save_file[?f.SDNAME_spells]) | SPL_RFLC;
-	    }
-	}
+	// REMOVED 2026-07-27: a non-rando "start with Reflect" branch lived here, granting
+	// SPL_RFLC to VANILLA new games whenever global.start_with_reflect was set.
+	//
+	// Why it had to go: that global is PERSISTENT (UserPreferences "StartWithReflect",
+	// load_game_pref.gml:180). Once ever switched on it stayed on, so every plain
+	// vanilla new game silently started with Reflect and nothing on the file-select
+	// screen said so. Caught in the act 2026-07-27: a fresh non-rando file was written
+	// spells=0 and re-saved as spells=32 seconds later.
+	//
+	// Start-with-spells belongs to the RANDOMIZER, and the rando branch above already
+	// does it properly via dg_RandoOTHER_SPELLS[...cursor_REFLECT]. Owner's rule: rando
+	// may turn these on, but it must not STICK once rando is off.
+	//
+	// The menu row itself is NOT removed and is NOT inert -- its check simply moved up
+	// into the rando branch above, so the option still works whenever rando is on.
 
 
 

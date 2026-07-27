@@ -21,6 +21,11 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        // macro: enter the dev code (mirror of the Konami code) to reveal it for
 	        // the session, or drop dev_unlock.txt in the save dir to keep it visible.
 	        case MainOption_DEV_TOOLS:     {return dev_avail(); break;}
+	        // Companion pages. Deliberately ALWAYS shown, even when the web server failed
+	        // to bind. Hiding them would silently delete the only route to the Twitch
+	        // features, and the player would have no idea the feature exists at all --
+	        // worse than a row that reports failure. zweb_open_page plays the BACK sound
+	        // when the server is down, so pressing it is audibly different from working.
 	        case MainOption_TWITCH:        {return true; break;}
 	        case MainOption_DISPLAY:       {return true; break;}
 	        case MainOption_OTHER:         {return true; break;}

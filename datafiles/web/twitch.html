@@ -25,6 +25,10 @@ button.primary:hover { background:#a76bff; }
 .note code { background:#1f2338; padding:1px 5px; border-radius:3px; }
 a { color:#9ecbff; }
 .statusline { margin-top:12px; min-height:1.3em; font-size:13px; }
+.cmds { display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:16px; margin-top:12px; }
+.cmds h3 { font-size:11px; margin:0 0 8px; letter-spacing:.08em; opacity:.55; font-weight:normal; }
+.cmds code { display:inline-block; background:#1f2338; border:1px solid #3a3f63;
+             padding:2px 7px; border-radius:3px; margin:0 4px 5px 0; font-size:12px; }
 </style></head><body>
 <header><h1>ZALiA — TWITCH SETUP</h1><span id="conn" class="pill">…</span></header>
 <main>
@@ -66,16 +70,26 @@ a { color:#9ecbff; }
     <code>!protect</code>, <code>!shield</code>, <code>!reflect</code> or summoned allies.
     Chat can only hurt you. Turning it on also enables chat commands.
   </p>
-  <div style="margin-top:12px;display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+  <div style="margin-top:12px;display:flex;align-items:center;gap:12px;flex-wrap:wrap">
     <button id="vsbtn" class="primary" onclick="toggleVs()">TURN VS CHAT ON</button>
-    <span style="font-size:12px;opacity:.7">CHAT KILLS</span>
-    <span id="vskills" style="font-size:26px;font-weight:bold;color:#ff9a9a">0</span>
     <button onclick="resetVs()">RESET SCORE</button>
   </div>
+  <p class="note">
+    The chat-kill score is shown on the <strong>tracker</strong>, not here — this page is
+    setup, and setup is not something you put on stream. Open TRACKER from the game's
+    options menu and add it to OBS as a browser source.
+  </p>
 </section>
 
 <section>
   <h2>3. CHAT EFFECTS</h2>
+  <p class="note" style="margin-top:0">
+    The master switch. With this off, chat can type commands all day and nothing happens.
+    Turning VS CHAT on above switches it on for you.
+  </p>
+  <div style="margin-top:12px">
+    <button id="rewbtn" onclick="toggleRewards()">CHAT COMMANDS: OFF</button>
+  </div>
   <label>COOLDOWN BETWEEN VIEWER COMMANDS (seconds, 0 = none)
          <span style="opacity:.5">— stored as frames; 60 frames = 1 second</span></label>
   <input type="text" id="cooldown" placeholder="0" autocomplete="off">
@@ -83,6 +97,31 @@ a { color:#9ecbff; }
   <input type="text" id="effect" placeholder="30" autocomplete="off">
   <div style="margin-top:14px"><button onclick="saveEffects()">SAVE</button></div>
   <div class="statusline" id="fxline"></div>
+</section>
+
+<section>
+  <h2>4. WHAT CHAT CAN TYPE</h2>
+  <p class="note" style="margin-top:0">
+    Viewers type these in your chat. Everything in the HELPS YOU column is refused while
+    VS CHAT MODE is on.
+  </p>
+  <div class="cmds">
+    <div>
+      <h3>HELPS YOU</h3>
+      <code>!heal</code> <code>!mp</code> <code>!refill</code> <code>!1up</code>
+      <code>!fairy</code> <code>!invuln</code> <code>!protect</code> <code>!shield</code>
+      <code>!reflect</code>
+    </div>
+    <div>
+      <h3>HURTS YOU</h3>
+      <code>!hurt</code> <code>!slow</code> <code>!flip</code> <code>!confuse</code>
+      <code>!dark</code> <code>!spawn</code> <code>!swarm</code> <code>!freeze</code>
+    </div>
+    <div>
+      <h3>JUST CHAOS</h3>
+      <code>!speed</code> <code>!party</code> <code>!cucco</code>
+    </div>
+  </div>
 </section>
 
 <section>
@@ -127,7 +166,9 @@ async function load() {
     ? '<span class="pill ok">TOKEN STORED</span>'
     : '<span class="pill bad">NO TOKEN YET</span>';
 
-  vskills.textContent = cfg.vs_kills || 0;
+  rewbtn.textContent   = cfg.enabled ? 'CHAT COMMANDS: ON' : 'CHAT COMMANDS: OFF';
+  rewbtn.className     = cfg.enabled ? 'primary' : '';
+
   vsbtn.textContent   = cfg.vs_mode ? 'TURN VS CHAT OFF' : 'TURN VS CHAT ON';
   vsbtn.className     = cfg.vs_mode ? '' : 'primary';
   vsbox.style.borderColor = cfg.vs_mode ? '#ff9a9a' : '#4a4f75';
@@ -173,6 +214,11 @@ async function saveEffects() {
 async function saveClient() {
   await api('/twitch/save?client_id=' + encodeURIComponent(clientid.value.trim()));
   cidline.textContent = 'Saved.';
+}
+
+async function toggleRewards() {
+  await api('/twitch/save?rewards=' + (cfg.enabled ? '0' : '1'));
+  setTimeout(load, 300);
 }
 
 async function toggleVs() {

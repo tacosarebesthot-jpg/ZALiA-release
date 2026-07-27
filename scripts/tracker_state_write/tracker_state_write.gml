@@ -175,6 +175,15 @@ function tracker_state_write() {
 	_s.deaths_warped = val(f.death_count_warped, 0);
 	_s.deaths_real   = max(0, f.death_count - val(f.death_count_warped, 0));
 
+	// ── VS CHAT MODE ────────────────────────────────────────────────────────────
+	// Moved here from the Twitch SETUP page 2026-07-27. The kill counter is the one
+	// piece of the Twitch feature an AUDIENCE wants to look at, and setup pages do
+	// not belong on stream -- they hold a channel name, a client id, and buttons that
+	// change the run. The tracker is the thing pointed at OBS, so the scoreboard
+	// lives here and the controls stay on the setup page.
+	_s.vs_mode  = (variable_global_exists("tw_vs_mode")  && global.tw_vs_mode) ? 1 : 0;
+	_s.vs_kills = variable_global_exists("tw_vs_kills") ? global.tw_vs_kills : 0;
+
 	// ── CRYSTALS REQUIRED (rando setup > REQUIREMENTS) ──────────────────────────
 	// This -- not a hardcoded 6 -- is what gates the Great Palace barrier
 	// (Barrier_init2.gml:105, Barrier_update_2.gml:114/132). A seed can require

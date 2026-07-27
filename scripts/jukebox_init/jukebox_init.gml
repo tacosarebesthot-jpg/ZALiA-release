@@ -55,14 +55,20 @@ function jukebox_init() {
 	global.jukebox_names  = [];
 	global.jukebox_assets = [];
 
-	// AUTO-ADVANCE (2026-07-26): the jukebox used to play ONE track on loop forever. The
-	// user wants it to behave like a real player -- play a track, then move to the next.
-	// When true, jukebox_play() starts tracks NON-looping and the per-frame poll in
-	// Surface_Draw_GUI_End advances when the instance stops. Set false for single-track
-	// repeat. Safe by construction: Audio_update_2's room-music and boss-music restarts are
-	// both gated on !global.jukebox_on (Audio_update_2.gml:42-45, 84-88), so the gap between
+	// PLAY MODE (2026-07-27). Was a boolean `jukebox_autoadvance`; the owner wanted
+	// actual player controls -- "loop a song, or change them, or shuffle".
+	//   JB_REPEAT  0  one track, forever  (jukebox_play passes loop=true)
+	//   JB_ADVANCE 1  play through the list in order
+	//   JB_SHUFFLE 2  random next, never the same track twice in a row
+	//
+	// REPEAT is the only mode that loops the audio instance. The other two start the
+	// track NON-looping so "instance stopped" means "track finished", which is what the
+	// per-frame poll in Surface_Draw_GUI_End watches.
+	//
+	// Safe by construction: Audio_update_2's room-music and boss-music restarts are both
+	// gated on !global.jukebox_on (Audio_update_2.gml:42-45, 84-88), so the gap between
 	// one track ending and the next starting can never let area music grab the channel.
-	global.jukebox_autoadvance = true;
+	global.jukebox_mode = JB_ADVANCE;
 
 	// Populate from the actual audiogroup rather than the old hard-coded
 	// mus_NESJUKE_001..056 scan (those assets were byte-identical re-imports of tracks

@@ -46,6 +46,13 @@ function OptionsMenu_Draw_Main() {
 	    case MainOption_MUSIC_SET:   {_yt1+=_DIST1; break;} // extra pad
 	    case MainOption_PC_SPRITES:  {_yt1+=_DIST2; break;} // extra pad
 	    case MainOption_INPUT_CONFIG:{_yt1+=$2;     break;} // extra pad
+
+	    // NOTE this menu does NOT scroll -- the loop below just stops drawing once a
+	    // row passes MenuWindow_yb. Adding rows here silently pushes CLOSE off the
+	    // bottom. Zeroing the padding to make room was tried and looked worse (rows
+	    // collided with the skin-sprite area), which is why the three companion-page
+	    // launchers became ONE row that opens a hub page instead. Count the rows
+	    // before adding another.
 	    case MainOption_CLOSE:       {_yt1+=_DIST2; break;} // extra pad
 	    }
     

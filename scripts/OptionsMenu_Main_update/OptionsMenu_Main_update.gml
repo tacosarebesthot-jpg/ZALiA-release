@@ -109,18 +109,25 @@ function OptionsMenu_Main_update() {
 
 	    // ---------------------------------------------------------
 	    // TWITCH: opens the player-facing stream menu (was buried in DEV TOOLS).
+	    // ---- COMPANION PAGES ------------------------------------
+	    // These three no longer open submenus -- they hand a loopback URL to the
+	    // player's default browser. The old TWITCH submenu's contents moved onto the
+	    // setup page; see OptionsMenu_Create.
+	    //
+	    // A failed open plays the BACK sound rather than the confirm sound, so "the
+	    // port was busy" is audible instead of looking like a dead menu row. That
+	    // happens when a second copy of the game is already running.
 	    case MainOption_TWITCH:{
 	    if (timer) break;
 
 	    if (_InputConfirm_pressed2)
 	    {
-	        Twitch_cursor = 0;
-	        aud_play_sound(CONFIRM_SOUND1);
+	        if (zweb_open_page("/home")) aud_play_sound(CONFIRM_SOUND1);
+	        else                           aud_play_sound(BACK_SOUND1);
 	        timer = DURATION1;
-	        menu_state = menu_state_TWITCH;
-	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	    }
 	    break;}//case MainOption_TWITCH
+
 
 	    case MainOption_DISPLAY:{
 	    if (timer) break;

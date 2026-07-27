@@ -212,6 +212,41 @@ function jukebox_poll_cmd() {
             }
         break;
 
+        // mode <0|1|2> -- 0 REPEAT one track, 1 ADVANCE in order, 2 SHUFFLE.
+        // Also accepts the words, because typing "shuffle" is what anyone would try.
+        //
+        // Switching INTO or OUT OF repeat has to restart the track: the loop flag is
+        // baked into the audio instance at play time, so a running track keeps its old
+        // looping behaviour until it is replayed. Without this, picking REPEAT while a
+        // track is already going appears to do nothing until the next song.
+        case "mode":
+            var _old = variable_global_exists("jukebox_mode") ? global.jukebox_mode : JB_ADVANCE;
+            var _new = _old;
+            switch (_arg)
+            {
+                case "repeat": case "loop": case "0": _new = JB_REPEAT;  break;
+                case "advance": case "next": case "1": _new = JB_ADVANCE; break;
+                case "shuffle": case "random": case "2": _new = JB_SHUFFLE; break;
+                default: _new = clamp(real(_arg), 0, JB_MODE_COUNT - 1); break;
+            }
+            global.jukebox_mode = _new;
+
+            // Plain branches, not a chained ternary -- this GML compiler rejects
+            // `a ? b : c ? d : e` outright ("unexpected symbol ?").
+            var _mname = "PLAY ALL";
+            if      (_new == JB_REPEAT)  _mname = "REPEAT ONE";
+            else if (_new == JB_SHUFFLE) _mname = "SHUFFLE";
+
+            global.jukebox_msg       = _mname;
+            global.jukebox_msg_timer = 120;
+
+            if ((_old == JB_REPEAT) != (_new == JB_REPEAT)
+            &&  global.jukebox_on && global.jukebox_inst && global.jukebox_count > 0)
+            {
+                jukebox_play();
+            }
+        break;
+
         case "playlist":
             global.jukebox_playlist = clamp(real(_arg), 0, JukeboxPL.COUNT - 1);
             jukebox_build_playlist();

@@ -31,10 +31,23 @@ function PaletteEditor_Step() {
 	PP0  = !CTL && !SHF && !ALT && PP;
 	PH0  = !CTL && !SHF && !ALT && PH;
 
-	var _EDIT_REQUESTED_PAL = (CTL0 && PP) 
-	                       || (Input.GP_Other6_held && Input.GP_Other4_held && Input.GP_Other2_pressed); // Hold trigR + bumpR, press Y
+	// DEV GATE (2026-07-27). CTRL+P dropped ANY player straight into the palette
+	// editor, and the two gamepad combos did the same for controller users. This is
+	// the accidental-entry the owner reported: reach for ctrl+P (or hold a trigger and
+	// tap Y) and you are in a colour editor with no on-screen way out -- the exit is
+	// backspace/escape, which nothing tells you.
 	//
-	var _EDIT_REQUESTED_BGR = (Input.GP_Other5_held && Input.GP_Other3_held && Input.GP_Other2_pressed); // Hold trigL + bumpL, press Y
+	// Gates OPENING only. Once the editor is open every other key here still works,
+	// including cancel -- otherwise revoking dev access mid-session would trap someone
+	// inside the very tool this is meant to keep them out of.
+	var _EDIT_ALLOWED = dev_avail();
+
+	var _EDIT_REQUESTED_PAL = _EDIT_ALLOWED
+	                      && ( (CTL0 && PP)
+	                       ||  (Input.GP_Other6_held && Input.GP_Other4_held && Input.GP_Other2_pressed) ); // Hold trigR + bumpR, press Y
+	//
+	var _EDIT_REQUESTED_BGR = _EDIT_ALLOWED
+	                      &&  (Input.GP_Other5_held && Input.GP_Other3_held && Input.GP_Other2_pressed);   // Hold trigL + bumpL, press Y
 
 	//var _Input_COLOR_SELECTED = Input.Jump_pressed;
 	var _Input_COLOR_SELECTED = Input.Jump_pressed || Input.Pause_pressed;

@@ -227,14 +227,24 @@ function OptionsMenu_Create() {
 	// (FULLSCREEN + APP SCALE main rows were MOVED into the DISPLAY submenu on 2026-06-27;
 	//  fullscreen toggle / window-scale cycle now live as the first two DISPLAY rows.)
 	//                                                                          //
-	// TWITCH promoted to the MAIN menu (2026-07-26). It used to live in DEV TOOLS ->
-	// TEST/CAPTURE, which is now hidden from players -- so the stream features were
-	// unreachable by exactly the people meant to use them.
+	// ---- COMPANION PAGES ----------------------------------------------------
+	// TWITCH promoted to the MAIN menu 2026-07-26; converted from a submenu to a
+	// LAUNCHER 2026-07-27. Everything it used to hold -- rewards on/off, connect,
+	// cooldown, effect length, the command list -- now lives on the setup page, which
+	// has a keyboard, a mouse and room to explain itself. A NES-style option list is a
+	// bad place to type a channel name and a terrible place to read documentation.
+	//
+	// All three rows are the same shape: an action that opens a loopback page in the
+	// player's own browser. Grouped together because they are one idea, not three.
+	// ONE row, not three. TWITCH SETUP / TRACKER / JUKEBOX were separate launchers
+	// for a day and it pushed CLOSE off the bottom -- this menu does not scroll, and
+	// tightening the gaps made rows collide instead. They now open a hub page that
+	// lists all three, which also has room to explain what each one is.
 	MainOption_TWITCH            = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "TWITCH";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "COMPANION PAGES";
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "LET YOUR TWITCH VIEWERS CHANGE THE GAME WHILE YOU PLAY. NEEDS A ONE-TIME SETUP.";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "OPENS JUKEBOX, TRACKER AND TWITCH SETUP IN YOUR BROWSER.";
 	//                                                                          //
 	MainOption_DEV_TOOLS         = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
@@ -876,7 +886,9 @@ function OptionsMenu_Create() {
 	             _i=Twitch.COMMANDS;
 	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP";
 	             _i=Twitch.SETUP;
-	Twitch_dg[#_i,0]="HOW TO SET UP";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="RUN SETUP_TWITCH_IRC.BAT, THEN READ START_HERE.TXT IN THE ZALIA_TWITCH_IRC_SETUP FOLDER.";
+	// Was "HOW TO SET UP", pointing at a .bat and a text file. The setup is a web page
+	// served by the game now, so this row OPENS it instead of describing homework.
+	Twitch_dg[#_i,0]="OPEN SETUP PAGE";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="OPENS THE SETUP PAGE IN YOUR BROWSER. SIGN IN ON TWITCH'S OWN SITE - NEVER TYPE A PASSWORD INTO THE GAME.";
 	             _i=Twitch.BACK;
 	Twitch_dg[#_i,0]="BACK";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="RETURN TO THE MAIN OPTIONS MENU.";
 

@@ -130,6 +130,14 @@ function macros() {
 #macro SPL_THUN (SPL_SPEL <<1)
 #macro SPL_SUMM (SPL_THUN <<1)
 #macro SPL_CUCO (SPL_SUMM <<1)
+
+// JUKEBOX PLAY MODE (2026-07-27). Replaces the old boolean global.jukebox_autoadvance.
+// Only JB_REPEAT loops the audio instance; the other two start tracks NON-looping so
+// "instance stopped" means "track finished" for the poll in Surface_Draw_GUI_End.
+#macro JB_REPEAT  0
+#macro JB_ADVANCE 1
+#macro JB_SHUFFLE 2
+#macro JB_MODE_COUNT 3
 #macro SPELL_COST_MAX $F0
 #macro ABL_IDLE $01
 #macro ABL_WALK $02

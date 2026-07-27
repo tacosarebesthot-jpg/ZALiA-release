@@ -54,6 +54,124 @@ if (DEV) show_debug_message("[ZWEB] " + _path + (_query != "" ? "?" + _query : "
 
 switch (_path)
 {
+    // GRANT for tracker verification. DEV-gated.
+    //
+    // Warping to each item does not work: several are SHOP PURCHASES (both maps),
+    // some rooms drop you inside geometry at exit 00, and a few need progression to
+    // reach at all. Verifying 25 items + 9 spells + keys + crystals by playing to
+    // each one is hours; this is seconds, and it also tests the UNLIT direction,
+    // which picking things up never can.
+    //
+    //   /give?items=N      OR N into f.items       (bitmask)
+    //   /give?spells=N     OR N into f.spells
+    //   /give?skills=N     OR N into f.skills
+    //   /give?cucco=N      OR N into f.Cucco_skills
+    //   /give?crystals=N   set crystals bitfield
+    //   /give?all=1        everything on
+    //   /give?clear=1      everything off  (runs BEFORE the others, so
+    //                      ?clear=1&items=255 means "reset then grant")
+    case "/give":
+        if (!dev_avail()) { zweb_send(_sock, "403 Forbidden", "text/plain", "dev only"); break; }
+
+        if (zweb_qs_has(_query, "clear"))
+        {
+            f.items = 0; f.spells = 0; f.skills = 0;
+            f.Cucco_skills = 0; f.crystals = 0;
+            g.CuccoSpell2_Acquired = 0;
+
+            var _cd, _ck, _ckid, _ckc;
+            for (_cd = 1; _cd <= 6; _cd++)
+            {
+                _ckc = val(g.dm_spawn[? STR_Dungeon + hex_str(_cd) + STR_Key + STR_Count]);
+                for (_ck = 1; _ck <= _ckc; _ck++)
+                {
+                    _ckid = STR_KEY + hex_str(_cd) + hex_str(_ck);
+                    f.dm_keys[? _ckid + STR_Acquired] = false;
+                    f.dm_keys[? _ckid + STR_Used]     = false;
+                }
+            }
+        }
+
+        if (zweb_qs_has(_query, "all"))
+        {
+            // Only the bits that are REAL -- see the ITEMS/SPELLS/SKILLS tables in
+            // tracker.html. Granting every bit would light slots that no longer
+            // exist (TABLET/MELODY/FEATHER) and prove nothing.
+            f.items        = ITM_CAND|ITM_GLOV|ITM_RAFT|ITM_BOOT|ITM_FLUT|ITM_CROS
+                           | ITM_HAMM|ITM_BRAC|ITM_FRY1|ITM_MASK|ITM_BOOK|ITM_MEAT
+                           | ITM_SHLD|ITM_RING|ITM_NKLC|ITM_SWRD|ITM_NOTE|ITM_MIRR
+                           | ITM_TRPH|ITM_MEDI|ITM_CHLD|ITM_BTL1|ITM_SKEY|ITM_MAP1|ITM_MAP2;
+            f.spells       = SPL_PRTC|SPL_JUMP|SPL_LIFE|SPL_FARY|SPL_FIRE
+                           | SPL_RFLC|SPL_SPEL|SPL_THUN|SPL_SUMM;
+            f.skills       = SKILL_THD|SKILL_THU;
+            f.Cucco_skills = f.CuccoSkill_THRUST_D|f.CuccoSkill_THRUST_U
+                           | f.CuccoSkill_BREAK1|f.CuccoSkill_PROJ1|f.CuccoSkill_PROJ2;
+            g.CuccoSpell2_Acquired = 1;
+            f.crystals     = $3F; // all six placed
+
+            // every key found, none spent -- the state a full clear leaves you in
+            var _ad, _ak, _akid, _akc;
+            for (_ad = 1; _ad <= 6; _ad++)
+            {
+                _akc = val(g.dm_spawn[? STR_Dungeon + hex_str(_ad) + STR_Key + STR_Count]);
+                for (_ak = 1; _ak <= _akc; _ak++)
+                {
+                    _akid = STR_KEY + hex_str(_ad) + hex_str(_ak);
+                    f.dm_keys[? _akid + STR_Acquired] = true;
+                    f.dm_keys[? _akid + STR_Used]     = false;
+                }
+            }
+        }
+
+        // KEYS are not a bitfield -- they live in f.dm_keys as per-key Acquired/Used
+        // flags, and the tracker shows USED / COLLECTED / TOTAL. So grant them
+        // properly rather than faking a count, and allow marking some USED, because
+        // "collected but not spent" vs "spent" is a display state that needs testing
+        // and cannot be reached any other way without playing the palace.
+        //
+        //   /give?keys=1        every key in every palace -> Acquired
+        //   /give?keys=1&used=2 ...and the first 2 per palace also marked Used
+        //   /give?keys=0        clear all key flags
+        if (zweb_qs_has(_query, "keys"))
+        {
+            var _kon   = (zweb_qs(_query, "keys") != "0");
+            var _nused = zweb_qs_has(_query, "used") ? tw_num(zweb_qs(_query,"used"), 0) : 0;
+            var _d, _k, _kid, _kcount;
+            for (_d = 1; _d <= 6; _d++)
+            {
+                _kcount = val(g.dm_spawn[? STR_Dungeon + hex_str(_d) + STR_Key + STR_Count]);
+                for (_k = 1; _k <= _kcount; _k++)
+                {
+                    _kid = STR_KEY + hex_str(_d) + hex_str(_k);
+                    f.dm_keys[? _kid + STR_Acquired] = _kon;
+                    f.dm_keys[? _kid + STR_Used]     = (_kon && _k <= _nused);
+                }
+            }
+        }
+
+        if (zweb_qs_has(_query, "items"))    f.items        |= tw_num(zweb_qs(_query,"items"), 0);
+        if (zweb_qs_has(_query, "spells"))   f.spells       |= tw_num(zweb_qs(_query,"spells"), 0);
+        if (zweb_qs_has(_query, "skills"))   f.skills       |= tw_num(zweb_qs(_query,"skills"), 0);
+        if (zweb_qs_has(_query, "cucco"))    f.Cucco_skills |= tw_num(zweb_qs(_query,"cucco"), 0);
+        if (zweb_qs_has(_query, "crystals")) f.crystals      = tw_num(zweb_qs(_query,"crystals"), 0);
+
+        zweb_send(_sock, "200 OK", "text/plain",
+            "items="   + string(f.items)
+          + " spells=" + string(f.spells)
+          + " skills=" + string(f.skills)
+          + " cucco="  + string(f.Cucco_skills)
+          + " crystals=" + string(f.crystals));
+    break;
+
+    // Hub page. The OPTIONS menu opens THIS rather than three separate rows -- that
+    // menu does not scroll and three launchers pushed CLOSE off the bottom.
+    case "/home":
+        var _hm = zweb_read_file(web_root + "home.html");
+        if (_hm == "") zweb_send(_sock, "404 Not Found", "text/plain", "home.html missing");
+        else           zweb_send(_sock, "200 OK", "text/html; charset=utf-8", _hm);
+    break;
+
+    // "/" stays on the jukebox: the dev .cmd files and old bookmarks point at it.
     case "/":
     case "/jukebox":
         var _html = zweb_read_file(web_root + "jukebox.html");
@@ -158,8 +276,22 @@ switch (_path)
     // The room warper can only step scene-by-scene with the arrow keys; there is
     // no "jump to this one" input, which makes reaching a specific scene for a
     // one-off test tedious. DEV-gated.
+    // One-shot tool: dump every item icon as a PNG with the pal-swap shader
+    // applied, so the tracker can show TRUE colours instead of the base palette
+    // the sprite files are stored in. See icon_export() for the full reasoning.
+    // DEV-gated -- it writes files and is a build-time tool, not a feature.
+    case "/icons/export":
+        if (!dev_avail()) { zweb_send(_sock, "403 Forbidden", "text/plain", "dev only"); break; }
+        var _cnt = icon_export();
+        zweb_send(_sock, "200 OK", "text/plain",
+            "exported " + string(_cnt) + " icons to " + working_directory + "icon_export\\");
+    break;
+
     case "/warp":
-        if (!DEV) { zweb_send(_sock, "403 Forbidden", "text/plain", "dev only"); break; }
+        // Was `if (!DEV)` -- and `#macro DEV` is hardcoded true, so this route was
+        // never actually gated: any page on this machine could teleport the player
+        // mid-run. dev_avail() is the RUNTIME gate. (2026-07-27)
+        if (!dev_avail()) { zweb_send(_sock, "403 Forbidden", "text/plain", "dev only"); break; }
 
         var _rmn = zweb_qs(_query, "rm");
         if (_rmn == "")
@@ -266,8 +398,28 @@ switch (_path)
         if (zweb_qs_has(_query, "user"))      _sm[? "user"]        = zweb_qs(_query, "user");
         if (zweb_qs_has(_query, "channel"))   _sm[? "channel"]     = zweb_qs(_query, "channel");
         if (zweb_qs_has(_query, "client_id")) _sm[? "client_id"]   = zweb_qs(_query, "client_id");
-        if (zweb_qs_has(_query, "cooldown"))  _sm[? "cooldown"]    = zweb_qs(_query, "cooldown");
-        if (zweb_qs_has(_query, "effect"))    _sm[? "effect_secs"] = zweb_qs(_query, "effect");
+
+        // COOLDOWN / EFFECT LENGTH / REWARDS must take effect NOW, not on next launch.
+        // These used to be menu rows that wrote the live globals directly; the menu is
+        // gone (2026-07-27), so writing only the config file would leave a streamer
+        // changing a value mid-stream and seeing nothing happen. Write BOTH.
+        if (zweb_qs_has(_query, "cooldown"))
+        {
+            _sm[? "cooldown"] = zweb_qs(_query, "cooldown");
+            global.tw_irc_cooldown_frames = max(0, floor(tw_num(_sm[? "cooldown"], 600)));
+        }
+        if (zweb_qs_has(_query, "effect"))
+        {
+            _sm[? "effect_secs"] = zweb_qs(_query, "effect");
+            // Never 0 -- a zero-length effect is indistinguishable from a failed command.
+            global.tw_effect_secs = max(1, floor(tw_num(_sm[? "effect_secs"], 5)));
+        }
+        if (zweb_qs_has(_query, "rewards"))
+        {
+            var _rw = zweb_qs(_query, "rewards");
+            global.tw_enabled = (_rw == "1" || _rw == "true");
+            _sm[? "rewards"]  = global.tw_enabled ? "1" : "0";
+        }
 
         zweb_twitch_cfg_write(_sm);
         ds_map_destroy(_sm);

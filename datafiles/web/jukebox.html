@@ -2,45 +2,131 @@
 <html><head><meta charset="utf-8"><title>ZALiA Jukebox</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
-:root { color-scheme: dark; }
+/* Every colour is a variable so the THEME blocks at the bottom are pure palette
+   swaps. Same variable names and same four palettes as tracker.html, so a
+   streamer running both gets a matched pair rather than two unrelated pages. */
+:root {
+  color-scheme: dark;
+  --void:#2b2f4a;   /* page + header ground        */
+  --panel:#232741;  /* footer / transport ground   */
+  --edge:#4a4f75;   /* rules and dividers          */
+  --ink:#e8e8f0;    /* body text                   */
+  --btn:#3a3f63; --btn-edge:#5b608c; --btn-hover:#4a5080;
+  --btn-on-bg:#ffffff; --btn-on-ink:#222222;
+  --field:#1f2338;  /* search box / inputs         */
+  --accent:#8ef7b0; /* NOW PLAYING + slider fill   */
+  --sel:#5b6bb5;    /* SELECTED row                */
+  --radius:4px;
+}
 * { box-sizing: border-box; }
-body { margin:0; font:14px ui-monospace,Consolas,monospace; background:#2b2f4a; color:#e8e8f0; }
+body { margin:0; font:14px ui-monospace,Consolas,monospace; background:var(--void); color:var(--ink); }
 header { padding:10px 14px; display:flex; gap:12px; align-items:baseline;
-         border-bottom:1px solid #4a4f75; position:sticky; top:0; background:#2b2f4a; z-index:2; }
+         border-bottom:1px solid var(--edge); position:sticky; top:0; background:var(--void); z-index:2; }
 h1 { font-size:15px; margin:0; letter-spacing:.08em; }
 .count { margin-left:auto; opacity:.7; }
 .row { display:flex; flex-wrap:wrap; gap:6px; padding:8px 14px; }
-button { font:inherit; padding:7px 12px; border:1px solid #5b608c; border-radius:4px;
-         background:#3a3f63; color:#e8e8f0; cursor:pointer; }
-button:hover { background:#4a5080; }
-button.on { background:#fff; color:#222; }
-#q { width:100%; padding:8px 10px; font:inherit; border-radius:4px;
-     border:1px solid #5b608c; background:#1f2338; color:#e8e8f0; }
+button { font:inherit; padding:7px 12px; border:1px solid var(--btn-edge); border-radius:var(--radius);
+         background:var(--btn); color:var(--ink); cursor:pointer; }
+button:hover { background:var(--btn-hover); }
+button.on { background:var(--btn-on-bg); color:var(--btn-on-ink); }
+#q { width:100%; padding:8px 10px; font:inherit; border-radius:var(--radius);
+     border:1px solid var(--btn-edge); background:var(--field); color:var(--ink); }
 main { padding:0 14px 14px; }
 .t { display:grid; grid-template-columns:14px 180px 1fr 52px; gap:12px; align-items:baseline;
-     padding:6px 8px; border-radius:4px; cursor:pointer; }
+     padding:6px 8px; border-radius:var(--radius); cursor:pointer; }
 .t .len { opacity:.45; font-size:12px; text-align:right; }
 .seekrow { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
-.seekrow input[type=range] { flex:1; accent-color:#8ef7b0; }
+.seekrow input[type=range] { flex:1; accent-color:var(--accent); }
 .time { opacity:.6; font-size:12px; min-width:38px; }
 .volrow { display:flex; align-items:center; gap:10px; margin-top:8px; }
-.volrow input[type=range] { width:150px; accent-color:#8ef7b0; }
+.volrow input[type=range] { width:150px; accent-color:var(--accent); }
 .volrow .lbl { opacity:.6; font-size:12px; }
-.t:hover { background:#3a3f63; }
+.t:hover { background:var(--btn); }
 /* SELECTED (what a zone button will act on) and NOW PLAYING are different
    things and must not look the same -- you can be assigning one track while
    another is playing. */
-.t.sel { background:#5b6bb5; }
-.t.now .title { color:#8ef7b0; font-weight:bold; }
-.t .spk { color:#8ef7b0; font-size:11px; }
+.t.sel { background:var(--sel); }
+.t.now .title { color:var(--accent); font-weight:bold; }
+.t .spk { color:var(--accent); font-size:11px; }
 .t .game { opacity:.6; font-size:12px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 .t.sel .game { opacity:.85; }
-footer { position:sticky; bottom:0; background:#232741; border-top:1px solid #4a4f75; padding:10px 14px; }
+footer { position:sticky; bottom:0; background:var(--panel); border-top:1px solid var(--edge); padding:10px 14px; }
 .hint { opacity:.8; margin-bottom:8px; min-height:1.2em; }
 .zones button { flex:1 1 90px; }
 .transport button { flex:1; }
+
+/* theme picker -- lives in the header so it never covers the transport bar */
+#themesel { font:inherit; font-size:12px; background:var(--field); color:var(--ink);
+            border:1px solid var(--btn-edge); border-radius:var(--radius); padding:3px 5px; }
+
+/* ===========================================================================
+   THEMES -- palettes lifted from tracker.html so the two pages match.
+   Adding one = a new block plus a new <option>.
+   =========================================================================== */
+
+/* ---- ZELDA 1: black status field, tan overworld ground, gold lettering ---- */
+body[data-theme="zelda1"] {
+  --void:#000000; --panel:#1a1408; --edge:#d4c896; --ink:#f8ecd0;
+  --btn:#5c4a26; --btn-edge:#d4c896; --btn-hover:#7a6434;
+  --btn-on-bg:#f8b800; --btn-on-ink:#241a00;
+  --field:#2a2010; --accent:#78f878; --sel:#7a6434; --radius:0px;
+}
+/* NES boxes notch their corners rather than curving them; --radius:0 above plus
+   the gold rule here is the whole look. Headings take the status-bar gold. */
+body[data-theme="zelda1"] h1 { color:#f8b800; text-shadow:1px 1px 0 #000; }
+body[data-theme="zelda1"] header,
+body[data-theme="zelda1"] footer { border-color:#f8b800; }
+
+/* ---- FINAL FANTASY: the blue command window in silver chrome -------------- */
+body[data-theme="ff"] {
+  --void:#0a1030; --panel:#0d1642; --edge:#eef2ff; --ink:#ffffff;
+  --btn:#1c3f8a; --btn-edge:#eef2ff; --btn-hover:#2a55b0;
+  --btn-on-bg:#ffd657; --btn-on-ink:#241800;
+  --field:#16224f; --accent:#7cf0d2; --sel:#2a55b0; --radius:6px;
+}
+/* The double rule is the signature -- same trick as the tracker: `double` is a
+   real border-style that draws two parallel lines with a gap for free. */
+body[data-theme="ff"] header { border-bottom:4px double var(--edge); }
+body[data-theme="ff"] footer { border-top:4px double var(--edge); }
+body[data-theme="ff"] button { box-shadow:inset 0 1px 0 rgba(255,255,255,.35); }
+body[data-theme="ff"] { text-shadow:1px 1px 0 rgba(0,0,20,.75); }
+
+/* ---- CASTLEVANIA: candlelit stone and tarnished gold --------------------- */
+body[data-theme="gothic"] {
+  --void:#0a0609; --panel:#221521; --edge:#8a6d3a; --ink:#ede0c8;
+  --btn:#2c2030; --btn-edge:#8a6d3a; --btn-hover:#3d2c42;
+  --btn-on-bg:#d8b34a; --btn-on-ink:#241505;
+  --field:#171019; --accent:#4fcf8f; --sel:#4a2b3d; --radius:2px;
+}
+body[data-theme="gothic"] h1 {
+  font-family:Georgia,"Times New Roman",serif; letter-spacing:.22em; color:#d8b34a;
+  text-shadow:0 1px 0 rgba(0,0,0,.7), 0 0 10px rgba(216,179,74,.25);
+}
+
+/* ---- ILLUMINATED TOME: the light one ------------------------------------- */
+body[data-theme="tome"] {
+  --void:#e9dfc4; --panel:#e2d3a9; --edge:#8a7040; --ink:#241a10;
+  --btn:#dbc99a; --btn-edge:#8a7040; --btn-hover:#cdb87f;
+  --btn-on-bg:#8a6a12; --btn-on-ink:#f6efd8;
+  --field:#f1e8d2; --accent:#3d6b3f; --sel:#c9b485; --radius:3px;
+  color-scheme: light;   /* so the native range/scrollbar chrome flips too */
+}
+body[data-theme="tome"] {
+  font-family:Georgia,"Times New Roman",serif;
+}
+body[data-theme="tome"] h1 { font-variant:small-caps; letter-spacing:.14em; }
 </style></head><body>
-<header><h1>ZALiA JUKEBOX</h1><span class="count" id="count"></span></header>
+<header>
+  <h1>ZALiA JUKEBOX</h1>
+  <span class="count" id="count"></span>
+  <select id="themesel" onchange="setTheme(this.value)" title="page theme">
+    <option value="">ZELDA II</option>
+    <option value="zelda1">ZELDA 1</option>
+    <option value="ff">FINAL FANTASY</option>
+    <option value="gothic">CASTLEVANIA</option>
+    <option value="tome">ILLUMINATED TOME</option>
+  </select>
+</header>
 <div class="row" id="playlists"></div>
 <div class="row"><input id="q" placeholder="type to search..." autocomplete="off"></div>
 <main id="list"></main>
@@ -61,6 +147,11 @@ footer { position:sticky; bottom:0; background:#232741; border-top:1px solid #4a
     <button onclick="cmd('next')">NEXT &gt;&gt;</button>
   </div>
   <div class="row transport" style="padding:0;margin-top:6px">
+    <!-- One button that cycles, not three radio buttons: there are only three states
+         and the label always says which one you are in, so a second click undoes a
+         misclick immediately. -->
+    <button id="modebtn" onclick="cycleMode()"
+            title="what happens when a track finishes">MODE: PLAY ALL</button>
     <button onclick="cmd('off','jukebox off - the game\'s own music is back')"
             title="leave jukebox mode and hand music back to the game">BACK TO GAME MUSIC</button>
   </div>
@@ -84,6 +175,26 @@ function togglePause() {
   cmd(isPaused ? 'resume' : 'pause', isPaused ? 'resumed' : 'paused');
   isPaused = !isPaused;
   pausebtn.textContent = isPaused ? 'RESUME' : 'PAUSE';
+}
+
+// PLAY MODE: what happens when a track ends. Must match the JB_* macros in
+// macros.gml -- 0 REPEAT, 1 ADVANCE, 2 SHUFFLE.
+//
+// Tracked here rather than read back from the game because there is no status
+// endpoint for it: /cmd is a one-way file drop. That means this can drift if the
+// mode is changed in-game, so the button reports what it LAST SET, and the game
+// shows its own confirmation on screen when it changes.
+const MODES = [
+  { cmd:'repeat',  label:'MODE: REPEAT ONE', hint:'the same track over and over' },
+  { cmd:'advance', label:'MODE: PLAY ALL',   hint:'plays down the list in order' },
+  { cmd:'shuffle', label:'MODE: SHUFFLE',    hint:'random next, never the same track twice in a row' }
+];
+let modeIdx = 1;   // ADVANCE, matching jukebox_init's default
+function applyMode() { modebtn.textContent = MODES[modeIdx].label; }
+function cycleMode() {
+  modeIdx = (modeIdx + 1) % MODES.length;
+  applyMode();
+  cmd('mode ' + MODES[modeIdx].cmd, MODES[modeIdx].hint);
 }
 
 const label = t => (t.game ? t.game + ' - ' : '') + t.title;
@@ -201,6 +312,25 @@ ZONES.forEach((z, i) => {
   };
   zones.append(b);
 });
+// THEME. Shares the key 'zalia_theme' with the tracker deliberately -- pick a look
+// on one page and the other matches, which is the point of using one palette set.
+// ?theme=NAME still wins over the stored choice, same rule as the tracker.
+function setTheme(name, remember) {
+  if (name) document.body.setAttribute('data-theme', name);
+  else      document.body.removeAttribute('data-theme');
+  const sel = document.getElementById('themesel');
+  if (sel) sel.value = name || '';
+  if (remember !== false) {
+    try { localStorage.setItem('zalia_theme', name || ''); } catch (e) {}
+  }
+}
+(function initTheme() {
+  let t = new URLSearchParams(location.search).get('theme');
+  if (t === null) { try { t = localStorage.getItem('zalia_theme'); } catch (e) { t = null; } }
+  setTheme(t || '', false);
+})();
+
 q.oninput = draw;
+applyMode();
 load();
 </script></body></html>

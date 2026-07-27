@@ -197,17 +197,32 @@ function load_game_pref() {
 
 
 
+	// Same trap as the two overlays below: every dev hotkey sets DevTools_state=true
+	// and it persists, so it must not be restored on a locked-down launch either.
 	_val = _dm_FILE_DATA[?"_DevTools"     +STR_State];
-	if(!is_undefined(_val)) g.DevTools_state = _val;
+	if (dev_avail()) { if(!is_undefined(_val)) g.DevTools_state = _val; }
+	else             { g.DevTools_state = false; }
 
 	_val = _dm_FILE_DATA[?"_DoubleJump"   +STR_State];
 	if(!is_undefined(_val)) g.DoubleJump_state = _val;
 
+	// DEV OVERLAY STATE IS PERSISTED, so gating the hotkey alone is a trap: toggle it
+	// on, lose dev access, and it is stuck on FOREVER across restarts with no way to
+	// clear it. That happened for real 2026-07-27 -- the owner hit U before the gate
+	// went in and could not turn it back off afterwards.
+	//
+	// Both of these were `if (DEV)`, i.e. always true, so a saved "on" was always
+	// restored. dev_avail() makes them SELF-HEALING: a locked-down launch forces the
+	// overlay off regardless of what the prefs file says, while the saved value is
+	// left intact so it comes back when dev is unlocked again.
+	var _dev_ok = dev_avail();
+
 	_val = _dm_FILE_DATA[?"_DevDash"      +STR_State];
-	if(!is_undefined(_val)) g.DevDash_state = _val;
+	if (_dev_ok) { if(!is_undefined(_val)) g.DevDash_state = _val; }
+	else         { g.DevDash_state = false; }
 
 	_val = _dm_FILE_DATA[?"_Debug_Overlay"+STR_State];
-	if (DEV)
+	if (_dev_ok)
 	{
 	    if(!is_undefined(_val))
 	    {

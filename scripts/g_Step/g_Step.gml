@@ -150,7 +150,12 @@ function g_Step() {
 	with(Input) Input_update1(); // Gamepad input checks. gp1,2,3,4, bumpers, triggers, fpb: frame pause buttons, keypressed_prev, keypressed_curr
 	with(Input) Input_update_p2(); // CO-OP P2 (fairy) gamepad read. No-op unless global.coop_enabled && a 2nd pad exists.
 	Dev_CoopTest_Step(); // CO-OP TEST harness: injects synthetic Input.p2_* AFTER the clear above so the fairy's Step reads them this frame. Self-gates on global.cooptest_run.
-	if (DEV) with(Input) Input_GameTesting(); // DEV-only: dev hotkeys (U=debug overlay, Z/E/V, file-clean combos). Gated so they can't fire in a play build.
+	// DEV HOTKEYS. Was `if (DEV)` -- but `#macro DEV` is hardcoded TRUE, so that
+	// gate never actually gated anything and every dev key (I/K/J/L/H/R/Z/E/U/V,
+	// numpad2, F2/F3, the ctrl+shift file-clean combos) was live for players.
+	// dev_avail() is the RUNTIME gate: dev code entered this session, or
+	// dev_unlock.txt in the save dir. (2026-07-27)
+	if (dev_avail()) with(Input) Input_GameTesting();
 
 	// CHEATS (toggled in Options > Dev Tools). Applied every step while in gameplay.
 	if (instance_exists(f) && instance_exists(global.pc))

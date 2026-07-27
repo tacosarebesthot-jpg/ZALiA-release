@@ -13,7 +13,11 @@ function Surface_Draw_GUI_End() {
 	// DEV PLAYTEST FLAG: press 3 during normal play to log the current spot for later review.
 	// Writes a screenshot of the fully-composited frame (we're in Draw GUI End) plus the
 	// scene / coords / game-time to <working_directory>problems\  (play_NNN.png + _playtest_log.txt).
-	if (keyboard_check_pressed(ord("3"))) // ungated so key-3 marking still works in DEV=false play builds
+	// Was deliberately ungated so marking worked in DEV=false builds. That reasoning
+	// is obsolete: dev_avail() is a RUNTIME unlock, so the owner still gets the key
+	// via dev_unlock.txt or the dev code, while a player pressing 3 no longer dumps
+	// screenshots into problems\ without knowing why. (2026-07-27)
+	if (dev_avail() && keyboard_check_pressed(ord("3")))
 	{
 	    if (!variable_global_exists("dev_flag_count")) global.dev_flag_count = 0;
 	    global.dev_flag_count++;
@@ -90,8 +94,10 @@ function Surface_Draw_GUI_End() {
 	// just read keyboard_string as the live note text. We clear it on enter/exit so it
 	// never carries stale input between sessions.
 
-	// --- 4: enter note mode (only when not already in it) ---
-	if (keyboard_check_pressed(ord("4"))
+	// --- 4: enter note mode (only when not already in it) --- DEV-gated 2026-07-27,
+	// same reasoning as key 3 above: it is a bug-reporting instrument, not a feature.
+	if (dev_avail()
+	&&  keyboard_check_pressed(ord("4"))
 	&&  variable_global_exists("note_active")
 	&& !global.note_active)
 	{
@@ -284,11 +290,14 @@ function Surface_Draw_GUI_End() {
 
 	// ------------------------------------------------------------------------------------
 	// MOVESPEED CHEAT (2): cycle Link's walk-speed multiplier 1 -> 2 -> 3 -> 4 -> 1.
-	// Play-safe (NOT DEV-gated) so it works in DEV=false play builds.
+	// DEV-GATED 2026-07-27. This was deliberately left ungated "so it works in play
+	// builds" -- but it is a CHEAT: press 2 and Link moves at up to 4x. A player who
+	// hits it by accident has silently broken their own run and no on-screen text
+	// explains how to undo it. dev_avail() keeps it one keypress away for the owner.
 	// Reversible: delete this block + the MOVESPEED CHEAT blocks in g_Create / updateX /
 	// Overworld_Step. The multiplier itself is applied in updateX (action rooms) and
 	// Overworld_Step (overworld); here we only own the hotkey + the on-screen readout.
-	if (keyboard_check_pressed(ord("2")))
+	if (dev_avail() && keyboard_check_pressed(ord("2")))
 	{
 	    if (!variable_global_exists("cheat_movespeed")) global.cheat_movespeed = 1;
 	    global.cheat_movespeed++;
@@ -446,8 +455,9 @@ function Surface_Draw_GUI_End() {
 	    // Deliberately requires jukebox_inst to be non-zero first: a 0 id means we have not
 	    // started anything yet (or the jukebox was just toggled on), and advancing then would
 	    // skip the very first track.
-	    if (variable_global_exists("jukebox_autoadvance") && global.jukebox_autoadvance
-	    &&  variable_global_exists("jukebox_inst")        && global.jukebox_inst)
+	    var _jb_mode = variable_global_exists("jukebox_mode") ? global.jukebox_mode : JB_ADVANCE;
+	    if (_jb_mode != JB_REPEAT
+	    &&  variable_global_exists("jukebox_inst") && global.jukebox_inst)
 	    {
 	        // A PAUSED track is not finished. audio_is_playing() is false while paused,
         // so without the is_paused test auto-advance reads "pause" as "track ended"
@@ -457,7 +467,19 @@ function Surface_Draw_GUI_End() {
                       || audio_is_paused(global.jukebox_inst));
 	        if (!_jb_alive && variable_global_exists("jukebox_count") && global.jukebox_count > 0)
 	        {
-	            global.jukebox_idx = (global.jukebox_idx + 1) mod global.jukebox_count;
+	            if (_jb_mode == JB_SHUFFLE && global.jukebox_count > 1)
+	            {
+	                // Pick from the OTHER count-1 tracks and skip over the current index.
+	                // A plain irandom(count-1) would repeat the track you just heard about
+	                // one time in N, which does not read as "shuffle" -- it reads as broken.
+	                var _r = irandom(global.jukebox_count - 2);
+	                if (_r >= global.jukebox_idx) _r++;
+	                global.jukebox_idx = _r;
+	            }
+	            else
+	            {
+	                global.jukebox_idx = (global.jukebox_idx + 1) mod global.jukebox_count;
+	            }
 	            jukebox_play();
 	            global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps); // show what changed
 	        }

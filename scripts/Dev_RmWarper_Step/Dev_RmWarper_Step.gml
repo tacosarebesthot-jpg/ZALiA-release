@@ -1,6 +1,16 @@
 /// @description  Dev_RmWarper_Step()
 function Dev_RmWarper_Step() {
 
+	// DEV GATE (2026-07-27). This object is created unconditionally in
+	// obj_start_Create, and its hotkeys -- X/Y start-stop a 793-room sweep, C
+	// flags, B toggles manual step, arrows jump scenes -- were reachable by any
+	// player during normal play. Starting a sweep by accident wrecks the run and
+	// gets reported as a bug.
+	//
+	// The sweep_active escape hatch matters: an auto-sweep started by the
+	// _autosweep.flag file must keep driving even on a locked-down build, or the
+	// flag silently does nothing. Gate the OPERATOR, not the machine.
+	if (!dev_avail() && !sweep_active && !sweep_note_active) exit;
 
 	// ============================================================
 	// DEV SCREEN-CHECK: note-taking + hotkeys + auto-sweep driver.

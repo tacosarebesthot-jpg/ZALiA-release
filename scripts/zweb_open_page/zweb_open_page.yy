@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"zweb_open_page",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"zweb_open_page",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

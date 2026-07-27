@@ -14,6 +14,23 @@
   --ink:#f4f4ff; --dim:#7a7398;
   --life:#e8484c; --magic:#4c9ff0; --got:#ffd23f; --hint:#7dffb0;
   --pip-off:#2a2544;
+  /* Three colors that used to be hardcoded further down. They have to be
+     variables or every theme inherits this theme's violet in three places and
+     has to override the same rules by hand -- both designers hit this
+     independently. --ghost is the unowned-item ink, --card the hint row, --hudbg
+     the status bar field. */
+  --ghost:#4a4368; --card:#141127; --hudbg:#000;
+
+  /* UI SYMBOLS from the game itself, not shapes drawn in CSS.
+     heart + magic come from the ripped NES sheet's container art; key and
+     crystal are exported through the pal-swap shader at PI_GUI1, which is what
+     the game's own HUD draws them at (draw_key_stats.gml:81). The raw sprite
+     files are unusable: spr_HUD_life_container is a blank meter bar and
+     spr_Item_Heart_container is stored blue in the base palette. */
+  --ico-heart:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAfUlEQVR4nM2TQQqAIBBFZ+QfpUWL7n+SFi06ykChNDGZjgy06IGofP9XB2W6EJGDDADYzns6VNyXMnwYdJGnc0tUplVK7+kgh57RkoYr/h8AgLVYEUoBAf7mCgieQne/AyIh1pxJVhyF1OZXgBfSMrvkJ77NVFr9kUIhI/MJG15M7mJTZygAAAAASUVORK5CYII=');
+  --ico-magic:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAQCAYAAAAiYZ4HAAAAiklEQVR4nGNkQAJ//vz5z4AFsLCwMMLZyIrv6MC5KODPnz//YZqYkE1RufIHQ7HKlT8oNsAZuJzFgqQYxQZkAHIaLucxMZAImGiugYVQHPyBisM8z0goDtCDl5EYxQxImsjztEqBBcQEJBqbGAjA/cAwxwa/0SlHwH4A2wAOgZQjBBXDbYABYpI3AGTqPlCxdV9sAAAAAElFTkSuQmCC');
+  --ico-key:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAVUlEQVQYlY2NsQ2AMAwEz9IPwAgpGCIF4zMGI6RggJdClcgRBVzjl896BwnbfWRJARBZ7scNwHVuyxEApbY+GnJesD3FmLLdJUV+kfNclNrelZ/yDw+sTz4+EJuSFQAAAABJRU5ErkJggg==');
+  --ico-crystal:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAICAYAAADED76LAAAAVklEQVQYlWNgQAJ//vz5/+fPn//IYizIkio2H+BsFhYWRgYGBgYmZMk7RwQYGBgYGFRsPjDATGJiIABQFMCswKkAL/jz589/BYs3/xUs3mD4BEURuiQAnywzDpGoqHQAAAAASUVORK5CYII=');
 }
 * { box-sizing:border-box; }
 html,body { height:100%; }
@@ -33,7 +50,7 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
 
 /* ---- status bar: the game's own HUD, not a card grid ---------------------- */
 .hud { grid-column:1/-1; display:flex; gap:26px; align-items:center; flex-wrap:wrap;
-       border:1px solid var(--edge); background:#000; padding:10px 14px; }
+       border:1px solid var(--edge); background:var(--hudbg); padding:10px 14px; }
 .hud .lbl { font-size:9px; letter-spacing:.2em; color:var(--dim); display:block; }
 .timer { font-size:34px; font-weight:700; letter-spacing:.04em; font-variant-numeric:tabular-nums; }
 .stat  { font-size:20px; font-weight:700; font-variant-numeric:tabular-nums; }
@@ -43,35 +60,116 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
 .where { margin-left:auto; text-align:right; color:var(--dim); font-size:11px; }
 .where b { color:var(--ink); font-size:14px; display:block; }
 
+/* ---- VS CHAT: the one panel meant to be read by the audience -------------- */
+.panel.vs { border-color:var(--life); }
+.vsrow { display:flex; align-items:baseline; justify-content:space-between; }
+.vsrow .lbl { font-size:9px; letter-spacing:.2em; color:var(--dim); }
+.vsnum { font-size:38px; font-weight:700; color:var(--life); font-variant-numeric:tabular-nums; line-height:1; }
+.vsoff { margin-top:7px; font-size:9px; letter-spacing:.18em; color:var(--dim); }
+
 /* ---- meters: segmented like the NES bar, not a smooth CSS gradient -------- */
 .meter { display:flex; gap:2px; margin-top:4px; }
 .meter i { flex:1; height:9px; background:var(--pip-off); }
 .meter.life  i.on { background:var(--life); }
 .meter.magic i.on { background:var(--magic); }
 
-/* ---- container pips: 27 discrete things, so show 27 discrete pips --------- */
+/* ---- container pips: 27 discrete things, so show 27 discrete pips ---------
+   HEARTS ARE HEART-SHAPED and magic containers are the magic jar's silhouette.
+   These were plain circles, which told a viewer nothing -- two identical rows of
+   dots that had to be read by their label. The shape carries the meaning before
+   the colour does, exactly like the NES status bar, and it survives being seen
+   small on a stream. clip-path keeps it pure CSS: no image, no asset, no request. */
 .pips { display:grid; grid-template-columns:repeat(14,1fr); gap:3px; margin-top:5px; }
-.pips b { aspect-ratio:1; background:var(--pip-off); border-radius:50%; }
-.pips.heart b.on { background:var(--life); }
-.pips.mag   b.on { background:var(--magic); }
+/* Real NES artwork, not clip-path silhouettes I drew. Unfound pips are the SAME
+   art drained of colour, so the row reads as "these are hearts, some not yet
+   found" rather than two rows of anonymous blobs. */
+.pips b { aspect-ratio:1; background:center/contain no-repeat; image-rendering:pixelated;
+          filter:grayscale(1) brightness(.38); }
+.pips.heart b { background-image:var(--ico-heart); }
+.pips.mag   b { background-image:var(--ico-magic); }
+.pips b.on { filter:none; }
 
-/* ---- the inventory board: the signature element -------------------------- */
-.board { display:grid; grid-template-columns:repeat(8,1fr); gap:5px; }
-.it { border:1px solid var(--pip-off); color:#4a4368; background:transparent;
-      padding:7px 2px; text-align:center; font-size:9px; letter-spacing:.04em;
-      line-height:1.25; min-height:38px; display:flex; align-items:center;
-      justify-content:center; transition:none; }
-.it.on { color:#1a1600; background:var(--got); border-color:var(--got); font-weight:700; }
+/* ---- the inventory board: the signature element --------------------------
+   THE RULE EVERY TRACKER LIVES BY: an unfound item is DIMMED, NOT HIDDEN, and it
+   keeps its own artwork. A viewer learns the board's shape once and then reads it
+   by position and silhouette, at a glance, from across a room. Blank boxes with
+   text labels force them to actually read -- which is what this looked like
+   before the real sprites went in.
+
+   The art is HoverBat's own item sprites (see the ICONS map in the script). They
+   are 8x8/16x16 NES tiles, so they MUST be scaled with image-rendering:pixelated;
+   the browser's default smoothing turns them into mush at this size. */
+.board { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+.it { border:1px solid var(--pip-off); color:var(--ghost); background:rgba(0,0,0,.25);
+      padding:6px 2px 4px; text-align:center; font-size:8px; letter-spacing:.03em;
+      line-height:1.1; min-height:56px; display:flex; flex-direction:column;
+      align-items:center; justify-content:center; gap:4px; transition:none; }
+.it img { width:32px; height:32px; object-fit:contain;
+          image-rendering:pixelated; image-rendering:crisp-edges;
+          /* Unfound: drained of colour and dropped back, but the SHAPE stays
+             fully legible. This is the whole readability trick. */
+          filter:grayscale(1) brightness(.45); opacity:.5; }
+.it span { opacity:.75; }
+.it .noicon { font-size:9px; padding:8px 0; }   /* FAIRY: animated in-game, no static sprite */
+.it.on { border-color:var(--got); background:rgba(255,210,63,.14); color:var(--got); font-weight:700; }
+.it.on img { filter:none; opacity:1; }
+.it.on span { opacity:1; }
+
+/* BOTTLE FILLED (Dark Link blood, gates the extra ending). A third state on one
+   tile, so it must not read as merely "lit brighter" -- the red edge and glow say
+   "this is different from owning the bottle", which is the whole point. */
+.it.on.filled { border-color:var(--life); background:rgba(232,72,76,.22);
+                box-shadow:inset 0 0 10px rgba(232,72,76,.35); }
+.it.on.filled span { color:var(--life); }
+
+/* SELECTED spell. Marks intent, not possession, so it is an OUTLINE rather than a
+   fill -- otherwise it would compete with the lit/unlit language everywhere else. */
+.it.sel { outline:2px solid var(--ink); outline-offset:-2px; }
+
+/* SMALL-SOURCE MODE. An OBS browser source has its OWN viewport, so its width is
+   literally how big the overlay is on stream -- a media query is the right lever.
+   Below 620px the text labels are unreadable anyway, so drop them entirely and
+   spend every pixel on the artwork. That is how EmoTracker reads at a glance: you
+   learn the grid by position and silhouette, not by reading 8px captions.
+   The label stays in the title attribute, so hovering still identifies a slot. */
+@media (max-width:620px) {
+  .board { grid-template-columns:repeat(8,1fr); gap:4px; }
+  .it { min-height:0; padding:4px 2px; gap:0; }
+  .it span { display:none; }
+  .it img { width:100%; height:auto; aspect-ratio:1; }
+  .it .noicon { display:block; font-size:8px; padding:2px 0; }
+  .spellboard .it, .skillrow .it { min-height:26px; font-size:8px; }
+  .spellboard .it span, .skillrow .it span { display:block; }  /* text-only boards keep their text */
+  .hud { gap:12px; padding:7px 9px; }
+  .timer { font-size:24px; }
+  .stat { font-size:15px; }
+  .wrap { padding:6px; gap:6px; }
+  .panel { padding:7px 8px; }
+}
+
+/* Spells and techniques have no sprite set, so they stay text -- but they get the
+   same lit/unlit language so the three boards read as one system. */
 .spellboard { grid-template-columns:repeat(5,1fr); }
+.spellboard .it { min-height:38px; font-size:9px; }
 .spellboard .it.on { background:var(--magic); border-color:var(--magic); color:#001222; }
 .skillrow { grid-template-columns:repeat(5,1fr); }
+.skillrow .it { min-height:38px; font-size:9px; }
 .skillrow .it.on { background:var(--hint); border-color:var(--hint); color:#00220f; }
 
-/* ---- keys ---------------------------------------------------------------- */
+/* ---- keys + crystals ------------------------------------------------------
+   Both now carry the game's own symbol above their text, so a glance says "keys"
+   and "crystals" without reading the panel heading. The symbol greys out with the
+   cell, same language as the item board and the container pips. */
 .keys { display:grid; grid-template-columns:repeat(6,1fr); gap:5px; }
-.key { border:1px solid var(--pip-off); text-align:center; padding:7px 2px; font-size:10px; color:#4a4368; }
-.key b { display:block; font-size:16px; }
+.key { border:1px solid var(--pip-off); text-align:center; padding:5px 2px 6px; font-size:10px;
+       color:var(--ghost); display:flex; flex-direction:column; align-items:center; gap:3px; }
+.key::before { content:""; width:20px; height:20px; background:center/contain no-repeat;
+               background-image:var(--ico-key); image-rendering:pixelated;
+               filter:grayscale(1) brightness(.4); }
+#crystals .key::before { background-image:var(--ico-crystal); }
+.key b { display:block; font-size:15px; line-height:1; }
 .key.on { border-color:var(--got); color:var(--got); }
+.key.on::before { filter:none; }
 
 /* ---- hints: the reason this page exists ---------------------------------- */
 .hints { position:sticky; top:12px; }
@@ -79,11 +177,363 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
 .hcount { float:right; color:var(--hint); }
 .hlist { display:flex; flex-direction:column; gap:1px; }
 .h { display:grid; grid-template-columns:1fr auto; gap:8px; padding:6px 7px;
-     background:#141127; border-left:3px solid var(--hint); align-items:baseline; }
+     background:var(--card); border-left:3px solid var(--hint); align-items:baseline; }
 .h .item { font-weight:700; font-size:14px; letter-spacing:.03em; }
 .h .loc  { color:var(--hint); font-size:11px; text-align:right; }
 .none { color:var(--dim); font-style:italic; padding:8px 4px; }
+
+/* ---- theme picker -------------------------------------------------------- */
+/* Hidden in OBS mode: the overlay is output, not a control panel. Pick the theme
+   in a normal browser tab, then point OBS at ?theme=NAME&obs=1. */
+#themebar { position:fixed; right:10px; bottom:10px; z-index:9; display:flex;
+            gap:6px; align-items:center; background:var(--card); border:1px solid var(--edge);
+            padding:6px 8px; font-size:10px; letter-spacing:.14em; color:var(--dim); }
+#themebar select { font:inherit; letter-spacing:.08em; background:var(--void); color:var(--ink);
+                   border:1px solid var(--edge); padding:3px 5px; }
+body.obs #themebar { display:none; }
+
+/* ===========================================================================
+   THEMES. Each is a self-contained body[data-theme="..."] block: variable
+   overrides first, then any rules that need more than a recolor. Adding one is
+   a new block plus a new <option> -- no JS change, no structural change.
+   =========================================================================== */
+
+/* ---- ZELDA 1 ------------------------------------------------------------- */
+body[data-theme="zelda1"] {
+  /* Zelda 1's status bar is a flat black field with one block of gold text on
+     it -- no HUD gradient, no bevel. Panels borrow the overworld's tan/olive
+     ground instead of the base theme's palace-stone violet. */
+  --void:#000000; --stone:#5c4a26; --edge:#d4c896;
+  --ink:#f8ecd0; --dim:#a8925c;
+  --life:#d82800; --magic:#3cbcfc; --got:#f8b800; --hint:#78f878;
+  --pip-off:#2a2010;
+  --ghost:#a8925c; --card:rgba(0,0,0,.5); --hudbg:#000;
+}
+/* NES dialog boxes fake a rounded corner by notching one pixel off each corner
+   rather than curving anything -- the hardware has no rounded-rect primitive.
+   clip-path reproduces that trick; border-radius would read as a modern card
+   sitting on top of an 8-bit HUD. */
+body[data-theme="zelda1"] .panel,
+body[data-theme="zelda1"] .hud {
+  clip-path: polygon(6px 0, calc(100% - 6px) 0, 100% 6px, 100% calc(100% - 6px),
+                      calc(100% - 6px) 100%, 6px 100%, 0 calc(100% - 6px), 0 6px);
+  border-width:2px;
+}
+/* Ground dither: the NES had no smooth shading, so a second tone gets stippled
+   in with a diagonal checker -- the same trick the overworld tiles use. */
+body[data-theme="zelda1"] .panel {
+  background-image: repeating-linear-gradient(45deg, rgba(0,0,0,.16) 0 2px, transparent 2px 4px);
+  background-color: var(--stone);
+}
+body[data-theme="zelda1"].obs .panel {
+  background-color: rgba(10,8,4,.8);
+  background-image: none;
+}
+/* The one splash of color on an otherwise monochrome bar is the gold label text
+   ("LIFE", "1UP"). Everything playing that role gets the same gold ink. */
+body[data-theme="zelda1"] h2,
+body[data-theme="zelda1"] .hud .lbl {
+  color: var(--got); font-weight:900; text-shadow:1px 1px 0 #000;
+}
+body[data-theme="zelda1"] .timer {
+  text-shadow:-1px -1px 0 rgba(255,255,255,.2), 1px 1px 0 #000;
+}
+body[data-theme="zelda1"] .it,
+body[data-theme="zelda1"] .key { border-width:2px; border-color:var(--edge); }
+body[data-theme="zelda1"] .it { background:var(--pip-off); }
+/* A heart is a heart, not a dot: Zelda 1 draws the same blocky 8x8 heart tile
+   full or empty, so the shape carries the meaning before the color does.
+   Straight edges only -- no curve the NES could not draw. */
+body[data-theme="zelda1"] .pips b { border-radius:0; }
+body[data-theme="zelda1"] .pips.heart b {
+  clip-path: polygon(20% 0%, 50% 18%, 80% 0%, 100% 30%, 100% 50%, 50% 100%, 0% 50%, 0% 30%);
+}
+/* Magic has no Zelda 1 equivalent, so it borrows the other iconic gem -- the
+   rupee -- rather than inventing a generic pip. */
+body[data-theme="zelda1"] .pips.mag b {
+  clip-path: polygon(50% 0%, 100% 35%, 80% 100%, 20% 100%, 0% 35%);
+}
+
+/* ---- ILLUMINATED TOME (the one LIGHT theme) ------------------------------ */
+body[data-theme="tome"] {
+  /* Aged vellum ground, iron-gall ink, oxblood and lapis for the two vital
+     stats, verdigris for hints, antique gold for the numbers that matter.
+     --ink/--dim flip DARK and --void/--stone flip LIGHT; every other variable
+     keeps its job, just re-pigmented. */
+  --void:#e9dfc4; --stone:#e2d3a9; --edge:#8a7040;
+  --ink:#241a10; --dim:#6b5a3c;
+  --life:#7a1f1f; --magic:#2c4c86; --got:#8a6a12; --hint:#3d6b3f;
+  --pip-off:#cdbb8c;
+  --ghost:#b0a077; --card:#efe4c4; --hudbg:#eee3c6;
+}
+body[data-theme="tome"] {
+  font-family:Georgia,"Times New Roman",serif;
+  /* Vellum grain under a faint vignette -- the page should look handled. */
+  background-color:var(--void);
+  background-image:
+    radial-gradient(ellipse at center, transparent 55%, rgba(90,65,25,.08) 100%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0.42 0 0 0 0 0.33 0 0 0 0 0.18 0 0 0 0.05 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-attachment:fixed;
+}
+/* OBS is the hard case for a light theme: solid vellum, not the dark wash the
+   base rule uses, or gameplay behind it fights the page for attention. */
+body[data-theme="tome"].obs .panel {
+  background:rgba(233,223,198,.94);
+  backdrop-filter:blur(3px);
+  box-shadow:0 2px 10px rgba(40,28,10,.45), inset 0 0 0 1px rgba(138,106,18,.25);
+}
+body[data-theme="tome"] .panel { position:relative; }
+body[data-theme="tome"] .panel::before {
+  content:""; position:absolute; top:0; left:0; right:0; height:3px;
+  background:linear-gradient(90deg, transparent, var(--got) 15%, var(--got) 85%, transparent);
+  opacity:.55;
+}
+/* Small-caps rubric headings. Left un-colored so the more specific .hints h2
+   rule keeps its green. */
+body[data-theme="tome"] h2 {
+  font-family:Palatino,"Palatino Linotype","Book Antiqua",Georgia,serif;
+  font-variant:small-caps; font-weight:700; letter-spacing:.16em;
+  border-bottom:1px solid var(--edge); padding-bottom:6px;
+}
+/* The drop-cap sensibility without touching markup: one illuminated initial per
+   heading, gold regardless of the heading's own ink -- the way a rubricator's
+   gold leaf ignores the color of the surrounding hand. */
+body[data-theme="tome"] h2::first-letter { font-size:1.55em; color:var(--got); font-weight:700; }
+/* HUD becomes an incipit plate. A black field here would force --ink, --life and
+   --magic into low-contrast overrides just to stay legible in this one bar. */
+body[data-theme="tome"] .hud {
+  background:linear-gradient(180deg,#f1e8d2,#e6d7ae);
+  border-top:3px double var(--got); border-bottom:3px double var(--got);
+}
+/* GHOSTED OUTLINES, the real fix: on vellum a dark ghost reads as a muddy blot.
+   Faded sepia + a dashed hairline gives "drawn but not yet inked in gold". */
+body[data-theme="tome"] .it, body[data-theme="tome"] .key {
+  border-style:dashed; font-weight:600;
+}
+body[data-theme="tome"] .it.on, body[data-theme="tome"] .key.on { border-style:solid; }
+body[data-theme="tome"] .key.on b { text-shadow:0 0 3px rgba(138,106,18,.45); }
+body[data-theme="tome"] .h { box-shadow:inset 0 0 0 1px rgba(138,106,18,.15); }
+/* Unlit pips sit close in lightness to the panel ground -- both warm tans -- so
+   a hairline ring keeps the tally visible without darkening the variable, which
+   also has to work as a plain border color. */
+body[data-theme="tome"] .meter i, body[data-theme="tome"] .pips b {
+  box-shadow:inset 0 0 0 1px rgba(90,65,25,.25);
+}
+/* SIGNATURE: the run timer in gold leaf. One number on the page gets the full
+   illumination treatment; everything else stays disciplined. */
+body[data-theme="tome"] .timer {
+  color:var(--got);
+  background:linear-gradient(180deg,#b8912c,#6e5209);
+  -webkit-background-clip:text; background-clip:text; color:transparent;
+  text-shadow:0 1px 0 rgba(255,255,255,.35);
+}
+body[data-theme="tome"] .panel.vs { border-width:2px; }
+
+/* ---- FINAL FANTASY (the command window) ---------------------------------- */
+body[data-theme="ff"] {
+  /* PS1/SNES command-window palette: pale sky-blue bleeding into deep navy,
+     chromed in silver. --got stays the "important number" gold; --hint moves to
+     a menu-cursor teal so it never fights --got for attention. */
+  --void:#0a1030; --stone:#1c3f8a; --edge:#eef2ff;
+  --ink:#ffffff; --dim:#9db4e8;
+  --life:#ff5568; --magic:#55c8ff; --got:#ffd657; --hint:#7cf0d2;
+  --pip-off:#16224f;
+  --ghost:#5a6fa8; --card:rgba(6,10,30,.55); --hudbg:#0d1642;
+  /* Every FF menu font is white with a hard 1px drop shadow, no blur -- that is
+     what makes text read as "menu chrome" rather than "web page". The lit chip
+     states below cancel it, because a light shadow under dark ink looks muddy. */
+  text-shadow: 1px 1px 0 rgba(0,0,20,.75);
+}
+/* :not(.obs) rather than source order -- body.obs has equal specificity, so
+   without this the backdrop would win over transparency by position alone. */
+body[data-theme="ff"]:not(.obs) {
+  background: radial-gradient(ellipse at 50% -10%, #1c2f6e 0%, #060912 60%);
+}
+/* THE SIGNATURE: `border: 4px double` is a real border-style that draws two
+   parallel rules with a gap for free -- exactly the FF window edge, no layered
+   box-shadow trickery. The four corner studs are tiny radial-gradient dots; that
+   hint of gold rivet is what sells "command window" over "card". */
+body[data-theme="ff"] .panel {
+  background-image:
+    radial-gradient(circle at 7px 7px, var(--got) 0 1.3px, transparent 1.6px),
+    radial-gradient(circle at calc(100% - 7px) 7px, var(--got) 0 1.3px, transparent 1.6px),
+    radial-gradient(circle at 7px calc(100% - 7px), var(--got) 0 1.3px, transparent 1.6px),
+    radial-gradient(circle at calc(100% - 7px) calc(100% - 7px), var(--got) 0 1.3px, transparent 1.6px),
+    linear-gradient(to bottom, #4d78d6 0%, #1a2f78 55%, #0d1642 100%);
+  background-repeat: no-repeat;
+  border: 4px double var(--edge); border-radius: 8px;
+  padding: 12px 14px;  /* the thicker double border eats into the base padding */
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.55),
+              inset 0 0 26px rgba(120,170,255,.22),
+              0 3px 10px rgba(0,0,0,.5);
+}
+/* Restated at higher specificity so the alert border survives the reskin
+   instead of getting silvered over like every other panel. */
+body[data-theme="ff"] .panel.vs { border-color: var(--life); }
+body[data-theme="ff"].obs .panel {
+  background-image:
+    radial-gradient(circle at 7px 7px, var(--got) 0 1.2px, transparent 1.5px),
+    radial-gradient(circle at calc(100% - 7px) 7px, var(--got) 0 1.2px, transparent 1.5px),
+    radial-gradient(circle at 7px calc(100% - 7px), var(--got) 0 1.2px, transparent 1.5px),
+    radial-gradient(circle at calc(100% - 7px) calc(100% - 7px), var(--got) 0 1.2px, transparent 1.5px),
+    linear-gradient(to bottom, rgba(60,95,190,.55), rgba(8,14,50,.7));
+  background-repeat: no-repeat; backdrop-filter: blur(3px);
+}
+body[data-theme="ff"] .hud {
+  background: linear-gradient(to bottom, #16255c, #060b24);
+  border: 4px double var(--edge); border-radius: 8px; padding: 11px 15px;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.4),
+              inset 0 0 22px rgba(120,170,255,.18),
+              0 3px 10px rgba(0,0,0,.5);
+}
+body[data-theme="ff"] h2 { border-bottom:1px solid rgba(255,255,255,.22); padding-bottom:5px; }
+/* THE RISK: a real FF command cursor, blinking, on the one panel this page
+   exists for. Everything else stays still -- spending the single animation here
+   is what keeps it from reading as decoration scattered everywhere. */
+body[data-theme="ff"] .hints h2 { position:relative; padding-left:16px; }
+body[data-theme="ff"] .hints h2::before {
+  content:"\25B6"; position:absolute; left:0; color:var(--got);
+  animation: ff-cursor-blink 1s steps(1) infinite;
+}
+@keyframes ff-cursor-blink { 50% { opacity:0; } }
+@media (prefers-reduced-motion: reduce) {
+  body[data-theme="ff"] .hints h2::before { animation:none; }
+}
+body[data-theme="ff"] .it  { border-color:rgba(238,242,255,.35); border-radius:3px; }
+body[data-theme="ff"] .it.on {
+  background:linear-gradient(to bottom,#ffe9a8,var(--got) 55%,#c99a1e);
+  border-color:#fff6d8; color:#3a2400; text-shadow:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.25);
+}
+body[data-theme="ff"] .spellboard .it.on {
+  background:linear-gradient(to bottom,#bfe6ff,var(--magic) 55%,#1c6fb0);
+  border-color:#eaf7ff; color:#00182c; text-shadow:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.25);
+}
+body[data-theme="ff"] .skillrow .it.on {
+  background:linear-gradient(to bottom,#c9ffe9,var(--hint) 55%,#1c9a72);
+  border-color:#eafff5; color:#00220f; text-shadow:none;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.8), inset 0 -2px 3px rgba(0,0,0,.25);
+}
+body[data-theme="ff"] .meter { border:1px solid rgba(238,242,255,.35); border-radius:2px; padding:2px; }
+body[data-theme="ff"] .meter i { border-radius:1px; }
+body[data-theme="ff"] .meter i.on { box-shadow:inset 0 1px 0 rgba(255,255,255,.5); }
+body[data-theme="ff"] .pips b.on {
+  box-shadow:0 0 4px rgba(255,255,255,.5), inset 0 1px 0 rgba(255,255,255,.6);
+}
+body[data-theme="ff"] .key { border-color:rgba(238,242,255,.3); border-radius:3px; }
+body[data-theme="ff"] .key.on { border-color:var(--got); box-shadow:inset 0 0 6px rgba(255,214,87,.3); }
+body[data-theme="ff"] ::selection { background:var(--got); color:#241800; }
+
+/* ---- CASTLEVANIA / GOTHIC ------------------------------------------------ */
+body[data-theme="gothic"] {
+  /* Dracula's castle rather than an NES palette: candlelit aubergine stone, a
+     tarnished gold-bronze frame, ruby/sapphire stained glass for life/magic.
+     --got doubles as "gilt" -- acquired items, spent crystals and the corner
+     filigree all use it, so from across the room "gold = yours" reads the same
+     way "yellow bar = life" reads in the original. */
+  --void:#0a0609; --stone:#221521; --edge:#8a6d3a;
+  --ink:#ede0c8; --dim:#8d7a93;
+  --life:#c8283f; --magic:#4a7fd0; --got:#d8b34a; --hint:#4fcf8f;
+  --pip-off:#2c2030;
+  --ghost:#6b5d76; --card:#171019; --hudbg:#060305;
+  /* One corner-scroll motif, used top-left as-is and bottom-right rotated 180
+     -- a matching pair of frame corners from a single asset. */
+  --gothic-corner: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cg fill='none' stroke='%23d8b34a' stroke-width='1.6' stroke-linecap='round'%3E%3Cpath d='M3 15 V3 H15'/%3E%3Cpath d='M3 3 Q13 3 13 13'/%3E%3C/g%3E%3Ccircle cx='3' cy='3' r='2.2' fill='%23d8b34a'/%3E%3C/svg%3E");
+}
+/* Candle glow, not a flat void. Skipped in OBS mode -- that background must
+   stay genuinely transparent, not "our transparent". */
+body[data-theme="gothic"]:not(.obs) {
+  background:
+    radial-gradient(ellipse 60% 40% at 15% -10%, rgba(216,179,74,.09), transparent 60%),
+    radial-gradient(ellipse 70% 50% at 90% 110%, rgba(200,40,63,.10), transparent 60%),
+    var(--void);
+}
+body[data-theme="gothic"].obs .panel { background:rgba(34,21,33,.76); backdrop-filter:blur(2px); }
+body[data-theme="gothic"] .panel {
+  position:relative;
+  background:linear-gradient(180deg, rgba(255,255,255,.03), rgba(0,0,0,.22)), var(--stone);
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.5), 0 3px 10px rgba(0,0,0,.45);
+}
+/* Filigree sits ON the frame, not inside the content box -- ornament belongs at
+   the edges so it never competes with the numbers. This is the whole reason the
+   theme stays legible while being ornate. */
+body[data-theme="gothic"] .panel::before,
+body[data-theme="gothic"] .panel::after,
+body[data-theme="gothic"] .hud::before,
+body[data-theme="gothic"] .hud::after {
+  content:''; position:absolute; width:22px; height:22px;
+  background-image:var(--gothic-corner); background-repeat:no-repeat;
+  background-size:contain; opacity:.85; pointer-events:none;
+}
+body[data-theme="gothic"] .panel::before,
+body[data-theme="gothic"] .hud::before { top:-1px; left:-1px; }
+body[data-theme="gothic"] .panel::after,
+body[data-theme="gothic"] .hud::after  { bottom:-1px; right:-1px; transform:rotate(180deg); }
+body[data-theme="gothic"] h2 {
+  font-family:Georgia,"Times New Roman",serif; letter-spacing:.24em; color:var(--got);
+  text-shadow:0 1px 0 rgba(0,0,0,.7), 0 0 10px rgba(216,179,74,.25);
+  border-bottom:1px solid var(--edge); padding-bottom:6px;
+}
+/* The room nameplate is the one piece of prose on the page -- everything else
+   is a number -- so it gets the serif too. */
+body[data-theme="gothic"] .where b { font-family:Georgia,"Times New Roman",serif; letter-spacing:.02em; }
+body[data-theme="gothic"] .hud { position:relative;
+  box-shadow:inset 0 2px 0 rgba(0,0,0,.6), inset 0 -2px 0 rgba(0,0,0,.6); }
+body[data-theme="gothic"] .timer { text-shadow:0 0 10px rgba(216,179,74,.35); }
+body[data-theme="gothic"] .stat.life  { text-shadow:0 0 8px rgba(200,40,63,.45); }
+body[data-theme="gothic"] .stat.magic { text-shadow:0 0 8px rgba(74,127,208,.45); }
+body[data-theme="gothic"] .panel.vs {
+  box-shadow:inset 0 0 0 1px rgba(0,0,0,.5), 0 0 16px rgba(200,40,63,.2);
+}
+body[data-theme="gothic"] .vsnum { text-shadow:0 0 14px rgba(200,40,63,.5); }
+body[data-theme="gothic"] .meter i.on {
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.35), inset 0 -2px 2px rgba(0,0,0,.35);
+}
+/* Cut gems, not filled dots. */
+body[data-theme="gothic"] .pips.heart b.on {
+  background:radial-gradient(circle at 32% 28%, #ff8a93, var(--life) 55%, #4a0812 100%);
+  box-shadow:0 0 4px rgba(200,40,63,.6);
+}
+body[data-theme="gothic"] .pips.mag b.on {
+  background:radial-gradient(circle at 32% 28%, #b9d3ff, var(--magic) 55%, #14285a 100%);
+  box-shadow:0 0 4px rgba(74,127,208,.6);
+}
+body[data-theme="gothic"] .it { box-shadow:inset 0 1px 3px rgba(0,0,0,.5); }
+body[data-theme="gothic"] .it.on {
+  background:linear-gradient(155deg,#f3dfa0 0%,#d8b34a 45%,#7c5a1e 100%);
+  border-color:#f0d78c; color:#241505;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 3px rgba(0,0,0,.35);
+}
+body[data-theme="gothic"] .spellboard .it.on {
+  background:linear-gradient(155deg,#9fc0ee 0%,#4a7fd0 45%,#1c3a72 100%);
+  border-color:#7ea8e6; color:#f4f8ff;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -2px 3px rgba(0,0,0,.35);
+}
+body[data-theme="gothic"] .skillrow .it.on {
+  background:linear-gradient(155deg,#9be8bb 0%,#3fae74 45%,#164f34 100%);
+  border-color:#7cd9a4; color:#062015;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.4), inset 0 -2px 3px rgba(0,0,0,.35);
+}
+body[data-theme="gothic"] .key.on {
+  background:linear-gradient(155deg,#f3dfa0 0%,#d8b34a 60%,#7c5a1e 100%);
+  border-color:#f0d78c; color:#241505;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.5), inset 0 -2px 3px rgba(0,0,0,.35);
+}
+body[data-theme="gothic"] .h { box-shadow:inset 0 1px 0 rgba(255,255,255,.04); }
 </style></head><body>
+
+<div id="themebar">
+  <span>THEME</span>
+  <select id="themesel" onchange="setTheme(this.value)">
+    <option value="">ZELDA II</option>
+    <option value="zelda1">ZELDA 1</option>
+    <option value="ff">FINAL FANTASY</option>
+    <option value="gothic">CASTLEVANIA</option>
+    <option value="tome">ILLUMINATED TOME</option>
+  </select>
+</div>
+
 <div class="wrap">
 
   <div class="hud">
@@ -140,7 +590,19 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
   </div>
 
   <div>
-    <div class="panel hints">
+    <!-- VS CHAT: hidden entirely unless the mode is on or chat has scored. This is the
+         viewer-facing half of the Twitch feature; the controls live on the setup page,
+         which is not something to put on stream. -->
+    <div class="panel vs" id="vspanel" hidden>
+      <h2>VS CHAT</h2>
+      <div class="vsrow">
+        <span class="lbl">CHAT KILLS</span>
+        <b class="vsnum" id="vskills">0</b>
+      </div>
+      <div class="vsoff" id="vsoff" hidden>MODE OFF — SCORE STANDS</div>
+    </div>
+
+    <div class="panel hints" style="margin-top:12px">
       <h2>HINTS <span class="hcount" id="hcount"></span></h2>
       <div class="hlist" id="hints"></div>
     </div>
@@ -149,7 +611,32 @@ h2 { margin:0 0 9px; font-size:10px; letter-spacing:.22em; color:var(--dim); fon
 </div>
 <script>
 const $ = id => document.getElementById(id);
-if (new URLSearchParams(location.search).has('obs')) document.body.classList.add('obs');
+const QS = new URLSearchParams(location.search);
+if (QS.has('obs')) document.body.classList.add('obs');
+
+// THEME. Order of precedence: ?theme= wins, then the last choice made in this
+// browser, then the ZELDA II default (no attribute at all, so :root applies).
+//
+// The URL param has to win, and has to work WITHOUT localStorage, because OBS
+// browser sources run in their own isolated profile -- a theme picked in your
+// normal browser is simply not visible to them. Point OBS at
+// ?theme=zelda1&obs=1 and it is deterministic.
+function setTheme(name, remember) {
+  if (name) document.body.setAttribute('data-theme', name);
+  else      document.body.removeAttribute('data-theme');
+  const sel = $('themesel');
+  if (sel) sel.value = name || '';
+  if (remember !== false) {
+    try { localStorage.setItem('zalia_theme', name || ''); } catch (e) {}
+  }
+}
+(function initTheme() {
+  let t = QS.get('theme');
+  // Only fall back to the stored choice when the URL did not specify one --
+  // otherwise an OBS source would drift to whatever was last clicked elsewhere.
+  if (t === null) { try { t = localStorage.getItem('zalia_theme'); } catch (e) { t = null; } }
+  setTheme(t || '', false);
+})();
 
 // Bit constants read straight from macros.gml. These are 32-bit fields and the
 // last item (WATER) is bit 31 -- JavaScript's & operator is 32-bit SIGNED, so a
@@ -179,13 +666,25 @@ const ITEMS = [
   // shows the game's word, not the constant's.
   ['NOTE',65536],['MIRROR',131072],['TROPHY',262144],['FLOWER',524288],
   ['CHILD',1048576],['BOTTLE',2097152],['S.KEY',4194304],['MAP 1',8388608],
-  // REMOVED 2026-07-27: TABLET (ItmK5) and FEATHER (ItmK7). Both have an object
-  // and an editor registration in GameObjectData_Create with a spr_Placement_*
-  // sprite, but NO data_spawn anywhere puts either in a room -- built and
-  // editor-ready, never deployed. Neither slot could ever light.
-  // Verify before re-adding: `grep -rn "ItmK5\|ItmK7" scripts/ --include=*.gml`
-  // returns only GameObjectData_Create and __global_object_depths. No spawn.
-  ['MAP 2',16777216],['MEDAL',67108864]
+  // REMOVED 2026-07-27: the three items that are registered but UNOBTAINABLE.
+  // Each has an object + sprite registration in g_Create, but NO data_spawn
+  // anywhere puts it in a room -- built and editor-ready, never deployed. A slot
+  // that can never light is worse than a missing slot: it reads as "still to find".
+  //
+  //   ITM_TBLT (ItmK5)  bit 25  TABLET
+  //   ITM_MEL1 (ItmKB)  bit 26  MELODY   <- was in this list mislabelled "MEDAL"
+  //   ITM_FTHR (ItmK7)  bit 27  FEATHER
+  //
+  // The MEDAL entry was the sneaky one: 67108864 is 2^26 = ITM_MEL1, so the row
+  // was showing a melody under a medal's name and could never tick either way.
+  //
+  // Re-verify before re-adding any of them -- the audit is
+  // scratchpad\item_spawn_audit.py, which cross-references every g_Create item
+  // registration against every data_spawn in the rm_data_init_* files.
+  //
+  // NOT removed: ITM_MEDI. It IS spawned, and it is the FLOWER the tracker already
+  // shows -- "medicine" is only the constant's name. See the note above.
+  ['MAP 2',16777216]
 ];
 
 // The four bits with no known grant site. NOT deleted -- shown in their own row
@@ -203,8 +702,26 @@ const UNVERIFIED = [
 // Bit 8 is SPL_FARY in code but the in-game spell list calls it CUCCO -- owner
 // confirmed 2026-07-27. Same rule as FLOWER above: show the player's word, not
 // the constant's.
+// Bits verified against macros.gml 2026-07-27:
+//   PRTC 1  JUMP 2  LIFE 4  FARY 8  FIRE 16  RFLC 32  SPEL 64  THUN 128  SUMM 256
+//
+// DO NOT "fix" bit 8 to FAIRY. It was renamed to FAIRY on 2026-07-27 on the
+// reasoning that the macro is SPL_FARY, and that was WRONG and had already been
+// settled earlier the same day: in this hack the fairy spell IS the Cucco
+// transform, so CUCCO is the player's word for bit 8 and the label is correct.
+// The renderer overrides this label anyway (see the CUCCO TIER note below), so
+// the rename was silently pointless as well as wrong.
+//
+// Bit 1 is PROTECT, not "SHIELD". It was labelled SHIELD on the reasoning that
+// vanilla Zelda II players call it that -- wrong for THIS game, and actively
+// confusing: ZALiA has a SHIELD *item* (ITM_SHLD, bit 4096) sitting on the
+// INVENTORY board, so two different boards showed a "SHIELD" that meant different
+// things. The game's own name list is STR_PROTECT (g_Create.gml:3437).
+// Same show-the-player's-word rule as FLOWER, CUCCO and HEAL.
+//
+// ENIGMA is still shown as SPELL -- that one has no competing item to confuse it.
 const SPELLS = [
-  ['SHIELD',1],['JUMP',2],['LIFE',4],['CUCCO',8],['FIRE',16],
+  ['PROTECT',1],['JUMP',2],['HEAL',4],['CUCCO',8],['FIRE',16],
   ['REFLECT',32],['SPELL',64],['THUNDER',128],['SUMMON',256]
 ];
 
@@ -218,13 +735,64 @@ const SPELLS = [
 // abilities ARE Link's own skills, already listed under TECHNIQUES, so the panel
 // only repeated them. The tier is the single fact worth showing, and it belongs
 // on the Cucco spell chip.
+// TWO techniques, not five. SKILL_BNC (4), SKILL_CST (8) and SKILL_AFR (16) are
+// declared in macros.gml and referenced NOWHERE ELSE in the codebase -- nothing
+// grants them, no rando toggle offers them (RandoOTHER_SKILLS has only STABDOWN
+// and STABUP), and Dev_StabToCheat's skill zones only cover THD/THU.
+//
+// They were showing as BOUNCE / CAST / A.FIRE, which read as real unfound
+// techniques. Same class of lie as the "MEDAL" item and the three unobtainable
+// items -- a slot that can never light tells a viewer there is something left to
+// find. Verify with `grep -rn "SKILL_BNC\|SKILL_CST\|SKILL_AFR"` before re-adding.
 const SKILLS = [
-  ['DOWNSTAB',1],['UPSTAB',2],['BOUNCE',4],['CAST',8],['A.FIRE',16]
+  ['DOWN STAB',1],['UP STAB',2]
 ];
 
+// GENERATED by _scripts\audits\build_icon_map.py -- do not hand-edit.
+// Ripped NES art (true colours) where vanilla Zelda II had the item;
+// the project's own sprites for ZALiA-only additions.
+// Sprite rip credit: Mister Mike, via spriters-resource.
+const ICONS = {
+  'BOOK'    :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAfUlEQVQokY2QuxGAIBBE3zFXCoGBBRBYlKUYGliQBRgQUAozGMGgiLrJzd7e3k8A4uoSHUhcXQrL3tMRP3Bx2yMSRi3c3EW2CTu7ktOeM3PxAyk7AcKyU/NmhzvMm1gK8lJP8XOE1o4n/P+kPWLbXlVMT7xcUX+wGQHwdskJaXg2QNk0WwkAAAAASUVORK5CYII=',
+  'BOOTS'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAANCAYAAABlyXS1AAAAT0lEQVR4nGNkQAJ/Zlj8R+YzIXPuTDjBgFMSXSEjssANDQa4sSpX/mDXCZK4o8NCC50ggNO1KJLouuCSIAmQPRiSMAmQA7DqRJbQuIFwJAAuiyQt7UFwxQAAAABJRU5ErkJggg==',
+  'BOTTLE'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAoAAAAQCAYAAAAvf+5AAAAAgUlEQVR4nGNkQAJ/Zlj8R+azZJxghLEZURT++YOqkIUFLs/EgAbu6LCAMTrAEFEpsGAgCP4gWY3uDCZcEljFQAK4FP6BijPCGMg+xGrqHywmYVPMAmLc0GAgqJiJkALyFapc+YMhiSwGjxlQtKErRo5KePBgi19kU8FhRyiIQGEMAFjhT1d18yXEAAAAAElFTkSuQmCC',
+  'BRACE'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAnklEQVQoka2QoRHDMAxFn3MaxcCgAwh0nILCjBJo0HEKMkCAgUfRnQp6dpI6sIL673+dPvx1SsJLwi2rD6JldTNzy3qCpgbUZaXeZEi8dPddO2VmHfhNmADqTYZ4gDgrwcz8KKZCOELTlfMEHB1x1hEAiJsRNxtEy+q9B173AajL+k0QkX6m9VASHmfdm+TxPkUDyHMN/QURCc0F+7sfmAJbkxsHErwAAAAASUVORK5CYII=',
+  'CANDLE'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAPCAYAAADZCo4zAAAAXklEQVR4nGNgQAI3NBj+M6ABJnTJG2iKmJAFVQosMEyCm6AClYTRGAruTDjBgA0wYnOgxg2EOEHACGP8+fMHbgILCwtcHO4GXGCgFfyZYfGfEUTgNYEl4wTOQAHJAQA/lh2rWLpNXQAAAABJRU5ErkJggg==',
+  'CHILD'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAQCAYAAAAiYZ4HAAAAnElEQVR4nI1SuQ3DMAwkDQ7jIgO4yDguPFKKjOMiI7jwKAcooBLRlEHJPkDvHckDJaIAAJKOiOOzMBKJiOmGK3HI9SyEfDngNdnq9+Q0h6U/EQGO4zsBClk+XFU4k0XQb2ujirhgMTGQ9ocdKwBI5S3y1Gsp+UoinFO2Mkdg8z2vfeX7+QvwPq/s6Bq3Vb26D1dZ0mkbqco+bu37Lzv2Y7KQM4X9AAAAAElFTkSuQmCC',
+  'CROSS'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAMCAYAAABfnvydAAAATElEQVR4nGNgQAJ//vz5D8LIYkwMBABhBX+gxoKNnmPDcEeHhQFFDJlzQ4Ph/58ZFnA+CLOAdMGAypU/EAaSGAqgkS8oVsCCwsPiegAeZkpxfYdkzgAAAABJRU5ErkJggg==',
+  'FAIRY'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA4AAAAPCAYAAADUFP50AAAAvElEQVR4nLVSMQ7DIAx0Ip7CwNAHZOhz+oA+pWOHPKdDHtAhQ59iKZUNbi7Gqrr0JCMwdz4wEBERM2/ksBbaJHzeuAOKUkqDiQhQVtI8ckcd5/OhmiA/WcM7GbcKIfEV886pwsujq/w6JY2uB427OzYIOV+nz1rmVuAAqWYVpSl8n2pwzdvaGmb5zlFdb0s4RyR8Bn/kCMIVRx2i98vtnuiI7zmim21EKLAnmvCOvqsRQuEv+INQfgj8KI83vop6cgudoj0AAAAASUVORK5CYII=',
+  'FLOWER'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAiklEQVQokY2Puw3DMAxEj8KN4sJFBnCRgVxmFJcpMpAGSOFCoxxAVxToIDZ0FT8P4pMhRZJHTdIAwPri8+xg2yqmr0DSSl5yrQYA02tBexAAUE4n3oufeskLSWtbzXPkvjvEk5FwsLsf/M0+w/cZfgkEFHW5AyX5JSDJu0sW/L1fwjpDQ3JDkkPAAd1uRQGFr0axAAAAAElFTkSuQmCC',
+  'FLUTE'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAYAAAAOCAYAAAAMn20lAAAASElEQVR4nGNggII/f/78B2EYnwnGYJhjw3BHh4UBUwINMJEswQADNzQY/oMwhg6VAgu668DvD+QwghnHCBacYwNXeWfCCTANABRTJS3p0iSsAAAAAElFTkSuQmCC',
+  'GLOVE'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAPCAYAAADZCo4zAAAAjElEQVR4nIVQsQ2AMAwzFad0YOAABg5i5BRGBg7iAAaGnhKpqAGjNiDwEilObCfABZm7uDeIrOxXIhJDW8Oi2VGl6kj6sSsq4fwm+MKvRZ1Ib2TDtN7BPy3CtMK9NQEgnZqUC3OSueUjZE5yQcPwg/abego9X89UBZGIpS/TDqe8TtntXEUV9BdGgQEP9n1UoLSyF50AAAAASUVORK5CYII=',
+  'HAMMER'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAcAAAAOCAYAAADjXQYbAAAAOUlEQVR4nGNgQAJ//vz5/2eGxX8YnxGZgwxYMk4wMt7QYMAqqVJgwYBTEgSYGIgFf9AchFfnMJIEAK/dFlwRMjqxAAAAAElFTkSuQmCC',
+  'MAP 1'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAi0lEQVQokX2RuxHDMAxDQZ9GYakBWGSglBrFZQoPpAFcchTeOYVDn8TQRqUPngRIhCAzO7C9rjnFTa1lApZ4QlRq4CbgJrPBzA4A4N0AALr2OYMbRmkt9xk87JLSv5rc5LxiNDzXHEhvQU5HkptA134atJZrwUkXZc87Zxg+JhPZR/4eKG1R3p2y8RentkJ9tXCC2QAAAABJRU5ErkJggg==',
+  'MAP 2'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAj0lEQVQokYVQsQ3DMAyjCp3iwSf4oAwdc0pGH5QhB2Tw0FMIKJMcO7VbAgJkkKJEC3MyAND3IaNeSoRhgrAmvGZkRYkw5lTL3yXCSJq68LMdGPX1mCcRTmJ6pJOqKmj3MicjWevLwScdqip3imbSp++YD7IVdCmw7L39KEU4WUkA/79aw5p+CnqHZe/sAeACLYeAsUTtD7sAAAAASUVORK5CYII=',
+  'MASK'    :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAkUlEQVQokaWRsQ3DMAwEz4JGceEiA6jIQCk9iksXGUgjuNAoBJgieYGWA6SIqsfz+RSf8PczMwewvfix4MeC215ctSzQbpl5LQC0rfbGBMDzfrUWJ2th2fdRKo4CidKvJZI+Fp2E57UwRcv8qJNGda5tFamji/jLJqcNTsQnGHgHp4Ycg+ldY3DxDuM9vopi8QWGAXyb3emxigAAAABJRU5ErkJggg==',
+  'MEAT'    :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAiElEQVQokYWQsRHEIAwEF8alOKAESnLoUghdkkogoBTN8MFbfsPL/5cwoz2OE3BKj9xrottp82CQm1oRAFIlRIM2bEVY9wxATfQw376bWhHiLwjwmACw7pm4bBK8BIBlkxA9aAnXmvOqrQipvtljSVd65O6V/hhUh292Dao6GL46zPprGOK9Z16OlF+IHMJE5AAAAABJRU5ErkJggg==',
+  'MIRROR'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAjUlEQVQokX1QsQ3DMAxjjZziQUMP8JBzckDPydBzckIHDTlFgDIkluVYDQEDMimJtAEHJigT1HOpEl4YOCaorOU8IiprsU2JCZo/5RxdNuA7AwDyT8AETWbmRCxby2DVXbzurSEQu+eJiAX0IafatL8nRDALYryiuvugahFpRgykx31DF/Jf0DQwT4gsDhsyXuuu5KXfAAAAAElFTkSuQmCC',
+  'NECKLC'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAc0lEQVQokWNggII/Myz+/5lh8Z8BG/jz589/ZIWYCtAEMRQhm4CuiImBgYGBYY4NVqsRCvAAIhWkHCGkDtXleMMDr+QNDYb/NzQYMBXBJLEpQvHFHR0WHL7AA+AhqVJgARdEZjMiuwM5yFkyTjAyMDAwAAAyrkvyjy5UHwAAAABJRU5ErkJggg==',
+  'NOTE'    :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAjUlEQVQokY2RsQ0CMQxFXyKPcgUFA6S4cVJQMsqVVzBOigxAQXGjWMoVEKODWPAlK1/631+2Az8QdE0NQC51yI14iJ1sS2VbqnEAciEAuCm5ELs46vZneIkiEtA1tceJZq+qlQ05XRMA0139LXpsh4iEt+FD/E64zc/yDLbiWQ7xwOBQuRwM8e+/GHUD7COeTUclPBLhAAAAAElFTkSuQmCC',
+  'RAFT'    :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAOCAYAAAASVl2WAAAAVklEQVR4nGP8M8PiPwMDAwNLxglGbGwmBii4ocHwHxub4c+fP/9BGCSIjc3CMMcGrFDlyh8GbGy4FXd0WBiwseEKcAE6KGCgvTcJWsEIIkAKWVhYsLIBpUV+9VC36NgAAAAASUVORK5CYII=',
+  'RING'    :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAWUlEQVQokWNgGBGAEZlzQ4PhP4ytcQMix4QsqXLlD4ZiRnSd6ICJgYGBQaXAAqukSoEFwg1/ZlhgmMKScQIi/+fPn//YFMCtxiaJIv5nhgWGCTA+TjfA7AcA/8IrRtifts0AAAAASUVORK5CYII=',
+  'S.KEY'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAPCAYAAADZCo4zAAAAdUlEQVR4nGNgQAJ//vz5D8LIYiwwARYWFkawyBwbuGIQzQhmzIEIwkHKEbhCJhBxZ8IJVAVzbOBiqCakHGG4o8PCoFJgAVfLBLebgQEsieLAjBOMcMk/MyxQXZ9xAi7HgOJNNIVgR+IDA6UA2aFYFSB7kaAJAMqUOHhElCwnAAAAAElFTkSuQmCC',
+  'SHIELD'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAdUlEQVQokWNgIAAY/8yw+H9nwgmcClhgDJUrfzAk7+iwMDBhiM6xYbijA9eHRQEaIKgAYdYcGwZkx8KsIcGKlCMMKlf+MKgUWDAwMCB8RbkjKVfAwMDAwPBnhsX/GxoM///8+fMfmY3dBKhvkIMbxRQYhokDAIHdMl9YvWU6AAAAAElFTkSuQmCC',
+  'SWORD'   :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAQCAYAAAArij59AAAAS0lEQVQokWNgQAN//vz5j8xnwieJoQAbGEkKsAXQnxkW/xkYGBgY0QUYGBgY7kw4waBxAyGH0PXnz39khZgKZlj8v6HBgEcBOSYAAOnTK8qMl3eoAAAAAElFTkSuQmCC',
+  'TROPHY'  :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAxUlEQVQ4jbVSsQ3DMAxjCp3iwUMOyNBzckBO6dih52TIARk8+BQB7tDIUWQZ6NASMBDLFMVIAn4FZi42liJKimjimjvYABENkqyTYvK5t8p43Rv1sDPCzm3lgwsAp4B56MJwToF5bSrlkZBHapxp7tXBgTwSwjLVe1imKuSCmYtUSBGFn9PnHHG5S2M133UAAPmxud8W1ZeMz/6Km0Q0iIM6W2/+0gftQO9D3QNdXQge9JvkdHtgp9BDV+Bb/FlgXi9b5+ENUo56jPat8bQAAAAASUVORK5CYII=',
+  '_HEARTC' :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAPCAYAAADtc08vAAAAfUlEQVR4nM2TQQqAIBBFZ+QfpUWL7n+SFi06ykChNDGZjgy06IGofP9XB2W6EJGDDADYzns6VNyXMnwYdJGnc0tUplVK7+kgh57RkoYr/h8AgLVYEUoBAf7mCgieQne/AyIh1pxJVhyF1OZXgBfSMrvkJ77NVFr9kUIhI/MJG15M7mJTZygAAAAASUVORK5CYII=',
+  '_MAGICC' :'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAQCAYAAAAiYZ4HAAAAiklEQVR4nGNkQAJ//vz5z4AFsLCwMMLZyIrv6MC5KODPnz//YZqYkE1RufIHQ7HKlT8oNsAZuJzFgqQYxQZkAHIaLucxMZAImGiugYVQHPyBisM8z0goDtCDl5EYxQxImsjztEqBBcQEJBqbGAjA/cAwxwa/0SlHwH4A2wAOgZQjBBXDbYABYpI3AGTqPlCxdV9sAAAAAElFTkSuQmCC',
+};
+
 function board(el, defs, value) {
-  el.innerHTML = defs.map(([name, bit]) =>
-    '<div class="it' + (has(value, bit) ? ' on' : '') + '">' + name + '</div>').join('');
+  el.innerHTML = defs.map(function(d) {
+    var name = d[0], bit = d[1];
+    var extra = d[2] || '';          // optional 3rd element: extra css class(es)
+    var on   = has(value, bit);
+    var src  = ICONS[name] || ICONS[d[3]];   // 4th element: icon key override
+    var body = src
+      ? '<img src="' + src + '" alt="' + name + '" title="' + name + '"><span>' + name + '</span>'
+      : '<span class="noicon">' + name + '</span>';
+    return '<div class="it' + (on ? ' on' : '') + (extra ? ' ' + extra : '') + '">' + body + '</div>';
+  }).join('');
 }
 function pips(el, got, total, cls) {
   let s = '';
@@ -267,21 +835,42 @@ async function load() {
     $('deathlbl').textContent = pen ? 'DEATHS · WARP PENALTY ON' : 'DEATHS · REAL ONLY';
   }
   $('deathlbl').style.color = pen ? '' : 'var(--hint)';
+
+  // VS CHAT scoreboard. Shown while the mode is on, and kept on screen afterwards
+  // if chat ever scored -- turning the mode off mid-stream should not erase the
+  // number people were watching. Absent entirely on a run that never used it.
+  const vsOn = !!s.vs_mode, vsKills = s.vs_kills || 0;
+  $('vspanel').hidden = !(vsOn || vsKills > 0);
+  $('vskills').textContent = vsKills;
+  $('vsoff').hidden = vsOn;
   $('levels').textContent = s.level_atk + '/' + s.level_mag + '/' + s.level_lif;
   $('room').textContent   = (s.room_name || '').replace(/^rm[AB]?_?/, '');
   $('seed').textContent   = s.is_rando ? ('SEED ' + s.seed + ' · Q' + s.quest_num)
                                        : ('QUEST ' + s.quest_num);
 
-  board($('items'),  ITEMS,  s.items);
+  // BOTTLE has THREE states, not two. Quest 2's bottle is filled with blood by
+  // killing Dark Link (Cutscene_ShadowBoss_2_update.gml:489) and that fill is what
+  // gates the mod's extra ending (Ganon1_update.gml:20). "Have bottle" and "have
+  // FILLED bottle" are completely different progress, so they cannot share one lit
+  // state -- the tracker was exporting bottle_full already and showing nothing.
+  const items = ITEMS.map(function (e) {
+    if (e[1] !== 2097152) return e;
+    return s.bottle_full ? ['BOTTLE', 2097152, 'filled'] : e;
+  });
+  board($('items'),  items,  s.items);
   board($('skills'), SKILLS, s.skills);
 
   // The Cucco TIER rides on the Cucco spell chip itself rather than getting its
   // own section: tier 2's abilities are Link's own skills, already shown under
   // TECHNIQUES, so a separate Cucco panel just repeated them. Any Cucco_skills
   // bit set = tier 2.
+  // SELECTED spell gets marked. The state already carried spell_selected; showing
+  // it means a viewer can see what will fire without reading the game's own HUD.
   const spells = SPELLS.map(function (e) {
-    if (e[1] !== 8) return e;
-    return ['CUCCO ' + (s.cucco_skills ? 'II' : 'I'), 8];
+    let out = e;
+    if (e[1] === 8) out = ['CUCCO ' + (s.cucco_skills ? 'II' : 'I'), 8];
+    if (e[1] === s.spell_selected) out = [out[0], out[1], 'sel'];
+    return out;
   });
   board($('spells'), spells, s.spells);
 
