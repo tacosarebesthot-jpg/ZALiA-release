@@ -164,7 +164,7 @@ function jukebox_poll_cmd() {
             }
         break;
 
-        // assignname <mus_asset> <zone 0-6> -- bind a track to a zone BY NAME.
+        // assignname <mus_asset> <zone 0-7> -- bind a track to a zone BY NAME.
         //
         // Prefer this over "assign". An index only means anything relative to the
         // playlist the game currently holds; a companion showing a stale list will
@@ -175,7 +175,7 @@ function jukebox_poll_cmd() {
             if (_sp3 > 0)
             {
                 var _nm = string_copy(_arg, 1, _sp3 - 1);
-                var _nz = clamp(real(string_copy(_arg, _sp3 + 1, string_length(_arg) - _sp3)), 0, 6);
+                var _nz = clamp(real(string_copy(_arg, _sp3 + 1, string_length(_arg) - _sp3)), 0, 7);
 
                 // the command file is lowercased on read, so recover the real asset
                 // name by case-insensitive match against the audiogroup
@@ -195,14 +195,14 @@ function jukebox_poll_cmd() {
             }
         break;
 
-        // assign <trackIdx> <zone 0-6> -- bind a track to a zone by playlist index.
+        // assign <trackIdx> <zone 0-7> -- bind a track to a zone by playlist index.
         // Kept for the in-game companion; see assignname for the safe form.
         case "assign":
             var _sp2 = string_pos(" ", _arg);
             if (_sp2 > 0 && global.jukebox_count > 0)
             {
                 var _ai = clamp(real(string_copy(_arg, 1, _sp2 - 1)), 0, global.jukebox_count - 1);
-                var _az = clamp(real(string_copy(_arg, _sp2 + 1, string_length(_arg) - _sp2)), 0, 6);
+                var _az = clamp(real(string_copy(_arg, _sp2 + 1, string_length(_arg) - _sp2)), 0, 7);
                 var _aa = global.jukebox_assets[_ai];
                 if (_aa != -1 && audio_exists(_aa))
                 {

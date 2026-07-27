@@ -163,7 +163,9 @@ body[data-theme="vellum"] h1 { font-variant:small-caps; letter-spacing:.14em; }
   </div>
 </footer>
 <script>
-const ZONES = ["TITLE","OVERWORLD","TOWN","DUNGEON","BOSS","ENDING","MINIGAME"];
+// TUNNELS is the town-to-town fast-travel basements -- seven rooms sharing the
+// _Basement01 theme. Split out of TOWN so a track can go in the tunnels ONLY.
+const ZONES = ["TITLE","OVERWORLD","TOWN","DUNGEON","BOSS","ENDING","MINIGAME","TUNNELS"];
 const PL    = ["OG","REMIX","MY MIX","ALL","FOLDER"];
 const MYMIX = 2;   // JukeboxPL.MY_NESMIX -- the owner's own imports
 

@@ -1483,12 +1483,19 @@ function Audio_Create() {
 	var _nm_minigame = ["mus_Gyromite_GameABGM","mus_PunchOut_BicycleTraining"];
 	var _nm_title_themes    = [STR_Title, dk_FileSelect, dk_ContinueSave];
 	var _nm_minigame_themes = [dk_Minigame+"01"];
-	var _nm_ow_themes = [STR_Overworld+STR_Standard, STR_Overworld+dk_DeathMountain, STR_Overworld+dk_MazeIsland, STR_Overworld+dk_ValleyOfDeath, STR_Overworld+STR_Dragmire, STR_Overworld+STR_Makarrha, STR_Rauru, STR_Ruto, STR_Saria, STR_Mido, STR_Nabooru, STR_Darunia, STR_New_Kasuto, STR_Old_Kasuto, STR_Bulblin, STR_House+"01", STR_Basement+"01"];
+	// TUNNELS (2026-07-27). _Basement01 is used by exactly SEVEN rooms -- the six
+	// town fast-travel basements and Darunia West -- so it is effectively a
+	// tunnels-only theme. The owner wanted SMB Underground in those tunnels ONLY,
+	// which was written off as needing per-room music; it did not, it just needed
+	// _Basement01 to stop riding the overworld/town bucket.
+	var _nm_tunnel        = ["mus_SMB_UndergroundTheme"];
+	var _nm_tunnel_themes = [STR_Basement+"01"];
+	var _nm_ow_themes = [STR_Overworld+STR_Standard, STR_Overworld+dk_DeathMountain, STR_Overworld+dk_MazeIsland, STR_Overworld+dk_ValleyOfDeath, STR_Overworld+STR_Dragmire, STR_Overworld+STR_Makarrha, STR_Rauru, STR_Ruto, STR_Saria, STR_Mido, STR_Nabooru, STR_Darunia, STR_New_Kasuto, STR_Old_Kasuto, STR_Bulblin, STR_House+"01"];
 	var _nm_dun_themes = [STR_Dungeon+hex_str(1), STR_Dungeon+hex_str(2), STR_Dungeon+hex_str(3), STR_Dungeon+hex_str(4), STR_Dungeon+hex_str(5), STR_Dungeon+hex_str(6), STR_Dungeon+hex_str(7), STR_Dungeon+hex_str(8)];
 	var _nm_boss_themes = [STR_Boss+"01", dk_ThunderBird, dk_ShadowBoss+"01", dk_ShadowBoss+"02", STR_Ganon+"1", STR_Ganon+"2", STR_Ganon+"3"];
 	var _nm_end_themes = [dk_Credits, dk_GameClear];
-	var _nm_buckets_tracks = [_nm_ow_town, _nm_level, _nm_boss, _nm_ending, _nm_title, _nm_minigame];
-	var _nm_buckets_themes = [_nm_ow_themes, _nm_dun_themes, _nm_boss_themes, _nm_end_themes, _nm_title_themes, _nm_minigame_themes];
+	var _nm_buckets_tracks = [_nm_ow_town, _nm_level, _nm_boss, _nm_ending, _nm_title, _nm_minigame, _nm_tunnel];
+	var _nm_buckets_themes = [_nm_ow_themes, _nm_dun_themes, _nm_boss_themes, _nm_end_themes, _nm_title_themes, _nm_minigame_themes, _nm_tunnel_themes];
 	for (var _nm_b=0; _nm_b<array_length(_nm_buckets_tracks); _nm_b++)
 	{
 	    var _nm_tracks = _nm_buckets_tracks[_nm_b];
