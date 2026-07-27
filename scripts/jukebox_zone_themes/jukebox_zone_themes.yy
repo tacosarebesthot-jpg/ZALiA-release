@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"jukebox_zone_themes",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"jukebox_zone_themes",
+  "parent":{
+    "name":"sound",
+    "path":"folders/Scripts/sound.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

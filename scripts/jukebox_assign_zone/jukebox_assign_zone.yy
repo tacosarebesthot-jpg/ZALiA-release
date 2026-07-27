@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"jukebox_assign_zone",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"jukebox_assign_zone",
+  "parent":{
+    "name":"sound",
+    "path":"folders/Scripts/sound.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

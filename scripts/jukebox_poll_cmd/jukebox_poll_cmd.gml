@@ -103,6 +103,22 @@ function jukebox_poll_cmd() {
             }
         break;
 
+        // assign <trackIdx> <zone 0-6> -- bind a track to a zone for real
+        case "assign":
+            var _sp2 = string_pos(" ", _arg);
+            if (_sp2 > 0 && global.jukebox_count > 0)
+            {
+                var _ai = clamp(real(string_copy(_arg, 1, _sp2 - 1)), 0, global.jukebox_count - 1);
+                var _az = clamp(real(string_copy(_arg, _sp2 + 1, string_length(_arg) - _sp2)), 0, 6);
+                var _aa = global.jukebox_assets[_ai];
+                if (_aa != -1 && audio_exists(_aa))
+                {
+                    jukebox_assign_zone(audio_get_name(_aa), _az);
+                    global.jukebox_hud_timer = 3 * game_get_speed(gamespeed_fps);
+                }
+            }
+        break;
+
         case "playlist":
             global.jukebox_playlist = clamp(real(_arg), 0, JukeboxPL.COUNT - 1);
             jukebox_build_playlist();

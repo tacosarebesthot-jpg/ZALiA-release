@@ -83,6 +83,17 @@ function jukebox_play() {
 
 	global.jukebox_inst = _inst;
 
+	// TELL THE COMPANION WINDOW what is actually playing. Without this the Jukebox
+	// window only knows about tracks IT asked for -- press next in game, or let
+	// auto-advance move on, and its highlight goes stale. One tiny file, written
+	// only on a track change, so it costs nothing per frame.
+	var _nf = file_text_open_write("jukebox_now.txt");
+	if (_nf != -1)
+	{
+	    file_text_write_string(_nf, string(_i));
+	    file_text_close(_nf);
+	}
+
 	if (DEV) show_debug_message("[JUKEBOX] play #" + string(_i + 1) + " (" + audio_get_name(_asset) + ") inst=" + string(_inst));
 
 }

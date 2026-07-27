@@ -229,6 +229,8 @@ function g_Step() {
 	    // Audio.dm was empty, so every track was classed "unassigned" and the export
 	    // carried no sets. build_playlist re-derives assigned/unassigned, rebuilds the
 	    // set map and re-exports, so the companion gets a correctly grouped list.
+	    jukebox_load_zones();     // replay saved zone assignments BEFORE the rebuild,
+	                              // so the exported list reflects them
 	    jukebox_build_playlist();
 	}
 
