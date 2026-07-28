@@ -1,141 +1,138 @@
 # What this port adds
 
-ZALiA is **HoverBat's** game. This page is only about what the GameMaker 2026
-port changed or added on top of it — so you can tell the two apart, and so credit
-lands where it belongs.
+**ZALiA is HoverBat's game.** This page separates his work from the port layer on
+top of it, so credit lands where it belongs.
 
-If you want the original, it is at https://github.com/ZA-LiA/ZALiA.
+It is not written from memory. It is a **file-level diff against
+[HoverBat's repository](https://github.com/ZA-LiA/ZALiA)** — anything present
+upstream is his, and only what is genuinely new here is claimed below.
 
-> **Not ours, to be clear:** the game itself, its design, its cast, the cucco spell
-> replacing *Zelda II*'s fairy, the towns, the palaces, the story — all HoverBat.
-> Everything below is the port layer on top. The [manual](MANUAL.md) documents the
-> whole game, his work included, because it never had one.
+| | Upstream (HoverBat) | This port | New |
+|---|---|---|---|
+| Scripts | 1,901 | 2,025 | **124** |
+| Objects | 313 | 317 | **4** |
+| Sounds | 498 | 592 | **94** |
 
----
-
-## Randomizer
-
-Every setting is **per save file**, chosen when you create it. Two files can be
-completely different quests.
-
-| What | Notes |
-|---|---|
-| **Item locations** | major items shuffled across the world |
-| **Spell locations** | which wise man teaches what |
-| **Town locations** | towns swap places on the overworld |
-| **Palace locations** | which palace sits where |
-| **Palace bosses** | bosses shuffled between palaces |
-| **Dungeon tilesets** | palaces get each other's look |
-| **Enemy spawns** | who shows up where, plus difficulty, HP and damage scaling |
-| **Overworld biomes** | the terrain itself |
-| **Key locations** | including whether keys can hide outside palaces |
-| **Start-with spells** | begin holding spells you would normally earn |
-
-### Two hint systems
-
-**Boulder hints** — in *every* game mode, not just randomizer. The boulder circle
-is a puzzle: push them in the right order and something opens. Townsfolk tell you
-the order, one step each.
-
-**Item hints** — randomizer only. Villagers tell you where specific items ended
-up, **in their own words** — "the ring is in a seaside cave" rather than a
-generated area label. The count of hints still out there is shown in-game and on
-the tracker. Switch them off at file creation if you would rather find everything
-yourself.
-
-Town **signs keep their original names** even when towns move, so you always know
-which location you are standing in.
+**Nothing was removed.** All 1,901 of his scripts are still here.
 
 ---
 
-## Stream tracker
+## His, not ours
 
-A browser page the game serves itself, built to be read **at a glance, across a
-room**, at about 460 px wide as an OBS Browser Source.
+Worth stating plainly, because these are the parts people notice:
 
-- Every item, spell, technique, container, key and crystal — lit or unlit
-- **Palace ledger** — one cell per palace: crystal placed, keys found/held/total, cleared
-- Heart and magic containers as notch bars, not a wall of pips
-- **Live spell state** — which spell is selected, which are currently active
-- Filled bottle, gold slime (kakusu) counter with the total *your* seed needs
-- Your hints, with the item's own sprite and the villager's wording
-- VS CHAT score, if chat is playing against you
-- **Five themes**, and `?obs=1` to drop the background so it composites over gameplay
+**The randomizer** — every setting, the logic, the item and spell shuffling, the
+hint system. **The cucco spell** replacing *Zelda II*'s fairy. **The gold slimes
+(kakusu).** **The palette editor**, **the room warper**, **the graphics effects
+system**. The towns, the palaces, the enemies, the story, the art, and the GML
+translation of *Zelda II*'s assembly that the whole thing rests on.
 
-Item art is the real NES sprite set at the correct palette, not approximations.
+If you enjoy ZALiA, that is HoverBat's game you are enjoying.
 
 ---
 
-## Twitch integration
+## Ours
 
-Viewers affect your run directly. Roughly fifty commands across helping,
-hindering, and pure chaos — plus **VS CHAT mode**, where chat's only goal is to
-kill you and every helpful command is blocked.
+### Twitch chat integration
+`twitch_apply`, `twitch_irc_*`, `twitch_poll`, `twitch_tick`, `twitch_config_save`,
+`obj_twitch_irc`, `obj_twitch_fairy`, `OptionsMenu_Twitch_*`
 
-Full list and setup: **[TWITCH_SETUP.md](TWITCH_SETUP.md)**.
+Around fifty chat commands, plus **VS CHAT mode** where chat's goal is to kill the
+runner and every helpful command is blocked, with a death scoreboard.
+See **[TWITCH_SETUP.md](TWITCH_SETUP.md)**.
 
----
+### The web companion server
+`obj_zalia_web`, `zweb_open_page`, `tracker_state_write`, `icon_export`
 
-## Jukebox
+The game serves its own pages on `127.0.0.1:8777`, loopback only — the **stream
+tracker** built for OBS in five themes, the **jukebox**, and the **Twitch setup**
+page.
 
-Every track in the game, playable on demand from a browser page.
+### The in-game tracker window
+`TrackerWin_init/_fill/_put/_draw/_step/_extern`
 
-- Five playlists, real per-zone assignment
-- Play in order, shuffle, or repeat one track
-- Seek, volume, and what is playing right now
-- Assign tracks by name so a playlist survives the track list changing
+### Jukebox
+`jukebox_init`, `_play`, `_build_playlist`, `_build_playlist_external`,
+`_build_set_map`, `_assign`, `_assign_zone`, `_zone_themes`, `_export_list`,
+`_poll_cmd`, `_playlist_name`
 
-## Music
+Five playlists with real per-zone assignment, order/shuffle/repeat-one. **Playlist
+five plays your own `.ogg` files** from `%LOCALAPPDATA%\ZALiA\music\` with no
+importing at all.
 
-Thirty-plus tracks imported on top of the original set, including an NES-mix
-soundtrack and a **RANDOM** mode that gives every run a different score.
+### Two-player co-op
+`Input_update_p2`, `obj_fairy_p2`, `spawn_fairy_proj`, `Dev_CoopTest_Step`
 
-A **TUNNELS** zone was split out so the fast-travel basements get their own theme
-rather than sharing the town music. Imported loops are cut on the *measured* loop
-point of the recording, so they repeat without a seam or a fade.
+A second player joins as a fairy.
 
----
+### Options menus
+`OptionsMenu_Display_*`, `_Color_*`, `_Misc_*`, `_Overlays_*`, `_Cheats_*`,
+`_Sweeps_*`, `_TestCap_*`, `apply_display_mode`
 
-## Two-player co-op
+Display filters (smooth / sharp / pixel-perfect / crisp-fill / CRT / scanlines),
+fullscreen and window scale, colour options, and the menus behind them.
 
-A second player joins as a **fairy** — reaching what Link cannot and helping in a
-fight. Plug in a second controller and enable it in options.
+### Music
+**94 new sound assets** — an NES-mix soundtrack, a RANDOM mode that scores every
+run differently, and a **TUNNELS** zone split out so the fast-travel basements no
+longer share the town theme. Imported loops are cut on the measured loop point of
+the recording, so they repeat without a seam.
 
----
+### Dev-tool gating
+`dev_avail`, `konami_check`
 
-## Presentation and controls
+HoverBat's development tools are excellent and stay in the build — but a player
+could previously wander into the palette editor or start a 793-room sweep by
+accident. They are now behind an unlock.
 
-**Display** — smooth, sharp, pixel-perfect, crisp-fill, CRT, or scanlines.
-Fullscreen and window scale.
+### Testing and diagnostics
+`tas_rec_*`, `tas_apply_held`, `tas_draw_overlay`, `mark_dump_replay`,
+`mark_replay_load`, `playlog_write`, `gp_diag_overlay`, `Dev_Bugprobe_*`,
+`test_exit_automation`, `test_startup_exit_audit`, `debug_exit_audit_traversal`
 
-**Controllers** — full gamepad support, a calibration wizard, and rebindable
-controls. Analog triggers behave properly.
+Input recording and replay, a bug-marking system that captures a screenshot plus
+scene, coordinates and recent inputs, gamepad diagnostics, and automated sweeps
+that walk every room in the game looking for crashes.
 
-**Quality of life** — low-HP beep, death counter, hint-NPC markers on the map,
-compass labels on the boulder circle, and a THUNDER cast that actually looks like
-lightning.
+### Odds and ends
+`thunderbolt_draw` / `thunderbolt_spawn` — a THUNDER cast that draws real
+lightning. `mob_teleport_ground_y` — the fix for a mid-air teleport that could make
+a run unwinnable. `walktune_panel` / `walktune_save`, `Overworld_refresh_edge`.
 
 ---
 
 ## The port itself
 
-Moving a GameMaker:Studio 1.4 project to GameMaker LTS 2026 is not a
-recompile. What that involved:
+Most of the effort, and the least visible. GameMaker removed a large part of the
+1.4 API, so a chunk of those 124 scripts are **reimplementations of functions that
+no longer exist**:
 
-- **All 793 scenes and 112 overworld pages load crash-free.** Eight separate
-  1.4→2026 crashes were tracked down, plus a root spawn-table bug that was
-  causing several of them.
-- **The 9.9-second fall stall is gone.** Entering a falling passage rebuilt the
-  tile layers with an accidentally quadratic delete. Fall-scene loads are now
-  around a tenth of a second, and verified across 29 scenes at 11–106 ms with no
-  degradation on repeat.
-- Teleporting enemies no longer strand in mid-air on multi-tier rooms — one case
-  of that could make a run **unwinnable**.
-- Enemy stun behaviour restored to match 1.4 rather than the port's regression.
-- Graphics-effects menu no longer creates and frees a GUI surface every frame.
+`tile_add`, `tile_delete`, `tile_layer_*`, `tile_get_*`, `tile_set_*`,
+`background_add`, `background_assign`, `background_get_*`, `draw_background*`,
+`__init_view`, `__view_get/_set`, `__init_background`, `__background_*`,
+`instance_create`, `object_get_depth`, `sound_get_name`, `room_set_view`,
+`room_tile_clear`, `__global_object_depths`, `__init_global`
 
-## Development tools
+On top of that:
 
-The game ships with its debugging instruments present but **switched off**, so a
-player cannot wander into a palette editor or start a 793-room sweep by accident.
-See the manual for how to turn them on if you want them.
+- **All 793 scenes and 112 overworld pages load crash-free** — eight separate
+  1.4→2026 crashes, plus a root spawn-table bug behind several of them
+- **The 9.9-second fall stall is gone.** Entering a falling passage rebuilt tile
+  layers with an accidentally quadratic delete. Now 11–106 ms, measured across 29
+  scenes with no degradation on repeat
+- Enemy stun behaviour restored to match 1.4 rather than the port's regression
+- Item-pickup invulnerability scoped correctly to held-over-head items
+- Graphics-effects menu no longer rebuilds a GUI surface every frame
+
+---
+
+## Documentation
+
+The [manual](MANUAL.md), this page and the [Twitch guide](TWITCH_SETUP.md) are
+new. They document the **whole game**, HoverBat's work included, because it never
+shipped with a manual.
+
+---
+
+*Miscredited something? That is a bug worth reporting. Verify any claim here by
+diffing this repository against https://github.com/ZA-LiA/ZALiA yourself.*
