@@ -1,0 +1,6 @@
+# The built game NEVER goes in the repo. audiogroup_mus.dat alone is ~602 MB and
+# GitHub's hard per-file limit inside a repository is 100 MB -- the push would be
+# rejected. The build ships as a RELEASE ASSET (2 GB limit) instead.
+../dist/
+dist/
+*.zip
