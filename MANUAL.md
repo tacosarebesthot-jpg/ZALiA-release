@@ -85,13 +85,24 @@ something for the town first.
 | **PROTECT** | halves damage taken |
 | **JUMP** | leap far higher |
 | **HEAL** | spend magic to restore life |
-| **CUCCO** | become a small creature that reaches places Link cannot |
+| **CUCCO** | become a cucco — small, light, and able to reach places Link cannot |
 | **FIRE** | your sword throws flame |
 | **REFLECT** | your shield turns back magic, and breaks certain barriers |
 | **SPELL** | reveals what is hidden |
 | **THUNDER** | strikes every enemy on screen |
 
 Press **Select** to change the active spell, **B** or **C** to cast.
+
+### About the CUCCO spell
+
+If you know *Zelda II*, you are looking for the **Fairy** spell and will not find
+it. HoverBat replaced it: where the original turned Link into a fairy, ZALiA turns
+him into a **cucco**. It fills the same role — reaching places Link cannot — and
+it is one spell, not two.
+
+**There is a second, hidden tier to it.** A stronger form of the cucco exists and
+it is not handed to you. If you are the sort of player who reads the manual
+looking for something to chase, that is the thing to chase.
 
 ---
 

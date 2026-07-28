@@ -6,6 +6,11 @@ lands where it belongs.
 
 If you want the original, it is at https://github.com/ZA-LiA/ZALiA.
 
+> **Not ours, to be clear:** the game itself, its design, its cast, the cucco spell
+> replacing *Zelda II*'s fairy, the towns, the palaces, the story — all HoverBat.
+> Everything below is the port layer on top. The [manual](MANUAL.md) documents the
+> whole game, his work included, because it never had one.
+
 ---
 
 ## Randomizer
