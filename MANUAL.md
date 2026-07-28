@@ -90,7 +90,7 @@ something for the town first.
 | **REFLECT** | your shield turns back magic, and breaks certain barriers |
 | **SPELL** | reveals what is hidden |
 | **THUNDER** | strikes every enemy on screen |
-| **SUMMON** | calls help |
+| **SUMMON** | summons Ganon at the end of the game |
 
 Press **Select** to change the active spell, **B** or **C** to cast.
 
