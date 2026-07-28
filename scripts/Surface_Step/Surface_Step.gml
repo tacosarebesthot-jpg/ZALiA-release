@@ -220,7 +220,7 @@ function Surface_Step() {
 
 
 
-	if (DEV) dev_tile_highlighting();
+	if (dev_avail()) dev_tile_highlighting(); // DEV is hardcoded true -- this ran every frame for players
 
 
 

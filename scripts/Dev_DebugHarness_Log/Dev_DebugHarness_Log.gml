@@ -1,6 +1,8 @@
 /// Debug harness — F7 snapshot + live state logging
 function Dev_DebugHarness_Log(_label) {
-	if (!DEV) exit;
+	// Was `if (!DEV)`, which never gated: DEV is hardcoded true, so a shipped
+	// player build appended to C:\temp\zalia_live_debug.log on every snapshot.
+	if (!dev_avail()) exit;
 
 	var _f = file_text_open_append("C:\\temp\\zalia_live_debug.log");
 	var _timestamp = "T"+string(current_time);

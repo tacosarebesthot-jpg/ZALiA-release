@@ -3,8 +3,11 @@ function d_l0__oo__0l_b() {
 
 
 	// for enabling
-	var _TIME1 = ROOM_SPEED_BASE * 60;
-	if (DEV) _TIME1 = $100;
+	var _TIME1 = ROOM_SPEED_BASE * 60;          // 3600 frames = 60s, the intended hold
+	// dev_avail(), not DEV. DEV is hardcoded true, so the dev shortcut ($100 = 256
+	// frames, ~4.3s) was what every player got -- 14x easier to trip by accident on
+	// an egg that is deliberately hard to find.
+	if (dev_avail()) _TIME1 = $100;
 
 	// for disabling
 	var _TIME2 = $100;

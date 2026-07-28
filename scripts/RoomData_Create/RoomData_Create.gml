@@ -1587,7 +1587,10 @@ function RoomData_Create() {
 
 
 	// --------------------------------------------------------------------------------------------
-	if (DEV) // Because this will save to local dir which needs to be moved to included files during development
+	// dev_avail(), not DEV. This dumps a dozen ds_maps/grids to disk at startup so
+	// they can be copied into Included Files during development -- with DEV
+	// hardcoded true it ran on every player's boot as well.
+	if (dev_avail())
 	{
 	    var _dm_save_data = ds_map_create();
     

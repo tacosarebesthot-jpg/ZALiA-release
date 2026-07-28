@@ -1175,9 +1175,12 @@ function g_Room_Start() {
 	if (_ROOM_A) {
 	    // MOD timing: scene_enter_add_tiles is the heavy (~1400-line) tile loader — prime suspect for
 	    // "the fall room takes forever to load". Log its microseconds per room to fall_timing.txt (DEV).
-	    var _tl_t0 = (DEV ? get_timer() : 0);
+	    // dev_avail(), not DEV -- DEV is hardcoded true, so players were opening,
+	    // appending to and closing fall_timing.txt on EVERY room transition.
+	    var _tl_log = dev_avail();
+	    var _tl_t0 = (_tl_log ? get_timer() : 0);
 	    scene_enter_add_tiles();
-	    if (DEV) {
+	    if (_tl_log) {
 	        var _tlf = file_text_open_append(working_directory + "fall_timing.txt");
 	        file_text_write_string(_tlf, room_get_name(room) + " | scene_enter_add_tiles | " + string(get_timer() - _tl_t0) + " us | fall=" + string(g.FallScene_timer));
 	        file_text_writeln(_tlf);
