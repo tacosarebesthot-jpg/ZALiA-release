@@ -184,7 +184,31 @@ hints, live. Five themes. Built to be read at a glance across a room, so it work
 as an OBS Browser Source at about 460 px wide. Add `?obs=1` to drop the background.
 
 **Jukebox** — every track in the game, playable on demand. Play in order, shuffle,
-or repeat one.
+or repeat one. There are **five playlists**; press **DELETE** in game to cycle
+through them.
+
+### Playing your own music
+
+Playlist five is yours. Drop music files into:
+
+```
+%LOCALAPPDATA%\ZALiA\music\
+```
+
+Create the `music` folder if it is not there. Anything you put in shows up in the
+jukebox, listed by filename, with no importing or patching of any kind — the game
+reads them straight off the disk each time the playlist is built.
+
+**They must be `.ogg` files.** MP3 is deliberately not scanned: GameMaker's
+support for it varies by machine, so an mp3 would sometimes play and sometimes
+silently do nothing, which looks like a broken jukebox rather than an unsupported
+file. Any converter will turn an mp3 into an ogg.
+
+The track name shown is just the filename, so name them how you want them to read.
+
+Your music obeys the in-game music volume like everything else, and switching
+playlists or restarting picks up whatever is in the folder at the time — add and
+remove files whenever you like.
 
 **Twitch** — connect your channel and let chat into your run.
 
