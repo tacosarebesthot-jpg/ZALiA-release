@@ -1182,7 +1182,15 @@ function g_Room_Start() {
 	    scene_enter_add_tiles();
 	    if (_tl_log) {
 	        var _tlf = file_text_open_append(working_directory + "fall_timing.txt");
-	        file_text_write_string(_tlf, room_get_name(room) + " | scene_enter_add_tiles | " + string(get_timer() - _tl_t0) + " us | fall=" + string(g.FallScene_timer));
+	        // room_get_name() is USELESS for attributing a slow load: the game reuses
+	        // one GM room (rmA_Action_Wide) for hundreds of scenes, so every line
+	        // reported the same name. g.rm_name is the actual scene id -- without it
+	        // a 300ms outlier cannot be traced to the room that caused it.
+	        // g.rm_name is already a readable scene id (area_name + hex_str(rm_num),
+	        // e.g. "_EastA_59") -- do NOT wrap it in hex_str(), and there is no
+	        // g.scene_name.
+	        file_text_write_string(_tlf, room_get_name(room) + " | scene=" + string(g.rm_name)
+	            + " | scene_enter_add_tiles | " + string(get_timer() - _tl_t0) + " us | fall=" + string(g.FallScene_timer));
 	        file_text_writeln(_tlf);
 	        file_text_close(_tlf);
 	    }
