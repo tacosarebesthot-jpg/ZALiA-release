@@ -3,6 +3,8 @@
 **ZALiA is HoverBat's game.** This page separates his work from the port layer on
 top of it, so credit lands where it belongs.
 
+**Version 2.0** — based on upstream ZALiA 1.7.12.02.
+
 It is not written from memory. It is a **file-level diff against
 [HoverBat's repository](https://github.com/ZA-LiA/ZALiA)** — anything present
 upstream is his, and only what is genuinely new here is claimed below.
@@ -136,3 +138,7 @@ shipped with a manual.
 
 *Miscredited something? That is a bug worth reporting. Verify any claim here by
 diffing this repository against https://github.com/ZA-LiA/ZALiA yourself.*
+
+---
+
+**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D)

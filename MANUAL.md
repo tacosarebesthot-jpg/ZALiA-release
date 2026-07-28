@@ -2,6 +2,8 @@
 
 *Zelda Again: Link is Adventuresome* — GameMaker 2026 Port
 
+**Version 2.0** — based on upstream ZALiA 1.7.12.02.
+
 ---
 
 ## The Story
@@ -179,7 +181,7 @@ Great Palace.
 
 ## Palaces
 
-<img src="docs/art-knight.jpg" align="right" width="210">
+<img src="docs/art-horsehead.jpg" align="right" width="210">
 
 Each palace ends with a boss and a crystal statue. Between you and it: locked
 doors, moving platforms, and the elevator shafts that connect the floors.
@@ -191,13 +193,19 @@ and remember that not every fall is survivable.
 The **Great Palace** in the Valley of Death opens only when all six crystals are
 set. It is longer and harder than anything before it.
 
+| | |
+|:---:|:---:|
+| <img src="docs/art-horsehead-painted.jpg" width="300"> | <img src="docs/art-dragon.jpg" width="300"> |
+
+Palace bosses do not go quietly.
+
 ---
 
 ## Some of what you will meet
 
-| | | |
-|:---:|:---:|:---:|
-| <img src="docs/art-moblin.jpg" width="200"> | <img src="docs/art-skeleton.jpg" width="200"> | <img src="docs/art-fishman.jpg" width="200"> |
+| | | | |
+|:---:|:---:|:---:|:---:|
+| <img src="docs/art-moblin.jpg" width="165"> | <img src="docs/art-skeleton.jpg" width="165"> | <img src="docs/art-fishman.jpg" width="165"> | <img src="docs/art-knight.jpg" width="165"> |
 
 Hyrule is not empty, and very little in it is friendly.
 
@@ -367,6 +375,13 @@ debugging.
 
 ---
 
+## Getting help
+
+Stuck, or found a bug? The [**Discord**](https://discord.gg/FSphHEsu8D) has a
+channel for the port, and playtest builds go out there first.
+
+---
+
 ## Credits
 
 Original game by **HoverBat** — [ZALiA](https://github.com/ZA-LiA/ZALiA).
@@ -376,3 +391,7 @@ playtesting by **LANEAGE**.
 *Zelda II: The Adventure of Link* and related marks are trademarks of **Nintendo**.
 This is a non-commercial fan project, not affiliated with or endorsed by Nintendo,
 and is not sold.
+
+---
+
+**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [What this port adds](FEATURES.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D)

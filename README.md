@@ -13,6 +13,8 @@ For the original game and its official builds, go to the upstream repository abo
 
 **Version 2.0** — based on upstream ZALiA 1.7.12.02.
 
+[**Join the Discord**](https://discord.gg/FSphHEsu8D) — releases, playtesting, bug reports, and the randomizer community.
+
 ---
 
 ## Download
@@ -109,6 +111,19 @@ debugging, and it is entirely possible to break your own save with it.
 
 ---
 
+## Community
+
+[**Discord**](https://discord.gg/FSphHEsu8D) — where releases get announced, playtest builds
+go out, and bugs get reported.
+
+| Channel | For |
+|---|---|
+| `#zalia-gm2026-port` | releases and general talk about the port |
+| `#zalia-playtest` | test builds and bug reports (supporters) |
+| `#donations` | if you want to support the work |
+
+---
+
 ## Credits
 
 ### The game
@@ -179,3 +194,7 @@ The original code is HoverBat's and is redistributed under the terms in
 trademarks of **Nintendo**. This is a non-commercial fan project, is not affiliated
 with or endorsed by Nintendo, and is not sold. No Nintendo ROM is included or
 required.
+
+---
+
+**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [What this port adds](FEATURES.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D)

@@ -188,3 +188,7 @@ together, not per-viewer, so a raid cannot chain effects faster than you set.
 
 If it gets out of hand, the master switch is one click on the setup page, and
 takes effect immediately.
+
+---
+
+**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [What this port adds](FEATURES.md) &middot; [Discord](https://discord.gg/FSphHEsu8D)
