@@ -146,7 +146,7 @@ Some open the way forward. Some make you stronger. A few are simply worth findin
 |---|---|
 | **SWORD** | a better blade |
 | **SHIELD** | reduces damage |
-| **RING** | **cuts damage to a third** — see the note under PROTECT |
+| **RING** | halves damage, and stacks with PROTECT — see the note under Spells |
 | **PENDANT** | |
 | **MASK** | |
 | **BOOK** | |
@@ -170,9 +170,6 @@ Great Palace.
 
 **HEART** and **JAR** restore life and magic · **1UP** an extra life ·
 **P-BAG** experience · a **FAIRY** restores you fully
-
-**Crystals** go into the statue at the end of each palace. Six crystals open the
-Great Palace.
 
 ---
 
