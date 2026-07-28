@@ -40,7 +40,19 @@ function p_Room_Start_palette_rando() {
 	                pal_rando_applied = true;
 	                // PALDIAG END
                 
-	                if (_dest_dungeon_num)
+	                // g.dm_tile_file must EXIST before it is indexed. It starts
+	                // undefined (g_Create), is loaded in g_Room_Start, and is set back
+	                // to undefined in g_Room_End -- so any path that reaches this
+	                // before the tile file is decoded crashed the game outright:
+	                //   ## EXCEPTION ## ds_map_find_value argument 1 incorrect type
+	                //   (undefined) expecting a ds_map ... p_Room_Start_palette_rando
+	                // Hit 2026-07-27 entering a palace on a seed with DUNGEON TILESETS
+	                // randomization. Without the map there is no layer name to look up,
+	                // and the loop below already skips undefined names, so skipping the
+	                // whole block is exactly equivalent minus the crash.
+	                if (_dest_dungeon_num
+	                && !is_undefined(g.dm_tile_file)
+	                &&  ds_exists(g.dm_tile_file, ds_type_map) )
 	                {
 	                    var _solid_wall_pi_pos = get_pal_pos(global.PI_BGR1);
                     
