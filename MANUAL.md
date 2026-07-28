@@ -21,7 +21,8 @@ what waits beneath it.
 Run `ZALiA.exe`. Choose a save slot, name your file, and begin.
 
 At the file screen you may start an ordinary quest, or turn on the **Randomizer** —
-see [Randomizer](#randomizer) below.
+see [Randomizer](#randomizer) below. **ELIMINATION MODE** on that screen is how you
+delete a save file.
 
 Your progress saves automatically. Everything is written to `%LOCALAPPDATA%\ZALiA\`,
 never to the game folder, so you can move or replace the game without losing a file.
@@ -82,7 +83,7 @@ something for the town first.
 
 | Spell | What it does |
 |---|---|
-| **PROTECT** | halves damage taken |
+| **PROTECT** | halves damage taken — but see below |
 | **JUMP** | leap far higher |
 | **HEAL** | spend magic to restore life |
 | **CUCCO** | become a cucco — small, light, and able to reach places Link cannot |
@@ -92,6 +93,21 @@ something for the town first.
 | **THUNDER** | strikes every enemy on screen |
 
 Press **Select** to change the active spell, **B** or **C** to cast.
+
+### PROTECT and the RING stack
+
+The **RING** reduces damage on its own, and PROTECT stacks on top of it:
+
+| What you have | Damage taken |
+|---|---|
+| neither | full |
+| **PROTECT** cast, no ring | half |
+| the **RING**, no PROTECT | half |
+| **PROTECT** *and* the **RING** | **a third** |
+
+So the ring is worth having even before you learn PROTECT, and casting PROTECT is
+still worth the magic once you have it. Any hit always does at least 1 damage —
+nothing reduces it to nothing.
 
 ### About the CUCCO spell
 
@@ -110,12 +126,50 @@ looking for something to chase, that is the thing to chase.
 
 Some open the way forward. Some make you stronger. A few are simply worth finding.
 
-**CANDLE** lights caves · **GLOVE** breaks blocks · **RAFT** crosses water ·
-**BOOTS** walk on water · **FLUTE** wakes what sleeps · **CROSS** reveals the
-invisible · **HAMMER** clears boulders and trees · **BRACELET** for the deepest
-doors · **MAGIC KEY** opens any palace lock
+### Things that open the way
 
-**Keys** open palace doors. Ordinary keys are spent when used; the magic key is not.
+| | |
+|---|---|
+| **CANDLE** | lights dark caves |
+| **GLOVE** | break blocks with the sword |
+| **RAFT** | cross water to the far continent |
+| **BOOTS** | walk on water |
+| **FLUTE** | wakes what sleeps |
+| **CROSS** | reveals what you cannot otherwise see |
+| **HAMMER** | clears boulders and trees from the overworld |
+| **BRACELET** | for the deepest doors |
+| **ALLKEY** | opens any palace lock, and is never spent |
+
+### Things that make you stronger
+
+| | |
+|---|---|
+| **SWORD** | a better blade |
+| **SHIELD** | reduces damage |
+| **RING** | **cuts damage to a third** — see the note under PROTECT |
+| **PENDANT** | |
+| **MASK** | |
+| **BOOK** | |
+
+### Quest items
+
+**NOTE** · **MIRROR** · **TROPHY** · **FLOWER** · **CHILD** · **MEAT** ·
+**BOTTLE** · **MAP 1** · **MAP 2**
+
+Townsfolk want these. Giving the right one to the right person is usually what
+unlocks a spell, and under the randomizer they can be anywhere.
+
+### Keys and crystals
+
+**Keys** open palace doors and are **spent** when used — the **ALLKEY** is not.
+
+**Crystals** go into the statue at the end of each palace. Six crystals open the
+Great Palace.
+
+### Pickups
+
+**HEART** and **JAR** restore life and magic · **1UP** an extra life ·
+**P-BAG** experience · a **FAIRY** restores you fully
 
 **Crystals** go into the statue at the end of each palace. Six crystals open the
 Great Palace.
