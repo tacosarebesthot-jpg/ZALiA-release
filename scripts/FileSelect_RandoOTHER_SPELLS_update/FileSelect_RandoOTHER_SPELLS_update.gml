@@ -49,6 +49,17 @@ function FileSelect_RandoOTHER_SPELLS_update() {
 	    ||  input_start_pressed )
 	    {
 	        dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor,2] = !dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor,2];
+
+	        // REFLECT is shown in TWO places -- here and the RandoOTHER MAIN row.
+	        // Keep the MAIN row in step so the two can never disagree; MAIN writes
+	        // this cell the same way. This cell is the only one the file actually
+	        // reads when granting start spells.
+	        if (RandoOTHER_SPELLS_cursor == RandoOTHER_SPELLS_cursor_REFLECT)
+	        {
+	            dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2] =
+	                dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_REFLECT,2];
+	        }
+
 	        //aud_play_sound(Audio.SND_CRSR_MVE2);
 	        aud_play_sound(Audio.SND_TYPE_CHR2);
 	    }

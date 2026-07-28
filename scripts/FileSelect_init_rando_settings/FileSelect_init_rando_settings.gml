@@ -76,7 +76,15 @@ function FileSelect_init_rando_settings() {
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_WARP_PENALTY,  2] = 1;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_PALETTE,       2] = 0;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_DUNGEON_TS,    2] = 0;
-	dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT, 2] = global.start_with_reflect; // persistent (loaded from prefs)
+	// DEFAULT OFF, every new randomizer. This used to read the persistent
+	// global.start_with_reflect, so the row came up ON for anyone who had ever
+	// switched it on in an earlier session -- the owner hit exactly that: a fresh
+	// rando defaulting to Reflect he never turned on.
+	//
+	// Set to 0 literally, NOT mirrored from the SPELLS cell: that cell is not zeroed
+	// until further down this same function, so reading it here would pick up the
+	// PREVIOUS seed's value and reintroduce the bug in a harder-to-see form.
+	dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT, 2] = 0;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_cursor_QUEST,  2] = 1;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_cursor_ATTACK, 2] = 1;
 	dg_RandoOTHER_Options[#RandoOTHER_MAIN_cursor_MAGIC,  2] = 1;

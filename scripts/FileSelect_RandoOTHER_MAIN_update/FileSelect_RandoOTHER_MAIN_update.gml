@@ -92,9 +92,14 @@ function FileSelect_RandoOTHER_MAIN_update() {
 	    case RandoOTHER_MAIN_START_REFLECT:{
 	    if (_InputConfirm_pressed2)
 	    {
-	        dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2] = !dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2]; // 2: state
-	        global.start_with_reflect = dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2]; // persist non-rando start option
-	        save_game_pref();
+	        // Drive the PER-SEED spells cell -- that cell is the only thing
+	        // FileSelect_register_file reads, so this row and the SPELLS page row can
+	        // no longer disagree. Deliberately NOT persisted any more: a start-with
+	        // spell is a property of the seed, not of the install, and persisting it
+	        // is what made new rando files inherit Reflect from an earlier session.
+	        var _rflc = !dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2];
+	        dg_RandoOTHER_Options[#RandoOTHER_MAIN_START_REFLECT,2]  = _rflc; // 2: state
+	        dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_REFLECT,2] = _rflc;
 	        aud_play_sound(get_audio_theme_track(CONFIRM_SOUND_THEME1));
 	    }
 	    break;}

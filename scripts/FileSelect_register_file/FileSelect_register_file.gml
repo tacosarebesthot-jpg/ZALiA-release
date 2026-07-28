@@ -145,15 +145,17 @@ function FileSelect_register_file(argument0) {
 	    if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_THUNDER,2]) _START_SPELLS |= SPL_THUN;
 	    //if (dg_RandoOTHER_SPELLS[#RandoOTHER_SPELLS_cursor_SUMMON, 2]) _START_SPELLS |= SPL_SUMM;
 
-	    // START REFLECT (the RandoOTHER MAIN row, backed by the persistent
-	    // global.start_with_reflect). MOVED IN HERE 2026-07-27 -- it used to live in an
-	    // `else` branch that fired on NON-rando files, so once the toggle had ever been
-	    // set every plain vanilla new game silently started with Reflect.
+	    // START REFLECT is granted by the SPELLS row ABOVE and nowhere else.
 	    //
-	    // The option still WORKS, it is just gated on rando now: rando on + toggle on
-	    // grants it, rando off never does. The preference stays persistent so the choice
-	    // survives between rando runs, which is the point of it.
-	    if (global.start_with_reflect) _START_SPELLS |= SPL_RFLC;
+	    // There used to be a second grant here reading the persistent
+	    // global.start_with_reflect. Two rows granted the same bit, and because that
+	    // one PERSISTED across seeds, a new rando file started with Reflect whenever
+	    // the toggle had ever been set in an earlier session -- the owner reported
+	    // exactly that: "it defaulted to have reflect on, I did not turn it on".
+	    //
+	    // A start-with-spell choice belongs to the SEED, not to the install. The
+	    // MAIN row now mirrors the per-seed SPELLS cell instead of a global, so
+	    // there is one source of truth and nothing carries between runs.
 
 	    _dm_save_file[?_datakey] = _START_SPELLS;
     
