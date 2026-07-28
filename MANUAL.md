@@ -193,9 +193,7 @@ and remember that not every fall is survivable.
 The **Great Palace** in the Valley of Death opens only when all six crystals are
 set. It is longer and harder than anything before it.
 
-| | |
-|:---:|:---:|
-| <img src="docs/art-horsehead-painted.jpg" width="300"> | <img src="docs/art-dragon.jpg" width="300"> |
+<p align="center"><img src="docs/art-dragon.jpg" width="360"></p>
 
 Palace bosses do not go quietly.
 
