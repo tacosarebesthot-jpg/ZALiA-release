@@ -181,10 +181,55 @@ or repeat one.
 
 ## Twitch Chat
 
-With chat commands on, your viewers can affect your game — help you, hinder you, or
-steal an item and hand it back later. Duration and cooldown are yours to set.
+Connect your channel on the Twitch setup page and your viewers can reach into the
+game. Each command has a cooldown and a duration you control, so chat can be a
+light garnish or a constant problem — your call.
 
 Your token is stored locally and is never shown or sent anywhere else.
+
+### Why you'd turn it on
+
+Because a run stops being a solo performance. Chat can bail you out of a bad fight
+or push you into one, and either way they are *in* the run rather than watching it.
+Viewers who type something and see it happen four frames later stay.
+
+### What chat can do
+
+**Help you**
+
+`!heal` restore life · `!mp` restore magic · `!1up` an extra life ·
+`!invuln` brief invulnerability · `!protect` `!shield` `!reflect` grant a spell
+effect · `!fairy` `!cucco` `!arise` summon help · `!freeze` freeze every
+non-boss enemy on screen · `!smite` kill every non-boss enemy on screen
+
+**Hurt you**
+
+`!hurt` damage · `!drain` drain magic · `!steal` takes one of your items and gives
+it back later · `!curse` a slow non-lethal HP drain · `!slow` slow you to a walk ·
+`!spawn <enemy> <n>` drop a named enemy next to you · `!swarm` a pack of random
+enemies around you
+
+**Mess with your head**
+
+`!confuse` swaps left and right · `!flip` mirrors the screen · `!dark` kills the
+lights · `!disco` colour-cycling overlay · `!party` disco and flip together ·
+`!shrink` `!grow` resize Link · `!speed` make him too fast to control ·
+`!flame` `!heckler` spawns a jumping flame tagged with the viewer's name ·
+`!music` reshuffle the soundtrack mid-run
+
+### VS CHAT mode
+
+Turn this on and it stops being a favour economy. **Chat's goal is to kill you.**
+
+Every helpful command is blocked — no healing, no magic, no extra lives, no
+shields, no invulnerability, no summons. Anyone who tries gets told it was blocked.
+Only the things that hurt you still work.
+
+The game keeps score. Every death is a point **to chat**, shown on the stream
+tracker as their running total. It does not reset when you do.
+
+It is deliberately a *block* list rather than an allow list, so any hostile
+command added later works in VS mode the day it ships.
 
 ---
 

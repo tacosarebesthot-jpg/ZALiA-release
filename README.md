@@ -27,6 +27,10 @@ losing progress.
 **New here?** Read the **[Instruction Manual](MANUAL.md)** — controls, spells,
 items, palaces, and how the randomizer works.
 
+- **[What this port adds](FEATURES.md)** — everything on top of HoverBat's original
+- **[Twitch chat setup](TWITCH_SETUP.md)** — every command, VS CHAT mode, and which
+  account to connect
+
 ---
 
 ## What this port adds
