@@ -236,11 +236,18 @@ switch (_path)
             _pos = audio_sound_get_track_position(global.jukebox_inst);
         }
 
+        // MODE is reported so the companion can show what is ACTUALLY set rather
+        // than what it last sent. Without this the page has no readback at all:
+        // cycling the mode button looked like nothing happened, because nothing
+        // visible did. 0=REPEAT 1=ADVANCE 2=SHUFFLE.
+        var _mode = variable_global_exists("jukebox_mode") ? global.jukebox_mode : JB_ADVANCE;
+
         zweb_send(_sock, "200 OK", "application/json",
               "{\"on\":" + string(_on) + ",\"idx\":" + string(_idx)
             + ",\"asset\":\"" + _name + "\""
             + ",\"pos\":" + string(_pos) + ",\"len\":" + string(_len)
             + ",\"vol\":" + string(instance_exists(Audio) ? Audio.mus_vol : 5)
+            + ",\"mode\":" + string(_mode)
             + ",\"paused\":" + string(_paused) + "}");
     break;
 
@@ -444,11 +451,19 @@ switch (_path)
             // Never 0 -- a zero-length effect is indistinguishable from a failed command.
             global.tw_effect_secs = max(1, floor(tw_num(_sm[? "effect_secs"], 5)));
         }
-        if (zweb_qs_has(_query, "rewards"))
+        // MASTER GATE for chat commands (!steal etc). Canonically "enabled".
+        // "rewards" is the ORIGINAL name and is kept as an alias: it is a
+        // leftover from when this only toggled channel-point rewards, and it
+        // made the master switch look like a sub-setting -- the setup page's
+        // own button already says "CHAT COMMANDS: ON/OFF" and reads cfg.enabled.
+        // Nothing about this gate is dev-only; it is ordinary Twitch config.
+        var _en_key = zweb_qs_has(_query, "enabled") ? "enabled"
+                    : (zweb_qs_has(_query, "rewards") ? "rewards" : "");
+        if (_en_key != "")
         {
-            var _rw = zweb_qs(_query, "rewards");
+            var _rw = zweb_qs(_query, _en_key);
             global.tw_enabled = (_rw == "1" || _rw == "true");
-            _sm[? "rewards"]  = global.tw_enabled ? "1" : "0";
+            _sm[? "rewards"]  = global.tw_enabled ? "1" : "0"; // stored key unchanged
         }
 
         zweb_twitch_cfg_write(_sm);

@@ -218,7 +218,7 @@ async function saveClient() {
 }
 
 async function toggleRewards() {
-  await api('/twitch/save?rewards=' + (cfg.enabled ? '0' : '1'));
+  await api('/twitch/save?enabled=' + (cfg.enabled ? '0' : '1'));
   setTimeout(load, 300);
 }
 

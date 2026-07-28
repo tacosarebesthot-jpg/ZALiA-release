@@ -183,10 +183,9 @@ function togglePause() {
 // PLAY MODE: what happens when a track ends. Must match the JB_* macros in
 // macros.gml -- 0 REPEAT, 1 ADVANCE, 2 SHUFFLE.
 //
-// Tracked here rather than read back from the game because there is no status
-// endpoint for it: /cmd is a one-way file drop. That means this can drift if the
-// mode is changed in-game, so the button reports what it LAST SET, and the game
-// shows its own confirmation on screen when it changes.
+// /now reports "mode" (0=REPEAT 1=ADVANCE 2=SHUFFLE) as of 2026-07-27, so the
+// button shows what the GAME actually has, not what this page last sent. The
+// index below is only the optimistic value between click and next poll.
 const MODES = [
   { cmd:'repeat',  label:'MODE: REPEAT ONE', hint:'the same track over and over' },
   { cmd:'advance', label:'MODE: PLAY ALL',   hint:'plays down the list in order' },
@@ -277,6 +276,11 @@ async function pollNow() {
     const n = await (await fetch('/now')).json();
     const a = n.on ? (n.asset || '') : '';
     if (a !== nowAsset) { nowAsset = a; draw(); }
+
+    // Trust the game over our own optimistic guess -- this is what stops the
+    // button claiming SHUFFLE when the mode was changed in-game.
+    if (typeof n.mode === 'number' && n.mode >= 0 && n.mode < MODES.length
+        && n.mode !== modeIdx) { modeIdx = n.mode; applyMode(); }
 
     curLen = n.len || 0;
     tlen.textContent = mmss(curLen);
