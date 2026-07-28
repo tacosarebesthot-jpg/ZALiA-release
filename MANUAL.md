@@ -81,6 +81,8 @@ your items, and your spells. Death costs you position, not progress.
 Each town holds a wise man who will teach you a spell, usually after you do
 something for the town first.
 
+<img src="docs/art-sorcerer.jpg" align="right" width="210">
+
 | Spell | What it does |
 |---|---|
 | **PROTECT** | halves damage taken â€” but see below |
@@ -110,6 +112,8 @@ still worth the magic once you have it. Any hit always does at least 1 damage â€
 nothing reduces it to nothing.
 
 ### About the CUCCO spell
+
+<img src="docs/art-cucco.jpg" align="right" width="200">
 
 If you know *Zelda II*, you are looking for the **Fairy** spell and will not find
 it. HoverBat replaced it: where the original turned Link into a fairy, ZALiA turns
@@ -175,6 +179,8 @@ Great Palace.
 
 ## Palaces
 
+<img src="docs/art-knight.jpg" align="right" width="210">
+
 Each palace ends with a boss and a crystal statue. Between you and it: locked
 doors, moving platforms, and the elevator shafts that connect the floors.
 
@@ -184,6 +190,16 @@ and remember that not every fall is survivable.
 
 The **Great Palace** in the Valley of Death opens only when all six crystals are
 set. It is longer and harder than anything before it.
+
+---
+
+## Some of what you will meet
+
+| | | |
+|:---:|:---:|:---:|
+| <img src="docs/art-moblin.jpg" width="200"> | <img src="docs/art-skeleton.jpg" width="200"> | <img src="docs/art-fishman.jpg" width="200"> |
+
+Hyrule is not empty, and very little in it is friendly.
 
 ---
 
