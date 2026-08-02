@@ -60,36 +60,48 @@ token from **that** account instead.
 
 ## Getting connected
 
-The quick path — from the `ZALiA_Twitch_IRC_Setup` folder in the game directory:
+It is all on the **Twitch setup page** — open it from **OPTIONS → COMPANION
+PAGES → Twitch**, or point a browser at `http://127.0.0.1:8777/twitch`.
 
-1. Run **`setup_twitch_irc.bat`**
-2. Say yes to open the token page. Pick **`chat:read`** (add `chat:edit` only if
-   you want the game speaking in chat). Authorise, copy the token.
-3. Paste the token, then type the login name **of the account the token belongs
-   to**, and the channel to join — **your** channel.
-4. In game: **OPTIONS → TWITCH → TWITCH IRC → ON**
-5. Top-left shows `TWITCH: connecting` then `connected`, and hides itself after a
-   few seconds so it is not stuck on your stream.
-6. Type `!heal 4` in your chat to test.
+**1. Connect your Twitch account.** Click **CONNECT WITH TWITCH**. This opens
+Twitch's *own* login page in your normal browser — you sign in on twitch.tv, not
+in the game, and the page never sees your password. Authorise the `chat:read` /
+`chat:edit` scopes and Twitch hands back a chat token, stored locally in
+`%LOCALAPPDATA%\ZALiA\twitch_config.txt` and never shown or sent anywhere else.
+**FORGET TOKEN** clears it.
 
-Your config lives at `%LOCALAPPDATA%\ZALiA\twitch_config.txt`. Re-run setup any
-time to change it, then toggle TWITCH IRC off and on.
+> Whichever account is **signed in to twitch.tv in that browser** when you click
+> authorise is the account the game becomes. To use a bot account (Option B
+> above), sign into twitch.tv as the bot first, *then* click CONNECT WITH TWITCH.
 
-**Testing without a live chat:** `twitch_test.bat heal 4` fires a command
-directly, so you can check effects before going live.
+**2. Set the channel.** Enter **YOUR TWITCH USERNAME** (the account the token
+belongs to) and the **CHANNEL TO JOIN** (usually the same), then **SAVE**.
+
+**3. Connect to chat.** Click **CONNECT TO CHAT**. The game's top-left shows
+`TWITCH: connecting` then `connected`, and hides itself after a few seconds so it
+is not stuck on your stream. Type `!heal 4` in your chat to test.
+
+**If CONNECT WITH TWITCH does nothing** it needs a Twitch application **Client
+ID** (the OAuth handshake requires one). If the build shipped with an App ID this
+is already handled; otherwise create a free app at
+[dev.twitch.tv/console](https://dev.twitch.tv/console) → *Register Your
+Application*, and paste its **Client ID** into the **APP ID** field on the page,
+then connect. As a manual fallback you can instead grab a token from
+[twitchtokengenerator.com](https://twitchtokengenerator.com/) (pick the
+`chat:read`, add `chat:edit` only if you want the game to speak) and drop it into
+the `token=` line of `twitch_config.txt` yourself.
 
 ### If it will not connect
 
-The status line tells you which failure it is. The usual causes:
-
 | Symptom | Cause |
 |---|---|
-| Never reaches `connected` | token expired, or wrong scopes — regenerate it |
-| Connects, commands do nothing | joined the wrong channel; check the `channel=` line |
-| Nothing at all | TWITCH IRC toggle is off, or the config was not saved |
+| Never reaches `connected` | token expired, or wrong scopes — reconnect |
+| CONNECT WITH TWITCH does nothing | no App ID — see above |
+| Connects, commands do nothing | joined the wrong channel, or CHAT EFFECTS is off |
+| Nothing at all | the config was not saved |
 
-Tokens expire. If it worked last month and not today, regenerate before debugging
-anything else.
+Tokens expire. If it worked last month and not today, click CONNECT WITH TWITCH
+again before debugging anything else.
 
 ---
 
