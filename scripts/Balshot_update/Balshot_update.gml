@@ -1,7 +1,10 @@
 /// @description  Balshot_update()
 function Balshot_update() {
 
-	if (stun_timer) { GOB_update_2(); exit; }
+	// B19 (2026-07-26 master list): same as Atta -- the stun gate hard-froze the
+	// mob on hit. GOB_update_2 -> update_EF11 already ticks stun_timer down, so
+	// the AI runs (jittery, half-acting) instead of freezing. Atta & Balshot ONLY.
+	// if (stun_timer) { GOB_update_2(); exit; }
 
 	//if(!ocs) // if on screen
 	if (Shoot_timer) Shoot_timer--;

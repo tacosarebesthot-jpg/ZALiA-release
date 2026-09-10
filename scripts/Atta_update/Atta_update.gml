@@ -1,7 +1,12 @@
 /// @description  Atta_update()
 function Atta_update() {
 
-	if (stun_timer) { GOB_update_2(); exit; }
+	// B19 (2026-07-26 master list): the stun gate here made Atta FREEZE SOLID on
+	// hit -- AI skipped entirely, a statue until the timer expired ("stun lock is
+	// op"). GOB_update_2 -> update_EF11 already ticks stun_timer down, so letting
+	// the AI run while stunned just makes it jitter and misfire instead of
+	// hard-freezing. Atta & Balshot ONLY -- every other enemy keeps the gate.
+	// if (stun_timer) { GOB_update_2(); exit; }
 
 	var                          _DUR = $30;
 	if ( counter == DUR_COOLDOWN+_DUR)

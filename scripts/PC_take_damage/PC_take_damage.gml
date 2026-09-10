@@ -19,6 +19,11 @@ function PC_take_damage() {
 	    exit; // invincible while holding item overhead
 	}
 
+	// FLAWLESS tracker (B65): any real PC hit while a boss is alive dirties the
+	// fight -- twitch_tick only throws the finisher toast if this never got set.
+	if (variable_global_exists("tw_boss_seen") && global.tw_boss_seen)
+	{   global.tw_boss_damaged = true;  }
+
 
 	var _INST = argument[0];
 

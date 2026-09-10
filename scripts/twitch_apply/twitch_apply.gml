@@ -1052,6 +1052,17 @@ function tw_spawn_obj(_name) {
 /// or fall transition running, so it is unaffected.
 function tw_spawn_window_ok(_v, _who_s) {
 
+	// Hostile GOB spawns only make sense in side-scroll scenes ("A" = scenes/towns/
+	// palaces). On the overworld map ("C") or menus/title ("B") the spawn pipeline
+	// bails silently (encounter/update-list guards) -- Lane's "swarm says it's
+	// supposed to work but... this screen is not good" (08-14 [0:21:15]). Say why.
+	if (instance_exists(g) && g.room_type != "A")
+	{
+		global.tw_toast       = _who_s + " -> " + string(_v) + " needs a battle screen";
+		global.tw_toast_timer = 180;
+		return false;
+	}
+
 	if (instance_exists(g)
 	&&  (g.gui_state != g.gui_state_NONE
 	||  g.cutscene

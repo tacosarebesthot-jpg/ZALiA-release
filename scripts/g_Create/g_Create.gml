@@ -4211,6 +4211,12 @@ function g_Create() {
 	global.tw_moon        = false; // gravity to 1/4 while set          (PC_update_vertical)   -- floaty jumps
 	global.tw_levelup_msg = "LEVEL UP!";    // toast text on the level-up menu (LevelUpMenu_Create).
 	                       // set to whatever chat earned -- "JEFF ROCKS" is one companion-page edit away.
+	global.tw_boss_seen     = false; // FLAWLESS tracker (B65): a Boss instance is alive this room
+	global.tw_boss_damaged  = false; // PC took a hit while the boss was alive -> not flawless
+	global.tw_boss_frames   = 0;     // how long the boss has been alive (skip <5s flicker)
+	global.tw_boss_room_loading = false; // ChangeRoom_timer was >0 last frame -> new room, reset
+	global.tw_mk_strings    = ["FLAWLESS VICTORY!", "FATALITY.", "BABALITY?", "FRIENDSHIP. Friendship.", "TOASTY!!"];
+	                                 // finisher copy supplied verbatim by chat (asm0deus, 09-04 stream)
 
 	// ── VS CHAT MODE ────────────────────────────────────────────────────────────
 	// Chat versus the runner: every helpful verb is refused (see the deny list at
