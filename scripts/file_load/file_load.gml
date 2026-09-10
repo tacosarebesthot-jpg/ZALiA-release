@@ -256,11 +256,25 @@ function file_load(argument0) {
 
 
 	// Overworld Biomes ----------------------------------------------
+	// B05 FIX (2026-09-10): the ds_map_clear used to live INSIDE the is_undefined
+	// guard, so loading a VANILLA save -- whose dm_rando has no TSRC key -- kept the
+	// PREVIOUS save's biome remap loaded on the persistent OVERWORLD instance. With
+	// the can_rando_ow_tsrc preference on, RandoTSRC_active (Overworld_Step:18) then
+	// stayed true and the vanilla overworld rendered through a dead seed's tile map:
+	// "on game over reset tile map reset to randomizer rather than respecting the
+	// vanilla playthrough logic" (lane's note; the re-roll shows up at the next
+	// overworld tile rebuild, e.g. after a game-over continue). Clear
+	// UNCONDITIONALLY, then repopulate only from real rando data.
+	ds_map_clear(global.OVERWORLD.dm_Rando_TSRC);
 	_val = f.dm_rando[?STR_Overworld+STR_TSRC+STR_Randomized];
 	if(!is_undefined(_val))
 	{
-	    ds_map_clear(global.OVERWORLD.dm_Rando_TSRC);
-	    global.OVERWORLD.dm_Rando_TSRC = json_decode(_val);
+	    var _biome_map = json_decode(_val);
+	    if (ds_exists(_biome_map, ds_type_map))  // json_decode returns -1 on malformed input
+	    {
+	        ds_map_copy(global.OVERWORLD.dm_Rando_TSRC, _biome_map);
+	        ds_map_destroy(_biome_map); // (the old code replaced the map id outright, leaking the cleared one)
+	    }
 	}
 
 

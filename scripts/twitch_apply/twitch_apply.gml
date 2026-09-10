@@ -725,6 +725,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// on revert. Re-assert each tick so a room change / spell clear can't drop the
 			// form early. Gated on mod_PC_CUCCO_1 (default ON); if that mod is off, casting
 			// FAIRY makes a normal fairy instead, so we no-op rather than mis-transform.
+			// Re-assert each tick so a room change / spell clear can't drop the
+			// form early. Gated on mod_PC_CUCCO_1 (default ON); if that mod is off,
+			// casting FAIRY makes a normal fairy instead, so we no-op RATHER THAN
+			// MIS-TRANSFORM -- but say so (B34: this used to be silent and read as
+			// a dead command on stream).
 			if (instance_exists(g) && instance_exists(global.pc) && g.mod_PC_CUCCO_1)
 			{
 				var _had_fary = (g.spells_active & SPL_FARY) != 0;
@@ -739,6 +744,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				});
 				global.tw_toast       = _who_s + " -> arise (CHICKEN!)";
 				global.tw_toast_timer = 180;
+			}
+			else
+			{
+				global.tw_toast       = _who_s + " -> arise is off in this save's settings";
+				global.tw_toast_timer = 240;
 			}
 			break;
 
