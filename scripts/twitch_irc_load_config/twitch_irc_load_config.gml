@@ -154,9 +154,13 @@ function tw_irc_is_verb(_v) {
 		case "fairy":  case "fary":                  // advertised by !cmds, was dead -> now refill-alias
 		case "protect": case "prtc": case "shield":  // advertised by !cmds, was dead -> now spell
 		case "reflect": case "rflc":                 // advertised by !cmds, was dead -> now spell
+		case "fire":   case "thunder": case "thun":  // bare spell names (lane typed these himself)
+		case "enigma": case "spel": case "jump": case "life": case "summon": case "summ":
 		case "ice":    case "icefloor":              // Z3 port
 		case "moon":                                 // gravity verb (Z2 is a platformer)
 		case "root":   case "deny":                  // Z3-family ports
+		case "kill":   case "killlink": case "poison": case "suggest":
+		case "donothing": case "rip": case "blip": case "coincidence": case "getfed": // joke verbs
 			return true;
 		default:
 			return false;

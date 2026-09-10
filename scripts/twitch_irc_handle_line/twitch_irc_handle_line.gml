@@ -77,11 +77,27 @@ function twitch_irc_handle_line(_line) {
 	}
 
 	// drop the leading '!' and lowercase -> bare verb ("!heal" -> "heal")
-	_verb = string_lower(string_delete(_verb, 1, 1));
+	// normalize the verb BEFORE the known-verb gate: clean stray unicode/punctuation
+	// (chatters paste U+034F after commands -- "!slow ͏" -- which silently killed
+	// the verb on four streams), and split a trailing number into the argument so
+	// "!hurt4" works like "!hurt 4". Both dead-command shapes are heavily documented
+	// in the VOD rips (CHAT_IDEAS_2026-09-10.md).
+	_verb = tw_clean_command(string_delete(string(_verb), 1, 1)); // strip "!", then clean
 	if (_verb == "") return;
 
-	// ignore unknown commands BEFORE they can consume the cooldown
-	if (!tw_irc_is_verb(_verb)) return;
+	if (!tw_irc_is_verb(_verb))
+	{
+		// "!hurt4" / "!freeze30": letter-prefix is a known verb -> move the digits
+		// into the argument. (Skip "1up"-style verbs: they never reach this branch.)
+		var _letters = string_letters(_verb);
+		var _digits  = string_digits(_verb);
+		if (_letters != "" && _digits != "" && tw_irc_is_verb(_letters))
+		{
+			_verb = _letters;
+			if (string(_arg) == "") _arg = _digits;
+		}
+		else return;
+	}
 
 	// ---- global cooldown (spam guard) -------------------------------------
 	// One throttle for everyone: ignore any accepted command within

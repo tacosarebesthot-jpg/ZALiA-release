@@ -23,9 +23,31 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// Master gate: OFF by default. Ignore everything unless explicitly enabled.
 	if (!variable_global_exists("tw_enabled") || !global.tw_enabled) return;
 
-	var _v     = string_lower(string(_verb));
+	var _v     = tw_clean_command(_verb);
 	var _who_s = string(_who);
 	if (_who_s == "") _who_s = "chat";
+
+	// Alias map -- real commands chat actually typed that died silently (mined from
+	// 7 VOD chats, see CHAT_IDEAS_2026-09-10.md). Canonicalized BEFORE the VS gate
+	// so a helpful alias can't sneak past it (restore -> refill gets blocked in VS
+	// mode like refill itself). Joke verbs chat invented get a scripted answer
+	// instead of a silent no-op.
+	switch (_v)
+	{
+		case "span":                                    _v = "spawn";   break;
+		case "conuse": case "confiuse":                 _v = "confuse"; break;
+		case "filp":                                    _v = "flip";    break;
+		case "speeed":                                  _v = "speed";   break;
+		case "huge":                                    _v = "grow";    break;
+		case "tiny":                                    _v = "shrink";  break;
+		case "restore":                                 _v = "refill";  break;
+		case "gorilla":                                 _v = "spawn"; _arg = "goriya"; break; // "Lol ducking auto correct"
+		case "donothing":   global.tw_toast = _who_s + " -> absolutely nothing happened. effectfully."; global.tw_toast_timer = 240; return;
+		case "rip":         global.tw_toast = _who_s + " -> F";                          global.tw_toast_timer = 240; return;
+		case "blip":        global.tw_toast = _who_s + " -> blip.";                      global.tw_toast_timer = 240; return;
+		case "coincidence": global.tw_toast = _who_s + " -> coincidence. or is it.";      global.tw_toast_timer = 240; return;
+		case "getfed":      global.tw_toast = _who_s + " -> later. maybe.";               global.tw_toast_timer = 240; return;
+	}
 
 	// ---- VS CHAT MODE (2026-07-27) -----------------------------------------
 	// Chat's goal is to kill the runner. Blocks every verb that HELPS -- healing,
@@ -44,10 +66,21 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	        case "fairy": case "fary": case "invuln": case "protect": case "prtc":
 	        case "shield": case "reflect": case "rflc": case "arise":
 	        case "cucco": case "cuco": case "chicken":
+	        case "jump": case "restore": // helpful bare-spell / alias forms
 	            global.tw_toast       = _who_s + " -> " + _v + " BLOCKED (VS CHAT)";
 	            global.tw_toast_timer = 180;
 	            return;
 	    }
+	}
+
+	// Bare spell names: same deal as protect/shield/reflect below -- chat types the
+	// spell's name as a verb (lane typed !enigma and !fire himself; both died).
+	// Translate into the spell case so one implementation casts them all.
+	if (_v == "fire" || _v == "thunder" || _v == "thun" || _v == "enigma"
+	||  _v == "spel" || _v == "jump" || _v == "life" || _v == "summon" || _v == "summ")
+	{
+		_arg = _v;
+		_v   = "spell";
 	}
 
 	// Bare spell names chat expects as verbs: StreamElements advertises
@@ -113,8 +146,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		// Bare "!heal"/"!mp" (no number) -> FULL restore of that meter (9999 clamps to
 		// get_stat_max, like !refill); "!heal N" adds N. Bare "!hurt"/"!drain" -> a modest
 		// 16-pt chip. Previously a bare verb gave _amt=0 -> adjust_stat(0,0) -> no-op.
-		case "heal":  if (instance_exists(f)) adjust_stat( (_amt > 0 ? _amt : 9999), 0); break;
-		case "hurt":  if (instance_exists(f)) adjust_stat(-(_amt > 0 ? _amt : 16),   0); break;
+		// EXPLICIT N on heal/hurt = QUARTER-HEART BOXES (SivUO, 09-04 stream: "!heal 1"
+		// healed a sliver -- "I thought 1 would be 1 square"). 8 raw points = one
+		// quarter box (16 = half a box, per lane's own on-stream read of a bare !hurt).
+		case "heal":  if (instance_exists(f)) adjust_stat( (_amt > 0 ? _amt * 8 : 9999), 0); break;
+		case "hurt":  if (instance_exists(f)) adjust_stat(-(_amt > 0 ? _amt * 8 : 16),   0); break;
 		case "mp":    if (instance_exists(f)) adjust_stat(0,  (_amt > 0 ? _amt : 9999)); break;
 		case "drain": if (instance_exists(f)) adjust_stat(0, -(_amt > 0 ? _amt : 16));   break;
 
@@ -538,7 +574,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				if (_sp_cnt < 1) _sp_cnt = 1;
 				if (_sp_cnt > 6) _sp_cnt = 6;
 
-				var _obj  = tw_spawn_obj(string_lower(_sp_name));
+				var _obj = tw_spawn_obj(string_lower(_sp_name));
+				if (is_undefined(_obj))
+				{
+					global.tw_toast       = _who_s + " -> unknown enemy. try: daira moblin goriya zora stalfos bat atta myu";
+					global.tw_toast_timer = 300;
+					break;
+				}
 				var _face = (global.pc.xScale < 0) ? -1 : 1;
 				for (var _sc = 0; _sc < _sp_cnt; _sc++)
 				{   GameObject_create(global.pc.xl + (24 + 16 * _sc) * _face, global.pc.yt, _obj, 1);  }
@@ -790,6 +832,58 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		case "kill":
+		case "killlink":
+			// HOSTILE (asked on three separate streams; chat's "polite assassin" meta
+			// builds to it: "I heal you up so I can kill you again"). Drives HP to 0
+			// through the same clamped lever as !hurt, so the death pipeline handles
+			// it like any lethal hit. Same window guard as the hostile spawns -- a
+			// kill landing inside a tally/cutscene is the 08-28 corruption class.
+			if (!tw_spawn_window_ok(_v, _who_s)) break;
+			if (instance_exists(f))
+			{
+				adjust_stat(-9999, 0);
+				global.tw_toast       = _who_s + " -> KILL. gg.";
+				global.tw_toast_timer = 240;
+			}
+			break;
+
+		case "poison":
+			// HOSTILE: a DoT that CAN kill -- the missing middle between !hurt (instant
+			// chip) and !curse (mild, floored at 1 HP, can never kill). 2 HP once a
+			// second for the duration; same clamped lever, nothing persistent.
+			if (instance_exists(f))
+			{
+				array_push(global.tw_active, {
+					frames  : _frames,
+					tick    : 60,
+					reapply : function() {
+						self.tick--;
+						if (self.tick <= 0)
+						{
+							self.tick = 60;
+							if (instance_exists(f) && f.hp > 0) adjust_stat(-2, 0);
+						}
+					}
+				});
+			}
+			break;
+
+		case "suggest":
+			// Catch the idea firehose in-band: lane invites ideas on stream constantly
+			// ("if you know any things that might be cool to add... let me know").
+			// Appends to chat_suggestions.txt next to the save/config files.
+			var _sf = file_text_open_append(working_directory + "chat_suggestions.txt");
+			if (_sf != -1)
+			{
+				file_text_write_string(_sf, string(_who_s) + ": " + string(_arg));
+				file_text_writeln(_sf);
+				file_text_close(_sf);
+				global.tw_toast       = _who_s + " -> logged. gainey will read it. maybe.";
+				global.tw_toast_timer = 240;
+			}
+			break;
+
 		default:
 			_known                = false;
 			global.tw_toast       = "unknown: " + _v;
@@ -898,9 +992,38 @@ function tw_spell_bit(_name) {
 }
 
 
+/// @description  tw_clean_command(verb) -- normalize a chat verb before dispatch:
+/// lowercase, strip EVERYTHING that isn't a-z/0-9/underscore. Chatters paste a
+/// combining-grapheme char (U+034F) after commands -- visible in the raw rips as
+/// "!slow ͏" -- and it made the verb compare fail silently on four different
+/// streams. This also eats stray "-heal"/"! heal" punctuation forms.
+/// (trailing-digit splitting like "!hurt4" lives in twitch_irc_handle_line,
+/// which owns the argument split; this only guarantees a clean token.)
+function tw_clean_command(_verb) {
+
+	var _str = string_lower(string(_verb));
+	var _out = "";
+	var _len = string_length(_str);
+	for (var _i = 1; _i <= _len; _i++)
+	{
+		var _c = string_char_at(_str, _i);
+		var _o = ord(_c);
+		if ( (_o >= 48 && _o <= 57)   // 0-9
+		||   (_o >= 97 && _o <= 122)  // a-z
+		||   _c == "_" )
+		{
+			_out += _c;
+		}
+	}
+	return _out;
+}
+
+
 /// @description  tw_spawn_obj(name) -- map a GAME-MASTER enemy name to its object index.
 /// All of these are normal, fightable enemies that already exist in this project and have
-/// valid version-1 ("01") objver property data. Unknown name -> a sensible default (Daira).
+/// valid version-1 ("01") objver property data. Empty name -> a sensible default (Daira).
+/// A NON-empty unknown name returns undefined -- the caller fizzles with the valid list
+/// (lane himself hit this with "!spawn fire"; silent default-spawn read as a broken verb).
 function tw_spawn_obj(_name) {
 
 	switch (_name)
@@ -913,7 +1036,7 @@ function tw_spawn_obj(_name) {
 		case "bat":     case "ache":               return Ache01;  // flyer (bat)
 		case "atta":                               return Atta01;  // flyer (bat)
 		case "myu":                                return Myu_A;   // weak crawler
-		default:                                   return DairA;   // sensible default
+		default:                                   return (_name == "") ? DairA : undefined;
 	}
 }
 

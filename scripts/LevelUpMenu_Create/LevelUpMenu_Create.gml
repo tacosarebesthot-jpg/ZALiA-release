@@ -244,10 +244,15 @@ function LevelUpMenu_Create() {
 	    show_debug_message("");
 	}
 
-
-
-
-
-
+	// chat-facing level-up callout (asm0deus, 09-04 stream: "make sure to add a
+	// message that Jeff Rocks to everytime Lane levels up in Z2"). Text is whatever
+	// global.tw_levelup_msg holds -- the companion page can set it later; empty
+	// string = silent. Rides the standard twitch toast draw (aged by twitch_tick,
+	// which runs unconditionally every frame, menus included).
+	if (variable_global_exists("tw_levelup_msg") && global.tw_levelup_msg != "")
+	{
+		global.tw_toast       = global.tw_levelup_msg;
+		global.tw_toast_timer = 240;
+	}
 
 }

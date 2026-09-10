@@ -4209,6 +4209,8 @@ function g_Create() {
 	                               // candle/object brightness before the frame ever drew.
 	global.tw_ice         = false; // ground friction to 1/4 while set  (PC_update_horizontal) -- Z3 !ice port
 	global.tw_moon        = false; // gravity to 1/4 while set          (PC_update_vertical)   -- floaty jumps
+	global.tw_levelup_msg = "LEVEL UP!";    // toast text on the level-up menu (LevelUpMenu_Create).
+	                       // set to whatever chat earned -- "JEFF ROCKS" is one companion-page edit away.
 
 	// ── VS CHAT MODE ────────────────────────────────────────────────────────────
 	// Chat versus the runner: every helpful verb is refused (see the deny list at
