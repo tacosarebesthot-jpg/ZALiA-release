@@ -212,6 +212,16 @@ function PC_update_vertical() {
 	        // 9569: JSR D19B
 	        if!(g.pc_lock&PC_LOCK_VSPD) // $4: vspd
 	        {
+	            // chat !moon failsafe (owner, 2026-09-10): quarter gravity can arc Link
+	            // above the room into trigger/tile rows that were never authored to be
+	            // reachable -- top-of-screen exit triggers and unbound transitions. Stop
+	            // the arc at $20 above the room top: deep enough to leave the OG's -$11
+	            // above-screen collision band alone, shallow enough that moon can never
+	            // leave the world upward. Only bites while the effect is live.
+	            if (variable_global_exists("tw_moon") && global.tw_moon
+	            &&  (vspd&$80)      // moving up
+	            &&  y < -$20 )      // well past the room's top bound
+	            {   vspd = 0;  }
 	            updateY2(_grav_add, _term_vel);
 	        }
         
