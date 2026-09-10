@@ -10,6 +10,9 @@
 //     user=yourbotname                            (the login nick)
 //     channel=yourchannel                         (channel to join; leading '#' optional)
 //     cooldown=600                                (OPTIONAL global anti-spam cooldown, FRAMES)
+//     effect_secs=10                              (OPTIONAL default effect duration, SECONDS --
+//                                                  what OPTIONS > TWITCH and the web companion
+//                                                  both save via twitch_config_save()/"/twitch/save")
 //
 // NEVER hardcodes a token -- the user supplies their own. If the file is missing
 // or any required field is blank, sets global.tw_irc_status = "no config" and
@@ -23,6 +26,7 @@ function twitch_irc_load_config() {
 
 	// defaults (idempotent)
 	if (!variable_global_exists("tw_irc_cooldown_frames")) global.tw_irc_cooldown_frames = 600;
+	if (!variable_global_exists("tw_effect_secs"))         global.tw_effect_secs         = 5;
 
 	var _path = working_directory + "twitch_config.txt";
 	if (!file_exists(_path))
@@ -42,6 +46,7 @@ function twitch_irc_load_config() {
 	var _user     = "";
 	var _channel  = "";
 	var _cooldown = global.tw_irc_cooldown_frames;
+	var _effect   = global.tw_effect_secs;
 
 	while (!file_text_eof(_fh))
 	{
@@ -66,6 +71,10 @@ function twitch_irc_load_config() {
 			case "nick":     _user    = _val;               break; // alias
 			case "channel":  _channel = _val;               break;
 			case "cooldown": _cooldown = tw_num(_val, 600); break;
+			// Same key twitch_config_save() and the web companion's /twitch/save both
+			// write. Without this case the duration they saved was silently dropped
+			// on every restart and effects reverted to the 5s default.
+			case "effect": case "effect_secs": _effect = tw_num(_val, _effect); break;
 		}
 	}
 	file_text_close(_fh);
@@ -84,6 +93,7 @@ function twitch_irc_load_config() {
 	global.tw_irc_user            = string_lower(_user);
 	global.tw_irc_channel         = _channel;
 	global.tw_irc_cooldown_frames = max(0, floor(_cooldown));
+	global.tw_effect_secs         = max(1, floor(_effect)); // same clamp /twitch/save applies live
 
 	if (_token == "" || _user == "" || _channel == "")
 	{

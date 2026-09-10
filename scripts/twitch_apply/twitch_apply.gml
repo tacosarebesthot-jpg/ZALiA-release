@@ -119,17 +119,25 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		case "dark":
 			// update_rm_brightness() recomputes brightness from items/objects every
 			// frame, so we re-force 0 each tick while active, then let it recompute
-			// the real value once on restore.
+			// the real value once on restore. The tw_dark flag additionally makes
+			// update_rm_brightness itself hold 0 (skip candle/object brightening) --
+			// update_Pallete_1a runs AFTER twitch_tick in the frame and its recompute
+			// otherwise stomped the forced 0 before anything drew, so !dark never
+			// visibly darkened anything (Lane's 08-14 stream).
 			if (instance_exists(g))
 			{
+				global.tw_dark = true;
 				set_rm_brightness(0);
 				array_push(global.tw_active, {
 					frames  : _frames,
-					reapply : function() { if (instance_exists(g)) set_rm_brightness(0);   },
+					reapply : function() { global.tw_dark = true; if (instance_exists(g)) set_rm_brightness(0);   },
 					// update_rm_brightness reads bare instance vars (pal_rm_dark_idx) that live on
 					// the palette instance `p`; called from this struct method, self == the struct,
 					// so it must run in p's scope or it throws "struct.pal_rm_dark_idx not set".
-					restore : function() { if (instance_exists(g) && instance_exists(p)) with (p) update_rm_brightness(); }
+					restore : function() {
+						global.tw_dark = false; // cleared BEFORE the recompute so the room returns to natural brightness
+						if (instance_exists(g) && instance_exists(p)) with (p) update_rm_brightness();
+					}
 				});
 			}
 			break;
@@ -373,7 +381,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				var _spd_frames  = (_spd_secs > 0) ? floor(_spd_secs * 60) : 600; // default 10s
 				if (_spd_frames > 3600) _spd_frames = 3600;                       // cap 60s
 
-				var _prev = global.pc.hspd_max;
+				// _prev normalized: hspd_max is base*current multiplier (PC_update_1 folds
+				// tw_speed_mul in every frame), so a re-fire while !speed is already live
+				// must NOT read the already-boosted value or each re-fire compounds 1.5x
+				// again (1.5 -> 2.25 -> ...).
+				var _prev = global.pc.hspd_max / max(global.pc.tw_speed_mul, 0.1);
 				var _fast = _prev * 1.5;
 				global.pc.tw_speed_mul = 1.5;
 				array_push(global.tw_active, {
@@ -460,6 +472,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		case "flame":
 		case "heckler":
 			// spawn a jumping flame next to the PC, tagged with the chatter's name.
+			// Same hostile-spawn window guard as !spawn/!swarm -- a Blaze loosed during
+			// the boss-defeat tally/cutscene can hit the player exactly like a pack can.
+			if (!tw_spawn_window_ok(_v, _who_s)) break;
 			if (instance_exists(global.pc))
 			{
 				var _fe = GameObject_create(global.pc.xl + 24, global.pc.yt, Blaze01, 2);
@@ -473,6 +488,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// optional COUNT: "!spawn moblin", "!spawn moblin 3", "!spawn 3 moblin", or
 			// "!spawn 3" (count only -> default enemy). Count defaults to 1, capped at 6 so
 			// chat can't flood a room. reuses the flame lever: GameObject_create(x,y,obj,1).
+			if (!tw_spawn_window_ok(_v, _who_s)) break; // no hostile packs mid-cutscene/tally (see tw_spawn_window_ok)
 			if (instance_exists(global.pc))
 			{
 				// parse name + optional numeric count out of the arg (order-independent)
@@ -509,6 +525,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// spawn a small pack of RANDOM enemies spread around the PC. count via tw_num
 			// (default 3), CAPPED at 6 so chat can't flood the room. Each spawn rolls a
 			// random type from a land-safe pool (was: all Myu).
+			if (!tw_spawn_window_ok(_v, _who_s)) break; // no hostile packs mid-cutscene/tally (see tw_spawn_window_ok)
 			if (instance_exists(global.pc))
 			{
 				var _n = floor(tw_num(_arg, 3));
@@ -768,4 +785,28 @@ function tw_spawn_obj(_name) {
 		case "myu":                                return Myu_A;   // weak crawler
 		default:                                   return DairA;   // sensible default
 	}
+}
+
+
+/// @description  tw_spawn_window_ok(verb, who) -- gate for the hostile spawn verbs
+/// (!spawn / !swarm). REPRO-WINDOW GUARD for Lane's 2026-08-28 "crashed it on a boss"
+/// report: twitch verbs execute from twitch_poll()/twitch_irc_step() near the TOP of
+/// g_Step, BEFORE the gui/cutscene gates lower in the frame -- so a pack spawned inside
+/// the boss-defeat tally/jar cutscene stayed hostile while the player was locked out of
+/// acting, until the segment transition cleared the room ~20s later ("I'm stuck, dude!
+/// I can't do regular things now"). Refuse those windows with a visible toast instead.
+/// Normal gameplay -- including live boss FIGHTS -- is gui_state NONE with no cutscene
+/// or fall transition running, so it is unaffected.
+function tw_spawn_window_ok(_v, _who_s) {
+
+	if (instance_exists(g)
+	&&  (g.gui_state != g.gui_state_NONE
+	||  g.cutscene
+	||  g.FallScene_timer))
+	{
+		global.tw_toast       = _who_s + " -> " + string(_v) + " fizzled (busy)";
+		global.tw_toast_timer = 180;
+		return false;
+	}
+	return true;
 }

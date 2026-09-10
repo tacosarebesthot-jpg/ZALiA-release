@@ -4202,6 +4202,11 @@ function g_Create() {
 	global.tw_flip        = false; // mirror the screen horizontally   (Surface_Draw_End)
 	global.tw_confuse     = false; // swap LEFT<->RIGHT player input    (Input_update2a)
 	global.tw_disco       = false; // HSV-cycling translucent overlay   (Surface_Draw_End)
+	global.tw_dark        = false; // force room brightness to 0        (update_rm_brightness).
+	                               // update_Pallete_1a runs AFTER twitch_tick every frame
+	                               // (g_Step:22 vs g_Step:339) and its update_rm_brightness()
+	                               // recompute stomped a plain set_rm_brightness(0) back to
+	                               // candle/object brightness before the frame ever drew.
 
 	// ── VS CHAT MODE ────────────────────────────────────────────────────────────
 	// Chat versus the runner: every helpful verb is refused (see the deny list at

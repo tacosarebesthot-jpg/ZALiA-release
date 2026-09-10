@@ -14,21 +14,29 @@ function update_rm_brightness() {
 	else if(!g.EnterRoom_SpawnGO_timer)
 	{
 	    set_rm_brightness(0);
-    
-	    if (f.items&ITM_CAND) set_rm_brightness(g.rm_brightness+1);
-    
-	    if (g.rm_brightness<g.RM_BRIGHTNESS_MAX)
+
+	    // chat !dark override: while active, 0 IS the room brightness -- skip the
+	    // candle/bright-object brightening so this recompute can't undo the verb in
+	    // the same frame it was applied (this function runs after twitch_tick every
+	    // frame). The pal_rm_dark_idx<0 branch above still forces MAX: with no dark
+	    // palette for the room there is nothing to render darkness with.
+	    if (!(variable_global_exists("tw_dark") && global.tw_dark))
 	    {
-	        with(GameObject)
+	        if (f.items&ITM_CAND) set_rm_brightness(g.rm_brightness+1);
+
+	        if (g.rm_brightness<g.RM_BRIGHTNESS_MAX)
 	        {
-	            if(!state 
-	            || !brightness )
+	            with(GameObject)
 	            {
-	                continue;//with(GameObject)
+	                if(!state
+	                || !brightness )
+	                {
+	                    continue;//with(GameObject)
+	                }
+
+	                set_rm_brightness(g.rm_brightness+brightness);
+	                if (g.rm_brightness>=g.RM_BRIGHTNESS_MAX) break;//with(GameObject)
 	            }
-            
-	            set_rm_brightness(g.rm_brightness+brightness);
-	            if (g.rm_brightness>=g.RM_BRIGHTNESS_MAX) break;//with(GameObject)
 	        }
 	    }
 	}
