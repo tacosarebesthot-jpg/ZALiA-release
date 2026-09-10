@@ -151,6 +151,12 @@ function tw_irc_is_verb(_v) {
 		case "freeze": case "stun":  case "smite": case "clearscreen":
 		case "curse":  case "party": case "refill":
 		case "arise":  case "chicken": case "cucco":
+		case "fairy":  case "fary":                  // advertised by !cmds, was dead -> now refill-alias
+		case "protect": case "prtc": case "shield":  // advertised by !cmds, was dead -> now spell
+		case "reflect": case "rflc":                 // advertised by !cmds, was dead -> now spell
+		case "ice":    case "icefloor":              // Z3 port
+		case "moon":                                 // gravity verb (Z2 is a platformer)
+		case "root":   case "deny":                  // Z3-family ports
 			return true;
 		default:
 			return false;

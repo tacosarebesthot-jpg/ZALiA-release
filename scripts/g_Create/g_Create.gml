@@ -4207,6 +4207,8 @@ function g_Create() {
 	                               // (g_Step:22 vs g_Step:339) and its update_rm_brightness()
 	                               // recompute stomped a plain set_rm_brightness(0) back to
 	                               // candle/object brightness before the frame ever drew.
+	global.tw_ice         = false; // ground friction to 1/4 while set  (PC_update_horizontal) -- Z3 !ice port
+	global.tw_moon        = false; // gravity to 1/4 while set          (PC_update_vertical)   -- floaty jumps
 
 	// ── VS CHAT MODE ────────────────────────────────────────────────────────────
 	// Chat versus the runner: every helpful verb is refused (see the deny list at

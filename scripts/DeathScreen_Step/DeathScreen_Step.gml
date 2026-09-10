@@ -17,6 +17,11 @@ function DeathScreen_Step() {
 	        {
 	            if (!variable_global_exists("tw_vs_kills")) global.tw_vs_kills = 0;
 	            global.tw_vs_kills++;
+	            // on-stream scoreboard moment: the kill toast rides the standard
+	            // twitch toast draw, and twitch_tick ages it even across the death
+	            // screen (it runs unconditionally near the top of g_Step).
+	            global.tw_toast       = "CHAT KILL!  x" + string(global.tw_vs_kills);
+	            global.tw_toast_timer = 240;
 	        }
 	        if (global.pc_lives>0) room_goto_(rmB_NextLife);
 	        else         room_goto_(rmB_GameOver);

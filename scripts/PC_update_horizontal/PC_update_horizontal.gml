@@ -68,8 +68,15 @@ function PC_update_horizontal() {
 	            If PC is on the ground when the attack reaches its final phase, PC_update_attack_2() will set hspd=0 which feels very abrupt at the faster speed.
 	            */
 	            //sdm("B. "+"hspd $"+hex_str(hspd)+", _HSPD "+string(_HSPD)+", _HSPD_MAX "+string(_HSPD_MAX)+", hspd_dir "+string(hspd_dir));
-	            hspd += -hspd_dir;
-	            hspd &= $FF;
+            // chat !ice: thin the ground friction to every 4th frame while the flag
+            // is set, so momentum carries -- you keep sliding after releasing the
+            // d-pad (ported from the Z3 mod's ice-floor effect).
+            if (!(variable_global_exists("tw_ice") && global.tw_ice)
+            ||  (global.App_frame_count & 3) == 0)
+            {
+                hspd += -hspd_dir;
+                hspd &= $FF;
+            }
 	        }
 	    }
     

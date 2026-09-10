@@ -95,6 +95,9 @@ function twitch_irc_handle_line(_line) {
 	}
 
 	// hand off to the EXISTING dispatcher (itself gated on global.tw_enabled).
-	// default duration 300 frames (5s @60fps) for timed effects.
-	twitch_apply(_verb, _arg, _sender, 300);
+	// Duration: pass EMPTY, not a number -- the hardcoded 300 here pinned EVERY
+	// chat effect to 5s and silently defeated the owner's EFFECT LENGTH setting
+	// (the options-menu value never reached IRC effects at all). Empty ->
+	// twitch_apply falls back to global.tw_effect_secs, same as the drop-file path.
+	twitch_apply(_verb, _arg, _sender, "");
 }

@@ -123,7 +123,11 @@ function PC_update_vertical() {
 	{   // 952D.  *** NOTE: Don't use _vspd_COPY beyond here
 	    var                                     _grav_add = GRAVITY2; // $48
 	    if (Input.Jump_held && vspd&$80 && _C1) _grav_add = GRAVITY1; // $30
-    
+	    // chat !moon: quarter gravity -- big floaty jumps (Zelda 2 is a platformer,
+	    // so the gravity verb the Z3/ALTTP brainstorm dropped lands here). Folds into
+	    // the same accumulator the OG variable jump already uses, so the feel is native.
+	    if (variable_global_exists("tw_moon") && global.tw_moon) _grav_add = max(1, _grav_add >> 2);
+
 	    // 9544
 	    // In OG, it is possible to get csTop to collide w/ solid 
 	    // tiles above the screen if (yy <= -$11). The cs check sees yy as $EF

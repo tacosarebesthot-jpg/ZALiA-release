@@ -50,6 +50,18 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	    }
 	}
 
+	// Bare spell names chat expects as verbs: StreamElements advertises
+	// !protect !shield !reflect in its !cmds list, but only "!spell protect"
+	// existed -- the bare forms fell through to "unknown" (dead advertised
+	// commands, 2026-08-14/08-28 streams). Translate them into the spell case.
+	// (The VS-mode deny list above already blocks these as helpful verbs.)
+	if (_v == "protect" || _v == "prtc" || _v == "shield"
+	||  _v == "reflect" || _v == "rflc")
+	{
+		_arg = _v;
+		_v   = "spell";
+	}
+
 	// Duration (FRAMES) for timed effects. An explicit dur from the drop-file/bot
 	// API still wins; when it is absent -- which is EVERY plain chat "!confuse" --
 	// fall back to the owner's EFFECT LENGTH setting instead of a hardcoded 5s.
@@ -59,6 +71,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// menu let you set 5-60s, twitch_config.txt stored it, OptionsMenu_Twitch_update
 	// even claimed "twitch_apply reads global.tw_effect_secs" -- but nothing here
 	// ever read it, so the slider did nothing and every effect was always 5s.
+	// (twitch_irc_handle_line ALSO used to hardcode a 300-frame dur, which kept
+	// the IRC path pinned at 5s even after this read existed -- fixed there.)
 	var _frames = tw_num(_dur, 0);
 	if (_frames <= 0)
 	{
@@ -67,8 +81,22 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	    _frames = _secs * game_get_speed(gamespeed_fps);
 	}
 
+	// "!verb N" -> N SECONDS explicit duration on the pure timed verbs (Lane,
+	// 2026-08-14: "only speed has that ability"). Parsed once here; verbs whose
+	// arg means something else (spawn/swarm counts, music titles, spell names)
+	// never read _arg_frames, so they are unaffected. Capped at 60s like speed.
+	var _arg_secs   = tw_num(_arg, 0);
+	if (_arg_secs > 60) _arg_secs = 60;
+	var _arg_frames = (_arg_secs > 0) ? floor(_arg_secs * 60) : 0;
+	if (_arg_frames > 0) _frames = _arg_frames;
+
 	// numeric amount for stat verbs (defensive: tw_num never throws on a bad string)
 	var _amt = tw_num(_arg, 0);
+
+	// 69/420: his chat types these numbers unprompted (real mined quotes:
+	// "!speed 69", then "!speed 67" to correct it). A numeric arg landing on
+	// one of them gets a small nod on the toast. Nothing else changes.
+	var _nice = (_amt == 69 || _amt == 420 || _arg_secs == 69 || _arg_secs == 420);
 
 	// recognized-verb flag: the default/unknown case flips this false so the messenger
 	// fairy below only heralds REAL commands, never a typo or stray drop file.
@@ -231,6 +259,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// FUN: "drunk" controls -- swap LEFT<->RIGHT player input for the duration.
 			// Input_update2a mirrors Right/Left held+pressed+released while the flag is
 			// set (before the derived bitfields are built). Reversible: clear the flag.
+			// Lane (08-14 [4:52:06]): a fixed duration is gameable -- "I can literally
+			// hold the other direction and then wait." So a BARE !confuse now rolls
+			// 10-30s RNG; an explicit "!confuse N" (or drop-file dur) still sets N.
+			if (_arg_frames > 0)           _frames = _arg_frames;        // explicit seconds
+			else if (tw_num(_dur, 0) <= 0) _frames = 600 + irandom(1200); // bare -> 10-30s
 			global.tw_confuse = true;
 			array_push(global.tw_active, {
 				frames  : _frames,
@@ -630,8 +663,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			break;
 
 		case "refill":
+		case "fairy":
+		case "fary":
 			// HELP: top off BOTH meters at once -- full HP + full MP. adjust_stat clamps each
 			// stat to its own get_stat_max(), so a huge positive delta just pins them full.
+			// !fairy: StreamElements advertises it, but no case existed (dead advertised
+			// command) -- a fairy that heals you is the natural reading, and VS mode
+			// already blocks it in the deny list above.
 			if (instance_exists(f)) adjust_stat(9999, 9999);
 			break;
 
@@ -662,6 +700,96 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		case "ice":
+		case "icefloor":
+			// FUN (ported from the Z3 mod's !ice): the floor is ice for the duration --
+			// ground friction drops to 1/4 (PC_update_horizontal applies its -1/frame
+			// decel only every 4th frame while the flag is set), so momentum carries
+			// and you keep sliding after releasing the d-pad. Pure flag, fully
+			// reversible, nothing persistent.
+			global.tw_ice = true;
+			array_push(global.tw_active, {
+				frames  : _frames,
+				reapply : function() { global.tw_ice = true;  },
+				restore : function() { global.tw_ice = false; }
+			});
+			break;
+
+		case "moon":
+			// FUN: quarter gravity for the duration -- big floaty jumps. Zelda 2 is a
+			// PLATFORMER, so the gravity verb the Z3 (ALTTP) brainstorm dropped for
+			// having nothing to push against lands perfectly here. PC_update_vertical
+			// folds the flag into _grav_add -- the same accumulator the OG variable
+			// jump (jump-held = lighter gravity) already uses, so the feel is native.
+			global.tw_moon = true;
+			array_push(global.tw_active, {
+				frames  : _frames,
+				reapply : function() { global.tw_moon = true;  },
+				restore : function() { global.tw_moon = false; }
+			});
+			break;
+
+		case "root":
+			// HOSTILE (Z3-family port): immobilize -- can't walk or jump, but CAN still
+			// attack. Flailing at enemies you can't reach is the joke. Uses the game's
+			// own pc_lock bits (PC_LOCK_HSPD is the exact bit elevators/cutscenes use),
+			// so it is reversible and cannot corrupt state. Re-assert each tick (some
+			// systems ASSIGN pc_lock, e.g. the Ganon fight); restore clears only OUR
+			// bits so it never un-locks a cutscene mid-hold.
+			if (instance_exists(g))
+			{
+				g.pc_lock |= (PC_LOCK_HSPD | PC_LOCK_JUMP);
+				array_push(global.tw_active, {
+					frames  : _frames,
+					bits    : (PC_LOCK_HSPD | PC_LOCK_JUMP),
+					reapply : function() { if (instance_exists(g)) g.pc_lock |= self.bits;  },
+					restore : function() { if (instance_exists(g)) g.pc_lock &= ~self.bits; }
+				});
+			}
+			break;
+
+		case "deny":
+			// HOSTILE (Z3 port, adapted): temporarily block a control family via the
+			// same pc_lock levers. "!deny spell", "!deny jump", "!deny upstab",
+			// "!deny downstab", "!deny upthrust", "!deny downthrust", "!deny all"
+			// (every control except walking -- !root is the full stop). No arg -> help.
+			// Engine truth: the PLAIN forward stab has no lock bit in the OG engine
+			// (can't deny it), and boots have no control lock, so unlike the Z3
+			// request there is nothing to deny there.
+			if (instance_exists(g))
+			{
+				var _dwhat = tw_slug(_arg);
+				var _dbits = 0;
+				switch (_dwhat)
+				{
+					case "spell":                                _dbits = PC_LOCK_SPEL; break;
+					case "magic":                                _dbits = PC_LOCK_SPEL; break;
+					case "jump":                                 _dbits = PC_LOCK_JUMP; break;
+					case "upstab":                               _dbits = PC_LOCK_ATK1; break;
+					case "downstab":                             _dbits = PC_LOCK_ATK2; break;
+					case "downthrust": case "thrust":            _dbits = PC_LOCK_ATK3; break;
+					case "upthrust":                             _dbits = PC_LOCK_ATK4; break;
+					case "all":      case "everything":          _dbits = PC_LOCK_JUMP | PC_LOCK_ATK1 | PC_LOCK_ATK2 | PC_LOCK_ATK3 | PC_LOCK_ATK4 | PC_LOCK_SPEL; break;
+					default:
+						global.tw_toast       = "deny: spell/jump/upstab/downstab/upthrust/downthrust/all";
+						global.tw_toast_timer = 300;
+						break;
+				}
+				if (_dbits != 0)
+				{
+					g.pc_lock |= _dbits;
+					array_push(global.tw_active, {
+						frames  : _frames,
+						bits    : _dbits,
+						reapply : function() { if (instance_exists(g)) g.pc_lock |= self.bits;  },
+						restore : function() { if (instance_exists(g)) g.pc_lock &= ~self.bits; }
+					});
+					global.tw_toast       = _who_s + " -> deny " + string(_arg);
+					global.tw_toast_timer = 180;
+				}
+			}
+			break;
+
 		default:
 			_known                = false;
 			global.tw_toast       = "unknown: " + _v;
@@ -677,6 +805,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// than stacking a second fairy. Gated on tw_enabled (already true past the top gate).
 	if (_known && global.tw_enabled)
 	{
+		// 69/420 nod -- appended after whatever the verb's own toast says.
+		if (_nice && global.tw_toast_timer > 0) global.tw_toast += "  (NICE)";
 		if (!instance_exists(obj_twitch_fairy))
 		{
 			// spawn coords are cosmetic -- Create repositions to just off the screen edge.
