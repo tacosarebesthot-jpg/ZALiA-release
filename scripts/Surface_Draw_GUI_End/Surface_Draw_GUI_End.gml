@@ -704,6 +704,34 @@ function Surface_Draw_GUI_End() {
 		}
 	}
 
+	// ── TWITCH live indicator (B45): a tiny always-on dot so the streamer can see at
+	// a glance whether chat interaction is live -- WITHOUT the permanent text label
+	// the IRC status block above deliberately avoids (the user is streaming; its
+	// visibility rule hides "connected" once the welcome timer expires). Colours:
+	// lime = IRC connected, aqua = connecting, red = error/no-config, orange =
+	// integration on without IRC (drop-file/manual), dark grey = integration off.
+	// Bottom-left 4x3 px -- clear of the toast (bottom-centre) and the HUD bar (top).
+	// Revert: delete this block.
+	{
+		var _dot_c = c_dkgrey;
+		if (variable_global_exists("tw_enabled") && global.tw_enabled)
+		{
+			_dot_c = c_orange;
+			if (variable_global_exists("tw_irc_enabled") && global.tw_irc_enabled)
+			{
+				var _dot_st = variable_global_exists("tw_irc_status") ? string(global.tw_irc_status) : "";
+				if (_dot_st == "connected")       _dot_c = c_lime;
+				else if (_dot_st == "connecting") _dot_c = c_aqua;
+				else if (string_pos("error", _dot_st) > 0 || _dot_st == "no config") _dot_c = c_red;
+			}
+		}
+		var _dot_gh = display_get_gui_height(); if (_dot_gh <= 0) _dot_gh = 240;
+		var _dot_pc = draw_get_colour();
+		draw_set_colour(_dot_c);
+		draw_rectangle(6, _dot_gh - 8, 10, _dot_gh - 5, false);
+		draw_set_colour(_dot_pc);
+	}
+
 	// ── KONAMI toast (easter egg): bottom-centre celebratory feedback ───────────────
 	// Mirrors the twitch toast above (black drop-shadow, default font, bottom-centre)
 	// but in c_yellow and a touch higher so the two never overlap. konami_fire() sets

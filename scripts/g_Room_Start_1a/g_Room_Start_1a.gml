@@ -107,9 +107,10 @@ function g_Room_Start_1a() {
 	                _len  = string_length(_objver2);
 	                _val1 = string_copy(  _objver2,1,_len-2); // obj name
 	                _val2 = dm_go_prop[?_val1+STR_Object+STR_Idx]; // obj
-	                if(!is_undefined(_val2))
-	                {
-	                    var _SCENE_USED = rm_name;
+		                if(!is_undefined(_val2)
+		                && Rando_spawn_clearance_ok(_val2, _spawn_xl, _spawn_yt)) // B09: no hopping fires in short corridors
+		                {
+		                    var _SCENE_USED = rm_name;
 	                    if (global.SceneRando_enabled) _SCENE_USED = val(f.dm_rando[?dk_SceneRando+STR_Scene+STR_Randomized+rm_name], rm_name);
                     
 	                    // *** Cutscene_CreateWaterfall_update() checks for any hard skin enemies and if PC can defeat them

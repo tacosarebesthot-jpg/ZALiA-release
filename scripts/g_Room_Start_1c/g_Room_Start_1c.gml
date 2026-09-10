@@ -71,7 +71,9 @@ function g_Room_Start_1c() {
 	                _len  = string_length(_objver2);
 	                _val1 = string_copy(  _objver2,1,_len-2); // obj name
 	                _val2 = g.dm_go_prop[?_val1+STR_Object+STR_Idx]; // obj
-	                if(!is_undefined(_val2))
+	                // B09: don't drop a hopping fire into a corridor it can't hop in
+	                if(!is_undefined(_val2)
+	                && Rando_spawn_clearance_ok(_val2, val(dm_spawn[?_spawn_datakey2+"_x"]), val(dm_spawn[?_spawn_datakey2+"_y"])))
 	                {
 	                    _obj = _val2;
 	                    _ver = str_hex(string_copy(_objver2,_len-1,2));

@@ -150,3 +150,36 @@ function Rando_init_enemy_data() {
 
 
 }
+
+
+/// @description  Rando_spawn_clearance_ok(object, spawn xl, spawn yt)
+/// @param object
+/// @param  spawn xl
+/// @param  spawn yt
+function Rando_spawn_clearance_ok() {
+
+	// B09 (owner rule, 2026-07-04 stream: "them fires should never spawn on 2 high
+	// areas... still forced dmg with no mechanic to not get hit"). The enemy rando
+	// substitutes an object at an existing spawn point and keeps that point's
+	// coordinates (the B84 family), so the hopping fire can land in a corridor too
+	// short for its arc -- unavoidable contact damage across the whole passage.
+	// Only the jumping fire is clearance-checked: it is the only mob whose whole
+	// threat model is owning air space. Everything else substitutes freely.
+
+	var _obj = argument[0];
+	var _xl  = argument[1];
+	var _yt  = argument[2];
+
+	if (!(_obj == Blaze01 || is_ancestor(_obj, Blaze01))) return true;
+
+	var _clm = _xl >> 3;
+	var _row = _yt >> 3;
+
+	// first solid row above the spawn point (search up, limit 6 rows = 48 px).
+	// none found (>=250) -> open sky above, plenty of room.
+	var _ceil = find_row_solid(TID_SOLID1, _clm, _row, -1, 6);
+	if (_ceil >= 250) return true;
+
+	var _clearance = _row - _ceil;  // rows of air between the ceiling and the spawn row
+	return (_clearance >= 5);       // under 40 px of headroom: a hopping fire owns the whole corridor
+}
