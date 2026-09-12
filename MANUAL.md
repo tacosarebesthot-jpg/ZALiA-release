@@ -395,4 +395,4 @@ and is not sold.
 
 ---
 
-**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [What this port adds](FEATURES.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D)
+**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [What this port adds](FEATURES.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D) &middot; [Patreon](https://www.patreon.com/cw/gainey666)
