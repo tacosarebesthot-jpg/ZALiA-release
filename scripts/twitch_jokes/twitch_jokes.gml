@@ -38,6 +38,7 @@ function tw_jokes_init() {
 	// IRC link is used, and both features work without chat, so read them here at boot.
 	global.tw_jokes_mode = clamp(tw_num(tw_config_get("jokes", "1"), 1), 0, 2);
 	global.tw_autosave   = (tw_num(tw_config_get("autosave", "1"), 1) != 0);
+	global.tw_rl         = (tw_num(tw_config_get("rl", "1"), 1) != 0);       // ROCKET LEAGUE quick-chat plates (round 11); most of it fires with no chat at all
 	global.tw_loz_jingle = (tw_num(tw_config_get("loz_jingle", "1"), 1) != 0); // loz_jingle=0 keeps the theme's own item fanfare
 
 	tw_jokes_load();
@@ -408,6 +409,27 @@ function tw_toast_push(_title, _sub, _kind) {
 	while (array_length(global.tw_toasts) > 5) array_delete(global.tw_toasts, 0, 1);
 }
 
+/// @description  tw_rl_swing(swinging) -- ROCKET LEAGUE (round 11) WHIFF counter. Called once a
+/// frame from PC_update_SwordHB_xy with "the PC's sword is out this frame". A swing is the RISING
+/// edge; the swing BEFORE it is what gets scored, because a hit can land on any frame of a swing
+/// (and one frame later still -- enemies read attack_bits from the previous frame). Five scored
+/// swings in a row with nothing hit is a WHIFF. Lives here so the hook stays one line.
+function tw_rl_swing(_swinging) {
+	if (!variable_global_exists("tw_rl")) return;
+	if (global.tw_rl && _swinging && !global.tw_rl_swinging)
+	{
+		if (global.tw_rl_hit) global.tw_rl_swings = 0;   // the last one landed -- streak broken
+		else                  global.tw_rl_swings++;
+		global.tw_rl_hit = false;
+		if (global.tw_rl_swings >= 5)
+		{
+			global.tw_rl_swings = 0;
+			tw_toast_push("WHIFF", "5 SWINGS, 0 HITS", "warn");
+		}
+	}
+	global.tw_rl_swinging = _swinging;
+}
+
 /// @description  tw_toast_from_line(text) -- the legacy one-line toast strings become title/sub/kind.
 function tw_toast_from_line(_line) {
 	var _l = string(_line);
@@ -587,6 +609,10 @@ function tw_help_draw() {
 		"FUN   !SONG !SUGGEST !METH !FATALITY",
 		"      !QUANTUMENTANGLE !HELP !POINTS",
 		"      !GHOST !CRUSH !RESHUFFLE",
+		// round 11 quick chat. Two rows, not one: the card is a fixed 8 px sprite font and the
+		// widest row it can hold is ~41 characters before it runs off a 320 px GUI.
+		"RL    !NICESHOT !WHATASAVE !CALCULATED",
+		"      !GG !EZ !WOW !SAVAGE !OKAY !THANKS",
 		"ADD A NUMBER FOR SECONDS: !SLOW 20"
 	];
 	var _gw = display_get_gui_width();  if (_gw <= 0) _gw = 320;

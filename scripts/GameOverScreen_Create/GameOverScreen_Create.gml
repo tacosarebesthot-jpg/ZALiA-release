@@ -40,6 +40,15 @@ function GameOverScreen_Create() {
 	f.xp = clamp(f.xp, 0,XP_MAX);
 
 
+	// ROCKET LEAGUE (round 11): chat gets the last word on the game over screen, but only when
+	// chat actually did this -- same 90 s "who last hurt you" test the death-screen assists
+	// plate uses, so a run that ended on its own merits dies in dignified silence.
+	if (variable_global_exists("tw_rl") && global.tw_rl
+	&&  variable_global_exists("tw_last_hurter") && global.tw_last_hurter != ""
+	&&  current_time - global.tw_last_hurter_t < 90000)
+	{   tw_toast_push(choose("GG", "EZ"), "", "chat");  }
+
+
 
 
 

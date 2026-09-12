@@ -85,6 +85,11 @@ function twitch_tick() {
 				// we want a little cutscene where the screen goes dark." Owner: the real MK2 splash.
 				tw_flawless_event("");
 			}
+			// ROCKET LEAGUE (round 11): the consolation prize. A boss that died after landing a
+			// hit isn't flawless, so it gets the RL plate instead of the MK2 splash -- the two
+			// branches are exclusive, no kill ever throws both.
+			else if (variable_global_exists("tw_rl") && global.tw_rl && global.tw_boss_damaged)
+			{   tw_toast_push("CALCULATED.", "", "win");  }
 			global.tw_boss_damaged = false;
 			global.tw_boss_frames  = 0;
 		}

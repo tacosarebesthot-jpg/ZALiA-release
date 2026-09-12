@@ -215,7 +215,11 @@ function GOB_body_collide_pc_sword() {
 	if!(cs &  CS_SW1) // if NOT already colliding PC SWord or PC Proj
 	{
 	    cs |= CS_SW1;
-    
+
+	    // ROCKET LEAGUE WHIFF (round 11): past every early exit, so this swing connected with
+	    // something real. tw_rl_swing() reads and clears the flag on the next swing's rising edge.
+	    if (variable_global_exists("tw_rl")) global.tw_rl_hit = true;
+
     
 	    // OG right here uses CURRENT frame's behavior
 	    if (global.pc.behavior==global.pc.behavior_STAB_DOWN)

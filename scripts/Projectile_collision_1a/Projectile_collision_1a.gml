@@ -47,7 +47,13 @@ function Projectile_collision_1a() {
 	    if (_C1 || _C2 || _C3)
 	    {
 	        collided_shield = true;
-        
+
+	        // ROCKET LEAGUE (round 11): NICE BLOCK! -- the one place a hostile projectile is
+	        // actually stopped by the PC's shield (reversed, bounced or disintegrated). 2 s
+	        // throttle: a Fokka volley or a reflect-spell room throws several a second.
+	        if (variable_global_exists("tw_rl") && global.tw_rl && current_time - global.tw_rl_block_t > 2000)
+	        {   global.tw_rl_block_t = current_time; tw_toast_push("NICE BLOCK!", "", "win");  }
+
 	        if (_C1) // Reverse: SoundWave
 	        {
 	            reflected = true;

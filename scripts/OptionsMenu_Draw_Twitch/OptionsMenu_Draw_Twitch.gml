@@ -114,6 +114,10 @@ function OptionsMenu_Draw_Twitch() {
 	        _text = _dg_state_text[#0, sign(variable_global_exists("tw_points_on") && global.tw_points_on)];
 	    break;
 
+	    case Twitch.RL:
+	        _text = _dg_state_text[#0, sign(variable_global_exists("tw_rl") && global.tw_rl)];
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

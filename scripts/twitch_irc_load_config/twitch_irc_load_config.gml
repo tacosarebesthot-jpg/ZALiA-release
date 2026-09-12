@@ -84,6 +84,9 @@ function twitch_irc_load_config() {
 			// (menu toggle, web save) never drops it; tw_jokes_init reads it at boot.
 			case "jokes": if (variable_global_exists("tw_jokes_mode")) global.tw_jokes_mode = clamp(tw_num(_val, 1), 0, 2); break;
 			case "autosave": global.tw_autosave = (tw_num(_val, 1) != 0); break;
+			// rl=0/1: the ROCKET LEAGUE row (round 11). Read here as well as in tw_jokes_init so
+			// a reload after a menu toggle or a web save never drops it.
+			case "rl": global.tw_rl = (tw_num(_val, 1) != 0); break;
 			case "points": if (variable_global_exists("tw_points_on")) global.tw_points_on = (tw_num(_val, 0) != 0); break;
 		}
 	}
@@ -186,6 +189,9 @@ function tw_irc_is_verb(_v) {
 		case "points": case "pts": case "bal": case "ghost": case "crush":   // round 10h
 		case "version": case "ver": case "build":
 		case "reshuffle":   // Lane's enemy reshuffler
+		case "niceshot": case "whatasave": case "calculated": case "savage":  // round 11: RL quick chat
+		case "closeone": case "okay": case "faking": case "gg": case "ez":
+		case "wow": case "noproblem": case "thanks":
 			return true;
 		default:
 			return false;
@@ -224,6 +230,15 @@ function tw_alias_verb(_v) {
 		case "invisible": case "invis": case "ghosts": return "ghost";
 		case "drop": case "block": case "squash": return "crush";
 		case "reroll": case "reshuffleenemies": case "enemyreshuffle": case "reshuffler": return "reshuffle";
+		// round 11 RL quick chat -- the short forms chat will actually type. Deliberately NO
+		// "np" alias for "noproblem": !np is already NOW PLAYING and every stream uses it.
+		case "nice":                      return "niceshot";
+		case "save":                      return "whatasave";
+		case "calc":                      return "calculated";
+		case "close":                     return "closeone";
+		case "ok":                        return "okay";
+		case "fake":                      return "faking";
+		case "ty":                        return "thanks";
 	}
 	return _v;
 }

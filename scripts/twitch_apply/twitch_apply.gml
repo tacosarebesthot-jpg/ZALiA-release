@@ -1025,6 +1025,64 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		// ---- ROCKET LEAGUE quick chat (round 11) -----------------------------------
+		// Twelve plates, zero game effect -- the whole point is that chat can be obnoxious
+		// on purpose. They push straight to tw_toast_push and zero tw_toast_timer instead of
+		// going through global.tw_toast, because the generic "who -> verb" feedback set above
+		// would be adopted by tw_toast_legacy_poll and draw a SECOND plate behind this one.
+		// The gag ships with the feature: three of the same line inside 6 s and the game does
+		// what Rocket League does -- "CHAT DISABLED FOR 4 SECONDS", and it means it.
+		case "niceshot": case "whatasave": case "calculated": case "savage":
+		case "closeone": case "okay":      case "faking":     case "gg":
+		case "ez":       case "wow":       case "noproblem":  case "thanks":
+			{
+				global.tw_toast_timer = 0;
+				if (!variable_global_exists("tw_rl") || !global.tw_rl)
+				{
+					global.tw_toast         = _who_s + " -> rocket league is off (options > twitch)";
+					global.tw_toast_timer   = 240;
+					global.tw_apply_refused = true;
+					break;
+				}
+				var _rl_txt = "";
+				switch (_v)
+				{
+					case "niceshot":   _rl_txt = "NICE SHOT!";   break;
+					case "whatasave":  _rl_txt = "WHAT A SAVE!"; break;
+					case "calculated": _rl_txt = "CALCULATED.";  break;
+					case "savage":     _rl_txt = "SAVAGE!";      break;
+					case "closeone":   _rl_txt = "CLOSE ONE!";   break;
+					case "okay":       _rl_txt = "OKAY.";        break;
+					case "faking":     _rl_txt = "FAKING.";      break;
+					case "gg":         _rl_txt = "GG";           break;
+					case "ez":         _rl_txt = "EZ";           break;
+					case "wow":        _rl_txt = "WOW!";         break;
+					case "noproblem":  _rl_txt = "NO PROBLEM.";  break;
+					default:           _rl_txt = "THANKS!";      break; // thanks
+				}
+				// muted: silently eaten, and refused so the points economy charges nobody
+				// for a command that did nothing.
+				if (current_time < global.tw_rl_mute_until)
+				{   global.tw_apply_refused = true; break;  }
+
+				if (_rl_txt == global.tw_rl_last_text && current_time - global.tw_rl_last_t < 6000)
+					global.tw_rl_last_count++;
+				else
+				{   global.tw_rl_last_text = _rl_txt; global.tw_rl_last_count = 1;  }
+				global.tw_rl_last_t = current_time;
+
+				if (global.tw_rl_last_count >= 3)
+				{   // the third one is the one that gets you muted -- it never draws
+					global.tw_rl_mute_until = current_time + 4000;
+					global.tw_rl_last_text  = "";
+					global.tw_rl_last_count = 0;
+					tw_toast_push("CHAT DISABLED FOR 4 SECONDS", "", "warn");
+					break;
+				}
+				tw_toast_push(_rl_txt, "FROM " + _who_s, "chat");
+			}
+			break;
+
 		case "version":
 			global.tw_toast       = "ZALiA " + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ")";
 			global.tw_toast_timer = 240;

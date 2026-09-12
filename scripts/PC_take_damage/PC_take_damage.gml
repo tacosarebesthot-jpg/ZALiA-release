@@ -133,6 +133,11 @@ function PC_take_damage() {
 	        }
 	        */
 	        pushback_pc(_INST.x, _AMOUNT);
+	        // ROCKET LEAGUE: BUMPING! rides the knockback from a real enemy hit. 3 s throttle --
+	        // a mob you are stuck inside re-hits every few iframes and would spam the drawer.
+	        // Skipped when this hit is also a one-container survival: WHAT A SAVE wins (below).
+	        if (variable_global_exists("tw_rl") && global.tw_rl && f.hp > Container_AMT && current_time - global.tw_rl_bump_t > 3000)
+	        {   global.tw_rl_bump_t = current_time; tw_toast_push("BUMPING!", "", "chat");  }
 	    }
 	    else
 	    {
@@ -191,6 +196,13 @@ function PC_take_damage() {
 
 
 	aud_play_sound(get_audio_theme_track(STR_PC+STR_Damage));
+
+
+	// ROCKET LEAGUE: WHAT A SAVE! -- survived the hit with one heart container or less left
+	// (Container_AMT = $20 of hp per container). 5 s throttle so a long chip-damage fight at
+	// low health doesn't turn into a wall of plates.
+	if (variable_global_exists("tw_rl") && global.tw_rl && f.hp > 0 && f.hp <= Container_AMT && current_time - global.tw_rl_save_t > 5000)
+	{   global.tw_rl_save_t = current_time; tw_toast_push("WHAT A SAVE!", "", "win");  }
 
 
 

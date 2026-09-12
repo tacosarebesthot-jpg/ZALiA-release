@@ -4325,6 +4325,27 @@ function g_Create() {
 	global.tw_ghost               = false;     // !ghost: enemies drawn at 12% alpha (GameObject_draw_1a)
 	global.tw_crush_count         = 0;         // enemies crushed by falling blocks this session
 	global.tw_loz_jingle          = true;      // main items play the Zelda 1 treasure fanfare (item_get_jingle)
+	// ROCKET LEAGUE QUICK-CHAT (round 11): game events throw RL plates through the toast
+	// drawer and chat gets the quick-chat verbs. One master switch (rl= in twitch_config.txt,
+	// ROCKET LEAGUE row on the TWITCH page) -- every hook tests global.tw_rl first, so OFF
+	// really is none of it. Defined here because tw_jokes_init reads the config below and
+	// several hooks (PC_take_damage, the sword swing counter) run before any chat exists.
+	global.tw_rl                  = true;
+	global.tw_rl_swings           = 0;         // sword swings in a row that hit nothing (5 -> WHIFF)
+	global.tw_rl_hit              = true;      // the swing in progress has landed (GOB_body_collide_pc_sword).
+	                                           // Starts TRUE so the very first swing of a session scores its
+	                                           // (nonexistent) predecessor as a hit instead of a phantom miss.
+	global.tw_rl_swinging         = false;     // attack_bits were nonzero last frame -- gives the swing rising edge
+	global.tw_rl_prev_rm          = "";        // last two room names, for the A->B->A "ROTATE!" call
+	global.tw_rl_prev_rm2         = "";
+	global.tw_rl_last_text        = "";        // quick-chat spam gag: same plate 3x in 6 s mutes chat 4 s
+	global.tw_rl_last_count       = 0;
+	global.tw_rl_last_t           = 0;
+	global.tw_rl_mute_until       = 0;
+	global.tw_rl_save_t           = 0;         // current_time throttles so a plate can't machine-gun
+	global.tw_rl_bump_t           = 0;
+	global.tw_rl_block_t          = 0;
+	global.tw_rl_boost_t          = 0;
 	tw_points_init();
 	tw_jokes_init();
 	// ────────────────────────────────────────────────────────────────────────

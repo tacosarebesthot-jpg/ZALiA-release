@@ -27,6 +27,12 @@ function cast_spell(argument0) {
     
 	    if (_SPELL_CAST&SPL_FARY)
 	    {
+	        // ROCKET LEAGUE (round 11): ALL YOURS. on the FAIRY cast. Hooked here, not in
+	        // update_spell_effects' SPL_FARY branch -- that branch never clears the bit, so it
+	        // runs every frame the spell is up, and g.spell_cast_this_frame is already zeroed
+	        // by g_Step before g_Step_A2 calls it. This is the only true cast edge.
+	        if (variable_global_exists("tw_rl") && global.tw_rl) tw_toast_push("ALL YOURS.", "", "chat");
+
 	        var _TO_HUMAN = false;
         
 	        if (CuccoSpell2_Acquired 

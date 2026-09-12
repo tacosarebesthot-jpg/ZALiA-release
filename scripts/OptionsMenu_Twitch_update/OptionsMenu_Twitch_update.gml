@@ -185,6 +185,20 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // ROCKET LEAGUE: quick-chat plates + the !niceshot family (round 11). ON/OFF, rl= in
+	    // twitch_config.txt. Saved on the spot like CHECKPOINTS -- most of this feature fires
+	    // with no chat connected, so the toggle has to survive a restart on its own.
+	    case Twitch.RL:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (!variable_global_exists("tw_rl")) global.tw_rl = true;
+	        global.tw_rl = !global.tw_rl;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // COMMANDS: read-only reference. The verb list lives in this row's description
 	    // string, so it draws in the info area like every other row's help text.
 	    case Twitch.COMMANDS:{ if (timer) break;

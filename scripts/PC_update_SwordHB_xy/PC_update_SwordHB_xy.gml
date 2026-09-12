@@ -26,6 +26,10 @@ function PC_update_SwordHB_xy() {
 
 	if (id==global.pc) attack_bits =              _bits;
 
+	// ROCKET LEAGUE WHIFF (round 11): this is the one place the PC's attack_bits are assigned,
+	// so it is the swing edge. ShadowBoss shares this script -- only the real PC counts.
+	if (id==global.pc) tw_rl_swing(_bits != 0);
+
 	if(!_bits) exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 

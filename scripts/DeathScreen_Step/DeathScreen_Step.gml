@@ -31,6 +31,12 @@ function DeathScreen_Step() {
 	                _dt_sub = "HEALED BY " + string(global.tw_last_helper);
 	            tw_toast_push("KILLED BY " + string(global.tw_last_hurter), _dt_sub, "win");
 	        }
+	        // ROCKET LEAGUE (round 11): the apology plate. Random so the same death never reads
+	        // the same way twice. Pushed AFTER the assists plate so the credit line stays on top.
+	        // The grawlix is "%&*!" and not "$#@%!" -- $ # @ are not in the sprite font
+	        // (FONT_LAYOUT) and tw_font_clean would drop them, leaving a bare "%!".
+	        if (variable_global_exists("tw_rl") && global.tw_rl)
+	        {   tw_toast_push(choose("WHOOPS...", "SORRY!", "NOOOO!", "%&*!"), "", "warn");  }
 	        if (variable_global_exists("tw_challenge")) global.tw_challenge = false; // !challenge ends on death
 	        if (global.pc_lives>0) room_goto_(rmB_NextLife);
 	        else         room_goto_(rmB_GameOver);

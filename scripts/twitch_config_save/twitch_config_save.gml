@@ -52,6 +52,8 @@ function twitch_config_save() {
     var _as_val    = (!variable_global_exists("tw_autosave") || global.tw_autosave) ? "1" : "0";
     var _wrote_pt  = false;
     var _pt_val    = (variable_global_exists("tw_points_on") && global.tw_points_on) ? "1" : "0";
+    var _wrote_rl  = false;
+    var _rl_val    = (!variable_global_exists("tw_rl") || global.tw_rl) ? "1" : "0"; // defaults ON, like autosave
 
     for (var _i = 0; _i < array_length(_lines); _i++)
     {
@@ -97,6 +99,11 @@ function twitch_config_save() {
             _lines[_i] = "points=" + _pt_val;
             _wrote_pt  = true;
         }
+        else if (_key == "rl")
+        {
+            _lines[_i] = "rl=" + _rl_val;
+            _wrote_rl  = true;
+        }
     }
 
     if (!_wrote_cd)  array_push(_lines, "cooldown="    + string(global.tw_irc_cooldown_frames));
@@ -105,6 +112,7 @@ function twitch_config_save() {
     if (!_wrote_jk)  array_push(_lines, "jokes=" + _jk_val);       // 0 NORMAL text, 1 CLEAN jokes, 2 DIRTY (twitch_jokes)
     if (!_wrote_as)  array_push(_lines, "autosave=" + _as_val);    // 1 = rolling checkpoints (tw_checkpoint_tick)
     if (!_wrote_pt)  array_push(_lines, "points=" + _pt_val);      // 1 = chat points economy (twitch_points)
+    if (!_wrote_rl)  array_push(_lines, "rl=" + _rl_val);          // 1 = ROCKET LEAGUE quick-chat plates + verbs (round 11)
 
     // ---- write it back ------------------------------------------------------
     var _fw = file_text_open_write(_path);

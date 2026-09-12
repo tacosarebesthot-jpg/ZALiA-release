@@ -76,6 +76,11 @@ function tw_points_cost(_v) {
 		case "points": case "pts": case "bal": case "help": case "song": case "np": case "nowplaying": case "track":
 		case "suggest": case "donothing": case "rip": case "blip": case "coincidence": case "getfed": case "link": case "unchicken":
 		case "version": case "ver": case "build":
+		// round 11 RL quick chat: free on purpose. They change nothing in the game, and a
+		// paywall on the spam gag would just stop the gag from ever happening.
+		case "niceshot": case "whatasave": case "calculated": case "savage":
+		case "closeone": case "okay": case "faking": case "gg": case "ez":
+		case "wow": case "noproblem": case "thanks":
 			return 0;
 		case "heal": return 20;   case "mp": return 15;   case "refill": case "fairy": case "fary": return 40;
 		case "1up": return 60;    case "invuln": return 30;

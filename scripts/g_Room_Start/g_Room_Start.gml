@@ -129,6 +129,16 @@ function g_Room_Start() {
 	    // round 10f: walking INTO the Maze Island palace without REFLECT gets a warning (Lane 09-11)
 	    if (dungeon_num == 4 && variable_global_exists("tw_last_dungeon_seen") && global.tw_last_dungeon_seen != 4) tw_reflect_hint("entry");
 	    global.tw_last_dungeon_seen = dungeon_num;
+	    // ROCKET LEAGUE (round 11): ROTATE! when the runner walks A -> B -> A, i.e. back into
+	    // the screen he just left. Side-scroll (room type A) only -- the overworld map and the
+	    // menu screens shuffle rm_name for reasons that have nothing to do with backtracking.
+	    if (variable_global_exists("tw_rl"))
+	    {
+	        if (global.tw_rl && rm_name == global.tw_rl_prev_rm2 && rm_name != global.tw_rl_prev_rm)
+	            tw_toast_push("ROTATE!", "", "info");
+	        global.tw_rl_prev_rm2 = global.tw_rl_prev_rm;
+	        global.tw_rl_prev_rm  = rm_name;
+	    }
 	    town_num     = get_town_num(rm_name);
 	    town_name    = dm_town[?STR_Town+STR_Name+hex_str(town_num)];
 	}
