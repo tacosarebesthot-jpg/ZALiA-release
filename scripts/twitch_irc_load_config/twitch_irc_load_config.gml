@@ -47,6 +47,7 @@ function twitch_irc_load_config() {
 	var _channel  = "";
 	var _cooldown = global.tw_irc_cooldown_frames;
 	var _effect   = global.tw_effect_secs;
+	var _autoconnect = (variable_global_exists("tw_irc_autoconnect") && global.tw_irc_autoconnect) ? 1 : 0;
 
 	while (!file_text_eof(_fh))
 	{
@@ -75,6 +76,10 @@ function twitch_irc_load_config() {
 			// write. Without this case the duration they saved was silently dropped
 			// on every restart and effects reverted to the 5s default.
 			case "effect": case "effect_secs": _effect = tw_num(_val, _effect); break;
+			// autoconnect=1: join chat on boot without touching the menu. Written by
+			// twitch_config_save() when the TWITCH IRC toggle is switched ON (09-11 stream:
+			// after a game restart the link stayed down for 8 min and nobody noticed).
+			case "autoconnect": case "auto": _autoconnect = tw_num(_val, 0); break;
 		}
 	}
 	file_text_close(_fh);
@@ -101,6 +106,7 @@ function twitch_irc_load_config() {
 		return false;
 	}
 
+	global.tw_irc_autoconnect = (_autoconnect != 0);
 	global.tw_irc_status = "idle"; // config valid -- ready to connect
 	return true;
 }
@@ -140,7 +146,11 @@ function tw_trim(_s) {
 /// can consume the cooldown. Mirrors the switch in twitch_apply() (aliases included).
 function tw_irc_is_verb(_v) {
 
-	switch (string_lower(string(_v)))
+	// Canonicalise FIRST. The alias map (tiny/huge/filp/span/restore/gorilla...) used
+	// to live only inside twitch_apply(), so every alias shipped on 09-10 was dead
+	// over IRC: this gate returned false before the dispatcher ever saw the name
+	// (Lane, 09-11 stream 2:01:02 "I think tiny just doesn't work"; !filp x2 at 2:50).
+	switch (tw_alias_verb(string_lower(string(_v))))
 	{
 		case "heal":   case "hurt":  case "mp":    case "drain":  case "1up":
 		case "invuln": case "shake": case "dark":  case "music":
@@ -160,9 +170,35 @@ function tw_irc_is_verb(_v) {
 		case "moon":                                 // gravity verb (Z2 is a platformer)
 		case "root":   case "deny":                  // Z3-family ports
 		case "kill":   case "killlink": case "poison": case "suggest":
+		case "steal":  case "rob": case "thief": case "pickpocket": // dispatch case existed since 07-27, never passed this gate (verb audit 09-11)
+		case "link":   case "unchicken":                       // force Link form back (Lane 09-11 2:30:53 "exclamation point be link again")
 		case "donothing": case "rip": case "blip": case "coincidence": case "getfed": // joke verbs
 			return true;
 		default:
 			return false;
 	}
+}
+
+/// @description  tw_alias_verb(v) -- ONE alias map shared by the IRC gate and the dispatcher.
+/// Pure renames only (no argument rewriting). Every name here was typed live by a real
+/// chatter and died silently (CHAT_IDEAS_2026-09-10.md, vod7 09-11). Add new typos HERE,
+/// never in only one of the two callers -- that split is exactly the bug this fixes.
+function tw_alias_verb(_v) {
+
+	switch (_v)
+	{
+		case "span":                      return "spawn";
+		case "conuse": case "confiuse":   return "confuse";
+		case "filp":                      return "flip";
+		case "speeed":                    return "speed";
+		case "huge":                      return "grow";
+		case "tiny":  case "small":       return "shrink";   // !small: Gainey 09-11 2:01:16
+		case "restore":                   return "refill";
+		case "suggestion":                return "suggest";  // asm0deus 09-11 1:07:44 "!suggestion !meth"
+		case "smith":                     return "smite";    // Gainey 09-11 1:53:32 (and Lane's "million ancient smiths" joke)
+		case "poson": case "posion":      return "poison";   // Gainey 09-11 1:11:29, 1:15:40 "my god i cant type"
+		case "mana":                      return "mp";       // asm0deus 09-11 2:12:40
+		case "up":                        return "1up";      // Gainey 09-11 1:15:24
+	}
+	return _v;
 }

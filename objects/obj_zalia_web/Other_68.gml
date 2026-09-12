@@ -490,6 +490,8 @@ switch (_path)
     case "/twitch/connect":
         global.tw_irc_enabled = true;
         twitch_irc_connect();
+        global.tw_irc_autoconnect = true; // same as the menu toggle: rejoin on next boot
+        twitch_config_save();
         zweb_send(_sock, "200 OK", "text/plain", "connecting");
     break;
 

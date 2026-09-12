@@ -84,12 +84,16 @@ function OptionsMenu_Twitch_update() {
 	        if (variable_global_exists("tw_irc_enabled") && global.tw_irc_enabled)
 	        {
 	            twitch_irc_disconnect();
+	            global.tw_irc_autoconnect = false; // OFF sticks across restarts too
+	            twitch_config_save();
 	        }
 	        else
 	        {
 	            global.tw_irc_enabled = true;
 	            twitch_irc_load_config();
 	            twitch_irc_connect();
+	            global.tw_irc_autoconnect = true;  // remember: rejoin chat on the next boot
+	            twitch_config_save();
 	        }
 	        aud_play_sound(_SOUND2);
 	        timer = DURATION1;

@@ -40,4 +40,11 @@ else if (_type == network_type_disconnect)
 	// up so the user can re-select the toggle to reconnect.
 	global.tw_irc_status = "error: disconnected";
 	global.tw_irc_socket = -1;
+	// 09-11 stream: the link was down ~8 min (1:53 -> 2:01) before anyone noticed --
+	// nothing on screen said so and the status dot is tiny. Shout, and let
+	// twitch_irc_step() retry on its own (5s, then every 30s).
+	global.tw_irc_reconnect_at = (variable_global_exists("tw_irc_frame") ? global.tw_irc_frame : 0) + 300;
+	global.tw_irc_reconnect_n  = 0;
+	global.tw_toast       = "CHAT LINK LOST -- reconnecting";
+	global.tw_toast_timer = 300;
 }

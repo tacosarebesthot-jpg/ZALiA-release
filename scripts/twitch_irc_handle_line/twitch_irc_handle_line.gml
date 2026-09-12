@@ -38,6 +38,13 @@ function twitch_irc_handle_line(_line) {
 		// hides "connected" once this reaches <= 0.
 		global.tw_irc_status_timer = 240;
 		global.tw_enabled    = true;
+		if (variable_global_exists("tw_irc_reconnect_n") && global.tw_irc_reconnect_n > 0)
+		{
+			global.tw_toast       = "CHAT LINK BACK";
+			global.tw_toast_timer = 240;
+		}
+		global.tw_irc_reconnect_at = -1;
+		global.tw_irc_reconnect_n  = 0;
 		return;
 	}
 

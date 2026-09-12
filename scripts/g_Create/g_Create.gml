@@ -4285,6 +4285,10 @@ function g_Create() {
 	global.tw_irc_cooldown_frames = 600;       // GLOBAL anti-spam cooldown (frames; 600 = 10s @60fps)
 	global.tw_irc_last_cmd        = -1000000;  // frame of last ACCEPTED chat command (huge -ve = ready now)
 	global.tw_irc_frame           = 0;         // monotonic frame counter (advanced by twitch_irc_step)
+	global.tw_irc_autoconnect     = false;     // twitch_config.txt autoconnect=1 -> join chat on boot (twitch_irc_step)
+	global.tw_irc_reconnect_at    = -1;        // frame to retry after a drop (-1 = none); armed by obj_twitch_irc
+	global.tw_irc_reconnect_n     = 0;         // retries since the drop (0 once the welcome 001 arrives)
+	global.QuestTimer_scale       = 1.5;       // top-left run timer text scale (Lane 09-11: "timer top left very small"); 1 = the old 8px sprite font
 	// ────────────────────────────────────────────────────────────────────────
 
 

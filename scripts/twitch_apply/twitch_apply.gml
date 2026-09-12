@@ -32,15 +32,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// so a helpful alias can't sneak past it (restore -> refill gets blocked in VS
 	// mode like refill itself). Joke verbs chat invented get a scripted answer
 	// instead of a silent no-op.
+	_v = tw_alias_verb(_v); // shared with the IRC gate (tw_irc_is_verb) -- see that function
 	switch (_v)
 	{
-		case "span":                                    _v = "spawn";   break;
-		case "conuse": case "confiuse":                 _v = "confuse"; break;
-		case "filp":                                    _v = "flip";    break;
-		case "speeed":                                  _v = "speed";   break;
-		case "huge":                                    _v = "grow";    break;
-		case "tiny":                                    _v = "shrink";  break;
-		case "restore":                                 _v = "refill";  break;
 		case "gorilla":                                 _v = "spawn"; _arg = "goriya"; break; // "Lol ducking auto correct"
 		case "donothing":   global.tw_toast = _who_s + " -> absolutely nothing happened. effectfully."; global.tw_toast_timer = 240; return;
 		case "rip":         global.tw_toast = _who_s + " -> F";                          global.tw_toast_timer = 240; return;
@@ -730,6 +724,18 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// casting FAIRY makes a normal fairy instead, so we no-op RATHER THAN
 			// MIS-TRANSFORM -- but say so (B34: this used to be silent and read as
 			// a dead command on stream).
+			if (instance_exists(g) && instance_exists(global.pc) && g.mod_PC_CUCCO_1
+			&&  global.pc.is_cucco)
+			{
+				// Already a chicken: the owner's 09-11 ruling (chat 2:31:18 "allow the spell
+				// version to force change form, whatever it is, to link or chicken") --
+				// a second !arise un-morphs instead of re-arming the same form. Same code
+				// as !link below.
+				tw_force_link_form();
+				global.tw_toast       = _who_s + " -> arise (LINK again)";
+				global.tw_toast_timer = 180;
+				break;
+			}
 			if (instance_exists(g) && instance_exists(global.pc) && g.mod_PC_CUCCO_1)
 			{
 				var _had_fary = (g.spells_active & SPL_FARY) != 0;
@@ -747,9 +753,28 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			else
 			{
-				global.tw_toast       = _who_s + " -> arise is off in this save's settings";
-				global.tw_toast_timer = 240;
+				// Lane could not parse the old text (09-11 1:42:54 "Needs the mod enabled in
+				// save settings? What does that mean?" ... "Twitch mod?"). Name the thing.
+				global.tw_toast       = _who_s + " -> arise: CUCCO mode is OFF for this save (game settings)";
+				global.tw_toast_timer = 300;
 			}
+			break;
+
+		case "link":
+		case "unchicken":
+			// Force Link form back (Lane 09-11 2:30:53 "exclamation point be link again").
+			// Helpful verb: ends any chat-cast cucco early; never touches a form the
+			// player set themselves (only OUR fairy bit is cleared, see the helper).
+			if (instance_exists(global.pc) && global.pc.is_cucco)
+			{
+				tw_force_link_form();
+				global.tw_toast       = _who_s + " -> LINK again";
+			}
+			else
+			{
+				global.tw_toast       = _who_s + " -> already Link";
+			}
+			global.tw_toast_timer = 180;
 			break;
 
 		case "ice":
@@ -788,6 +813,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// so it is reversible and cannot corrupt state. Re-assert each tick (some
 			// systems ASSIGN pc_lock, e.g. the Ganon fight); restore clears only OUR
 			// bits so it never un-locks a cutscene mid-hold.
+			// Duration: Lane, 09-11 stream 1:44:31 / 1:45:01 -- "make root like max 10
+			// seconds ... fix the root to be random 7 to 12 seconds"; the global 5-45s RNG
+			// gave him a 20s root at 0:33 ("might as well just be !kill"). Explicit
+			// "!root N" still wins.
+			if (_arg_frames <= 0) _frames = 420 + irandom(300); // 7..12 s
 			if (instance_exists(g))
 			{
 				g.pc_lock |= (PC_LOCK_HSPD | PC_LOCK_JUMP);
@@ -812,18 +842,26 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			{
 				var _dwhat = tw_slug(_arg);
 				var _dbits = 0;
+				// Engine bits (PC_update_attack_1 / PC_update_vertical): ATK1 = standing
+				// stab, ATK2 = crouching stab (d-held on the ground), ATK3 = down-thrust
+				// (the jump-down attack), ATK4 = up-thrust. What Lane calls "downstab" is
+				// ATK3 -- on 09-11 "!deny downstab" locked his crouch stab instead
+				// (2:14:53 "it denies the sword, but it didn't deny downstab ... he just
+				// needs to redefine what downstab is as crouchstab"). So: downstab ==
+				// downthrust, and the crouch one is crouchstab. Same for upstab == upthrust.
 				switch (_dwhat)
 				{
-					case "spell":                                _dbits = PC_LOCK_SPEL; break;
-					case "magic":                                _dbits = PC_LOCK_SPEL; break;
-					case "jump":                                 _dbits = PC_LOCK_JUMP; break;
-					case "upstab":                               _dbits = PC_LOCK_ATK1; break;
-					case "downstab":                             _dbits = PC_LOCK_ATK2; break;
-					case "downthrust": case "thrust":            _dbits = PC_LOCK_ATK3; break;
-					case "upthrust":                             _dbits = PC_LOCK_ATK4; break;
+					case "spell":  case "magic":                             _dbits = PC_LOCK_SPEL; break;
+					case "jump":                                             _dbits = PC_LOCK_JUMP; break;
+					case "stab":   case "highstab": case "sword":            _dbits = PC_LOCK_ATK1; break;
+					case "crouchstab": case "lowstab": case "duckstab":
+					case "crouch": case "duck":                              _dbits = PC_LOCK_ATK2; break;
+					case "downstab": case "downthrust": case "thrust":
+					case "dstab":  case "down":                              _dbits = PC_LOCK_ATK3; break;
+					case "upstab": case "upthrust": case "ustab": case "up": _dbits = PC_LOCK_ATK4; break;
 					case "all":      case "everything":          _dbits = PC_LOCK_JUMP | PC_LOCK_ATK1 | PC_LOCK_ATK2 | PC_LOCK_ATK3 | PC_LOCK_ATK4 | PC_LOCK_SPEL; break;
 					default:
-						global.tw_toast       = "deny: spell/jump/upstab/downstab/upthrust/downthrust/all";
+						global.tw_toast       = "deny: spell/jump/stab/crouchstab/downstab/upstab/all";
 						global.tw_toast_timer = 300;
 						break;
 				}
@@ -1083,4 +1121,26 @@ function tw_spawn_window_ok(_v, _who_s) {
 		return false;
 	}
 	return true;
+}
+
+/// @description  tw_force_link_form() -- end every chat-cast !arise now (frames -> 0 so the
+/// normal expiry path restores exactly what it would have restored) and drop the fairy bit.
+/// If the player was fairy/cucco BEFORE chat touched him, the arise entry's had_fary keeps
+/// its restore from stripping that; we only clear the bit ourselves when no such entry
+/// says otherwise.
+function tw_force_link_form() {
+	var _keep_bit = false;
+	if (variable_global_exists("tw_active") && is_array(global.tw_active))
+	{
+		for (var _i = 0; _i < array_length(global.tw_active); _i++)
+		{
+			var _e = global.tw_active[_i];
+			if (is_struct(_e) && variable_struct_exists(_e, "had_fary"))
+			{
+				if (_e.had_fary) _keep_bit = true;
+				_e.frames = 0; // expire on the next tick -> its restore() runs
+			}
+		}
+	}
+	if (!_keep_bit && instance_exists(g)) g.spells_active &= ~SPL_FARY;
 }

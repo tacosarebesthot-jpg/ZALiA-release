@@ -5,7 +5,22 @@ function Surface_Draw_GUI_End() {
 	if (global.QuestTimer_can_draw)
 	{
 	    global.QuestTimer_can_draw = false;
-	    draw_text_(global.QuestTimer_xl,global.QuestTimer_yt, global.QuestTimer_text);
+	    // Lane, 09-11 stream (chat 0:18:27 "fix - time top left very small text"): the
+	    // 8px sprite font is unreadable after stream downscale. Scale > 1 draws the
+	    // built-in font instead, shadowed, same anchor; 1 keeps the original look.
+	    var _qt_sc = variable_global_exists("QuestTimer_scale") ? global.QuestTimer_scale : 1;
+	    if (_qt_sc <= 1)
+	    {
+	        draw_text_(global.QuestTimer_xl,global.QuestTimer_yt, global.QuestTimer_text);
+	    }
+	    else
+	    {
+	        var _qt_pf = draw_get_font(); var _qt_ph = draw_get_halign(); var _qt_pc = draw_get_colour();
+	        draw_set_font(-1); draw_set_halign(fa_left);
+	        draw_set_colour(c_black); draw_text_transformed(global.QuestTimer_xl + 1, global.QuestTimer_yt + 1, global.QuestTimer_text, _qt_sc, _qt_sc, 0);
+	        draw_set_colour(c_white); draw_text_transformed(global.QuestTimer_xl,     global.QuestTimer_yt,     global.QuestTimer_text, _qt_sc, _qt_sc, 0);
+	        draw_set_font(_qt_pf); draw_set_halign(_qt_ph); draw_set_colour(_qt_pc);
+	    }
 	}
 
 
@@ -96,7 +111,11 @@ function Surface_Draw_GUI_End() {
 
 	// --- 4: enter note mode (only when not already in it) --- DEV-gated 2026-07-27,
 	// same reasoning as key 3 above: it is a bug-reporting instrument, not a feature.
+	// CTRL+4 (was bare 4): on 09-11 a stray 4 mid-stream opened this while Lane was
+	// typing and cost him a restart (1:45:46 "how did I make it go black ... don't
+	// pause or hit four"). Bare 3 (flag + shot) is unchanged; the owner told him to use 3.
 	if (dev_avail()
+	&&  keyboard_check(vk_control)
 	&&  keyboard_check_pressed(ord("4"))
 	&&  variable_global_exists("note_active")
 	&& !global.note_active)
@@ -214,7 +233,7 @@ function Surface_Draw_GUI_End() {
 	    var _ty = _by + 5;
 
 	    draw_set_colour(c_yellow);
-	    draw_text(_tx, _ty, "FLAG NOTE (ENTER=save  ESC=cancel):");
+	    draw_text(_tx, _ty, "FLAG NOTE [CTRL+4] (ENTER=save  ESC=cancel):");
 	    _ty += 14;
 
 	    // what they're annotating (so they see the context)

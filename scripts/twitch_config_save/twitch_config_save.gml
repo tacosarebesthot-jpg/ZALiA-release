@@ -44,6 +44,8 @@ function twitch_config_save() {
     // ---- replace our keys in place -----------------------------------------
     var _wrote_cd  = false;
     var _wrote_dur = false;
+    var _wrote_ac  = false;
+    var _ac_val    = (variable_global_exists("tw_irc_autoconnect") && global.tw_irc_autoconnect) ? "1" : "0";
 
     for (var _i = 0; _i < array_length(_lines); _i++)
     {
@@ -69,10 +71,16 @@ function twitch_config_save() {
             _lines[_i] = "effect_secs=" + string(global.tw_effect_secs);
             _wrote_dur = true;
         }
+        else if (_key == "autoconnect")
+        {
+            _lines[_i] = "autoconnect=" + _ac_val;
+            _wrote_ac  = true;
+        }
     }
 
     if (!_wrote_cd)  array_push(_lines, "cooldown="    + string(global.tw_irc_cooldown_frames));
     if (!_wrote_dur) array_push(_lines, "effect_secs=" + string(global.tw_effect_secs));
+    if (!_wrote_ac)  array_push(_lines, "autoconnect=" + _ac_val); // 1 = join chat on boot (twitch_irc_step)
 
     // ---- write it back ------------------------------------------------------
     var _fw = file_text_open_write(_path);
