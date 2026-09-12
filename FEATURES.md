@@ -141,4 +141,4 @@ diffing this repository against https://github.com/ZA-LiA/ZALiA yourself.*
 
 ---
 
-**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D) &middot; [Patreon](https://www.patreon.com/cw/gainey666)
+**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D) &middot; [Patreon](https://www.patreon.com/cw/gainey666) &middot; [Changelog](CHANGELOG.md)

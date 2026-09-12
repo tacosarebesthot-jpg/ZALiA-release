@@ -14,6 +14,7 @@ For the original game and its official builds, go to the upstream repository abo
 **Version 2.0** — based on upstream ZALiA 1.7.12.02.
 
 [**Join the Discord**](https://discord.gg/FSphHEsu8D) — releases, playtesting, bug reports, and the randomizer community.
+[**What changed**](CHANGELOG.md) — version history; the version shows bottom-right of the title screen and answers `!version` in chat.
 
 ---
 
@@ -220,4 +221,4 @@ required.
 
 ---
 
-**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [What this port adds](FEATURES.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D) &middot; [Patreon](https://www.patreon.com/cw/gainey666)
+**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [What this port adds](FEATURES.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D) &middot; [Patreon](https://www.patreon.com/cw/gainey666) &middot; [Changelog](CHANGELOG.md)
