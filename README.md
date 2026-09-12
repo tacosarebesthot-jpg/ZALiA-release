@@ -190,7 +190,7 @@ BROOMIETUNES · ANARKHYA · STEEL CRESCENTS · the Link Is Adventuresome communi
 
 ### 2026 port special thanks
 
-**LANEAGE** · **DOW_PY72O** (cumqueefador) · **MrB** · **HoverBat**, for ZALiA ·
+**LANEAGE** · **DOW_PY72O** (cumqueefador) · **MrB** ·
 **Claude** (Anthropic), who wrote the 2026 rounds at gainey's direction · Laneage's Twitch chat, for every idea in the command list
 
 ### Original *Zelda II: The Adventure of Link* staff — Nintendo, 1987
