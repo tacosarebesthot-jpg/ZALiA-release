@@ -168,15 +168,24 @@ Item and HUD sprites used by the companion tracker are ripped from the original
 [The Spriters Resource](https://www.spriters-resource.com/nes/). ZALiA-specific
 item sprites were exported from the game's own palette shader.
 
-### Patrons
+### HoverBat's patrons
 
-WOLFZEN SKIIGH · WOLFZEN 'XIB' SKIIGH · CAPTAIN BOZO · GUARDIAN · BLACKMAGE14 ·
-X570 BELMONT · TECHTONIC IMPROV · ROBIN AM · KOEBI · FLUFFY TAIL · REINEKE ·
-JERBERJER · DRALKKIN · JACOB THE MOO · ATOMIC DRACULA · AARON · ZABII · DOW_PY72O
+WOLFZEN 'XIB' SKIIGH · CAPTAIN BOZO · GUARDIAN · BLACKMAGE14 · X570 BELMONT ·
+TECHTONIC IMPROV · ROBIN AM · KOEBI · FLUFFY TAIL · REINEKE · JERBERJER · DRALKKIN ·
+JACOB THE MOO · ATOMIC DRACULA · AARON · ZABII
 
-### Special thanks
+### HoverBat's special thanks
 
-PATRICK · ERIN · VINNY · SCHMIDTTYGAMES · TRAILZ · ALTERNA4091 · SOPHILAUTIA · cumqueefador
+PATRICK · ERIN · VINNY · SCHMIDTTYGAMES · TRAILZ · ALTERNA4091 · SOPHILAUTIA ·
+BROOMIETUNES · ANARKHYA · STEEL CRESCENTS · the Link Is Adventuresome community
+
+### 2026 port patrons
+
+**LANEAGE** · **DOW_pyro720**
+
+### 2026 port special thanks
+
+**LANEAGE** · **DOW_pyro720** · **HoverBat**, for ZALiA · Laneage's Twitch chat, for every idea in the command list
 
 ### Original *Zelda II: The Adventure of Link* staff — Nintendo, 1987
 
