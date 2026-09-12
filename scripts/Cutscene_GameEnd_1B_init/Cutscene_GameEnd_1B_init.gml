@@ -348,6 +348,14 @@ function Cutscene_GameEnd_1B_init() {
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	//                                                  //
 	//                                                  //
+	// ------------------- SUPPORT THE PORT (owner 2026-09-12) -------------------
+	_text="SUPPORT THE PORT";
+	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
+	dg_CREDITS[#_idx,1] = "PATREON.COM/GAINEY666"; // the Discord invite is case-sensitive and this font is caps only, so it lives in the README
+	dg_CREDITS[#_idx,5] = _text; // 5: staff text
+	dg_CREDITS[#_idx,6] = 1; // Center credit text
+	//                                                  //
+	//                                                  //
 	// ------------------- ORIGINAL GAME STAFF -------------------
 	var _USE_PSEUDO_NAMES = false;
 	_text="ORIGINAL GAME STAFF";
