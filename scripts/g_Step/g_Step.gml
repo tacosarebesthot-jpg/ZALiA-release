@@ -155,7 +155,7 @@ function g_Step() {
 	// numpad2, F2/F3, the ctrl+shift file-clean combos) was live for players.
 	// dev_avail() is the RUNTIME gate: dev code entered this session, or
 	// dev_unlock.txt in the save dir. (2026-07-27)
-	if (dev_avail()) with(Input) Input_GameTesting();
+	if (dev_avail() && !note_typing()) with(Input) Input_GameTesting(); // note_typing(): never while a note box is capturing keys
 
 	// CHEATS (toggled in Options > Dev Tools). Applied every step while in gameplay.
 	if (instance_exists(f) && instance_exists(global.pc))

@@ -32,7 +32,7 @@ function Surface_Draw_GUI_End() {
 	// is obsolete: dev_avail() is a RUNTIME unlock, so the owner still gets the key
 	// via dev_unlock.txt or the dev code, while a player pressing 3 no longer dumps
 	// screenshots into problems\ without knowing why. (2026-07-27)
-	if (dev_avail() && keyboard_check_pressed(ord("3")))
+	if (dev_avail() && !note_typing() && keyboard_check_pressed(ord("3")))
 	{
 	    if (!variable_global_exists("dev_flag_count")) global.dev_flag_count = 0;
 	    global.dev_flag_count++;
@@ -111,11 +111,10 @@ function Surface_Draw_GUI_End() {
 
 	// --- 4: enter note mode (only when not already in it) --- DEV-gated 2026-07-27,
 	// same reasoning as key 3 above: it is a bug-reporting instrument, not a feature.
-	// CTRL+4 (was bare 4): on 09-11 a stray 4 mid-stream opened this while Lane was
-	// typing and cost him a restart (1:45:46 "how did I make it go black ... don't
-	// pause or hit four"). Bare 3 (flag + shot) is unchanged; the owner told him to use 3.
+	// Bare 4 opens the note box (Lane's instructions say "3 or 4"). The 09-11 restart
+	// was not this key: it was the dev hotkeys still firing on the letters he TYPED
+	// into the box (X = autosweep). Those are now gated on note_typing().
 	if (dev_avail()
-	&&  keyboard_check(vk_control)
 	&&  keyboard_check_pressed(ord("4"))
 	&&  variable_global_exists("note_active")
 	&& !global.note_active)
@@ -233,7 +232,7 @@ function Surface_Draw_GUI_End() {
 	    var _ty = _by + 5;
 
 	    draw_set_colour(c_yellow);
-	    draw_text(_tx, _ty, "FLAG NOTE [CTRL+4] (ENTER=save  ESC=cancel):");
+	    draw_text(_tx, _ty, "FLAG NOTE (ENTER=save  ESC=cancel):");
 	    _ty += 14;
 
 	    // what they're annotating (so they see the context)
@@ -316,7 +315,7 @@ function Surface_Draw_GUI_End() {
 	// Reversible: delete this block + the MOVESPEED CHEAT blocks in g_Create / updateX /
 	// Overworld_Step. The multiplier itself is applied in updateX (action rooms) and
 	// Overworld_Step (overworld); here we only own the hotkey + the on-screen readout.
-	if (dev_avail() && keyboard_check_pressed(ord("2")))
+	if (dev_avail() && !note_typing() && keyboard_check_pressed(ord("2")))
 	{
 	    if (!variable_global_exists("cheat_movespeed")) global.cheat_movespeed = 1;
 	    global.cheat_movespeed++;

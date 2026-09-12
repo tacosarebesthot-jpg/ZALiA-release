@@ -26,8 +26,8 @@ function PaletteEditor_Step() {
 	SHF0 = !CTL &&  SHF && !ALT; // ONLY SHF held
 	ALT0 = !CTL && !SHF &&  ALT; // ONLY ALT held
 	//                                                  //
-	PP   = keyboard_check_pressed(ord("P"));
-	PH   = keyboard_check(        ord("P"));
+	PP   = keyboard_check_pressed(ord("P")) && !note_typing();
+	PH   = keyboard_check(        ord("P")) && !note_typing();
 	PP0  = !CTL && !SHF && !ALT && PP;
 	PH0  = !CTL && !SHF && !ALT && PH;
 

@@ -55,3 +55,15 @@ function dev_avail() {
     return global.dev_unlocked;
 
 }
+
+/// @description  note_typing() -- true while the player is TYPING into an on-screen note
+/// box (key-4 flag note, or the room-warper's sweep note). Every dev hotkey must check
+/// this: those keys are read in Step events that run BEFORE the note box consumes the
+/// keystroke, so typing "x" into a note started the automated screen sweep on Lane's
+/// 09-11 stream and cost him a restart (1:45:46 "how did I make it go black").
+/// `#macro DEV` is hardcoded true, so the hotkeys exist in every build; gate the typist.
+function note_typing() {
+	if (variable_global_exists("note_active") && global.note_active) return true;
+	if (variable_global_exists("sweep_note_active") && global.sweep_note_active) return true;
+	return false;
+}
