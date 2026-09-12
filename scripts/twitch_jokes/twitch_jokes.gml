@@ -50,6 +50,10 @@ function tw_jokes_init() {
 				{
 					global.tw_jokes_mode = clamp(tw_num(tw_trim(string_copy(_line, _eq + 1, string_length(_line) - _eq)), 1), 0, 2);
 				}
+				if (_eq > 1 && string_lower(tw_trim(string_copy(_line, 1, _eq - 1))) == "autosave")
+				{
+					global.tw_autosave = (tw_num(tw_trim(string_copy(_line, _eq + 1, string_length(_line) - _eq)), 1) != 0);
+				}
 			}
 			file_text_close(_fh);
 		}
@@ -552,4 +556,159 @@ function tw_toast_draw() {
 		_slot++;
 	}
 	draw_set_alpha(_pa); draw_set_colour(_pc);
+}
+
+// ─── !help card (round 10c) ────────────────────────────────────────────────────
+// One screen of "how chat plays" for new viewers (MrMaseTV, 09-11). !help / !cmds /
+// !commands / !howto arm global.tw_help_timer; tw_help_draw() paints a panel top-centre
+// for 8 s in the sprite font. Content is a fixed list, grouped, so it stays readable.
+
+function tw_help_show() {
+	global.tw_help_timer = 480;
+}
+
+function tw_help_draw() {
+	if (!variable_global_exists("tw_help_timer") || global.tw_help_timer <= 0) return;
+	global.tw_help_timer--;
+	static _rows = [
+		"HOW CHAT PLAYS: TYPE !WORD IN CHAT",
+		"HELP  !HEAL !MP !REFILL !1UP !FAIRY !LINK",
+		"      !PROTECT !REFLECT !INVULN",
+		"HURT  !HURT !DRAIN !POISON !KILL !TAX",
+		"      !DMGUP !ATTRITION !CURSE !STEAL",
+		"CHAOS !SLOW !SPEED !FLIP !CONFUSE !DARK",
+		"      !SHAKE !DISCO !MOON !ICE !ROOT !DENY",
+		"MOBS  !SPAWN !SWARM !FREEZE !SMITE !PARTY",
+		"      !FLAME !ARISE !CUCCO !CHALLENGE",
+		"FUN   !SONG !SUGGEST !METH !FATALITY",
+		"      !QUANTUMENTANGLE !HELP",
+		"ADD A NUMBER FOR SECONDS: !SLOW 20"
+	];
+	var _gw = display_get_gui_width();  if (_gw <= 0) _gw = 320;
+	var _gh = display_get_gui_height(); if (_gh <= 0) _gh = 240;
+	var _s  = max(1, floor(_gh / 240));
+	var _font = global.dl_game_font[| global.game_font_idx];
+	var _cw = sprite_get_width(_font) * _s;
+	var _lh = 10 * _s;
+	var _maxc = 0;
+	for (var _i = 0; _i < array_length(_rows); _i++) _maxc = max(_maxc, string_length(_rows[_i]));
+	var _pw = _maxc * _cw + 12 * _s;
+	var _ph = array_length(_rows) * _lh + 12 * _s;
+	var _x = round((_gw - _pw) * 0.5);
+	var _y = 48 * _s;
+	var _fade = min(1, global.tw_help_timer / 20);
+	var _pa = draw_get_alpha(); var _pc = draw_get_colour();
+	draw_set_alpha(0.9 * _fade); draw_set_colour(c_black);
+	draw_rectangle(_x, _y, _x + _pw, _y + _ph, false);
+	draw_set_alpha(_fade); draw_set_colour(make_colour_rgb(60, 188, 252));
+	draw_rectangle(_x, _y, _x + _pw, _y + _ph, true);
+	draw_set_alpha(_fade);
+	for (var _r = 0; _r < array_length(_rows); _r++)
+		tw_toast_text(_x + 6 * _s, _y + 6 * _s + _r * _lh, _rows[_r], _s, _font, (_r == 0) ? -1 : -2);
+	draw_set_alpha(_pa); draw_set_colour(_pc);
+}
+
+// ─── rolling checkpoints (round 10d) ───────────────────────────────────────────
+// Lane 09-11 (1:51:50): "spit out a save every 60 seconds into a folder, I'll delete
+// it manually... or every time I get an item or a level up". The save SLOT is left
+// exactly as the game last saved it: tw_checkpoint() lets file_save() write the live
+// state, copies that file to checkpoints\SaveFile_N_<stamp>.txt, then puts the slot's
+// previous bytes (and the in-memory copies file_save refreshed) back. Restoring =
+// copy a checkpoint over SaveFile_N.txt in %LOCALAPPDATA%\ZALiA while the game is
+// closed (README.txt in the folder says so). Newest 30 are kept.
+
+function tw_checkpoint(_why) {
+	if (!instance_exists(f) || f.file_num < 1) return false;
+	if (!variable_global_exists("tw_autosave") || !global.tw_autosave) return false;
+	var _slot_name = f.dl_file_names[| f.file_num - 1];
+	var _slot_path = working_directory + _slot_name;
+	if (!file_exists(_slot_name)) return false;
+
+	// remember the slot as the game last saved it
+	var _fh = file_text_open_read(_slot_path);
+	if (_fh == -1) return false;
+	var _old = file_text_read_string(_fh);
+	file_text_close(_fh);
+	var _key = STR_Save + STR_File + hex_str(f.file_num) + STR_Encoded;
+	var _old_enc = global.dm_save_file_data[? _key];
+
+	file_save(f.file_num, false);   // live state -> slot (and the rando data files, which are live anyway)
+
+	var _dir = working_directory + "checkpoints";
+	if (!directory_exists(_dir)) directory_create(_dir);
+	var _stamp = string(current_year) + string_replace_all(string_format(current_month, 2, 0), " ", "0")
+		+ string_replace_all(string_format(current_day, 2, 0), " ", "0") + "_"
+		+ string_replace_all(string_format(current_hour, 2, 0), " ", "0")
+		+ string_replace_all(string_format(current_minute, 2, 0), " ", "0")
+		+ string_replace_all(string_format(current_second, 2, 0), " ", "0");
+	var _prefix = f.dl_FILE_NAME_PREFIX[| f.file_num - 1];
+	var _dest = _dir + "\\" + _prefix + "_" + _stamp + "_" + string(_why) + ".txt";
+	file_copy(_slot_path, _dest);
+
+	// put the slot back
+	var _fw = file_text_open_write(_slot_path);
+	if (_fw != -1) { file_text_write_string(_fw, _old); file_text_close(_fw); }
+	if (!is_undefined(_old_enc)) global.dm_save_file_data[? _key] = _old_enc;
+	var _dm = json_decode(_old);
+	if (_dm != -1) { ds_map_copy(global.dm_save_file, _dm); ds_map_destroy(_dm); }
+
+	// folder note + prune to the newest 30 of this slot
+	var _readme = _dir + "\\README.txt";
+	if (!file_exists("checkpoints\\README.txt"))
+	{
+		var _rf = file_text_open_write(_readme);
+		if (_rf != -1)
+		{
+			file_text_write_string(_rf, "ZALiA rolling checkpoints (every 60 s of play, every item, every level-up)."); file_text_writeln(_rf);
+			file_text_write_string(_rf, "To restore: close the game, copy one of these over SaveFile_N.txt one folder up, start the game."); file_text_writeln(_rf);
+			file_text_write_string(_rf, "Delete anything you do not need. The game keeps the newest 30 per slot."); file_text_writeln(_rf);
+			file_text_close(_rf);
+		}
+	}
+	var _names = [];
+	var _fn = file_find_first(_dir + "\\" + _prefix + "_*.txt", 0);
+	while (_fn != "") { array_push(_names, _fn); _fn = file_find_next(); }
+	file_find_close();
+	array_sort(_names, true);
+	while (array_length(_names) > 30) { file_delete(_dir + "\\" + _names[0]); array_delete(_names, 0, 1); }
+
+	global.tw_ckpt_last  = current_time;
+	global.tw_ckpt_count = (variable_global_exists("tw_ckpt_count") ? global.tw_ckpt_count : 0) + 1;
+	if (DEV) show_debug_message("[CKPT] " + _dest);
+	return true;
+}
+
+/// @description  tw_checkpoint_tick() -- called from twitch_tick every frame. 60 s of live play,
+/// an item bit change, or the level-up flag makes a checkpoint. Never in menus, cutscenes,
+/// transitions, the title or the death screen.
+function tw_checkpoint_tick() {
+	if (!variable_global_exists("tw_autosave") || !global.tw_autosave) return;
+	if (!instance_exists(f) || !instance_exists(g) || f.file_num < 1) return;
+	if (g.room_type == "B") return;
+	if (g.gui_state != g.gui_state_NONE || g.cutscene || g.ChangeRoom_timer > 0) return;
+	if (!instance_exists(global.pc)) return;
+	if (!variable_global_exists("tw_ckpt_items")) { global.tw_ckpt_items = f.items; global.tw_ckpt_frames = 0; }
+	if (!variable_global_exists("tw_ckpt_due")) global.tw_ckpt_due = "";
+	var _why = "";
+	if (f.items != global.tw_ckpt_items) { global.tw_ckpt_items = f.items; _why = "item"; }
+	if (global.tw_ckpt_due != "") { _why = global.tw_ckpt_due; global.tw_ckpt_due = ""; }
+	global.tw_ckpt_frames++;
+	if (_why == "" && global.tw_ckpt_frames >= 3600) _why = "timer";
+	if (_why == "") return;
+	global.tw_ckpt_frames = 0;
+	tw_checkpoint(_why);
+}
+
+// ─── reflect hint (round 10f) ──────────────────────────────────────────────────
+// Lane 09-11 (2:43:22): "what's the point in going into dungeons if at the end I get to
+// the reflect boss and can't kill him". Carock (Maze Island palace, dungeon 4) is the only
+// boss that needs REFLECT. Say so on the way in, and again when the fight starts.
+function tw_reflect_hint(_where) {
+	if (!instance_exists(f)) return;
+	if (f.spells & SPL_RFLC) return;
+	if (!variable_global_exists("tw_reflect_hint_time")) global.tw_reflect_hint_time = -100000;
+	if (current_time - global.tw_reflect_hint_time < 20000) return;   // not twice in 20 s
+	global.tw_reflect_hint_time = current_time;
+	if (_where == "boss") tw_toast_push("CAROCK NEEDS REFLECT", "YOU DONT HAVE IT. HE WONT DIE.", "warn");
+	else                  tw_toast_push("THIS PALACE ENDS IN CAROCK", "HE NEEDS REFLECT. YOU HAVE NONE.", "warn");
 }

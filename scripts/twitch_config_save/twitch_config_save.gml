@@ -48,6 +48,8 @@ function twitch_config_save() {
     var _wrote_jk  = false;
     var _ac_val    = (variable_global_exists("tw_irc_autoconnect") && global.tw_irc_autoconnect) ? "1" : "0";
     var _jk_val    = variable_global_exists("tw_jokes_mode") ? string(global.tw_jokes_mode) : "1";
+    var _wrote_as  = false;
+    var _as_val    = (!variable_global_exists("tw_autosave") || global.tw_autosave) ? "1" : "0";
 
     for (var _i = 0; _i < array_length(_lines); _i++)
     {
@@ -83,12 +85,18 @@ function twitch_config_save() {
             _lines[_i] = "jokes=" + _jk_val;
             _wrote_jk  = true;
         }
+        else if (_key == "autosave")
+        {
+            _lines[_i] = "autosave=" + _as_val;
+            _wrote_as  = true;
+        }
     }
 
     if (!_wrote_cd)  array_push(_lines, "cooldown="    + string(global.tw_irc_cooldown_frames));
     if (!_wrote_dur) array_push(_lines, "effect_secs=" + string(global.tw_effect_secs));
     if (!_wrote_ac)  array_push(_lines, "autoconnect=" + _ac_val); // 1 = join chat on boot (twitch_irc_step)
     if (!_wrote_jk)  array_push(_lines, "jokes=" + _jk_val);       // 0 NORMAL text, 1 CLEAN jokes, 2 DIRTY (twitch_jokes)
+    if (!_wrote_as)  array_push(_lines, "autosave=" + _as_val);    // 1 = rolling checkpoints (tw_checkpoint_tick)
 
     // ---- write it back ------------------------------------------------------
     var _fw = file_text_open_write(_path);

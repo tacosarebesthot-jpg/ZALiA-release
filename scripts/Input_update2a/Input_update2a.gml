@@ -174,6 +174,12 @@ function Input_update2a() {
 	    var _cf_h = Right_held;     Right_held     = Left_held;     Left_held     = _cf_h;
 	    var _cf_p = Right_pressed;  Right_pressed  = Left_pressed;  Left_pressed  = _cf_p;
 	    var _cf_r = Right_released; Right_released = Left_released; Left_released = _cf_r;
+	    if (variable_global_exists("tw_confuse_v") && global.tw_confuse_v) // !disorient: vertical too
+	    {
+	        var _cv_h = Up_held;     Up_held     = Down_held;     Down_held     = _cv_h;
+	        var _cv_p = Up_pressed;  Up_pressed  = Down_pressed;  Down_pressed  = _cv_p;
+	        var _cv_r = Up_released; Up_released = Down_released; Down_released = _cv_r;
+	    }
 	}
 
 	// Pack the FINAL resolved input (post dev-inject + twitch-confuse) into the 10-bit

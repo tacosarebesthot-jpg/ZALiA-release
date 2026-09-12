@@ -83,6 +83,7 @@ function twitch_irc_load_config() {
 			// jokes=0/1/2: the CHAT JOKES row (twitch_jokes). Read here too so a reload
 			// (menu toggle, web save) never drops it; tw_jokes_init reads it at boot.
 			case "jokes": if (variable_global_exists("tw_jokes_mode")) global.tw_jokes_mode = clamp(tw_num(_val, 1), 0, 2); break;
+			case "autosave": global.tw_autosave = (tw_num(_val, 1) != 0); break;
 		}
 	}
 	file_text_close(_fh);
@@ -179,6 +180,7 @@ function tw_irc_is_verb(_v) {
 		case "link":   case "unchicken":                       // force Link form back (Lane 09-11 2:30:53 "exclamation point be link again")
 		case "donothing": case "rip": case "blip": case "coincidence": case "getfed": // joke verbs
 		case "tax": case "dmgup": case "attrition":   // Z3 ports, round 10b
+		case "meth": case "quantumentangle": case "help": case "challenge": case "disorient": // round 10c
 			return true;
 		default:
 			return false;
@@ -208,6 +210,10 @@ function tw_alias_verb(_v) {
 		case "rupees": case "rupeesteal": case "xpsteal": case "xp": case "taxes": return "tax"; // Z3 names, Z2 taxes XP
 		case "doubledamage": case "dmg2": case "damageup": return "dmgup";
 		case "bleed":  case "hunger":     return "attrition";
+		case "cmds": case "commands": case "howto": case "howtoplay": return "help";
+		case "entangle": case "quantum": case "qe": return "quantumentangle";
+		case "confuseall": case "disorientate": return "disorient";
+		case "flippalace": case "nomercy": case "noreprieve": return "challenge";
 	}
 	return _v;
 }

@@ -126,6 +126,9 @@ function g_Room_Start() {
 	    rm_name      = area_name+hex_str(rm_num);
 	    dungeon_num  = get_dungeon_num(rm_name);
 	    dungeon_name = dm_dungeon[?STR_Dungeon+hex_str(dungeon_num)+STR_Name];
+	    // round 10f: walking INTO the Maze Island palace without REFLECT gets a warning (Lane 09-11)
+	    if (dungeon_num == 4 && variable_global_exists("tw_last_dungeon_seen") && global.tw_last_dungeon_seen != 4) tw_reflect_hint("entry");
+	    global.tw_last_dungeon_seen = dungeon_num;
 	    town_num     = get_town_num(rm_name);
 	    town_name    = dm_town[?STR_Town+STR_Name+hex_str(town_num)];
 	}

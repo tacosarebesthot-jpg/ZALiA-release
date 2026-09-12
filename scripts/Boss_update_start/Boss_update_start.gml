@@ -29,7 +29,7 @@ function Boss_update_start() {
 	switch(object_index){
 	case Rebonack01A:{start_timer = $FF; break;}
 	//case Rebonack01A:{start_timer = $FF - ((BRIDGE_TILE_CNT*($1<<S1)) * !bridge_ver); break;}
-	case Carock01:{start_timer = $40; break;}
+	case Carock01:{start_timer = $40; tw_reflect_hint("boss"); break;}
 	case Barba01:{start_timer = $FF; break;}
 	case Thunderbird01:{start_timer = $90; break;}
 	}

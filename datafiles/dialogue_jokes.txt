@@ -16,7 +16,7 @@
 chatters: Gainey666, asm0deus, HungSo1o, SivUO, smokencameljoecool, Tedw3rd, MrMaseTV, twitchvin, Kavalesca, Dave, Carl, Meatwad, Frylock, Shake, Bubbles, Ricky, Julian, Lahey, Kurt Angle, Snake, Madden
 
 # ---- town signs ----
-0000A: WELCOME TO RAURU. POPULATION: CHAT.
+0000A: WELCOME TO RAURU. EVERYONE HERE IS CHAT.
 0000A: WELCOME TO RAURU. NO REFUNDS.
 0000A: RAURU. THE TUTORIAL TOWN. CHAT SKIPPED IT.
 0000Ax: WELCOME TO RAURU. WIPE YOUR FUCKING FEET.

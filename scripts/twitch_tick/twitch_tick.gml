@@ -17,7 +17,31 @@ function twitch_tick() {
 	if (variable_global_exists("tw_toast_timer") && global.tw_toast_timer > 0)
 	{   global.tw_toast_timer--;  }
 
+	tw_checkpoint_tick();   // rolling checkpoints (round 10d) -- independent of the twitch mod
+
 	if (!variable_global_exists("tw_active")) return;
+
+	// !challenge ends the moment the palace is left (round 10c)
+	if (variable_global_exists("tw_challenge") && global.tw_challenge && instance_exists(g) && g.dungeon_num <= 0)
+	{   global.tw_challenge = false;  }
+
+	// queued swarms land on the next live battle screen, 60 frames after it settles
+	if (variable_global_exists("tw_swarm_queue") && array_length(global.tw_swarm_queue) > 0 && instance_exists(g))
+	{
+		if (!variable_global_exists("tw_room_live_frames")) global.tw_room_live_frames = 0;
+		if (g.room_type == "A" && g.gui_state == g.gui_state_NONE && !g.cutscene && !g.FallScene_timer && g.ChangeRoom_timer <= 0 && instance_exists(global.pc))
+		{
+			global.tw_room_live_frames++;
+			if (global.tw_room_live_frames >= 60 && global.tw_enabled)
+			{
+				var _sq = global.tw_swarm_queue[0];
+				array_delete(global.tw_swarm_queue, 0, 1);
+				global.tw_room_live_frames = 0;
+				twitch_apply("swarm", string(_sq.n), _sq.who, "");
+			}
+		}
+		else global.tw_room_live_frames = 0;
+	}
 
 	// cheap idle exit: disabled with nothing pending
 	if ((!variable_global_exists("tw_enabled") || !global.tw_enabled)

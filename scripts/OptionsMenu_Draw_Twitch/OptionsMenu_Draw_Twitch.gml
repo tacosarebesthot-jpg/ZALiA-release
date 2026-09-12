@@ -106,6 +106,10 @@ function OptionsMenu_Draw_Twitch() {
 	        _text = tw_jokes_mode_label();
 	    break;
 
+	    case Twitch.AUTOSAVE:
+	        _text = _dg_state_text[#0, sign(variable_global_exists("tw_autosave") && global.tw_autosave)];
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

@@ -4312,6 +4312,15 @@ function g_Create() {
 	// chatters.txt, jokes= mode, and global.tw_toasts (the plates drawn by tw_toast_draw).
 	global.tw_toasts              = [];
 	global.tw_dmg_mult            = 1;         // !dmgup: PC_take_damage multiplier (1 = normal)
+	global.tw_confuse_v           = false;     // !disorient: confuse + up/down swap (Input_update2a)
+	global.tw_challenge           = false;     // !challenge: flip for the whole palace, 4 hearts, no reprieve
+	global.tw_swarm_queue         = [];        // !swarm typed off a battle screen waits here
+	global.tw_help_timer          = 0;         // !help card frames left (tw_help_draw)
+	global.tw_last_helper         = "";  global.tw_last_helper_t = 0;   // death-toast assists
+	global.tw_last_hurter         = "";  global.tw_last_hurter_t = 0;
+	global.tw_autosave            = true;      // rolling checkpoints (tw_checkpoint_tick); autosave= in twitch_config.txt
+	global.tw_ckpt_due            = "";        // "levelup" etc. -> checkpoint on the next live frame
+	global.tw_last_dungeon_seen   = 0;         // reflect hint fires once per palace entry
 	tw_jokes_init();
 	// ────────────────────────────────────────────────────────────────────────
 

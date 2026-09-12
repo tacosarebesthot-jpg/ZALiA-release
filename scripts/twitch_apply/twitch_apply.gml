@@ -52,7 +52,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// get added, and a new hostile verb should work in vs mode the day it lands.
 	// The failure mode of a missed entry is "one helpful verb slips through",
 	// not "every new effect is silently dead".
-	if (variable_global_exists("tw_vs_mode") && global.tw_vs_mode)
+	var _no_reprieve = (variable_global_exists("tw_vs_mode") && global.tw_vs_mode)
+	                || (variable_global_exists("tw_challenge") && global.tw_challenge); // !challenge: no help for the whole palace
+	if (_no_reprieve)
 	{
 	    switch (_v)
 	    {
@@ -61,7 +63,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	        case "shield": case "reflect": case "rflc": case "arise":
 	        case "cucco": case "cuco": case "chicken":
 	        case "jump": case "restore": // helpful bare-spell / alias forms
-	            global.tw_toast       = _who_s + " -> " + _v + " BLOCKED (VS CHAT)";
+	            global.tw_toast       = _who_s + " -> " + _v + ((variable_global_exists("tw_vs_mode") && global.tw_vs_mode) ? " BLOCKED (VS CHAT)" : " BLOCKED (CHALLENGE: NO REPRIEVE)");
 	            global.tw_toast_timer = 180;
 	            return;
 	    }
@@ -184,6 +186,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// visibly darkened anything (Lane's 08-14 stream).
 			if (instance_exists(g))
 			{
+				// Lane 09-11 (0:40:33): say when this room simply has no dark palette. The
+				// effect still arms, so it lands in the next room that has one.
+				if (instance_exists(p) && p.pal_rm_dark_idx < 0)
+				{
+					global.tw_toast       = _who_s + " -> dark: this room has no dark version (armed for the next one)";
+					global.tw_toast_timer = 240;
+				}
 				global.tw_dark = true;
 				set_rm_brightness(0);
 				array_push(global.tw_active, {
@@ -390,6 +399,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					reapply : function() { if (instance_exists(global.pc)) { global.pc.tw_scale_mul = self.sc; global.pc.tw_scale_mul = self.sc; } },
 					restore : function() { if (instance_exists(global.pc)) { global.pc.tw_scale_mul = 1;       global.pc.tw_scale_mul = 1;       } }
 				});
+				// "!grow 999": the number is SECONDS (capped at 60) -- say so, chat kept guessing
+				global.tw_toast       = _who_s + " -> " + _v + " " + string(round(_frames / 60)) + "s";
+				global.tw_toast_timer = 180;
 			}
 			break;
 
@@ -594,7 +606,19 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// spawn a small pack of RANDOM enemies spread around the PC. count via tw_num
 			// (default 3), CAPPED at 6 so chat can't flood the room. Each spawn rolls a
 			// random type from a land-safe pool (was: all Myu).
-			if (!tw_spawn_window_ok(_v, _who_s)) break; // no hostile packs mid-cutscene/tally (see tw_spawn_window_ok)
+			// Lane 09-11 (1:41:44): on the overworld / mid-cutscene the swarm is QUEUED and
+			// lands on the next live battle screen (twitch_tick drains global.tw_swarm_queue).
+			if (!tw_spawn_window_ok(_v, _who_s))
+			{
+				if (!variable_global_exists("tw_swarm_queue")) global.tw_swarm_queue = [];
+				if (array_length(global.tw_swarm_queue) < 3)
+				{
+					array_push(global.tw_swarm_queue, { n : floor(tw_num(_arg, 3)), who : _who_s });
+					global.tw_toast       = _who_s + " -> swarm QUEUED for the next battle screen";
+					global.tw_toast_timer = 240;
+				}
+				break;
+			}
 			if (instance_exists(global.pc))
 			{
 				var _n = floor(tw_num(_arg, 3));
@@ -630,8 +654,12 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// down 1/frame -- so we just re-assert a high value each tick (reapply; this also
 			// catches enemies spawned mid-freeze) and clear it to 0 on restore. Pure stun:
 			// deals NO damage, fully reversible.
+			var _frozen = 0;
 			with (Enemy)
-			{   if (state == state_NORMAL && !is_ancestor(object_index, Boss)) stun_timer = 30;  }
+			{   if (state == state_NORMAL && !is_ancestor(object_index, Boss)) { stun_timer = 30; _frozen++; }  }
+			// owner ask (FEATURE_REQUESTS 09-11): "chatter FROZE 5 ENEMIES", not "chatter -> freeze"
+			global.tw_toast       = _who_s + " -> FROZE " + string(_frozen) + (_frozen == 1 ? " ENEMY" : " ENEMIES") + " " + string(round(_frames / 60)) + "s";
+			global.tw_toast_timer = 240;
 			array_push(global.tw_active, {
 				frames  : _frames,
 				reapply : function() {
@@ -707,6 +735,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// command) -- a fairy that heals you is the natural reading, and VS mode
 			// already blocks it in the deny list above.
 			if (instance_exists(f)) adjust_stat(9999, 9999);
+			global.tw_toast       = _who_s + " -> " + _v + ": full life + magic" + ((_amt > 0) ? " (the number does nothing)" : "");
+			global.tw_toast_timer = 180;
 			break;
 
 		case "arise":
@@ -856,6 +886,80 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			{
 				global.tw_toast       = _who_s + " -> nothing playing";
 			}
+			global.tw_toast_timer = 240;
+			break;
+
+		// ---- round 10c: combos, jokes, help, challenge, disorient -------------------
+		// meth = moon + jump + speed (asm0deus 09-11 1:07:44 "!suggestion !meth").
+		case "meth":
+			twitch_apply("moon",  "", _who_s, _dur);
+			twitch_apply("jump",  "", _who_s, _dur);
+			twitch_apply("speed", "", _who_s, _dur);
+			global.tw_toast       = _who_s + " -> METH: moon + jump + speed. do not sleep.";
+			global.tw_toast_timer = 240;
+			break;
+
+		// quantumentangle (Lane/SivUO "add that"): a joke with a tiny random side effect.
+		case "quantumentangle":
+			{
+				var _qe = choose("shake", "disco", "moon", "shrink", "grow");
+				twitch_apply(_qe, "3", _who_s, "");
+				global.tw_toast       = _who_s + " -> quantum entangled. observed: " + _qe + ". elsewhere: unknown.";
+				global.tw_toast_timer = 240;
+			}
+			break;
+
+		// help: the one-screen "how chat plays" card (tw_help_draw). MrMaseTV 09-11.
+		case "help":
+			tw_help_show();
+			global.tw_toast       = _who_s + " -> help card on screen";
+			global.tw_toast_timer = 120;
+			break;
+
+		// challenge: Lane's design (09-11 2:53): flip stays on for the WHOLE palace, life
+		// capped at 4 containers, no reprieve (helpful verbs blocked). Ends when he leaves
+		// the palace or dies (twitch_tick / DeathScreen_Step clear it). Only in a palace.
+		case "challenge":
+			if (!instance_exists(g) || g.dungeon_num <= 0)
+			{
+				global.tw_toast       = _who_s + " -> challenge needs a palace";
+				global.tw_toast_timer = 240;
+				break;
+			}
+			if (variable_global_exists("tw_challenge") && global.tw_challenge)
+			{
+				global.tw_toast       = _who_s + " -> challenge is already on";
+				global.tw_toast_timer = 180;
+				break;
+			}
+			global.tw_challenge = true;
+			global.tw_flip      = true;
+			array_push(global.tw_active, {
+				frames  : 999999,
+				reapply : function() {
+					if (!global.tw_challenge) { self.frames = 0; return; }
+					global.tw_flip = true;
+					if (instance_exists(f) && f.hp > 4 * Container_AMT) f.hp = 4 * Container_AMT;
+				},
+				restore : function() { global.tw_challenge = false; global.tw_flip = false; }
+			});
+			global.tw_toast       = _who_s + " -> CHALLENGE: flipped until you leave, 4 hearts max, no reprieve";
+			global.tw_toast_timer = 300;
+			break;
+
+		// disorient: confuse that also swaps UP and DOWN (Lane 09-11 3:47:45 "confuse
+		// doesn't do up and down"; owner's call was to keep !confuse as is and add this).
+		case "disorient":
+			if (_arg_frames > 0)           _frames = _arg_frames;
+			else if (tw_num(_dur, 0) <= 0) _frames = 600 + irandom(1200);
+			global.tw_confuse   = true;
+			global.tw_confuse_v = true;
+			array_push(global.tw_active, {
+				frames  : _frames,
+				reapply : function() { global.tw_confuse = true;  global.tw_confuse_v = true;  },
+				restore : function() { global.tw_confuse = false; global.tw_confuse_v = false; }
+			});
+			global.tw_toast       = _who_s + " -> DISORIENT: all four directions swapped " + string(round(_frames / 60)) + "s";
 			global.tw_toast_timer = 240;
 			break;
 
@@ -1018,6 +1122,22 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// One messenger at a time: if it's already on screen, just RE-ARM its hover (and
 	// pull it back in if it was already leaving) so it rides out the new command rather
 	// than stacking a second fairy. Gated on tw_enabled (already true past the top gate).
+	// death-toast assists (chat's polite-assassin meta): who last helped, who last hurt
+	if (_known)
+	{
+		switch (_v)
+		{
+			case "heal": case "mp": case "refill": case "1up": case "life": case "fairy": case "fary":
+			case "invuln": case "link": case "unchicken": case "freeze": case "stun": case "smite": case "clearscreen":
+				global.tw_last_helper = _who_s; global.tw_last_helper_t = current_time; break;
+			case "hurt": case "drain": case "poison": case "kill": case "killlink": case "tax": case "dmgup":
+			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
+			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
+			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth":
+				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; break;
+		}
+	}
+
 	if (_known && global.tw_enabled)
 	{
 		// 69/420 nod -- appended after whatever the verb's own toast says.

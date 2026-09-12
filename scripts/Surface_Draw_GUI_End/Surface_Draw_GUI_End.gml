@@ -681,6 +681,7 @@ function Surface_Draw_GUI_End() {
 	// in twitch_jokes.gml. Callers still set tw_toast / tw_np_timer / konami_toast;
 	// tw_toast_draw() adopts them (tw_toast_legacy_poll) and draws the stacked plates.
 	tw_toast_draw();
+	tw_help_draw();   // !help card (round 10c)
 
 	// ── TWITCH IRC (no-bot mode) status line: top-left, only while the IRC client is
 	// enabled. Reads global.tw_irc_status (idle/connecting/connected/error/no config)

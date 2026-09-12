@@ -19,6 +19,7 @@ function update_LevelUp_1a() {
 	// 9F51
 
 	f.xp -= get_xp_next(g.level_up_idx);
+	global.tw_ckpt_due = "levelup"; // rolling checkpoint on the next live frame (twitch_jokes tw_checkpoint_tick)
 
 
 

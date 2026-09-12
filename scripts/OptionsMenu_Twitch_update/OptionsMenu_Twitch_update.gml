@@ -162,6 +162,18 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // CHECKPOINTS: rolling save copies (twitch_jokes tw_checkpoint). ON/OFF, autosave= in twitch_config.txt.
+	    case Twitch.AUTOSAVE:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (!variable_global_exists("tw_autosave")) global.tw_autosave = true;
+	        global.tw_autosave = !global.tw_autosave;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // COMMANDS: read-only reference. The verb list lives in this row's description
 	    // string, so it draws in the info area like every other row's help text.
 	    case Twitch.COMMANDS:{ if (timer) break;

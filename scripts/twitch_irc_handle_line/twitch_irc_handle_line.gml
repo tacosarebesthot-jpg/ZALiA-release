@@ -114,7 +114,19 @@ function twitch_irc_handle_line(_line) {
 	&&  variable_global_exists("tw_irc_last_cmd")
 	&&  variable_global_exists("tw_irc_frame"))
 	{
-		if (global.tw_irc_frame - global.tw_irc_last_cmd < global.tw_irc_cooldown_frames) return;
+		if (global.tw_irc_frame - global.tw_irc_last_cmd < global.tw_irc_cooldown_frames)
+		{
+			// say how long, at most once every 2 s so spam can't flood the plates
+			if (!variable_global_exists("tw_cd_toast_frame")) global.tw_cd_toast_frame = -1000;
+			if (global.tw_irc_frame - global.tw_cd_toast_frame >= 120)
+			{
+				global.tw_cd_toast_frame = global.tw_irc_frame;
+				var _cd_left = ceil((global.tw_irc_cooldown_frames - (global.tw_irc_frame - global.tw_irc_last_cmd)) / 60);
+				global.tw_toast       = _sender + " -> WAIT " + string(_cd_left) + "S (cooldown)";
+				global.tw_toast_timer = 120;
+			}
+			return;
+		}
 		global.tw_irc_last_cmd = global.tw_irc_frame;
 	}
 
