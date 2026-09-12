@@ -830,6 +830,25 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		case "song":
+		case "np":
+		case "nowplaying":
+		case "track":
+			// Helpful, no effect: answer chat's perennial "what song is this" with the current
+			// track (tracked by tw_nowplaying_set from aud_play_sound). Free of the cooldown
+			// in spirit, but it still passes the global gate like everything else.
+			if (variable_global_exists("tw_np_name") && string(global.tw_np_name) != "")
+			{
+				global.tw_toast       = "NOW PLAYING: " + string(global.tw_np_name);
+				global.tw_np_timer    = 300;
+			}
+			else
+			{
+				global.tw_toast       = _who_s + " -> nothing playing";
+			}
+			global.tw_toast_timer = 240;
+			break;
+
 		case "deny":
 			// HOSTILE (Z3 port, adapted): temporarily block a control family via the
 			// same pc_lock levers. "!deny spell", "!deny jump", "!deny upstab",

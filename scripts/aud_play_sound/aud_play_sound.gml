@@ -55,6 +55,9 @@ function aud_play_sound() {
         
 	        _inst = audio_play_sound(argument[0], _PRIORITY, _LOOP);
 	        mus_rm_inst = _inst;
+	        // NOW PLAYING (2026-09-12): every music start funnels through here (area music,
+	        // jukebox, boss). Intros are skipped so the toast fires once, on the body.
+	        tw_nowplaying_set(argument[0], val(dm[?audio_get_name(argument[0])+"_Is"+STR_Intro]));
         
 	        //sdm("mus_rm_inst: "+string(mus_rm_inst));
 	        if(!is_undefined(_THEME))

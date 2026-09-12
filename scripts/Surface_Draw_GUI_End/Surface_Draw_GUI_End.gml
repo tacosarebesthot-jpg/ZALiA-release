@@ -659,6 +659,21 @@ function Surface_Draw_GUI_End() {
 	// counted down in twitch_tick(); this block only reads it. Fully guarded; saves and
 	// restores font/halign/colour so it can't leak draw state into anything after it.
 	// Revert: delete this block + the twitch_* scripts + their wiring/globals.
+	// NOW PLAYING (2026-09-12, provisional look -- the toast redo replaces the drawing,
+	// not the hook). Bottom-left, small, aqua, fades out over the last second.
+	if (variable_global_exists("tw_np_timer") && global.tw_np_timer > 0)
+	{
+		global.tw_np_timer--;
+		var _np_pf = draw_get_font(); var _np_ph = draw_get_halign(); var _np_pc = draw_get_colour(); var _np_pa = draw_get_alpha();
+		draw_set_font(-1); draw_set_halign(fa_left);
+		var _np_gh = display_get_gui_height(); if (_np_gh <= 0) _np_gh = 240;
+		var _np_msg = "NOW PLAYING: " + string(global.tw_np_name);
+		draw_set_alpha(min(1, global.tw_np_timer / 60));
+		draw_set_colour(c_black); draw_text(9, _np_gh - 41, _np_msg);
+		draw_set_colour(c_aqua);  draw_text(8, _np_gh - 42, _np_msg);
+		draw_set_alpha(_np_pa); draw_set_font(_np_pf); draw_set_halign(_np_ph); draw_set_colour(_np_pc);
+	}
+
 	if (variable_global_exists("tw_toast_timer") && global.tw_toast_timer > 0)
 	{
 		var _tw_pf = draw_get_font();

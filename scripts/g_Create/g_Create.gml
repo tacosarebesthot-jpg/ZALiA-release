@@ -4288,6 +4288,11 @@ function g_Create() {
 	global.tw_irc_autoconnect     = false;     // twitch_config.txt autoconnect=1 -> join chat on boot (twitch_irc_step)
 	global.tw_irc_reconnect_at    = -1;        // frame to retry after a drop (-1 = none); armed by obj_twitch_irc
 	global.tw_irc_reconnect_n     = 0;         // retries since the drop (0 once the welcome 001 arrives)
+	global.tw_np_enabled          = true;      // NOW PLAYING toast on every new music track (aud_play_sound -> tw_nowplaying_set)
+	global.tw_np_name             = "";        // pretty name of the current track ("CV3 MAD FOREST")
+	global.tw_np_asset            = -1;        // its sound asset
+	global.tw_np_last             = "";        // raw name last announced (dedupe across loop restarts)
+	global.tw_np_timer            = 0;         // frames left on the NOW PLAYING toast
 	global.QuestTimer_scale       = 1.5;       // top-left run timer text scale (Lane 09-11: "timer top left very small"); 1 = the old 8px sprite font
 	// ────────────────────────────────────────────────────────────────────────
 
