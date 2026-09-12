@@ -3055,6 +3055,7 @@
     {"id":{"name":"Rando_prepare_hints","path":"scripts/Rando_prepare_hints/Rando_prepare_hints.yy",},},
     {"id":{"name":"Rando_randomize_dungeon_tilesets","path":"scripts/Rando_randomize_dungeon_tilesets/Rando_randomize_dungeon_tilesets.yy",},},
     {"id":{"name":"Rando_randomize_enemies","path":"scripts/Rando_randomize_enemies/Rando_randomize_enemies.yy",},},
+    {"id":{"name":"Rando_reshuffle_enemies","path":"scripts/Rando_reshuffle_enemies/Rando_reshuffle_enemies.yy",},},
     {"id":{"name":"Rando_randomize_file","path":"scripts/Rando_randomize_file/Rando_randomize_file.yy",},},
     {"id":{"name":"Rando_randomize_items_1","path":"scripts/Rando_randomize_items_1/Rando_randomize_items_1.yy",},},
     {"id":{"name":"Rando_randomize_items_1a_1","path":"scripts/Rando_randomize_items_1a_1/Rando_randomize_items_1a_1.yy",},},

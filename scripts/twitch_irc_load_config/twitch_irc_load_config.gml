@@ -185,6 +185,7 @@ function tw_irc_is_verb(_v) {
 		case "stasis":   // Lane's freeze-Link ask
 		case "points": case "pts": case "bal": case "ghost": case "crush":   // round 10h
 		case "version": case "ver": case "build":
+		case "reshuffle":   // Lane's enemy reshuffler
 			return true;
 		default:
 			return false;
@@ -222,6 +223,7 @@ function tw_alias_verb(_v) {
 		case "balance": case "point": case "mypoints": return "points";
 		case "invisible": case "invis": case "ghosts": return "ghost";
 		case "drop": case "block": case "squash": return "crush";
+		case "reroll": case "reshuffleenemies": case "enemyreshuffle": case "reshuffler": return "reshuffle";
 	}
 	return _v;
 }

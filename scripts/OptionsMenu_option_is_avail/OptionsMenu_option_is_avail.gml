@@ -233,6 +233,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        default:                    {return false; break;}
 	        case Rando_MARK_ACQUIRED:   {return val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]) || val(global.dm_save_file_settings[?STR_Randomize+STR_PBAG+STR_Locations]) || val(global.dm_save_file_settings[?STR_Randomize+STR_Key +STR_Locations]); break;}
 	        case Rando_HINTS:           {return val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations]); break;}
+	        case Rando_RESHUFFLE:       {return instance_exists(f) && f.file_num > 0 && val(f.dm_rando[?STR_Randomize+STR_Enemy+STR_Method]) > 0; break;}
 	        case Rando_MAPS_SHOW_KEYS:  {return val(global.dm_save_file_settings[?STR_Randomize+STR_Key+STR_Locations]); break;}
 	        case Rando_ENEMY_RANDO:     {return val(global.dm_save_file_settings[?STR_Randomize+STR_Enemy+STR_Method]) || val(global.dm_save_file_settings[?STR_Randomize+STR_Enemy+STR_Spawner]) || val(global.dm_save_file_settings[?STR_Randomize+STR_Enemy+STR_ENIGMA]); break;}
 	        //case Rando_RANDO_ENEMY:     {return val(global.dm_save_file_settings[?STR_Randomize+STR_Enemy+STR_Method]); break;}

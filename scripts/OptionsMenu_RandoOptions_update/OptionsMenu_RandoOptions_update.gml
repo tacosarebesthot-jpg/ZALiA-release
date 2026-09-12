@@ -79,6 +79,19 @@ function OptionsMenu_RandoOptions_update() {
 	    break;}
     
 	    // -------------------------------------------------
+	    case Rando_RESHUFFLE:{
+	    if (timer) break;
+
+	    if (_InputConfirm_pressed)
+	    {
+	        var _rs = Rando_reshuffle_enemies();
+	        if (_rs == "") { aud_play_sound(_SOUND2); tw_toast_push("ENEMIES RESHUFFLED", "FROM THE NEXT SCREEN ON", "info"); }
+	        else           { aud_play_sound(BACK_SOUND1); tw_toast_push("RESHUFFLE: " + string_upper(_rs), "", "warn"); }
+	        timer = DURATION1;
+	    }
+	    break;}
+
+	    // -------------------------------------------------
 	    case Rando_HINTS:{
 	    if (timer) break;
     

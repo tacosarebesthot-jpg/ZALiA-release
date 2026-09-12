@@ -1006,6 +1006,25 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		// reshuffle (Lane's "enemy reshuffler", 09-11 / 09-12): re-roll the seed's enemy randomizer
+		// mid-run. Items, spells, palaces, towns untouched; the next screen uses the new roll.
+		case "reshuffle":
+			{
+				var _rs = Rando_reshuffle_enemies();
+				if (_rs == "")
+				{
+					global.tw_toast       = _who_s + " -> ENEMIES RESHUFFLED. the next screen is a surprise.";
+					global.tw_toast_timer = 300;
+				}
+				else
+				{
+					global.tw_toast       = _who_s + " -> reshuffle: " + _rs;
+					global.tw_toast_timer = 240;
+					global.tw_apply_refused = true;
+				}
+			}
+			break;
+
 		case "version":
 			global.tw_toast       = "ZALiA " + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ")";
 			global.tw_toast_timer = 240;
@@ -1223,7 +1242,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "hurt": case "drain": case "poison": case "kill": case "killlink": case "tax": case "dmgup":
 			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
 			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
-			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush":
+			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush": case "reshuffle":
 				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; break;
 		}
 	}

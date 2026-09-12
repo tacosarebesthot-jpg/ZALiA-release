@@ -586,7 +586,7 @@ function tw_help_draw() {
 		"      !FLAME !ARISE !CUCCO !CHALLENGE",
 		"FUN   !SONG !SUGGEST !METH !FATALITY",
 		"      !QUANTUMENTANGLE !HELP !POINTS",
-		"      !GHOST !CRUSH",
+		"      !GHOST !CRUSH !RESHUFFLE",
 		"ADD A NUMBER FOR SECONDS: !SLOW 20"
 	];
 	var _gw = display_get_gui_width();  if (_gw <= 0) _gw = 320;

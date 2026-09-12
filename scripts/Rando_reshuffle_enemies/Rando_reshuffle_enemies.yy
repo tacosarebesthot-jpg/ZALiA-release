@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"Rando_reshuffle_enemies",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"Rando_reshuffle_enemies",
+  "parent":{
+    "name":"Scripts",
+    "path":"folders/Scripts.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

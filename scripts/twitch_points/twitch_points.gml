@@ -92,6 +92,7 @@ function tw_points_cost(_v) {
 		case "ice": case "icefloor": return 15; case "moon": return 10;  case "disco": return 5;  case "party": return 15;
 		case "shrink": case "grow": return 10;  case "speed": return 15; case "shake": return 5;  case "music": return 5;
 		case "meth": return 40;   case "quantumentangle": return 10;  case "ghost": return 25;  case "crush": return 25;
+		case "reshuffle": return 50;
 		case "fatality": case "friendship": case "flawless": case "finisher": return 20;
 	}
 	return 10;

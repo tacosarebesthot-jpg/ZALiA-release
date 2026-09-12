@@ -61,6 +61,11 @@ function OptionsMenu_Draw_RandoOptions() {
 	        _text = val(dm_options[?_dk+hex_str(_option_state)+STR_Text], STR_undefined);
 	        break;}
         
+	        case Rando_RESHUFFLE:{
+	        var _rs_n = instance_exists(f) ? val(f.dm_rando[?STR_Randomize+STR_Enemy+"_Reshuffle"+STR_Count]) : 0;
+	        _text = (_rs_n > 0) ? (string(_rs_n) + "X") : val(dm_options[?_dk+hex_str(0)+STR_Text], "GO");
+	        break;}
+
 	        case Rando_HINTS:{
 	        _option_state = global.RandoHints_enabled;
 	        _text = val(dm_options[?_dk+hex_str(_option_state)+STR_Text], STR_undefined);

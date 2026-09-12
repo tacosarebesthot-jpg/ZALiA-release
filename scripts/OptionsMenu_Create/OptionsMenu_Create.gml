@@ -1136,6 +1136,14 @@ function OptionsMenu_Create() {
 	}//switch(global.MarkItemLocations_VER)
 	//                                                                          //
 	_j=0; _k=0;
+	Rando_RESHUFFLE = ++_i;
+	_dk2 = _dk0+hex_str(_i);
+	dm_options[?_dk2+STR_Font]                         = FONT2;
+	dm_options[?_dk2+STR_Option+STR_Text]              = "RESHUFFLE ENEMIES";
+	dm_options[?_dk2+STR_State+hex_str(_j++)+STR_Text] = "GO";
+	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "RE-ROLL THIS SEED'S ENEMY RANDOMIZER NOW. ITEMS, SPELLS, PALACES AND TOWNS STAY PUT. TAKES EFFECT ON THE NEXT SCREEN.";
+	//                                                                          //
+	_j=0; _k=0;
 	Rando_HINTS = ++_i;
 	_dk2 = _dk0+hex_str(_i);
 	dm_options[?_dk2+STR_Font]                         = FONT2;
