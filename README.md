@@ -91,7 +91,12 @@ is never displayed or transmitted anywhere else.
 
 Viewers type commands in your chat to affect your run — healing, hindering, or
 stealing an item and giving it back a while later. Effect duration and cooldown
-are configurable on the setup page.
+are configurable on the setup page. The same OPTIONS → TWITCH page also holds
+**CHAT JOKES** (town folk talk like chat) and **CHECKPOINTS** (rolling save copies).
+See [TWITCH_SETUP.md](TWITCH_SETUP.md) for the full command list.
+
+Sending a bug report? Double-click **GRAB_LOGS.bat** in the game folder: it zips your
+logs, saves and marked spots to your desktop. That is the folder we need, not the game.
 
 ---
 

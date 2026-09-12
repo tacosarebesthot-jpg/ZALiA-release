@@ -122,50 +122,96 @@ behaves.
 
 ## What chat can do
 
-Syntax is `!verb [amount]`. Unknown commands are ignored. Timed effects run for
-the duration you set.
+Syntax is `!verb [amount]`. Unknown commands are ignored. Every **timed** effect
+takes an explicit duration in seconds — `!flip 100`, `!dark 45` — capped at 60s;
+without one it runs for the duration you set. Typos auto-correct where it matters
+(`!filp`, `!huge`, `!span`), stray invisible paste-characters are stripped, and
+`!hurt4` works like `!hurt 4`.
 
 ### Help you
 
 | Command | Effect |
 |---|---|
-| `!heal <n>` | restore health |
+| `!heal <n>` | restore `<n>` quarter-heart boxes (bare `!heal` = full) |
 | `!mp <n>` | restore magic |
-| `!refill` | full health and magic |
+| `!refill` `!restore` | full health and magic |
+| `!fairy` | full health and magic (the fairy heals you) |
 | `!1up` | an extra life |
 | `!invuln` | brief invincibility |
 | `!protect` `!shield` `!reflect` | grant that spell's effect |
-| `!fairy` `!arise` `!cucco` `!chicken` | turn Link into a cucco |
-| `!freeze` `!stun` | freeze every non-boss enemy on screen |
+| `!jump` `!life` `!summon` | cast that spell |
+| `!arise` `!cucco` `!chicken` | turn Link into a cucco |
+| `!freeze` `!stun` | freeze every non-boss enemy on screen (the toast counts them) |
 | `!smite` `!clearscreen` | kill every non-boss enemy on screen |
+| `!link` `!unchicken` | back to Link form |
 
 ### Hurt you
 
 | Command | Effect |
 |---|---|
-| `!hurt <n>` | chip damage, non-lethal |
+| `!hurt <n>` | `<n>` quarter-heart boxes of damage (bare `!hurt` = half a box) |
 | `!drain <n>` | drain magic |
+| `!poison` | ticking damage that can kill |
+| `!kill` | exactly what it says |
 | `!curse` | slow health drip, stops at 1 HP |
 | `!steal` `!rob` | takes one of your items and gives it back later |
 | `!slow` | marsh-slow legs |
-| `!spawn <enemy> <n>` | drop a named enemy next to you |
+| `!root` | no walking, no jumping — swinging still works |
+| `!spawn <enemy> <n>` | drop a named enemy next to you (daira, moblin, goriya, zora, stalfos, bat, atta, myu) |
 | `!swarm <n>` | a pack of random enemies around you |
 | `!flame` `!heckler` | a jumping flame tagged with the viewer's name |
+| `!deny <what>` | temporarily blocks spell / jump / upstab / downstab / upthrust / downthrust / all |
+| `!tax <pct>` | takes a cut of your experience (bare `!tax` = 10%, up to 50) |
+| `!dmgup <secs>` | every hit does double damage for a while |
+| `!attrition <secs>` | life drips away slowly; stops short of killing |
+| `!stasis <secs>` | Link freezes in place, mid-air included (1–10s) |
+| `!challenge` | inside a palace only: screen stays flipped until you leave, life capped at 4 hearts, no helpful commands. Ends when you leave or die |
 
 ### Mess with your head
 
 | Command | Effect |
 |---|---|
-| `!confuse` | swaps left and right |
+| `!confuse` | swaps left and right — bare `!confuse` rolls a random 10–30s, good luck |
+| `!disorient` | confuse, plus up and down |
 | `!flip` | mirrors the screen |
-| `!dark` | kills the lights — you will need the candle |
+| `!dark` | kills the lights — you will need the candle (it actually works now) |
+| `!ice` | the floor is ice; momentum is a lifestyle |
+| `!moon` | quarter gravity. big floaty jumps |
 | `!disco` | colour-cycling overlay |
 | `!party` | disco and flip together |
 | `!shrink` `!grow` | resize Link |
 | `!speed <secs>` | too fast to control |
 | `!shake` | screen shake |
-| `!spell <name>` | cast a named spell |
+| `!spell <name>` | cast a named spell (`!fire` `!thunder` `!enigma` work too) |
 | `!music` | reshuffle the soundtrack mid-run |
+| `!song` `!np` | shows the current track's name (it also pops up on every new track) |
+| `!meth` | moon + jump + speed at once |
+| `!quantumentangle` | something small and random happens. or doesn't |
+| `!help` `!cmds` | a one-screen card of all of this, in the game, for 8 seconds |
+| `!suggest <idea>` | your idea goes in a file gainey reads |
+
+Clean out a boss fight without taking a hit and the game plays the real Mortal
+Kombat II **FLAWLESS VICTORY** and **FATALITY** / **FRIENDSHIP** splash, announcer and
+all. `!swarm` typed on the overworld waits for the next battle screen. A command on
+cooldown answers with how long to wait. Small numbers like 69 and 420 get the respect
+they deserve.
+
+### Chat jokes
+
+With **CHAT JOKES** on (OPTIONS → TWITCH), the town folk talk like chat: every idle
+line, sign, healer and story-recorder has several alternates picked at random, with
+your chatters' names and the boss you are fighting dropped in. **CLEAN** keeps the
+cursing out, **DIRTY** lets it all through, **NORMAL** is the original text. Hints and
+quest lines are never changed, so a randomizer run stays solvable. The lines live in
+`dialogue_jokes.txt` next to the game; a copy in `%LOCALAPPDATA%\ZALiA\` overrides it,
+so you can write your own.
+
+### Checkpoints
+
+**CHECKPOINTS** (same page, on by default) drops a copy of your live save into
+`%LOCALAPPDATA%\ZALiA\checkpoints\` every 60 seconds of play, on every item and on
+every level-up, keeping the newest 30. Your real save file is never touched. To go
+back in time: close the game, copy one over `SaveFile_N.txt`, start the game.
 
 ---
 
@@ -174,13 +220,13 @@ the duration you set.
 Turn this on and it stops being a favour economy. **Chat's goal is to kill you.**
 
 Every helpful command is **blocked** — no healing, no magic, no extra lives, no
-shields, no invulnerability, no cucco. Anyone who tries is told it was blocked, so
-they know the rules rather than thinking the game is broken. Only the things that
-hurt you still work.
+shields, no invulnerability, no cucco, no jump spell. Anyone who tries is told it
+was blocked, so they know the rules rather than thinking the game is broken. Only
+the things that hurt you still work.
 
-**The game keeps score.** Every death is a point to chat, shown live on the stream
-tracker as their running total. It does not reset when you do — it stands for the
-session.
+**The game keeps score.** Every death is a point to chat — the stream toast calls
+it out live ("CHAT KILL xN") and the tracker shows their running total. It does not
+reset when you do — it stands for the session.
 
 Blocking works as a *deny* list rather than an allow list, deliberately: any
 hostile command added in a future version works in VS mode the day it ships,
