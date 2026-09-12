@@ -179,6 +179,10 @@ JACOB THE MOO · ATOMIC DRACULA · AARON · ZABII
 PATRICK · ERIN · VINNY · SCHMIDTTYGAMES · TRAILZ · ALTERNA4091 · SOPHILAUTIA ·
 BROOMIETUNES · ANARKHYA · STEEL CRESCENTS · the Link Is Adventuresome community
 
+### Support the port
+
+[**Join the Discord**](https://discord.gg/FSphHEsu8D) for builds, playtesting and bug reports. Patreon link: coming.
+
 ### 2026 port patrons and donators
 
 **LANEAGE** · **DOW_PY72O** (cumqueefador) · **MrB**
