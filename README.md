@@ -179,13 +179,13 @@ JACOB THE MOO · ATOMIC DRACULA · AARON · ZABII
 PATRICK · ERIN · VINNY · SCHMIDTTYGAMES · TRAILZ · ALTERNA4091 · SOPHILAUTIA ·
 BROOMIETUNES · ANARKHYA · STEEL CRESCENTS · the Link Is Adventuresome community
 
-### 2026 port patrons
+### 2026 port patrons and donators
 
-**LANEAGE** · **DOW_PY72O** (cumqueefador)
+**LANEAGE** · **DOW_PY72O** (cumqueefador) · **MrB**
 
 ### 2026 port special thanks
 
-**LANEAGE** · **DOW_PY72O** (cumqueefador) · **HoverBat**, for ZALiA ·
+**LANEAGE** · **DOW_PY72O** (cumqueefador) · **MrB** · **HoverBat**, for ZALiA ·
 **Claude** (Anthropic), who wrote the 2026 rounds at gainey's direction · Laneage's Twitch chat, for every idea in the command list
 
 ### Original *Zelda II: The Adventure of Link* staff — Nintendo, 1987
