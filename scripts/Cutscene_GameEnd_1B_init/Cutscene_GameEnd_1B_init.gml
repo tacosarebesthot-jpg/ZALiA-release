@@ -323,11 +323,12 @@ function Cutscene_GameEnd_1B_init() {
 	//                                                  //
 	//                                                  //
 	//                                                  //
-	// ------------------- 2026 PORT PATRONS (owner 2026-09-12: only these two) -------------------
-	_text="2026 PORT PATRONS";
+	// ------------------- 2026 PORT PATRONS AND DONATORS (owner 2026-09-12) -------------------
+	_text="2026 PORT PATRONS AND DONATORS";
 	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
 	dg_CREDITS[#_idx,1] = "LANEAGE";
-	dg_CREDITS[#_idx,2] = "DOW-PYRO720"; // DOW_pyro720 (the font draws "_" blank)
+	dg_CREDITS[#_idx,2] = "DOW-PY72O"; // DOW_PY72O aka cumqueefador (the font draws "_" blank)
+	dg_CREDITS[#_idx,3] = "MRB";
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	//                                                  //
@@ -335,12 +336,14 @@ function Cutscene_GameEnd_1B_init() {
 	_text="2026 PORT SPECIAL THANKS";
 	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
 	dg_CREDITS[#_idx,1] = "LANEAGE";
-	dg_CREDITS[#_idx,2] = "DOW-PYRO720";
+	dg_CREDITS[#_idx,2] = "DOW-PY72O (CUMQUEEFADOR)";
+	dg_CREDITS[#_idx,3] = "MRB";
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
 	dg_CREDITS[#_idx,1] = "HOVERBAT, FOR ZALIA";
-	dg_CREDITS[#_idx,2] = "LANEAGE'S TWITCH CHAT";
+	dg_CREDITS[#_idx,2] = "CLAUDE (ANTHROPIC)";
+	dg_CREDITS[#_idx,3] = "LANEAGE'S TWITCH CHAT";
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	//                                                  //
