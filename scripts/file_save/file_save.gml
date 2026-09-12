@@ -18,6 +18,10 @@ function file_save() {
 	var                            _arg=0;
 	var _FILE_NUM       = argument[_arg++];
 	var _WILL_ELIMINATE = argument[_arg++];
+	// optional: a checkpoint path (twitch_jokes tw_checkpoint). The live state is written THERE
+	// instead of the slot, and nothing else is touched: no slot rewrite, no in-memory copies, no
+	// rando data / spoiler rewrite.
+	var _CHECKPOINT_PATH = (argument_count > _arg) ? string(argument[_arg++]) : "";
 
 	var _i, _file, _data;
 	var _dm_save_data = ds_map_create();
@@ -156,6 +160,18 @@ function file_save() {
 
 
 
+
+	if (_CHECKPOINT_PATH != "")
+	{
+	    _file = file_text_open_write(_CHECKPOINT_PATH);
+	    if (_file != -1)
+	    {
+	        file_text_write_string(_file, json_encode(_dm_save_data));
+	        file_text_close(_file);
+	    }
+	    ds_map_destroy(_dm_save_data); _dm_save_data=undefined;
+	    return; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	}
 
 	if (file_exists(_FILE_NAME))
 	{

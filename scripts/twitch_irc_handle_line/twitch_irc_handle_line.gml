@@ -108,6 +108,12 @@ function twitch_irc_handle_line(_line) {
 		else return;
 	}
 
+	// POINTS ECONOMY: can the viewer pay? Checked before the cooldown, so a broke viewer
+	// neither arms the cooldown for everyone nor pays; the deduction happens after the
+	// dispatcher reports the command took effect.
+	var _bill_verb = tw_alias_verb(_verb);
+	if (!tw_points_afford(_sender, _bill_verb)) return;
+
 	// ---- global cooldown (spam guard) -------------------------------------
 	// One throttle for everyone: ignore any accepted command within
 	// global.tw_irc_cooldown_frames of the previous accepted one.
@@ -131,14 +137,11 @@ function twitch_irc_handle_line(_line) {
 		global.tw_irc_last_cmd = global.tw_irc_frame;
 	}
 
-	// POINTS ECONOMY (round 10h): pay for the verb, or hear why not. After the cooldown
-	// so a rejected command is never charged.
-	if (!tw_points_charge(_sender, tw_alias_verb(_verb))) return;
-
 	// hand off to the EXISTING dispatcher (itself gated on global.tw_enabled).
 	// Duration: pass EMPTY, not a number -- the hardcoded 300 here pinned EVERY
 	// chat effect to 5s and silently defeated the owner's EFFECT LENGTH setting
 	// (the options-menu value never reached IRC effects at all). Empty ->
 	// twitch_apply falls back to global.tw_effect_secs, same as the drop-file path.
 	twitch_apply(_verb, _arg, _sender, "");
+	if (variable_global_exists("tw_apply_ok") && global.tw_apply_ok) tw_points_deduct(_sender, _bill_verb);
 }

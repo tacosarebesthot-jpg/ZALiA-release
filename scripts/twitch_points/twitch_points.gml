@@ -19,21 +19,7 @@ function tw_points_init() {
 	global.tw_points_frame  = 0;
 	global.tw_points_saved  = 0;
 	global.tw_points_stipend= 0;
-	if (file_exists("twitch_config.txt"))
-	{
-		var _fc = file_text_open_read("twitch_config.txt");
-		if (_fc != -1)
-		{
-			while (!file_text_eof(_fc))
-			{
-				var _cl = tw_trim(file_text_readln(_fc));
-				var _ce = string_pos("=", _cl);
-				if (_ce > 1 && string_lower(tw_trim(string_copy(_cl, 1, _ce - 1))) == "points")
-					global.tw_points_on = (tw_num(tw_trim(string_copy(_cl, _ce + 1, string_length(_cl) - _ce)), 0) != 0);
-			}
-			file_text_close(_fc);
-		}
-	}
+	global.tw_points_on = (tw_num(tw_config_get("points", "0"), 0) != 0);
 	if (file_exists("points.txt"))
 	{
 		var _fh = file_text_open_read("points.txt");
@@ -126,8 +112,8 @@ function tw_points_earn(_who) {
 	tw_points_add(_k, 1);
 }
 
-/// @description  tw_points_charge(who, verb) -> true if the command may run (paid or free).
-function tw_points_charge(_who, _v) {
+/// @description  tw_points_afford(who, verb) -> true if the viewer may run it (free, or can pay). No deduction.
+function tw_points_afford(_who, _v) {
 	if (!variable_global_exists("tw_points_on") || !global.tw_points_on) return true;
 	if (tw_points_is_free(_who)) return true;
 	var _cost = tw_points_cost(_v);
@@ -139,8 +125,15 @@ function tw_points_charge(_who, _v) {
 		global.tw_toast_timer = 180;
 		return false;
 	}
-	tw_points_add(_who, -_cost);
 	return true;
+}
+
+/// @description  tw_points_deduct(who, verb) -- pay for a command that actually took effect.
+function tw_points_deduct(_who, _v) {
+	if (!variable_global_exists("tw_points_on") || !global.tw_points_on) return;
+	if (tw_points_is_free(_who)) return;
+	var _cost = tw_points_cost(_v);
+	if (_cost > 0) tw_points_add(_who, -_cost);
 }
 
 /// @description  tw_points_tick() -- from twitch_tick every frame: the 5-minute stipend and the throttled save.

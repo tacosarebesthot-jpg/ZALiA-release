@@ -20,6 +20,10 @@
 // ============================================================================
 function twitch_apply(_verb, _arg, _who, _dur) {
 
+	// tw_apply_ok: did this call actually do something? twitch_irc_handle_line charges points
+	// only when it did (round 10i). Every early return / refusal leaves it false.
+	global.tw_apply_ok = false;
+
 	// Master gate: OFF by default. Ignore everything unless explicitly enabled.
 	if (!variable_global_exists("tw_enabled") || !global.tw_enabled) return;
 
@@ -130,6 +134,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// recognized-verb flag: the default/unknown case flips this false so the messenger
 	// fairy below only heralds REAL commands, never a typo or stray drop file.
 	var _known = true;
+	global.tw_apply_refused = false; // set by a verb that bailed with its own toast (no palace, no battle screen...)
+
 
 	// feedback toast (plain ASCII arrow for default-font glyph safety; the
 	// default case overrides it). Timer counted down in twitch_tick().
@@ -585,6 +591,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				{
 					global.tw_toast       = _who_s + " -> unknown enemy. try: daira moblin goriya zora stalfos bat atta myu";
 					global.tw_toast_timer = 300;
+					global.tw_apply_refused = true;
 					break;
 				}
 				var _face = (global.pc.xScale < 0) ? -1 : 1;
@@ -924,12 +931,14 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			{
 				global.tw_toast       = _who_s + " -> challenge needs a palace";
 				global.tw_toast_timer = 240;
+				global.tw_apply_refused = true;
 				break;
 			}
 			if (variable_global_exists("tw_challenge") && global.tw_challenge)
 			{
 				global.tw_toast       = _who_s + " -> challenge is already on";
 				global.tw_toast_timer = 180;
+				global.tw_apply_refused = true;
 				break;
 			}
 			global.tw_challenge = true;
@@ -976,13 +985,18 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					g.pc_lock |= (PC_LOCK_HSPD | PC_LOCK_JUMP);
 					array_push(global.tw_active, {
 						frames  : _frames,
-						sx      : global.pc.x,
-						sy      : global.pc.y,
+						pc_id   : global.pc,
+						sxl     : global.pc.xl,
+						syt     : global.pc.yt,
 						bits    : (PC_LOCK_HSPD | PC_LOCK_JUMP),
 						reapply : function() {
+							// a death, a respawn or a room change ends the hold: never pin a new Link to old coordinates
+							if (!instance_exists(global.pc) || global.pc != self.pc_id || (instance_exists(g) && g.ChangeRoom_timer > 0))
+							{   self.frames = 0; return;  }
 							global.tw_stasis = true;
 							if (instance_exists(g)) g.pc_lock |= self.bits;
-							if (instance_exists(global.pc)) { global.pc.x = self.sx; global.pc.y = self.sy; global.pc.vspd = 0; global.pc.hspd = 0; }
+							set_xlyt(global.pc, self.sxl, self.syt); // keeps xl/yt/xc/yb and the hit boxes in step with x/y
+							global.pc.vspd = 0; global.pc.hspd = 0;
 						},
 						restore : function() { global.tw_stasis = false; if (instance_exists(g)) g.pc_lock &= ~self.bits; }
 					});
@@ -1017,6 +1031,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		// It falls on him or on whatever is under it (FallingBlock_update does the crushing).
 		case "crush":
 			if (!tw_spawn_window_ok(_v, _who_s)) break;
+			if (!instance_exists(g) || g.dungeon_num <= 0)
+			{	// the block lands as palace break-tiles; outside a palace that rewrites town/cave floors
+				global.tw_toast       = _who_s + " -> crush needs a palace";
+				global.tw_toast_timer = 240;
+				global.tw_apply_refused = true;
+				break;
+			}
 			if (instance_exists(global.pc))
 			{
 				var _cr_x = (global.pc.xl + 8) & ~15;
@@ -1202,6 +1223,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		}
 	}
 
+	if (_known && global.tw_enabled && global.tw_apply_ok == false) global.tw_apply_ok = !global.tw_apply_refused;
+	global.tw_apply_refused = false;
+
 	if (_known && global.tw_enabled)
 	{
 		// 69/420 nod -- appended after whatever the verb's own toast says.
@@ -1365,6 +1389,7 @@ function tw_spawn_window_ok(_v, _who_s) {
 	{
 		global.tw_toast       = _who_s + " -> " + string(_v) + " needs a battle screen";
 		global.tw_toast_timer = 180;
+		global.tw_apply_refused = true;
 		return false;
 	}
 
@@ -1375,6 +1400,7 @@ function tw_spawn_window_ok(_v, _who_s) {
 	{
 		global.tw_toast       = _who_s + " -> " + string(_v) + " fizzled (busy)";
 		global.tw_toast_timer = 180;
+		global.tw_apply_refused = true;
 		return false;
 	}
 	return true;

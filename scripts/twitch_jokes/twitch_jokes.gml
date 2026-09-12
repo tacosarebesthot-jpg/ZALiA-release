@@ -34,33 +34,35 @@ function tw_jokes_init() {
 	global.tw_chatters_live   = [];              // seen live this session, oldest first
 	global.tw_last_boss       = "";              // object name of the last Boss seen (twitch_tick)
 
-	// jokes= from twitch_config.txt (twitch_irc_load_config only runs when the IRC
-	// link is used, and the jokes work without chat)
-	var _p = working_directory + "twitch_config.txt";
-	if (file_exists(_p))
-	{
-		var _fh = file_text_open_read(_p);
-		if (_fh != -1)
-		{
-			while (!file_text_eof(_fh))
-			{
-				var _line = tw_trim(file_text_readln(_fh));
-				var _eq = string_pos("=", _line);
-				if (_eq > 1 && string_lower(tw_trim(string_copy(_line, 1, _eq - 1))) == "jokes")
-				{
-					global.tw_jokes_mode = clamp(tw_num(tw_trim(string_copy(_line, _eq + 1, string_length(_line) - _eq)), 1), 0, 2);
-				}
-				if (_eq > 1 && string_lower(tw_trim(string_copy(_line, 1, _eq - 1))) == "autosave")
-				{
-					global.tw_autosave = (tw_num(tw_trim(string_copy(_line, _eq + 1, string_length(_line) - _eq)), 1) != 0);
-				}
-			}
-			file_text_close(_fh);
-		}
-	}
+	// jokes= / autosave= from twitch_config.txt. twitch_irc_load_config only runs when the
+	// IRC link is used, and both features work without chat, so read them here at boot.
+	global.tw_jokes_mode = clamp(tw_num(tw_config_get("jokes", "1"), 1), 0, 2);
+	global.tw_autosave   = (tw_num(tw_config_get("autosave", "1"), 1) != 0);
+	global.tw_loz_jingle = (tw_num(tw_config_get("loz_jingle", "1"), 1) != 0); // loz_jingle=0 keeps the theme's own item fanfare
 
 	tw_jokes_load();
 	tw_chatters_load();
+}
+
+/// @description  tw_config_get(key, default) -- one value out of twitch_config.txt ("key=value" lines,
+/// # comments). Boot-time reads for settings that must work before the IRC client ever loads.
+function tw_config_get(_key, _default) {
+	var _name = "twitch_config.txt";
+	if (!file_exists(_name)) return _default;
+	var _fh = file_text_open_read(_name);
+	if (_fh == -1) return _default;
+	var _want = string_lower(string(_key));
+	var _out = _default;
+	while (!file_text_eof(_fh))
+	{
+		var _line = tw_trim(file_text_readln(_fh));
+		var _eq = string_pos("=", _line);
+		if (_eq > 1 && string_char_at(_line, 1) != "#"
+		&&  string_lower(tw_trim(string_copy(_line, 1, _eq - 1))) == _want)
+		{   _out = tw_trim(string_copy(_line, _eq + 1, string_length(_line) - _eq));  }
+	}
+	file_text_close(_fh);
+	return _out;
 }
 
 /// @description  tw_jokes_load() -- (re)read dialogue_jokes.txt into global.tw_jokes_map.
@@ -181,21 +183,8 @@ function tw_jokes_format(_text, _save_name) {
 		if (_nm == "") _nm = "LINK";
 		_t = string_replace_all(_t, "{name}", _nm);
 	}
-	_t = string_upper(_t);
-
-	// font-safe characters only (FONT_LAYOUT) plus the two control characters
-	static _ok = " /\\()*+-.,:'%&!?0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ<|";
-	var _clean = "";
-	var _n = string_length(_t);
-	for (var _i = 1; _i <= _n; _i++)
-	{
-		var _c = string_char_at(_t, _i);
-		if (_c == "\"") _c = "'";
-		else if (_c == ";") _c = ",";
-		else if (_c == "_") _c = " ";     // "_" is the writer's CHAR_BLANK (fast-forward), never wanted here
-		else if (ord(_c) > 127) continue;
-		if (string_pos(_c, _ok) > 0) _clean += _c;
-	}
+	// font-safe characters only, plus the two control characters ("_" would be the writer's CHAR_BLANK)
+	var _clean = tw_font_clean(_t, "<|");
 
 	// wrap: pages ("|") of paragraphs ("<") of words
 	var _pages_out = [];
@@ -363,7 +352,14 @@ function tw_boss_name() {
 // tw_toast/konami_toast/tw_np_timer into a plate, so no caller had to change.
 
 function tw_toast_clean(_s) {
+	return tw_trim(tw_font_clean(_s, ""));
+}
+
+/// @description  tw_font_clean(text, extra) -- upper case, sprite-font characters only ("\"" -> "'",
+/// ";" -> ",", "_" -> space, anything non-ASCII dropped); extra = control characters to let through.
+function tw_font_clean(_s, _extra) {
 	var _t = string_upper(string(_s));
+	var _ok = FONT_LAYOUT + string(_extra);
 	var _out = "";
 	var _n = string_length(_t);
 	for (var _i = 1; _i <= _n; _i++)
@@ -373,9 +369,9 @@ function tw_toast_clean(_s) {
 		else if (_c == ";") _c = ",";
 		else if (_c == "_") _c = " ";
 		else if (ord(_c) > 127) continue;
-		if (string_pos(_c, FONT_LAYOUT) > 0) _out += _c;
+		if (string_pos(_c, _ok) > 0) _out += _c;
 	}
-	return tw_trim(_out);
+	return _out;
 }
 
 /// @description  tw_toast_push(title, sub, kind) -- queue one plate. kind: chat/music/win/warn/info.
@@ -386,26 +382,29 @@ function tw_toast_push(_title, _sub, _kind) {
 	if (_t == "") return;
 	static _MAXT = 26;
 	static _MAXS = 30;
-	if (string_length(_t) > _MAXT && _s == "")
-	{	// spill the tail of a long one-liner into the second line at a word boundary
+	var _t2 = "";
+	if (string_length(_t) > _MAXT)
+	{	// a long title wraps at a word boundary onto a second title line; nothing is cut
 		var _cut = _MAXT;
 		while (_cut > 10 && string_char_at(_t, _cut) != " ") _cut--;
 		if (_cut <= 10) _cut = _MAXT;
-		_s = tw_trim(string_delete(_t, 1, _cut));
-		_t = tw_trim(string_copy(_t, 1, _cut));
+		_t2 = tw_trim(string_delete(_t, 1, _cut));
+		_t  = tw_trim(string_copy(_t, 1, _cut));
+		if (string_length(_t2) > _MAXT) _t2 = string_copy(_t2, 1, _MAXT - 1) + ".";
 	}
-	if (string_length(_t) > _MAXT) _t = string_copy(_t, 1, _MAXT - 1) + ".";
+	if (_s == "" && _t2 != "") { _s = _t2; _t2 = ""; }   // a one-liner's tail reads fine as the dim sub line
 	if (string_length(_s) > _MAXS) _s = string_copy(_s, 1, _MAXS - 1) + ".";
 
-	// the same plate twice within half a second is spam (e.g. !song sets both toast globals)
+	// the same plate twice within half a second is spam (e.g. !song sets both toast globals);
+	// title AND sub, so two chatters doing the same verb both get their plate
 	var _n = array_length(global.tw_toasts);
 	if (_n > 0)
 	{
 		var _last = global.tw_toasts[_n - 1];
-		if (_last.title == _t && _last.age < 30) return;
+		if (_last.title == _t && _last.sub == _s && _last.age < 30) return;
 	}
 	var _life = (_kind == "music") ? 300 : ((_kind == "win") ? 300 : 240);
-	array_push(global.tw_toasts, { title : _t, sub : _s, kind : string(_kind), age : 0, life : _life });
+	array_push(global.tw_toasts, { title : _t, title2 : _t2, sub : _s, kind : string(_kind), age : 0, life : _life });
 	while (array_length(global.tw_toasts) > 5) array_delete(global.tw_toasts, 0, 1);
 }
 
@@ -500,18 +499,17 @@ function tw_toast_draw() {
 	var _n = array_length(global.tw_toasts);
 	if (_n == 0) return;
 
-	var _gw = display_get_gui_width();  if (_gw <= 0) _gw = 320;
 	var _gh = display_get_gui_height(); if (_gh <= 0) _gh = 240;
 	var _s  = max(1, floor(_gh / 240));            // 1 at the default GUI, 4 on a 1080p takeover
 	var _font = global.dl_game_font[| global.game_font_idx];
 	var _cw = sprite_get_width(_font) * _s;
-	var _ph = 24 * _s;
 	var _gap = 3 * _s;
 	var _x0 = 8 * _s;
 	var _yb = _gh - 10 * _s;                       // bottom edge of the newest plate
 
 	var _pa = draw_get_alpha(); var _pc = draw_get_colour();
 	var _slot = 0;
+	var _stack_y = _yb;   // plates stack upward from here, each by its own height
 	for (var _i = _n - 1; _i >= 0; _i--)
 	{
 		var _e = global.tw_toasts[_i];
@@ -525,10 +523,13 @@ function tw_toast_draw() {
 		else if (_e.age >= _e.life - _OUT) _prog = max(0, (_e.life - _e.age) / _OUT);
 		var _ease = _prog * _prog * (3 - 2 * _prog);
 
-		var _tw = max(string_length(_e.title), string_length(_e.sub)) * _cw;
+		var _rows = 1 + (_e.title2 != "" ? 1 : 0) + (_e.sub != "" ? 1 : 0);
+		var _ph   = (_rows <= 2 ? 24 : 33) * _s;
+		var _tw = max(string_length(_e.title), string_length(_e.title2), string_length(_e.sub)) * _cw;
 		var _pw = max(112 * _s, _tw + 30 * _s);
 		var _x = round(-_pw + (_x0 + _pw) * _ease);
-		var _y = _yb - _ph - _slot * (_ph + _gap);
+		var _y = _stack_y - _ph;
+		_stack_y = _y - _gap;
 		var _col = tw_toast_kind_colour(_e.kind);
 
 		draw_set_alpha(0.86); draw_set_colour(c_black);
@@ -543,11 +544,13 @@ function tw_toast_draw() {
 		tw_toast_text(_x + 8 * _s, _y + 8 * _s, _glyph, _s, _font, _col);
 		// text
 		var _tx = _x + 24 * _s;
-		if (_e.sub == "") tw_toast_text(_tx, _y + 8 * _s, _e.title, _s, _font, -1);
+		if (_rows == 1) tw_toast_text(_tx, _y + 8 * _s, _e.title, _s, _font, -1);
 		else
 		{
-			tw_toast_text(_tx, _y + 4 * _s,  _e.title, _s, _font, -1);
-			tw_toast_text(_tx, _y + 13 * _s, _e.sub,   _s, _font, -2);
+			var _ty = _y + 4 * _s;
+			tw_toast_text(_tx, _ty, _e.title, _s, _font, -1); _ty += 9 * _s;
+			if (_e.title2 != "") { tw_toast_text(_tx, _ty, _e.title2, _s, _font, -1); _ty += 9 * _s; }
+			if (_e.sub != "")    tw_toast_text(_tx, _ty, _e.sub, _s, _font, -2);
 		}
 		// drain bar
 		var _frac = clamp(1 - _e.age / _e.life, 0, 1);
@@ -613,9 +616,9 @@ function tw_help_draw() {
 // ─── rolling checkpoints (round 10d) ───────────────────────────────────────────
 // Lane 09-11 (1:51:50): "spit out a save every 60 seconds into a folder, I'll delete
 // it manually... or every time I get an item or a level up". The save SLOT is left
-// exactly as the game last saved it: tw_checkpoint() lets file_save() write the live
-// state, copies that file to checkpoints\SaveFile_N_<stamp>.txt, then puts the slot's
-// previous bytes (and the in-memory copies file_save refreshed) back. Restoring =
+// exactly as the game last saved it: tw_checkpoint() asks file_save() to write the live
+// state to checkpoints\SaveFile_N_<stamp>.txt instead of the slot (its third argument), so
+// neither the slot nor the rando data/spoiler files are touched. Restoring =
 // copy a checkpoint over SaveFile_N.txt in %LOCALAPPDATA%\ZALiA while the game is
 // closed (README.txt in the folder says so). Newest 30 are kept.
 
@@ -626,16 +629,6 @@ function tw_checkpoint(_why) {
 	var _slot_path = working_directory + _slot_name;
 	if (!file_exists(_slot_name)) return false;
 
-	// remember the slot as the game last saved it
-	var _fh = file_text_open_read(_slot_path);
-	if (_fh == -1) return false;
-	var _old = file_text_read_string(_fh);
-	file_text_close(_fh);
-	var _key = STR_Save + STR_File + hex_str(f.file_num) + STR_Encoded;
-	var _old_enc = global.dm_save_file_data[? _key];
-
-	file_save(f.file_num, false);   // live state -> slot (and the rando data files, which are live anyway)
-
 	var _dir = working_directory + "checkpoints";
 	if (!directory_exists(_dir)) directory_create(_dir);
 	var _stamp = string(current_year) + string_replace_all(string_format(current_month, 2, 0), " ", "0")
@@ -645,14 +638,7 @@ function tw_checkpoint(_why) {
 		+ string_replace_all(string_format(current_second, 2, 0), " ", "0");
 	var _prefix = f.dl_FILE_NAME_PREFIX[| f.file_num - 1];
 	var _dest = _dir + "\\" + _prefix + "_" + _stamp + "_" + string(_why) + ".txt";
-	file_copy(_slot_path, _dest);
-
-	// put the slot back
-	var _fw = file_text_open_write(_slot_path);
-	if (_fw != -1) { file_text_write_string(_fw, _old); file_text_close(_fw); }
-	if (!is_undefined(_old_enc)) global.dm_save_file_data[? _key] = _old_enc;
-	var _dm = json_decode(_old);
-	if (_dm != -1) { ds_map_copy(global.dm_save_file, _dm); ds_map_destroy(_dm); }
+	file_save(f.file_num, false, _dest);   // live state -> the checkpoint file only (file_save's 3rd argument)
 
 	// folder note + prune to the newest 30 of this slot
 	var _readme = _dir + "\\README.txt";
@@ -722,7 +708,9 @@ function item_get_jingle(_theme_key) {
 	if (variable_global_exists("tw_loz_jingle") && global.tw_loz_jingle)
 	{
 		var _s = asset_get_index("snd_LoZ_ItemGet");
-		if (_s != -1 && audio_exists(_s)) { aud_play_sound(_s); return; }
+		// same call shape as the theme fanfare: the audiogroup_mus branch stops the room music,
+		// plays the stinger, and Audio_update_2 resumes the area track afterwards
+		if (_s != -1 && audio_exists(_s)) { aud_play_sound(_s, -1, false, -1, _theme_key); return; }
 	}
 	aud_play_sound(get_audio_theme_track(_theme_key), -1, false, -1, _theme_key);
 }

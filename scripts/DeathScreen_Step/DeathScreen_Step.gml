@@ -24,10 +24,10 @@ function DeathScreen_Step() {
 	            global.tw_toast_timer = 240;
 	        }
 	        // assists on the death toast (round 10c): who last hurt / helped within 90 s
-	        if (variable_global_exists("tw_last_hurter") && current_time - global.tw_last_hurter_t < 90000)
+	        if (variable_global_exists("tw_last_hurter") && global.tw_last_hurter != "" && current_time - global.tw_last_hurter_t < 90000)
 	        {
 	            var _dt_sub = "";
-	            if (variable_global_exists("tw_last_helper") && current_time - global.tw_last_helper_t < 90000)
+	            if (variable_global_exists("tw_last_helper") && global.tw_last_helper != "" && current_time - global.tw_last_helper_t < 90000)
 	                _dt_sub = "HEALED BY " + string(global.tw_last_helper);
 	            tw_toast_push("KILLED BY " + string(global.tw_last_hurter), _dt_sub, "win");
 	        }

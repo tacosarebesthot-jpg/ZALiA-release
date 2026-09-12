@@ -49,7 +49,9 @@ function FallingBlock_update() {
 	    var _crushed = 0;
 	    with (Enemy)
 	    {
-	        if (state == state_NORMAL && hp > 0 && !is_ancestor(object_index, Boss) && !is_ancestor(object_index, FaBlA))
+	        if (state == state_NORMAL && hp > 0 && react_sword
+	        && !is_ancestor(object_index, Boss) && !is_ancestor(object_index, FaBlA)
+	        && !is_ancestor(object_index, Kakusu) && object_index != HelmetheadHead01) // hunt objects and the boss head are not mobs
 	        {
 	            update_body_hb_1a();
 	            if (rectInRect(BodyHB_xl, BodyHB_yt, BodyHB_w, BodyHB_h, _cb_x, _cb_y, _cb_w, _cb_h))

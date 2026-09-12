@@ -2,8 +2,8 @@
   "$GMSound":"v2",
   "%Name":"snd_LoZ_ItemGet",
   "audioGroupId":{
-    "name":"audiogroup_snd",
-    "path":"audiogroups/audiogroup_snd",
+    "name":"audiogroup_mus",
+    "path":"audiogroups/audiogroup_mus",
   },
   "bitDepth":1,
   "channelFormat":0,
