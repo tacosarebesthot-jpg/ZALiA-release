@@ -37,9 +37,12 @@ items, palaces, and how the randomizer works.
 
 ## What this port adds
 
+The randomizer (items, spells, town locations, palace layouts, enemy spawns, the
+in-game hints) is **HoverBat's**, and so is everything else in the game itself. See
+[FEATURES.md](FEATURES.md) for the line between his work and this port's. This port adds:
+
 | | |
 |---|---|
-| **Randomizer** | items, spells, town locations, palace layouts, enemy spawns, with in-game hints |
 | **Stream tracker** | a browser page sized for OBS — every item, spell, container and key, in five themes |
 | **Twitch integration** | chat can trigger in-game effects, including stealing your items |
 | **Jukebox** | browse and play every track in the game; order, shuffle or repeat |
@@ -57,7 +60,7 @@ items, palaces, and how the randomizer works.
 | ![Town](docs/town.png) | ![Great Palace](docs/great-palace.png) |
 | A town in Western Hyrule | The Great Palace |
 | ![Palace](docs/palace.png) | ![Randomizer settings](docs/rando-settings.png) |
-| A palace with randomized dungeon tilesets | Per-seed randomizer settings, shown at file select |
+| A palace with randomized dungeon tilesets (HoverBat's randomizer) | Per-seed randomizer settings, shown at file select |
 
 ---
 
