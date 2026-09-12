@@ -2,6 +2,10 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
+## 2.1.2 — 2026-09-12
+
+- **Enemy reshuffler** (Lane's ask): `!reshuffle` in chat, or RESHUFFLE ENEMIES on the randomizer page, re-rolls the seed's enemy randomizer mid-run. Items, spells, palaces and towns stay where the seed put them; ground, flying and spawner slots keep their kind; the next screen uses the new roll and it survives a restart. Refuses with a reason on a seed without enemy randomization.
+
 ## 2.1.1 — 2026-09-12 (hotfix)
 
 Ten fixes from a code review of the 2.1.0 rounds:
