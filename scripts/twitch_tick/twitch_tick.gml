@@ -135,9 +135,9 @@ function tw_nowplaying_set(_snd, _is_intro) {
 /// @description  tw_splash_enqueue(sprite, sound, wait_frames, toast) -- queue one splash step.
 /// sprite/sound may be -1 (sound-only step, or silent sprite). wait = frames to hold before
 /// this step starts (after the previous one ends). toast = "" or a line for the small toast.
-function tw_splash_enqueue(_spr, _snd, _wait, _toast) {
+function tw_splash_enqueue(_spr, _snd, _wait, _toast, _dur = 0, _y = -1) {
 	if (!variable_global_exists("tw_splash_queue") || !is_array(global.tw_splash_queue)) global.tw_splash_queue = [];
-	array_push(global.tw_splash_queue, { spr : _spr, snd : _snd, wait : _wait, toast : _toast });
+	array_push(global.tw_splash_queue, { spr : _spr, snd : _snd, wait : _wait, toast : _toast, dur : _dur, y : _y });
 }
 
 /// @description  tw_splash_step() -- per-frame driver: advances the playing splash at the
@@ -148,7 +148,14 @@ function tw_splash_step() {
 	{
 		var _fps = game_get_speed(gamespeed_fps); if (_fps <= 0) _fps = 60;
 		global.tw_splash_frame += 54.70684 / _fps;             // MK2 arcade = 54.706840 Hz
-		if (global.tw_splash_frame >= sprite_get_number(global.tw_splash_spr))
+		if (global.tw_splash_dur > 0)
+		{
+			// looping mode (the flashing FLAWLESS VICTORY line): cycle for dur frames
+			global.tw_splash_dur--;
+			if (global.tw_splash_frame >= sprite_get_number(global.tw_splash_spr)) global.tw_splash_frame -= sprite_get_number(global.tw_splash_spr);
+			if (global.tw_splash_dur <= 0) { global.tw_splash_spr = -1; global.tw_splash_frame = 0; }
+		}
+		else if (global.tw_splash_frame >= sprite_get_number(global.tw_splash_spr))
 		{
 			global.tw_splash_spr   = -1;
 			global.tw_splash_frame = 0;
@@ -163,7 +170,7 @@ function tw_splash_step() {
 	{
 		// hold first, then start: re-queue at the front with wait cleared
 		global.tw_splash_wait = _e.wait;
-		array_insert(global.tw_splash_queue, 0, { spr : _e.spr, snd : _e.snd, wait : 0, toast : _e.toast });
+		array_insert(global.tw_splash_queue, 0, { spr : _e.spr, snd : _e.snd, wait : 0, toast : _e.toast, dur : _e.dur, y : _e.y });
 		return;
 	}
 	if (is_string(_e.toast) && _e.toast != "")
@@ -176,6 +183,8 @@ function tw_splash_step() {
 	{
 		global.tw_splash_spr   = _e.spr;
 		global.tw_splash_frame = 0;
+		global.tw_splash_dur   = _e.dur;
+		global.tw_splash_cur_y = (_e.y >= 0) ? _e.y : global.tw_splash_y;
 	}
 }
 
@@ -196,10 +205,14 @@ function tw_flawless_event(_which) {
 	var _s_frd  = asset_get_index("snd_mk2_friendship");
 	var _p_fat  = asset_get_index("spr_mk2_fatality");
 	var _p_frd  = asset_get_index("spr_mk2_friendship");
-	tw_splash_enqueue(-1, _s_flaw, 0, "FLAWLESS VICTORY!");
+	var _p_fvt  = asset_get_index("spr_mk2_flawless_text");
+	// The arcade's own FLAWLESS VICTORY line (8-frame white/red flash, ripped), looped for
+	// ~1.8 s under the announcer, mid-screen like the arcade (row 112 of 254 -> GUI y 106).
+	if (_p_fvt >= 0) tw_splash_enqueue(_p_fvt, _s_flaw, 0, "", 100, 106);
+	else             tw_splash_enqueue(-1,     _s_flaw, 0, "FLAWLESS VICTORY!");
 	if (_which == "flawless") return;
 	if (_which == "") _which = (irandom(1) == 0) ? "fatality" : "friendship";
-	if (_which == "friendship" && _p_frd >= 0) tw_splash_enqueue(_p_frd, _s_frd, 75, "");
-	else if (_p_fat >= 0)                       tw_splash_enqueue(_p_fat, _s_fat, 75, "");
+	if (_which == "friendship" && _p_frd >= 0) tw_splash_enqueue(_p_frd, _s_frd, 20, "");
+	else if (_p_fat >= 0)                       tw_splash_enqueue(_p_fat, _s_fat, 20, "");
 	else { global.tw_toast = "FATALITY."; global.tw_toast_timer = 240; }
 }

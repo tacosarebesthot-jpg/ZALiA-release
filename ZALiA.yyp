@@ -4742,6 +4742,7 @@
     {"id":{"name":"spr_Platform_Rock_01c","path":"sprites/spr_Platform_Rock_01c/spr_Platform_Rock_01c.yy",},},
     {"id":{"name":"spr_Pole01Segment","path":"sprites/spr_Pole01Segment/spr_Pole01Segment.yy",},},
     {"id":{"name":"spr_mk2_fatality","path":"sprites/spr_mk2_fatality/spr_mk2_fatality.yy",},},
+    {"id":{"name":"spr_mk2_flawless_text","path":"sprites/spr_mk2_flawless_text/spr_mk2_flawless_text.yy",},},
     {"id":{"name":"spr_mk2_friendship","path":"sprites/spr_mk2_friendship/spr_mk2_friendship.yy",},},
     {"id":{"name":"spr_pop01_1","path":"sprites/spr_pop01_1/spr_pop01_1.yy",},},
     {"id":{"name":"spr_pop01_2","path":"sprites/spr_pop01_2/spr_pop01_2.yy",},},

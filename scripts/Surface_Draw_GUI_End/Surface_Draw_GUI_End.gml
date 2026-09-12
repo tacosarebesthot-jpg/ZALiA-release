@@ -673,7 +673,7 @@ function Surface_Draw_GUI_End() {
 		}
 		draw_set_alpha(1); draw_set_colour(c_white);
 		var _sp_f = floor(global.tw_splash_frame);
-		draw_sprite_ext(global.tw_splash_spr, _sp_f, _sp_gw * 0.5, global.tw_splash_y, global.tw_splash_scale, global.tw_splash_scale, 0, c_white, 1);
+		draw_sprite_ext(global.tw_splash_spr, _sp_f, _sp_gw * 0.5, global.tw_splash_cur_y, global.tw_splash_scale, global.tw_splash_scale, 0, c_white, 1);
 		draw_set_alpha(_sp_pa); draw_set_colour(_sp_pc);
 	}
 

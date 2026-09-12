@@ -4305,6 +4305,8 @@ function g_Create() {
 	global.tw_splash_y            = 51;        // GUI y of the text top (arcade row 54 of 254)
 	global.tw_splash_dim          = 0.5;       // screen dim under the splash (0 = none)
 	global.tw_splash_enabled      = true;
+	global.tw_splash_dur          = 0;         // >0: loop the current sprite for this many frames (flashing text)
+	global.tw_splash_cur_y        = 51;        // y of the sprite playing now (per-entry override of tw_splash_y)
 	global.QuestTimer_scale       = 1.5;       // top-left run timer text scale (Lane 09-11: "timer top left very small"); 1 = the old 8px sprite font
 	// ────────────────────────────────────────────────────────────────────────
 
