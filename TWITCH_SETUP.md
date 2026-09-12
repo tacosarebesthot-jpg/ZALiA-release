@@ -166,6 +166,7 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!attrition <secs>` | life drips away slowly; stops short of killing |
 | `!stasis <secs>` | Link freezes in place, mid-air included (1–10s) |
 | `!challenge` | inside a palace only: screen stays flipped until you leave, life capped at 4 hearts, no helpful commands. Ends when you leave or die |
+| `!crush` | drops a palace block from above you. Falling blocks kill whatever they land on now, you included |
 
 ### Mess with your head
 
@@ -173,13 +174,14 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 |---|---|
 | `!confuse` | swaps left and right — bare `!confuse` rolls a random 10–30s, good luck |
 | `!disorient` | confuse, plus up and down |
+| `!ghost <secs>` | every non-boss enemy on screen turns nearly invisible |
 | `!flip` | mirrors the screen |
 | `!dark` | kills the lights — you will need the candle (it actually works now) |
 | `!ice` | the floor is ice; momentum is a lifestyle |
 | `!moon` | quarter gravity. big floaty jumps |
 | `!disco` | colour-cycling overlay |
 | `!party` | disco and flip together |
-| `!shrink` `!grow` | resize Link |
+| `!shrink` `!grow` | resize Link, hitbox and sword reach included |
 | `!speed <secs>` | too fast to control |
 | `!shake` | screen shake |
 | `!spell <name>` | cast a named spell (`!fire` `!thunder` `!enigma` work too) |
@@ -188,6 +190,7 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!meth` | moon + jump + speed at once |
 | `!quantumentangle` | something small and random happens. or doesn't |
 | `!help` `!cmds` | a one-screen card of all of this, in the game, for 8 seconds |
+| `!points` | your balance, when the points economy is on (see below) |
 | `!suggest <idea>` | your idea goes in a file gainey reads |
 
 Clean out a boss fight without taking a hit and the game plays the real Mortal
@@ -205,6 +208,13 @@ cursing out, **DIRTY** lets it all through, **NORMAL** is the original text. Hin
 quest lines are never changed, so a randomizer run stays solvable. The lines live in
 `dialogue_jokes.txt` next to the game; a copy in `%LOCALAPPDATA%\ZALiA\` overrides it,
 so you can write your own.
+
+### Points economy
+
+**POINTS ECONOMY** (same page, off by default) makes commands cost something. Viewers earn 1
+point per chat message (up to 6 a minute) and 5 points every 5 minutes while they are
+talking; every command has a price (a heal 20, a swarm 25, a kill 100). Too poor and the
+game says so on screen. The broadcaster is always free. Balances persist between streams.
 
 ### Checkpoints
 
