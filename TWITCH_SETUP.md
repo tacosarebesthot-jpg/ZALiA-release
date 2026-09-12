@@ -190,6 +190,7 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!meth` | moon + jump + speed at once |
 | `!quantumentangle` | something small and random happens. or doesn't |
 | `!help` `!cmds` | a one-screen card of all of this, in the game, for 8 seconds |
+| `!niceshot` `!whatasave` `!calculated` `!savage` `!closeone` `!okay` `!faking` `!gg` `!ez` `!wow` `!noproblem` `!thanks` | Rocket League quick-chat plates, free. Three of the same inside six seconds: chat disabled for 4 seconds |
 | `!points` | your balance, when the points economy is on (see below) |
 | `!suggest <idea>` | your idea goes in a file gainey reads |
 
@@ -198,6 +199,13 @@ Kombat II **FLAWLESS VICTORY** and **FATALITY** / **FRIENDSHIP** splash, announc
 all. `!swarm` typed on the overworld waits for the next battle screen. A command on
 cooldown answers with how long to wait. Small numbers like 69 and 420 get the respect
 they deserve.
+
+### Rocket League
+
+**ROCKET LEAGUE** (OPTIONS → TWITCH, on by default) makes the game talk in quick-chat: WHAT A SAVE!
+on a one-heart survival, CALCULATED. on a bloody boss kill, WHIFF after five empty swings,
+NICE BLOCK!, BUMPING!, NICE DEMO!, NEED BOOST!, ALL YOURS., ROTATE!, and the death lines. Turn it
+off and all of it, verbs included, goes quiet.
 
 ### Chat jokes
 

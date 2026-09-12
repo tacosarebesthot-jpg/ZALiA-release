@@ -2,6 +2,11 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
+## 2.1.3 — 2026-09-12
+
+- **Rocket League quick-chat.** ROCKET LEAGUE toggle on the TWITCH page (on by default). The game throws quick-chat plates on its own: WHAT A SAVE! when you survive at one heart, WHOOPS / SORRY / NOOOO on a death and GG or EZ on the game over screen when chat did it, CALCULATED. on a boss kill that cost you health, WHIFF after five swings that hit nothing, NICE BLOCK! on a shield deflect, BUMPING! on knockback, NICE DEMO! on a crush, NEED BOOST! at empty magic, ALL YOURS. on the fairy spell, ROTATE! when you walk straight back into the room you just left. Chat gets `!niceshot` `!whatasave` `!calculated` `!savage` `!closeone` `!okay` `!faking` `!gg` `!ez` `!wow` `!noproblem` `!thanks`, free, and three of the same one inside six seconds earns CHAT DISABLED FOR 4 SECONDS.
+- **More town lines.** EverQuest, Ultima Online and 80s to 2000s pop culture jokes for the villagers (76 new lines, same rules: never a hint).
+
 ## 2.1.2 — 2026-09-12
 
 - **Enemy reshuffler** (Lane's ask): `!reshuffle` in chat, or RESHUFFLE ENEMIES on the randomizer page, re-rolls the seed's enemy randomizer mid-run. Items, spells, palaces and towns stay where the seed put them; ground, flying and spawner slots keep their kind; the next screen uses the new roll and it survives a restart. Refuses with a reason on a seed without enemy randomization.
