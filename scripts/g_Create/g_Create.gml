@@ -4311,6 +4311,7 @@ function g_Create() {
 	// CHAT JOKES + the toast drawer (twitch_jokes.gml, 2026-09-12): dialogue_jokes.txt,
 	// chatters.txt, jokes= mode, and global.tw_toasts (the plates drawn by tw_toast_draw).
 	global.tw_toasts              = [];
+	global.tw_dmg_mult            = 1;         // !dmgup: PC_take_damage multiplier (1 = normal)
 	tw_jokes_init();
 	// ────────────────────────────────────────────────────────────────────────
 

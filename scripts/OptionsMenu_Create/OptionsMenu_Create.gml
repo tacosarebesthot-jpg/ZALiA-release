@@ -886,7 +886,7 @@ function OptionsMenu_Create() {
 	             _i=Twitch.JOKES;
 	Twitch_dg[#_i,0]="CHAT JOKES";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="TOWN FOLK TALK LIKE CHAT. NORMAL = ORIGINAL TEXT. CLEAN = JOKES, NO CURSING. DIRTY = ALL OF IT. HINTS ARE NEVER CHANGED.";
 	             _i=Twitch.COMMANDS;
-	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP";
+	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP !TAX !DMGUP !ATTRITION !SONG";
 	             _i=Twitch.SETUP;
 	// Was "HOW TO SET UP", pointing at a .bat and a text file. The setup is a web page
 	// served by the game now, so this row OPENS it instead of describing homework.

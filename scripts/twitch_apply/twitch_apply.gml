@@ -859,6 +859,50 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			global.tw_toast_timer = 240;
 			break;
 
+		// ---- Z3 ports, round 10b (2026-09-12) --------------------------------------
+		// tax: Z3's !tax/!rupeesteal. Z2 has no rupees, so it taxes EXPERIENCE: a bare
+		// !tax takes 10%, "!tax N" takes N% (1..50). One-shot, hostile, never below 0.
+		// XP loss is exactly what Z2's own drain enemies do (f.xpDrain), so nothing new.
+		case "tax":
+			if (instance_exists(f))
+			{
+				var _pct = clamp(_amt > 0 ? _amt : 10, 1, 50);
+				var _take = ceil(f.xp * _pct / 100);
+				f.xp = max(0, f.xp - _take);
+				global.tw_toast       = _who_s + " -> tax: -" + string(_take) + " xp (" + string(_pct) + "%)";
+				global.tw_toast_timer = 240;
+			}
+			break;
+
+		// dmgup: Z3's !dmgup -- every hit on the PC does double damage for the duration.
+		// PC_take_damage multiplies by global.tw_dmg_mult after its own ring/shield maths.
+		case "dmgup":
+			global.tw_dmg_mult = 2;
+			array_push(global.tw_active, {
+				frames  : _frames,
+				reapply : function() { global.tw_dmg_mult = 2; },
+				restore : function() { global.tw_dmg_mult = 1; }
+			});
+			global.tw_toast       = _who_s + " -> DOUBLE DAMAGE " + string(round(_frames / 60)) + "s";
+			global.tw_toast_timer = 240;
+			break;
+
+		// attrition: Z3's !attrition -- life drips away for the duration (2 pts every 20
+		// frames = 6/s, a bare !hurt is 16). Floors at 8 pts: it hurts, it never kills.
+		case "attrition":
+			array_push(global.tw_active, {
+				frames  : _frames,
+				tick    : 0,
+				reapply : function() {
+					self.tick++;
+					if (self.tick mod 20 == 0 && instance_exists(f) && f.hp > 8) f.hp = max(8, f.hp - 2);
+				},
+				restore : function() { }
+			});
+			global.tw_toast       = _who_s + " -> ATTRITION " + string(round(_frames / 60)) + "s";
+			global.tw_toast_timer = 240;
+			break;
+
 		case "deny":
 			// HOSTILE (Z3 port, adapted): temporarily block a control family via the
 			// same pc_lock levers. "!deny spell", "!deny jump", "!deny upstab",

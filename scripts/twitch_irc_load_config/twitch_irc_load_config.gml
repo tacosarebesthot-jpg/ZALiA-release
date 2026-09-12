@@ -178,6 +178,7 @@ function tw_irc_is_verb(_v) {
 		case "song":   case "np": case "nowplaying": case "track": // "what song is this" (every stream)
 		case "link":   case "unchicken":                       // force Link form back (Lane 09-11 2:30:53 "exclamation point be link again")
 		case "donothing": case "rip": case "blip": case "coincidence": case "getfed": // joke verbs
+		case "tax": case "dmgup": case "attrition":   // Z3 ports, round 10b
 			return true;
 		default:
 			return false;
@@ -204,6 +205,9 @@ function tw_alias_verb(_v) {
 		case "poson": case "posion":      return "poison";   // Gainey 09-11 1:11:29, 1:15:40 "my god i cant type"
 		case "mana":                      return "mp";       // asm0deus 09-11 2:12:40
 		case "up":                        return "1up";      // Gainey 09-11 1:15:24
+		case "rupees": case "rupeesteal": case "xpsteal": case "xp": case "taxes": return "tax"; // Z3 names, Z2 taxes XP
+		case "doubledamage": case "dmg2": case "damageup": return "dmgup";
+		case "bleed":  case "hunger":     return "attrition";
 	}
 	return _v;
 }

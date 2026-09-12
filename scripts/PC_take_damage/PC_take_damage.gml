@@ -72,6 +72,11 @@ function PC_take_damage() {
 	    }
 	}
 
+	// !dmgup (Z3 port, round 10b): chat doubled incoming damage for a while. Applied
+	// after the ring/shield reduction so the effect is exactly "twice what you'd take".
+	if (_damage > 0 && variable_global_exists("tw_dmg_mult") && global.tw_dmg_mult > 1)
+	{   _damage = _damage * global.tw_dmg_mult;  }
+
 
 	if (g.DevTools_state)
 	{   // g.dev_invState. 2: skip all, 1 skip dmg, 0 regular
