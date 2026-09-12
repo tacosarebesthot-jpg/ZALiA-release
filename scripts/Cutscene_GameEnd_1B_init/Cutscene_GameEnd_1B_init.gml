@@ -341,9 +341,8 @@ function Cutscene_GameEnd_1B_init() {
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
-	dg_CREDITS[#_idx,1] = "HOVERBAT, FOR ZALIA";
-	dg_CREDITS[#_idx,2] = "CLAUDE (ANTHROPIC)";
-	dg_CREDITS[#_idx,3] = "LANEAGE'S TWITCH CHAT";
+	dg_CREDITS[#_idx,1] = "CLAUDE (ANTHROPIC)";
+	dg_CREDITS[#_idx,2] = "LANEAGE'S TWITCH CHAT";
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	//                                                  //
