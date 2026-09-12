@@ -963,6 +963,35 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			global.tw_toast_timer = 240;
 			break;
 
+		// stasis: freeze LINK in place, mid-air included (Lane 09-11 1:41:18, 1:43:51, and his
+		// key-4 note "make it freeze link"). 3 s default, "!stasis N" up to 10 s. Root's lock
+		// bits stop walking/jumping, PC_update_vertical skips gravity, reapply pins x/y.
+		case "stasis":
+			{
+				var _st_secs = clamp(tw_num(_arg, 3), 1, 10);
+				_frames = floor(_st_secs * 60);
+				if (instance_exists(g) && instance_exists(global.pc))
+				{
+					global.tw_stasis = true;
+					g.pc_lock |= (PC_LOCK_HSPD | PC_LOCK_JUMP);
+					array_push(global.tw_active, {
+						frames  : _frames,
+						sx      : global.pc.x,
+						sy      : global.pc.y,
+						bits    : (PC_LOCK_HSPD | PC_LOCK_JUMP),
+						reapply : function() {
+							global.tw_stasis = true;
+							if (instance_exists(g)) g.pc_lock |= self.bits;
+							if (instance_exists(global.pc)) { global.pc.x = self.sx; global.pc.y = self.sy; global.pc.vspd = 0; global.pc.hspd = 0; }
+						},
+						restore : function() { global.tw_stasis = false; if (instance_exists(g)) g.pc_lock &= ~self.bits; }
+					});
+					global.tw_toast       = _who_s + " -> STASIS " + string(_st_secs) + "s. hang in there.";
+					global.tw_toast_timer = 240;
+				}
+			}
+			break;
+
 		// ---- Z3 ports, round 10b (2026-09-12) --------------------------------------
 		// tax: Z3's !tax/!rupeesteal. Z2 has no rupees, so it taxes EXPERIENCE: a bare
 		// !tax takes 10%, "!tax N" takes N% (1..50). One-shot, hostile, never below 0.
@@ -1133,7 +1162,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "hurt": case "drain": case "poison": case "kill": case "killlink": case "tax": case "dmgup":
 			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
 			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
-			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth":
+			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis":
 				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; break;
 		}
 	}

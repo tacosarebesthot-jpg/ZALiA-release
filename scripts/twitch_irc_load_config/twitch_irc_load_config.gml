@@ -181,6 +181,7 @@ function tw_irc_is_verb(_v) {
 		case "donothing": case "rip": case "blip": case "coincidence": case "getfed": // joke verbs
 		case "tax": case "dmgup": case "attrition":   // Z3 ports, round 10b
 		case "meth": case "quantumentangle": case "help": case "challenge": case "disorient": // round 10c
+		case "stasis":   // Lane's freeze-Link ask
 			return true;
 		default:
 			return false;
@@ -214,6 +215,7 @@ function tw_alias_verb(_v) {
 		case "entangle": case "quantum": case "qe": return "quantumentangle";
 		case "confuseall": case "disorientate": return "disorient";
 		case "flippalace": case "nomercy": case "noreprieve": return "challenge";
+		case "freezelink": case "hold": case "statis": case "stais": return "stasis";
 	}
 	return _v;
 }

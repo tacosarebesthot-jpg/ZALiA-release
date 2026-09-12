@@ -1,6 +1,12 @@
 /// @description  PC_update_vertical()
 function PC_update_vertical() {
 
+	// chat !stasis (Lane 09-11 1:41:18 / mark #002 "make it freeze link"): Link hangs
+	// where he is, mid-air included. No gravity, no vertical motion; twitch_apply holds
+	// x/y and the walk/jump lock bits. Attacking still works -- that is the joke.
+	if (variable_global_exists("tw_stasis") && global.tw_stasis) { vspd = 0; vspd_sub = 0; exit; }
+
+
 
 	// 94C5
 	if(!is_undefined(   colliding_elevator) 

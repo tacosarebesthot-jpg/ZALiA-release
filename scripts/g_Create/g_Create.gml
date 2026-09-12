@@ -4313,6 +4313,7 @@ function g_Create() {
 	global.tw_toasts              = [];
 	global.tw_dmg_mult            = 1;         // !dmgup: PC_take_damage multiplier (1 = normal)
 	global.tw_confuse_v           = false;     // !disorient: confuse + up/down swap (Input_update2a)
+	global.tw_stasis              = false;     // !stasis: Link frozen in place (PC_update_vertical + pc_lock)
 	global.tw_challenge           = false;     // !challenge: flip for the whole palace, 4 hearts, no reprieve
 	global.tw_swarm_queue         = [];        // !swarm typed off a battle screen waits here
 	global.tw_help_timer          = 0;         // !help card frames left (tw_help_draw)
