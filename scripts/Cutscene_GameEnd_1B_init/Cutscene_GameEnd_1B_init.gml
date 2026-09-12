@@ -258,7 +258,7 @@ function Cutscene_GameEnd_1B_init() {
 	//                                                  //
 	//                                                  //
 	// ------------------- PATRONS -------------------
-	_text="PATRONS";
+	_text="HOVERBAT'S PATRONS";
 	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
 	//dg_CREDITS[#_idx,1] = "WOLFZEN SKIIGH";  
 	dg_CREDITS[#_idx,1] = "WOLFZEN 'XIB' SKIIGH";  
@@ -289,14 +289,11 @@ function Cutscene_GameEnd_1B_init() {
 	dg_CREDITS[#_idx,4] = "ZABII"; //
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
-	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
-	dg_CREDITS[#_idx,1] = "DOWPYRO"; // funded the tooling the 2026 port was built with
-	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	//                                                  //
 	//                                                  //
 	//                                                  //
 	// ------------------- SPECIAL THANKS -------------------
-	_text="SPECIAL THANKS";
+	_text="HOVERBAT'S SPECIAL THANKS";
 	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
 	dg_CREDITS[#_idx,1] = "MOM"; // 
 	dg_CREDITS[#_idx,2] = "DAD"; // 
@@ -324,6 +321,28 @@ function Cutscene_GameEnd_1B_init() {
 	dg_CREDITS[#_idx,5] = _text; // 5: staff text
 	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	//                                                  //
+	//                                                  //
+	//                                                  //
+	// ------------------- 2026 PORT PATRONS (owner 2026-09-12: only these two) -------------------
+	_text="2026 PORT PATRONS";
+	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
+	dg_CREDITS[#_idx,1] = "LANEAGE";
+	dg_CREDITS[#_idx,2] = "DOW-PYRO720"; // DOW_pyro720 (the font draws "_" blank)
+	dg_CREDITS[#_idx,5] = _text; // 5: staff text
+	dg_CREDITS[#_idx,6] = 1; // Center credit text
+	//                                                  //
+	// ------------------- 2026 PORT SPECIAL THANKS -------------------
+	_text="2026 PORT SPECIAL THANKS";
+	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
+	dg_CREDITS[#_idx,1] = "LANEAGE";
+	dg_CREDITS[#_idx,2] = "DOW-PYRO720";
+	dg_CREDITS[#_idx,5] = _text; // 5: staff text
+	dg_CREDITS[#_idx,6] = 1; // Center credit text
+	ds_grid_resize(dg_CREDITS, (++_idx)+1, CREDITS_COUNT2);
+	dg_CREDITS[#_idx,1] = "HOVERBAT, FOR ZALIA";
+	dg_CREDITS[#_idx,2] = "LANEAGE'S TWITCH CHAT";
+	dg_CREDITS[#_idx,5] = _text; // 5: staff text
+	dg_CREDITS[#_idx,6] = 1; // Center credit text
 	//                                                  //
 	//                                                  //
 	// ------------------- ORIGINAL GAME STAFF -------------------
