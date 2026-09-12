@@ -1006,6 +1006,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		case "version":
+			global.tw_toast       = "ZALiA " + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ")";
+			global.tw_toast_timer = 240;
+			break;
+
 		// ---- round 10h: points, ghost, crush ---------------------------------------
 		case "points": case "pts": case "bal":
 			if (variable_global_exists("tw_points_on") && global.tw_points_on)

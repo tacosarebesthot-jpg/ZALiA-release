@@ -15,6 +15,11 @@ function macros() {
 #macro application_surface_H BASE_GAME_RESOLUTION_H
 #macro VIEW_W_OG 256
 #macro VIEW_H_OG 240
+// ZALiA 2.0 port version. Bump here (and options/windows/options_windows.yy) for every
+// release; the title screen, !version and the release stager read this. History: CHANGELOG.md
+// in the ZALiA-release repo.
+#macro ZALIA_VERSION "2.1.1"
+#macro ZALIA_BUILD_DATE "2026-09-12"
 #macro VIEW_W_OG_ (VIEW_W_OG >>1)
 #macro VIEW_H_OG_ (VIEW_H_OG >>1)
 #macro VIEW_W_WD application_surface_W

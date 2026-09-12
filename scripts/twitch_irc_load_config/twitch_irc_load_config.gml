@@ -184,6 +184,7 @@ function tw_irc_is_verb(_v) {
 		case "meth": case "quantumentangle": case "help": case "challenge": case "disorient": // round 10c
 		case "stasis":   // Lane's freeze-Link ask
 		case "points": case "pts": case "bal": case "ghost": case "crush":   // round 10h
+		case "version": case "ver": case "build":
 			return true;
 		default:
 			return false;

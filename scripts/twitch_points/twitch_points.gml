@@ -75,6 +75,7 @@ function tw_points_cost(_v) {
 	{
 		case "points": case "pts": case "bal": case "help": case "song": case "np": case "nowplaying": case "track":
 		case "suggest": case "donothing": case "rip": case "blip": case "coincidence": case "getfed": case "link": case "unchicken":
+		case "version": case "ver": case "build":
 			return 0;
 		case "heal": return 20;   case "mp": return 15;   case "refill": case "fairy": case "fary": return 40;
 		case "1up": return 60;    case "invuln": return 30;

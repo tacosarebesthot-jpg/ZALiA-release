@@ -574,7 +574,7 @@ function tw_help_draw() {
 	if (!variable_global_exists("tw_help_timer") || global.tw_help_timer <= 0) return;
 	global.tw_help_timer--;
 	static _rows = [
-		"HOW CHAT PLAYS: TYPE !WORD IN CHAT",
+		"HOW CHAT PLAYS: TYPE !WORD IN CHAT   V" + ZALIA_VERSION,
 		"HELP  !HEAL !MP !REFILL !1UP !FAIRY !LINK",
 		"      !PROTECT !REFLECT !INVULN",
 		"HURT  !HURT !DRAIN !POISON !KILL !TAX",

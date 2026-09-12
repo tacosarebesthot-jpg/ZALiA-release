@@ -104,6 +104,12 @@ function TitleScreen_Draw() {
 	    draw_sprite(TITLE_SPR,0, x,title_y);
 	}
 
+	// version tag, bottom right of the view (bug reports and stream VODs show which build this is)
+	{
+	    var _vtag = "V" + ZALIA_VERSION;
+	    draw_text_(viewXR() - (string_length(_vtag) << 3) - 8, viewYT() + viewH() - 16, _vtag, -1, global.PI_BGR4);
+	}
+
 
 
 
