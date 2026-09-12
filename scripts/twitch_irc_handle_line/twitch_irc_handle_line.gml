@@ -71,6 +71,7 @@ function twitch_irc_handle_line(_line) {
 	}
 
 	_msg = tw_trim(_msg); // strip a trailing CR and any padding
+	tw_chatter_note(_sender); // CHAT JOKES: {chatter} pool -- every talker, command or not
 	if (_msg == "" || string_char_at(_msg, 1) != "!") return;
 
 	// split "!verb arg..." into verb + (everything after the first space) arg.

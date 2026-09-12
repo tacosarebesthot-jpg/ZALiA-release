@@ -148,6 +148,20 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // CHAT JOKES: NORMAL / CLEAN / DIRTY town text (twitch_jokes, dialogue_jokes.txt).
+	    // LEFT/RIGHT steps, confirm cycles. Saved as jokes= in twitch_config.txt.
+	    case Twitch.JOKES:{
+	    var _jd = _HORIZONTAL;
+	    if (_jd == 0 && !timer && _InputConfirm_pressed2) _jd = 1;
+	    if (_jd != 0)
+	    {
+	        if (!variable_global_exists("tw_jokes_mode")) global.tw_jokes_mode = 1;
+	        tw_jokes_set_mode((global.tw_jokes_mode + _jd + 3) mod 3);
+	        aud_play_sound(CURSOR_SOUND1);
+	        timer = DURATION0;
+	    }
+	    break;}
+
 	    // COMMANDS: read-only reference. The verb list lives in this row's description
 	    // string, so it draws in the info area like every other row's help text.
 	    case Twitch.COMMANDS:{ if (timer) break;

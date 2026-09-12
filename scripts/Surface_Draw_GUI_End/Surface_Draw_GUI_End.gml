@@ -677,40 +677,10 @@ function Surface_Draw_GUI_End() {
 		draw_set_alpha(_sp_pa); draw_set_colour(_sp_pc);
 	}
 
-	// NOW PLAYING (2026-09-12, provisional look -- the toast redo replaces the drawing,
-	// not the hook). Bottom-left, small, aqua, fades out over the last second.
-	if (variable_global_exists("tw_np_timer") && global.tw_np_timer > 0)
-	{
-		global.tw_np_timer--;
-		var _np_pf = draw_get_font(); var _np_ph = draw_get_halign(); var _np_pc = draw_get_colour(); var _np_pa = draw_get_alpha();
-		draw_set_font(-1); draw_set_halign(fa_left);
-		var _np_gh = display_get_gui_height(); if (_np_gh <= 0) _np_gh = 240;
-		var _np_msg = "NOW PLAYING: " + string(global.tw_np_name);
-		draw_set_alpha(min(1, global.tw_np_timer / 60));
-		draw_set_colour(c_black); draw_text(9, _np_gh - 41, _np_msg);
-		draw_set_colour(c_aqua);  draw_text(8, _np_gh - 42, _np_msg);
-		draw_set_alpha(_np_pa); draw_set_font(_np_pf); draw_set_halign(_np_ph); draw_set_colour(_np_pc);
-	}
-
-	if (variable_global_exists("tw_toast_timer") && global.tw_toast_timer > 0)
-	{
-		var _tw_pf = draw_get_font();
-		var _tw_ph = draw_get_halign();
-		var _tw_pc = draw_get_colour();
-		draw_set_font(-1);
-		draw_set_halign(fa_center);
-		var _tw_gw = display_get_gui_width();  if (_tw_gw <= 0) _tw_gw = 320;
-		var _tw_gh = display_get_gui_height(); if (_tw_gh <= 0) _tw_gh = 240;
-		var _tw_x  = _tw_gw * 0.5;
-		var _tw_y  = _tw_gh - 28;
-		var _tw_msg = "";
-		if (variable_global_exists("tw_toast")) _tw_msg = string(global.tw_toast);
-		draw_set_colour(c_black); draw_text(_tw_x + 1, _tw_y + 1, _tw_msg);
-		draw_set_colour(c_lime);  draw_text(_tw_x,     _tw_y,     _tw_msg);
-		draw_set_halign(_tw_ph);
-		draw_set_colour(_tw_pc);
-		draw_set_font(_tw_pf);
-	}
+	// TOASTS (2026-09-12): every text toast goes through the achievement-plate drawer
+	// in twitch_jokes.gml. Callers still set tw_toast / tw_np_timer / konami_toast;
+	// tw_toast_draw() adopts them (tw_toast_legacy_poll) and draws the stacked plates.
+	tw_toast_draw();
 
 	// ── TWITCH IRC (no-bot mode) status line: top-left, only while the IRC client is
 	// enabled. Reads global.tw_irc_status (idle/connecting/connected/error/no config)
@@ -783,33 +753,7 @@ function Surface_Draw_GUI_End() {
 		draw_set_colour(_dot_pc);
 	}
 
-	// ── KONAMI toast (easter egg): bottom-centre celebratory feedback ───────────────
-	// Mirrors the twitch toast above (black drop-shadow, default font, bottom-centre)
-	// but in c_yellow and a touch higher so the two never overlap. konami_fire() sets
-	// the text + timer; the timer is counted down HERE (Draw GUI End always runs, even
-	// when g_Step exits early). Fully guarded; saves/restores font/halign/colour so it
-	// can't leak draw state. Revert: delete this block + the konami_* globals in
-	// g_Create + the konami_check script + the konami_check() call in g_Step.
-	if (variable_global_exists("konami_toast_timer") && global.konami_toast_timer > 0)
-	{
-		global.konami_toast_timer--;
-		var _km_pf = draw_get_font();
-		var _km_ph = draw_get_halign();
-		var _km_pc = draw_get_colour();
-		draw_set_font(-1);
-		draw_set_halign(fa_center);
-		var _km_gw = display_get_gui_width();  if (_km_gw <= 0) _km_gw = 320;
-		var _km_gh = display_get_gui_height(); if (_km_gh <= 0) _km_gh = 240;
-		var _km_x  = _km_gw * 0.5;
-		var _km_y  = _km_gh - 44;
-		var _km_msg = "";
-		if (variable_global_exists("konami_toast")) _km_msg = string(global.konami_toast);
-		draw_set_colour(c_black);  draw_text(_km_x + 1, _km_y + 1, _km_msg);
-		draw_set_colour(c_yellow); draw_text(_km_x,     _km_y,     _km_msg);
-		draw_set_halign(_km_ph);
-		draw_set_colour(_km_pc);
-		draw_set_font(_km_pf);
-	}
+	// (KONAMI toast: drawn by tw_toast_draw above since 2026-09-12)
 
 	// ── CO-OP P2 JOIN PROMPT ────────────────────────────────────────────────────────
 	// While co-op is ON but no SEPARATE 2nd controller has joined the fairy (slot still

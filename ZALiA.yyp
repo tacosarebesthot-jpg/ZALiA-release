@@ -526,6 +526,7 @@
   ],
   "ForcedPrefabProjectReferences":[],
   "IncludedFiles":[
+    {"$GMIncludedFile":"","%Name":"dialogue_jokes.txt","CopyToMask":9223372036854775807,"filePath":"datafiles","name":"dialogue_jokes.txt","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"gamecontrollerdb.txt","CopyToMask":9223372036854775807,"filePath":"datafiles","name":"gamecontrollerdb.txt","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"jukebox.html","CopyToMask":9223372036854775807,"filePath":"datafiles/web","name":"jukebox.html","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
     {"$GMIncludedFile":"","%Name":"jukebox_tags.json","CopyToMask":9223372036854775807,"filePath":"datafiles/web","name":"jukebox_tags.json","resourceType":"GMIncludedFile","resourceVersion":"2.0",},
@@ -3412,6 +3413,7 @@
     {"id":{"name":"twitch_irc_send","path":"scripts/twitch_irc_send/twitch_irc_send.yy",},},
     {"id":{"name":"twitch_irc_step","path":"scripts/twitch_irc_step/twitch_irc_step.yy",},},
     {"id":{"name":"twitch_poll","path":"scripts/twitch_poll/twitch_poll.yy",},},
+    {"id":{"name":"twitch_jokes","path":"scripts/twitch_jokes/twitch_jokes.yy",},},
     {"id":{"name":"twitch_tick","path":"scripts/twitch_tick/twitch_tick.yy",},},
     {"id":{"name":"triforce_pal_update","path":"scripts/triforce_pal_update/triforce_pal_update.yy",},},
     {"id":{"name":"Tyell_draw","path":"scripts/Tyell_draw/Tyell_draw.yy",},},

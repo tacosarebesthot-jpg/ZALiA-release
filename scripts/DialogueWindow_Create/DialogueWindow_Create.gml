@@ -206,6 +206,7 @@ function DialogueWindow_Create() {
 	MAX_LINES = (rows-2)>>1; // = 4
 
 	dl_lines_written = ds_list_create();
+	page_clear_pending = false; // CHAT JOKES: a "|" page break is waiting to clear the box
 	repeat(MAX_LINES)
 	{
 	    ds_list_add(dl_lines_written,"");

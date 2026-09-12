@@ -867,7 +867,7 @@ function OptionsMenu_Create() {
 	// The oauth token is deliberately NEVER shown -- the owner streams this menu.
 	enum Twitch
 	{
-	    REWARDS, CHAT, COOLDOWN, DURATION, COMMANDS, SETUP,
+	    REWARDS, CHAT, COOLDOWN, DURATION, JOKES, COMMANDS, SETUP,
 	    BACK,
 	    COUNT
 	}
@@ -883,6 +883,8 @@ function OptionsMenu_Create() {
 	Twitch_dg[#_i,0]="COMMAND COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="SECONDS BETWEEN CHAT COMMANDS. AFFECTS TWITCH IRC ONLY. LEFT/RIGHT TO CHANGE.";
 	             _i=Twitch.DURATION;
 	Twitch_dg[#_i,0]="EFFECT LENGTH";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="HOW LONG A TIMED EFFECT LASTS, LIKE SLOW OR DARK. LEFT/RIGHT TO CHANGE.";
+	             _i=Twitch.JOKES;
+	Twitch_dg[#_i,0]="CHAT JOKES";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="TOWN FOLK TALK LIKE CHAT. NORMAL = ORIGINAL TEXT. CLEAN = JOKES, NO CURSING. DIRTY = ALL OF IT. HINTS ARE NEVER CHANGED.";
 	             _i=Twitch.COMMANDS;
 	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP";
 	             _i=Twitch.SETUP;

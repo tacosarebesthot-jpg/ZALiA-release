@@ -132,6 +132,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case Twitch.CHAT:           {return true; break;}
 	        case Twitch.COOLDOWN:       {return true; break;}
 	        case Twitch.DURATION:       {return true; break;}
+	        case Twitch.JOKES:          {return true; break;}
 	        case Twitch.COMMANDS:       {return true; break;}
 	        case Twitch.SETUP:          {return true; break;}
 	        case Twitch.BACK:           {return true; break;}

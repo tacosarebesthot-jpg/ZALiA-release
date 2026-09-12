@@ -80,6 +80,9 @@ function twitch_irc_load_config() {
 			// twitch_config_save() when the TWITCH IRC toggle is switched ON (09-11 stream:
 			// after a game restart the link stayed down for 8 min and nobody noticed).
 			case "autoconnect": case "auto": _autoconnect = tw_num(_val, 0); break;
+			// jokes=0/1/2: the CHAT JOKES row (twitch_jokes). Read here too so a reload
+			// (menu toggle, web save) never drops it; tw_jokes_init reads it at boot.
+			case "jokes": if (variable_global_exists("tw_jokes_mode")) global.tw_jokes_mode = clamp(tw_num(_val, 1), 0, 2); break;
 		}
 	}
 	file_text_close(_fh);

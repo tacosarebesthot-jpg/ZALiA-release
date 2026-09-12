@@ -4308,6 +4308,10 @@ function g_Create() {
 	global.tw_splash_dur          = 0;         // >0: loop the current sprite for this many frames (flashing text)
 	global.tw_splash_cur_y        = 51;        // y of the sprite playing now (per-entry override of tw_splash_y)
 	global.QuestTimer_scale       = 1.5;       // top-left run timer text scale (Lane 09-11: "timer top left very small"); 1 = the old 8px sprite font
+	// CHAT JOKES + the toast drawer (twitch_jokes.gml, 2026-09-12): dialogue_jokes.txt,
+	// chatters.txt, jokes= mode, and global.tw_toasts (the plates drawn by tw_toast_draw).
+	global.tw_toasts              = [];
+	tw_jokes_init();
 	// ────────────────────────────────────────────────────────────────────────
 
 

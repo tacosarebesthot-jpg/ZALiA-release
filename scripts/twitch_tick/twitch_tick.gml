@@ -48,6 +48,8 @@ function twitch_tick() {
 		{
 			global.tw_boss_seen = true;
 			global.tw_boss_frames++;
+			if (global.tw_boss_frames == 1 || (global.tw_boss_frames mod 30) == 0) // CHAT JOKES {boss}: remember who this was
+			{   with (Boss) { global.tw_last_boss = object_get_name(object_index); break; }  }
 		}
 		else if (global.tw_boss_seen && !global.tw_boss_room_loading)
 		{

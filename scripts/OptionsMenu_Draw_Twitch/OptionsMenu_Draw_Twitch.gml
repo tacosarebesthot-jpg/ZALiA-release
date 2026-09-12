@@ -102,6 +102,10 @@ function OptionsMenu_Draw_Twitch() {
 	        _text = string(_du) + "S";
 	    break;
 
+	    case Twitch.JOKES:
+	        _text = tw_jokes_mode_label();
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

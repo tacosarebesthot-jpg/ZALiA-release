@@ -360,13 +360,27 @@ function update_Dialogue() {
 	        }
 	        break;}//case 'A'
 	    }//switch(val(dm_dialogue[?_DIALOGUE_DK+dk_DynamicDialogue+STR_Type]))
-    
-    
-    
-    
+
+
+	    // CHAT JOKES (2026-09-12, ported from Z3): a random alternate line from
+	    // dialogue_jokes.txt for this NPC, in CLEAN/DIRTY mode only. Never for rando
+	    // hints, hint-flagged keys, or anything the branches above marked special --
+	    // owner rule: jokes must not touch text that affects the game. The picker
+	    // resolves {name}/{chatter}/{boss}, wraps to the box and inserts "|" page breaks.
+	    if (!_dialogue_is_special
+	    &&  variable_global_exists("tw_jokes_mode") && global.tw_jokes_mode > 0
+	    && !val(g.dm_RandoHints[?g.dialogue_source.dialogue_datakey])
+	    && !val(dm_dialogue[?_DIALOGUE_DK+STR_Hint]) )
+	    {
+	        dialogue = tw_jokes_pick(string_replace_all(_DIALOGUE_DK, "_", ""), dialogue, _SAVE_FILE_NAME);
+	    }
+
+
 	    dlg_line_cnt  = 1; // At least 1
 	    dlg_line_cnt += string_count(g.CHAR_END_LINE1, dialogue);
 	    dlg_line_cnt += string_count(g.CHAR_END_LINE2, dialogue);
+	    if (string_count("|", dialogue)) dlg_line_cnt = MAX_LINES; // CHAT JOKES: paged text fills the box
+	    page_clear_pending = false;
     
     
 	    ds_grid_resize(dg_dlg, 1,3);
@@ -377,8 +391,9 @@ function update_Dialogue() {
 	    for(_i=0; _i<_LEN; _i++)
 	    {
 	            _char = string_char_at(dialogue,_i+1);
-	        if (_char==g.CHAR_END_LINE1 
-	        ||  _char==g.CHAR_END_LINE2 )
+	        if (_char==g.CHAR_END_LINE1
+	        ||  _char==g.CHAR_END_LINE2
+	        ||  _char=="|" ) // CHAT JOKES page break
 	        {
 	            dg_dlg[#_idx,2] = _char;
 	            ds_grid_resize(dg_dlg, (++_idx)+1,ds_grid_height(dg_dlg));
@@ -484,8 +499,18 @@ function update_Dialogue() {
 	             + ' KASUTO';     // 
 	    */
 	    var _LEN = string_length(dialogue);
-    
-    
+
+
+	    // CHAT JOKES page break: the hold on "|" is over -- clear the box and keep writing
+	    if (variable_instance_exists(id, "page_clear_pending") && page_clear_pending)
+	    {
+	        page_clear_pending = false;
+	        for(var _pg=ds_list_size(dl_lines_written)-1; _pg>=0; _pg--) dl_lines_written[|_pg] = "";
+	        writ_line_idx      = 0;
+	        writ_line_char_pos = 0;
+	    }
+
+
 	    if (writ_char_pos<_LEN)
 	    {
 	        //  _C3: can SKIP TO END of dlg
@@ -516,9 +541,15 @@ function update_Dialogue() {
 	            {
 	                _last++; // go until next char != g.CHAR_BLANK
 	            }
-            
-            
-	            if (_char==g.CHAR_END_LINE1 
+
+
+	            if (_char=="|") // CHAT JOKES page break: hold this page, then clear and go on
+	            {
+	                page_clear_pending = true;
+	                break;//while
+	            }
+
+	            if (_char==g.CHAR_END_LINE1
 	            ||  _char==g.CHAR_END_LINE2 )
 	            {
 	                writ_line_idx++;
@@ -536,6 +567,12 @@ function update_Dialogue() {
         
         
         
+	        if (variable_instance_exists(id, "page_clear_pending") && page_clear_pending)
+	        {
+	            add_char_tmr = 50; // ~0.8 s to read the page (a held button skips it)
+	            break;//case SUB_STATE_TALK1
+	        }
+
 	        if(!_C3) // Writing 1 char, NOT skipping to end of dlg
 	        {
 	            if (_TYPE==TYPE_ZLDA1)
