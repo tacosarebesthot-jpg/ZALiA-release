@@ -1141,7 +1141,7 @@ function OptionsMenu_Create() {
 	dm_options[?_dk2+STR_Font]                         = FONT2;
 	dm_options[?_dk2+STR_Option+STR_Text]              = "RESHUFFLE ENEMIES";
 	dm_options[?_dk2+STR_State+hex_str(_j++)+STR_Text] = "GO";
-	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "RE-ROLL THIS SEED'S ENEMY RANDOMIZER NOW. ITEMS, SPELLS, PALACES AND TOWNS STAY PUT. TAKES EFFECT ON THE NEXT SCREEN.";
+	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "RE-ROLL THIS SEED'S ENEMY RANDOMIZER NOW. ITEMS, SPELLS, PALACES AND TOWNS STAY PUT. TAKES EFFECT ON THE NEXT SCREEN. THE SPOILER FILE KEEPS THE ORIGINAL ROLL.";
 	//                                                                          //
 	_j=0; _k=0;
 	Rando_HINTS = ++_i;

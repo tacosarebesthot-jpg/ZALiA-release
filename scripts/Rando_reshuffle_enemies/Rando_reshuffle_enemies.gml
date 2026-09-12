@@ -19,10 +19,9 @@
 // reads, so it survives a restart. A counter in f.dm_rando says how many times it happened.
 function Rando_reshuffle_enemies() {
 	if (!instance_exists(f) || f.file_num < 1) return "no file loaded";
-	if (!val(global.dm_save_file_settings[?STR_Randomize+STR_Item+STR_Locations])
-	&&  !val(f.dm_rando[?STR_Randomize+STR_Enemy+STR_Method])) return "this seed has no enemy randomizer";
 	var _method = val(f.dm_rando[?STR_Randomize+STR_Enemy+STR_Method]);
 	if (_method != 1 && _method != 2) return "this seed has no enemy randomizer";
+	if (!global.EnemyRando_enabled) return "enemy rando is turned off (randomizer page)"; // the room loaders honour that toggle
 
 	// class of an objver: 1 ground, 2 flying, 3 spawner, 0 unknown
 	static _class_of = function(_objver) {
@@ -64,6 +63,7 @@ function Rando_reshuffle_enemies() {
 	// 2. shuffle the assigned side of each class and write the pairs back
 	var _seed  = val(f.dm_rando[?STR_Rando+STR_Seed]);
 	var _count = val(f.dm_rando[?STR_Randomize+STR_Enemy+"_Reshuffle"+STR_Count]) + 1;
+	var _rng = random_get_seed(); // put the stream back afterwards: mark replays snapshot it
 	random_set_seed(_seed + _count * 7919 + current_time mod 100000); // different every time, never the seed's own roll
 	var _changed = 0;
 	for (var _c = 1; _c <= 3; _c++)
@@ -76,9 +76,10 @@ function Rando_reshuffle_enemies() {
 			var _o = _orig[_c][_i], _nv = _shuffled[_i];
 			if (_method == 1)
 			{
-				f.dm_rando[? _prefix + _o + _suffix] = _nv;
 				var _ov = g.dm_spawn[? _nv + STR_OBJVER];
-				if (!is_undefined(_ov)) f.dm_rando[? _prefix + _o + STR_OBJVER + STR_Randomized] = _ov;
+				if (is_undefined(_ov)) continue; // unknown spawn: leave this pair exactly as it was
+				f.dm_rando[? _prefix + _o + _suffix] = _nv;
+				f.dm_rando[? _prefix + _o + STR_OBJVER + STR_Randomized] = _ov;
 			}
 			else
 			{
@@ -87,6 +88,7 @@ function Rando_reshuffle_enemies() {
 			_changed++;
 		}
 	}
+	random_set_seed(_rng);
 	if (_changed == 0) return "nothing to reshuffle";
 	f.dm_rando[?STR_Randomize+STR_Enemy+"_Reshuffle"+STR_Count] = _count;
 
@@ -95,7 +97,8 @@ function Rando_reshuffle_enemies() {
 	f.dm_rando_full[? _quest_key + STR_Rando + STR_Data] = json_encode(f.dm_rando);
 	var _path = working_directory + f.dl_FILE_NAME_PREFIX[| f.file_num - 1] + STR_Rando + STR_Data + ".txt";
 	var _fw = file_text_open_write(_path);
-	if (_fw != -1) { file_text_write_string(_fw, json_encode(f.dm_rando_full)); file_text_close(_fw); }
+	if (_fw == -1) return "could not write the rando data file"; // the in-memory roll would be lost at the next save
+	file_text_write_string(_fw, json_encode(f.dm_rando_full)); file_text_close(_fw);
 	if (DEV) show_debug_message("[RANDO] enemies reshuffled (#" + string(_count) + ", " + string(_changed) + " entries, method " + string(_method) + ")");
 	return "";
 }
