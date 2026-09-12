@@ -659,6 +659,24 @@ function Surface_Draw_GUI_End() {
 	// counted down in twitch_tick(); this block only reads it. Fully guarded; saves and
 	// restores font/halign/colour so it can't leak draw state into anything after it.
 	// Revert: delete this block + the twitch_* scripts + their wiring/globals.
+	// MK2 SPLASH (2026-09-12): dim the whole GUI, then the ripped arcade text animation at
+	// the arcade's own position (top-centre), one sprite frame per arcade frame.
+	if (variable_global_exists("tw_splash_spr") && global.tw_splash_spr >= 0 && sprite_exists(global.tw_splash_spr))
+	{
+		var _sp_gw = display_get_gui_width();  if (_sp_gw <= 0) _sp_gw = 320;
+		var _sp_gh = display_get_gui_height(); if (_sp_gh <= 0) _sp_gh = 240;
+		var _sp_pa = draw_get_alpha(); var _sp_pc = draw_get_colour();
+		if (global.tw_splash_dim > 0)
+		{
+			draw_set_alpha(global.tw_splash_dim); draw_set_colour(c_black);
+			draw_rectangle(0, 0, _sp_gw, _sp_gh, false);
+		}
+		draw_set_alpha(1); draw_set_colour(c_white);
+		var _sp_f = floor(global.tw_splash_frame);
+		draw_sprite_ext(global.tw_splash_spr, _sp_f, _sp_gw * 0.5, global.tw_splash_y, global.tw_splash_scale, global.tw_splash_scale, 0, c_white, 1);
+		draw_set_alpha(_sp_pa); draw_set_colour(_sp_pc);
+	}
+
 	// NOW PLAYING (2026-09-12, provisional look -- the toast redo replaces the drawing,
 	// not the hook). Bottom-left, small, aqua, fades out over the last second.
 	if (variable_global_exists("tw_np_timer") && global.tw_np_timer > 0)

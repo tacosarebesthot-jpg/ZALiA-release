@@ -4293,6 +4293,18 @@ function g_Create() {
 	global.tw_np_asset            = -1;        // its sound asset
 	global.tw_np_last             = "";        // raw name last announced (dedupe across loop restarts)
 	global.tw_np_timer            = 0;         // frames left on the NOW PLAYING toast
+	// MK2 SPLASH (2026-09-12): the real arcade FATALITY / FRIENDSHIP text animations, ripped
+	// frame-for-frame from MAME (briefs\mk2_splash_rip), played over a dimmed screen with the
+	// arcade announcer samples. Driven by tw_splash_enqueue()/tw_splash_step() in twitch_tick.gml,
+	// drawn in Surface_Draw_GUI_End. Fired by the flawless-boss tracker (B65) and the test verbs.
+	global.tw_splash_queue        = [];        // pending {spr, snd, wait, toast} entries
+	global.tw_splash_spr          = -1;        // sprite playing now (-1 = none)
+	global.tw_splash_frame        = 0;         // float frame cursor (advances at the arcade's 54.7 fps)
+	global.tw_splash_wait         = 0;         // frames before the next queue entry starts
+	global.tw_splash_scale        = 0.8;       // arcade 400 px wide -> GUI 320 px
+	global.tw_splash_y            = 51;        // GUI y of the text top (arcade row 54 of 254)
+	global.tw_splash_dim          = 0.5;       // screen dim under the splash (0 = none)
+	global.tw_splash_enabled      = true;
 	global.QuestTimer_scale       = 1.5;       // top-left run timer text scale (Lane 09-11: "timer top left very small"); 1 = the old 8px sprite font
 	// ────────────────────────────────────────────────────────────────────────
 

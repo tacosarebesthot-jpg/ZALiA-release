@@ -830,6 +830,16 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		case "fatality":
+		case "friendship":
+		case "flawless":
+		case "finisher":
+			// FUN: fire the MK2 splash on demand (no gameplay effect). "finisher" = random.
+			tw_flawless_event((_v == "finisher") ? "" : _v);
+			global.tw_toast       = _who_s + " -> " + string_upper(_v);
+			global.tw_toast_timer = 120;
+			break;
+
 		case "song":
 		case "np":
 		case "nowplaying":

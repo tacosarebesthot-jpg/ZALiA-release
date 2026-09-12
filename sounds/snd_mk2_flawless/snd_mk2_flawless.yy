@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"snd_mk2_flawless",
+  "audioGroupId":{
+    "name":"audiogroup_snd",
+    "path":"audiogroups/audiogroup_snd",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":6,
+  "conversionMode":0,
+  "duration":1.8125,
+  "exportDir":"",
+  "name":"snd_mk2_flawless",
+  "parent":{
+    "name":"Sounds",
+    "path":"folders/Sounds.yy",
+  },
+  "preload":true,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"snd_mk2_flawless",
+  "volume":1.0,
+}

@@ -12,6 +12,7 @@
 // ============================================================================
 function twitch_tick() {
 
+	tw_splash_step(); // MK2 splash queue (runs even with the twitch mod off: boss callouts are for everyone)
 	// toast countdown (independent of the effect list)
 	if (variable_global_exists("tw_toast_timer") && global.tw_toast_timer > 0)
 	{   global.tw_toast_timer--;  }
@@ -53,8 +54,9 @@ function twitch_tick() {
 			global.tw_boss_seen = false;
 			if (!global.tw_boss_damaged && global.tw_boss_frames > 300)
 			{
-				global.tw_toast       = global.tw_mk_strings[irandom(array_length(global.tw_mk_strings) - 1)];
-				global.tw_toast_timer = 240;
+				// Lane 09-11 (3:45:24): "all I did was get some green text at the bottom there ...
+				// we want a little cutscene where the screen goes dark." Owner: the real MK2 splash.
+				tw_flawless_event("");
 			}
 			global.tw_boss_damaged = false;
 			global.tw_boss_frames  = 0;
@@ -128,4 +130,76 @@ function tw_nowplaying_set(_snd, _is_intro) {
 		}
 	}
 	global.tw_np_last = _name;
+}
+
+/// @description  tw_splash_enqueue(sprite, sound, wait_frames, toast) -- queue one splash step.
+/// sprite/sound may be -1 (sound-only step, or silent sprite). wait = frames to hold before
+/// this step starts (after the previous one ends). toast = "" or a line for the small toast.
+function tw_splash_enqueue(_spr, _snd, _wait, _toast) {
+	if (!variable_global_exists("tw_splash_queue") || !is_array(global.tw_splash_queue)) global.tw_splash_queue = [];
+	array_push(global.tw_splash_queue, { spr : _spr, snd : _snd, wait : _wait, toast : _toast });
+}
+
+/// @description  tw_splash_step() -- per-frame driver: advances the playing splash at the
+/// arcade's frame rate, then starts the next queued step once the wait elapses.
+function tw_splash_step() {
+	if (!variable_global_exists("tw_splash_spr")) return;
+	if (global.tw_splash_spr >= 0)
+	{
+		var _fps = game_get_speed(gamespeed_fps); if (_fps <= 0) _fps = 60;
+		global.tw_splash_frame += 54.70684 / _fps;             // MK2 arcade = 54.706840 Hz
+		if (global.tw_splash_frame >= sprite_get_number(global.tw_splash_spr))
+		{
+			global.tw_splash_spr   = -1;
+			global.tw_splash_frame = 0;
+		}
+		return;
+	}
+	if (global.tw_splash_wait > 0) { global.tw_splash_wait--; return; }
+	if (!is_array(global.tw_splash_queue) || array_length(global.tw_splash_queue) == 0) return;
+	var _e = global.tw_splash_queue[0];
+	array_delete(global.tw_splash_queue, 0, 1);
+	if (_e.wait > 0)
+	{
+		// hold first, then start: re-queue at the front with wait cleared
+		global.tw_splash_wait = _e.wait;
+		array_insert(global.tw_splash_queue, 0, { spr : _e.spr, snd : _e.snd, wait : 0, toast : _e.toast });
+		return;
+	}
+	if (is_string(_e.toast) && _e.toast != "")
+	{
+		global.tw_toast       = _e.toast;
+		global.tw_toast_timer = 240;
+	}
+	if (_e.snd >= 0 && audio_exists(_e.snd)) aud_play_sound(_e.snd);
+	if (_e.spr >= 0 && sprite_exists(_e.spr))
+	{
+		global.tw_splash_spr   = _e.spr;
+		global.tw_splash_frame = 0;
+	}
+}
+
+/// @description  tw_flawless_event(which) -- the flawless-boss celebration. "" = random
+/// finisher, "fatality" / "friendship" force one, "flawless" = announcer + text only.
+/// Sequence (mirrors the arcade): FLAWLESS VICTORY announcer + text, ~1.3 s, then the
+/// finisher splash with its own announcer sample. Assets by name so a missing import
+/// degrades to the old text toast instead of crashing.
+function tw_flawless_event(_which) {
+	if (variable_global_exists("tw_splash_enabled") && !global.tw_splash_enabled)
+	{
+		global.tw_toast       = global.tw_mk_strings[irandom(array_length(global.tw_mk_strings) - 1)];
+		global.tw_toast_timer = 240;
+		return;
+	}
+	var _s_flaw = asset_get_index("snd_mk2_flawless");
+	var _s_fat  = asset_get_index("snd_mk2_fatality");
+	var _s_frd  = asset_get_index("snd_mk2_friendship");
+	var _p_fat  = asset_get_index("spr_mk2_fatality");
+	var _p_frd  = asset_get_index("spr_mk2_friendship");
+	tw_splash_enqueue(-1, _s_flaw, 0, "FLAWLESS VICTORY!");
+	if (_which == "flawless") return;
+	if (_which == "") _which = (irandom(1) == 0) ? "fatality" : "friendship";
+	if (_which == "friendship" && _p_frd >= 0) tw_splash_enqueue(_p_frd, _s_frd, 75, "");
+	else if (_p_fat >= 0)                       tw_splash_enqueue(_p_fat, _s_fat, 75, "");
+	else { global.tw_toast = "FATALITY."; global.tw_toast_timer = 240; }
 }

@@ -171,6 +171,7 @@ function tw_irc_is_verb(_v) {
 		case "root":   case "deny":                  // Z3-family ports
 		case "kill":   case "killlink": case "poison": case "suggest":
 		case "steal":  case "rob": case "thief": case "pickpocket": // dispatch case existed since 07-27, never passed this gate (verb audit 09-11)
+		case "fatality": case "friendship": case "flawless": case "finisher": // MK2 splash (fun / on-stream test)
 		case "song":   case "np": case "nowplaying": case "track": // "what song is this" (every stream)
 		case "link":   case "unchicken":                       // force Link form back (Lane 09-11 2:30:53 "exclamation point be link again")
 		case "donothing": case "rip": case "blip": case "coincidence": case "getfed": // joke verbs
