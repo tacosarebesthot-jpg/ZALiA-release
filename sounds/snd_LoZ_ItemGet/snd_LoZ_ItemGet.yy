@@ -1,0 +1,26 @@
+{
+  "$GMSound":"v2",
+  "%Name":"snd_LoZ_ItemGet",
+  "audioGroupId":{
+    "name":"audiogroup_snd",
+    "path":"audiogroups/audiogroup_snd",
+  },
+  "bitDepth":1,
+  "channelFormat":0,
+  "compression":0,
+  "compressionQuality":6,
+  "conversionMode":0,
+  "duration":3.0000,
+  "exportDir":"",
+  "name":"snd_LoZ_ItemGet",
+  "parent":{
+    "name":"Sounds",
+    "path":"folders/Sounds.yy",
+  },
+  "preload":true,
+  "resourceType":"GMSound",
+  "resourceVersion":"2.0",
+  "sampleRate":44100,
+  "soundFile":"snd_LoZ_ItemGet",
+  "volume":1.0,
+}

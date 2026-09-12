@@ -867,7 +867,7 @@ function OptionsMenu_Create() {
 	// The oauth token is deliberately NEVER shown -- the owner streams this menu.
 	enum Twitch
 	{
-	    REWARDS, CHAT, COOLDOWN, DURATION, JOKES, AUTOSAVE, COMMANDS, SETUP,
+	    REWARDS, CHAT, COOLDOWN, DURATION, JOKES, AUTOSAVE, POINTS, COMMANDS, SETUP,
 	    BACK,
 	    COUNT
 	}
@@ -887,6 +887,8 @@ function OptionsMenu_Create() {
 	Twitch_dg[#_i,0]="CHAT JOKES";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="TOWN FOLK TALK LIKE CHAT. NORMAL = ORIGINAL TEXT. CLEAN = JOKES, NO CURSING. DIRTY = ALL OF IT. HINTS ARE NEVER CHANGED.";
 	             _i=Twitch.AUTOSAVE;
 	Twitch_dg[#_i,0]="CHECKPOINTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="A COPY OF YOUR SAVE EVERY 60 SECONDS, EVERY ITEM AND EVERY LEVEL UP, IN THE CHECKPOINTS FOLDER NEXT TO YOUR SAVES. YOUR REAL SAVE IS NOT TOUCHED.";
+	             _i=Twitch.POINTS;
+	Twitch_dg[#_i,0]="POINTS ECONOMY";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="VIEWERS EARN POINTS BY CHATTING (1 A MESSAGE, 5 EVERY 5 MINUTES) AND EVERY COMMAND COSTS SOME. !POINTS SHOWS A BALANCE. OFF = EVERYTHING IS FREE.";
 	             _i=Twitch.COMMANDS;
 	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP !TAX !DMGUP !ATTRITION !SONG";
 	             _i=Twitch.SETUP;

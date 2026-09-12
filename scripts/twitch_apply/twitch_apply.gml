@@ -992,6 +992,41 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		// ---- round 10h: points, ghost, crush ---------------------------------------
+		case "points": case "pts": case "bal":
+			if (variable_global_exists("tw_points_on") && global.tw_points_on)
+				global.tw_toast = _who_s + " -> " + string(floor(tw_points_get(_who_s))) + " pts (1 per message, +5 every 5 min)";
+			else
+				global.tw_toast = _who_s + " -> points are off. everything is free.";
+			global.tw_toast_timer = 240;
+			break;
+
+		// ghost (twitchvin): every non-boss enemy on screen is nearly invisible for a while
+		case "ghost":
+			global.tw_ghost = true;
+			array_push(global.tw_active, {
+				frames  : _frames,
+				reapply : function() { global.tw_ghost = true;  },
+				restore : function() { global.tw_ghost = false; }
+			});
+			global.tw_toast       = _who_s + " -> GHOSTS " + string(round(_frames / 60)) + "s. they are still there.";
+			global.tw_toast_timer = 240;
+			break;
+
+		// crush (Lane 09-11 2:07 "Crush as a summon"): drop a palace block from above Link.
+		// It falls on him or on whatever is under it (FallingBlock_update does the crushing).
+		case "crush":
+			if (!tw_spawn_window_ok(_v, _who_s)) break;
+			if (instance_exists(global.pc))
+			{
+				var _cr_x = (global.pc.xl + 8) & ~15;
+				var _cr_y = max(viewYT() + 16, global.pc.yt - 80);
+				GameObject_create(_cr_x, _cr_y, FaBlA, 1);
+				global.tw_toast       = _who_s + " -> CRUSH incoming";
+				global.tw_toast_timer = 180;
+			}
+			break;
+
 		// ---- Z3 ports, round 10b (2026-09-12) --------------------------------------
 		// tax: Z3's !tax/!rupeesteal. Z2 has no rupees, so it taxes EXPERIENCE: a bare
 		// !tax takes 10%, "!tax N" takes N% (1..50). One-shot, hostile, never below 0.
@@ -1162,7 +1197,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "hurt": case "drain": case "poison": case "kill": case "killlink": case "tax": case "dmgup":
 			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
 			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
-			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis":
+			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush":
 				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; break;
 		}
 	}

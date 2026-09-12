@@ -174,6 +174,17 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // POINTS ECONOMY: ON/OFF (twitch_points), points= in twitch_config.txt.
+	    case Twitch.POINTS:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (!variable_global_exists("tw_points_on")) global.tw_points_on = false;
+	        tw_points_set_on(!global.tw_points_on);
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // COMMANDS: read-only reference. The verb list lives in this row's description
 	    // string, so it draws in the info area like every other row's help text.
 	    case Twitch.COMMANDS:{ if (timer) break;

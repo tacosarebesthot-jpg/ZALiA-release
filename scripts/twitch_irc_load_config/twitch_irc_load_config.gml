@@ -84,6 +84,7 @@ function twitch_irc_load_config() {
 			// (menu toggle, web save) never drops it; tw_jokes_init reads it at boot.
 			case "jokes": if (variable_global_exists("tw_jokes_mode")) global.tw_jokes_mode = clamp(tw_num(_val, 1), 0, 2); break;
 			case "autosave": global.tw_autosave = (tw_num(_val, 1) != 0); break;
+			case "points": if (variable_global_exists("tw_points_on")) global.tw_points_on = (tw_num(_val, 0) != 0); break;
 		}
 	}
 	file_text_close(_fh);
@@ -182,6 +183,7 @@ function tw_irc_is_verb(_v) {
 		case "tax": case "dmgup": case "attrition":   // Z3 ports, round 10b
 		case "meth": case "quantumentangle": case "help": case "challenge": case "disorient": // round 10c
 		case "stasis":   // Lane's freeze-Link ask
+		case "points": case "pts": case "bal": case "ghost": case "crush":   // round 10h
 			return true;
 		default:
 			return false;
@@ -216,6 +218,9 @@ function tw_alias_verb(_v) {
 		case "confuseall": case "disorientate": return "disorient";
 		case "flippalace": case "nomercy": case "noreprieve": return "challenge";
 		case "freezelink": case "hold": case "statis": case "stais": return "stasis";
+		case "balance": case "point": case "mypoints": return "points";
+		case "invisible": case "invis": case "ghosts": return "ghost";
+		case "drop": case "block": case "squash": return "crush";
 	}
 	return _v;
 }

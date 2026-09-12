@@ -4322,6 +4322,10 @@ function g_Create() {
 	global.tw_autosave            = true;      // rolling checkpoints (tw_checkpoint_tick); autosave= in twitch_config.txt
 	global.tw_ckpt_due            = "";        // "levelup" etc. -> checkpoint on the next live frame
 	global.tw_last_dungeon_seen   = 0;         // reflect hint fires once per palace entry
+	global.tw_ghost               = false;     // !ghost: enemies drawn at 12% alpha (GameObject_draw_1a)
+	global.tw_crush_count         = 0;         // enemies crushed by falling blocks this session
+	global.tw_loz_jingle          = true;      // main items play the Zelda 1 treasure fanfare (item_get_jingle)
+	tw_points_init();
 	tw_jokes_init();
 	// ────────────────────────────────────────────────────────────────────────
 

@@ -18,6 +18,7 @@ function twitch_tick() {
 	{   global.tw_toast_timer--;  }
 
 	tw_checkpoint_tick();   // rolling checkpoints (round 10d) -- independent of the twitch mod
+	tw_points_tick();       // points stipend + throttled save (round 10h)
 
 	if (!variable_global_exists("tw_active")) return;
 

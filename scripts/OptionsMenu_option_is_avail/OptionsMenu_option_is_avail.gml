@@ -134,6 +134,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case Twitch.DURATION:       {return true; break;}
 	        case Twitch.JOKES:          {return true; break;}
 	        case Twitch.AUTOSAVE:       {return true; break;}
+	        case Twitch.POINTS:         {return true; break;}
 	        case Twitch.COMMANDS:       {return true; break;}
 	        case Twitch.SETUP:          {return true; break;}
 	        case Twitch.BACK:           {return true; break;}

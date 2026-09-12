@@ -582,7 +582,8 @@ function tw_help_draw() {
 		"MOBS  !SPAWN !SWARM !FREEZE !SMITE !PARTY",
 		"      !FLAME !ARISE !CUCCO !CHALLENGE",
 		"FUN   !SONG !SUGGEST !METH !FATALITY",
-		"      !QUANTUMENTANGLE !HELP",
+		"      !QUANTUMENTANGLE !HELP !POINTS",
+		"      !GHOST !CRUSH",
 		"ADD A NUMBER FOR SECONDS: !SLOW 20"
 	];
 	var _gw = display_get_gui_width();  if (_gw <= 0) _gw = 320;
@@ -712,4 +713,16 @@ function tw_reflect_hint(_where) {
 	global.tw_reflect_hint_time = current_time;
 	if (_where == "boss") tw_toast_push("CAROCK NEEDS REFLECT", "YOU DONT HAVE IT. HE WONT DIE.", "warn");
 	else                  tw_toast_push("THIS PALACE ENDS IN CAROCK", "HE NEEDS REFLECT. YOU HAVE NONE.", "warn");
+}
+
+// ─── item jingle (round 10h, owner's idea: the OG Zelda item fanfare) ──────────
+/// @description  item_get_jingle(theme_key) -- main items play the Zelda 1 treasure fanfare
+/// (snd_LoZ_ItemGet, ripped from the NSFe) when global.tw_loz_jingle is on, else the theme's own.
+function item_get_jingle(_theme_key) {
+	if (variable_global_exists("tw_loz_jingle") && global.tw_loz_jingle)
+	{
+		var _s = asset_get_index("snd_LoZ_ItemGet");
+		if (_s != -1 && audio_exists(_s)) { aud_play_sound(_s); return; }
+	}
+	aud_play_sound(get_audio_theme_track(_theme_key), -1, false, -1, _theme_key);
 }

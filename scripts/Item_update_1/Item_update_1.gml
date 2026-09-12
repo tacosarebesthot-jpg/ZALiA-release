@@ -15,7 +15,7 @@ function Item_update_1() {
 	    case STR_CANDLE:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -23,7 +23,7 @@ function Item_update_1() {
 	    case STR_GLOVE:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -31,7 +31,7 @@ function Item_update_1() {
 	    case STR_RAFT:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -39,7 +39,7 @@ function Item_update_1() {
 	    case STR_HAMMER:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -47,7 +47,7 @@ function Item_update_1() {
 	    case STR_BOOTS:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    Overworld_tile_change_2a(global.OVERWORLD.TileChangeEvent_TYPE_BOOT1);
 	    break;}
     
@@ -56,7 +56,7 @@ function Item_update_1() {
 	    case STR_FLUTE:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -64,7 +64,7 @@ function Item_update_1() {
 	    case STR_BRACELET:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -72,7 +72,7 @@ function Item_update_1() {
 	    case STR_CROSS:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
     
@@ -84,7 +84,7 @@ function Item_update_1() {
 	    case STR_RFAIRY:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    g.StatRestore_timer_hp = get_stat_max(STR_Heart);
 	    break;}
     
@@ -93,7 +93,7 @@ function Item_update_1() {
 	    case STR_BOOK:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -101,7 +101,7 @@ function Item_update_1() {
 	    case STR_MEAT:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -109,7 +109,7 @@ function Item_update_1() {
 	    case STR_PENDANT:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -117,7 +117,7 @@ function Item_update_1() {
 	    case STR_SHIELD:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -125,7 +125,7 @@ function Item_update_1() {
 	    case STR_SWORD:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -133,7 +133,7 @@ function Item_update_1() {
 	    case STR_RING:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -141,7 +141,7 @@ function Item_update_1() {
 	    case STR_ALLKEY:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -149,7 +149,7 @@ function Item_update_1() {
 	    case STR_MASK:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
     
@@ -161,7 +161,7 @@ function Item_update_1() {
 	    case STR_FEATHER:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -187,7 +187,7 @@ function Item_update_1() {
 	    case STR_TROPHY:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -195,7 +195,7 @@ function Item_update_1() {
 	    case STR_NOTE:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -203,7 +203,7 @@ function Item_update_1() {
 	    case STR_MIRROR:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -211,7 +211,7 @@ function Item_update_1() {
 	    case STR_FLOWER:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -219,7 +219,7 @@ function Item_update_1() {
 	    case STR_CHILD:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
 	    // ===============================================================================
@@ -227,7 +227,7 @@ function Item_update_1() {
 	    case STR_BOTTLE:{
 	    f.items |= ITEM_BIT;
 	    _can_flash=true;
-	    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);
+	    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled
 	    break;}
     
     
@@ -241,7 +241,7 @@ function Item_update_1() {
 	    f.cont_pieces_hp += string_copy(ITEM_ID, string_length(ITEM_ID)-3, 4);
 	    g.StatRestore_timer_hp = get_stat_max(STR_Heart);
 	    if!(cont_piece_cnt_hp() mod f.CONT_PIECE_PER) // if this completes a container
-	    {    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);  }
+	    {    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled  }
 	    else aud_play_sound(get_audio_theme_track(_MUSIC_THEME2), -1,false,-1, _MUSIC_THEME2);
 	    break;}
     
@@ -251,7 +251,7 @@ function Item_update_1() {
 	    f.cont_pieces_mp += string_copy(ITEM_ID, string_length(ITEM_ID)-3, 4);
 	    g.StatRestore_timer_mp = get_stat_max(STR_Magic);
 	    if!(cont_piece_cnt_mp() mod f.CONT_PIECE_PER) // if this completes a container
-	    {    aud_play_sound(get_audio_theme_track(_MUSIC_THEME1), -1,false,-1, _MUSIC_THEME1);  }
+	    {    item_get_jingle(_MUSIC_THEME1); // round 10h: Zelda 1 treasure fanfare when enabled  }
 	    else aud_play_sound(get_audio_theme_track(_MUSIC_THEME2), -1,false,-1, _MUSIC_THEME2);
 	    break;}
     

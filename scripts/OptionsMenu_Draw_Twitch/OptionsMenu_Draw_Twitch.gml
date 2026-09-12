@@ -110,6 +110,10 @@ function OptionsMenu_Draw_Twitch() {
 	        _text = _dg_state_text[#0, sign(variable_global_exists("tw_autosave") && global.tw_autosave)];
 	    break;
 
+	    case Twitch.POINTS:
+	        _text = _dg_state_text[#0, sign(variable_global_exists("tw_points_on") && global.tw_points_on)];
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

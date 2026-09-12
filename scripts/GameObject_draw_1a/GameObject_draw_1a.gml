@@ -9,7 +9,12 @@ function GameObject_draw_1a(argument0, argument1) {
 	if (!variable_instance_exists(id, "xScale")) xScale = 1;
 	if (!variable_instance_exists(id, "yScale")) yScale = 1;
 
-	draw_sprite_(argument0,0, drawX,drawY, argument1, xScale,yScale);
+	// !ghost (round 10h): non-boss enemies fade to a whisper while the effect is live
+	if (variable_global_exists("tw_ghost") && global.tw_ghost
+	&&  is_ancestor(object_index, Enemy) && !is_ancestor(object_index, Boss))
+	{   draw_sprite_(argument0,0, drawX,drawY, argument1, xScale,yScale, c_white, 0.12);  }
+	else
+	{   draw_sprite_(argument0,0, drawX,drawY, argument1, xScale,yScale);  }
 
 
 

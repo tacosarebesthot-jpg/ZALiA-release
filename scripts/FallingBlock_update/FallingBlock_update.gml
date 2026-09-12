@@ -40,6 +40,32 @@ function FallingBlock_update() {
 
 
 
+	// CRUSH (round 10h, Lane 09-11 2:05:26 "the falling blocks... don't hurt monsters"):
+	// a block still falling that overlaps a non-boss enemy kills it, breaks, and says so.
+	if (!counter && vspd > 0)
+	{
+	    update_body_hb_1a();
+	    var _cb_x = BodyHB_xl, _cb_y = BodyHB_yt, _cb_w = BodyHB_w, _cb_h = BodyHB_h;
+	    var _crushed = 0;
+	    with (Enemy)
+	    {
+	        if (state == state_NORMAL && hp > 0 && !is_ancestor(object_index, Boss) && !is_ancestor(object_index, FaBlA))
+	        {
+	            update_body_hb_1a();
+	            if (rectInRect(BodyHB_xl, BodyHB_yt, BodyHB_w, BodyHB_h, _cb_x, _cb_y, _cb_w, _cb_h))
+	            {   damage_gob(id, max(1, hp), false); _crushed++;  }
+	        }
+	    }
+	    if (_crushed)
+	    {
+	        global.tw_crush_count = (variable_global_exists("tw_crush_count") ? global.tw_crush_count : 0) + _crushed;
+	        tw_toast_push("CRUSHED!", string(_crushed) + (_crushed == 1 ? " ENEMY" : " ENEMIES") + " UNDER A BLOCK (" + string(global.tw_crush_count) + " TOTAL)", "win");
+	        aud_play_sound(get_audio_theme_track(dk_BlockBreak));
+	        counter = 1; // break apart
+	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    }
+	}
+
 	// AC06: JSR E677
 	GOB_body_collide_pc_sword();
 

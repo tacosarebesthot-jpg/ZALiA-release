@@ -50,6 +50,8 @@ function twitch_config_save() {
     var _jk_val    = variable_global_exists("tw_jokes_mode") ? string(global.tw_jokes_mode) : "1";
     var _wrote_as  = false;
     var _as_val    = (!variable_global_exists("tw_autosave") || global.tw_autosave) ? "1" : "0";
+    var _wrote_pt  = false;
+    var _pt_val    = (variable_global_exists("tw_points_on") && global.tw_points_on) ? "1" : "0";
 
     for (var _i = 0; _i < array_length(_lines); _i++)
     {
@@ -90,6 +92,11 @@ function twitch_config_save() {
             _lines[_i] = "autosave=" + _as_val;
             _wrote_as  = true;
         }
+        else if (_key == "points")
+        {
+            _lines[_i] = "points=" + _pt_val;
+            _wrote_pt  = true;
+        }
     }
 
     if (!_wrote_cd)  array_push(_lines, "cooldown="    + string(global.tw_irc_cooldown_frames));
@@ -97,6 +104,7 @@ function twitch_config_save() {
     if (!_wrote_ac)  array_push(_lines, "autoconnect=" + _ac_val); // 1 = join chat on boot (twitch_irc_step)
     if (!_wrote_jk)  array_push(_lines, "jokes=" + _jk_val);       // 0 NORMAL text, 1 CLEAN jokes, 2 DIRTY (twitch_jokes)
     if (!_wrote_as)  array_push(_lines, "autosave=" + _as_val);    // 1 = rolling checkpoints (tw_checkpoint_tick)
+    if (!_wrote_pt)  array_push(_lines, "points=" + _pt_val);      // 1 = chat points economy (twitch_points)
 
     // ---- write it back ------------------------------------------------------
     var _fw = file_text_open_write(_path);

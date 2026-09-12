@@ -72,6 +72,7 @@ function twitch_irc_handle_line(_line) {
 
 	_msg = tw_trim(_msg); // strip a trailing CR and any padding
 	tw_chatter_note(_sender); // CHAT JOKES: {chatter} pool -- every talker, command or not
+	tw_points_earn(_sender);  // POINTS: 1 per message (twitch_points)
 	if (_msg == "" || string_char_at(_msg, 1) != "!") return;
 
 	// split "!verb arg..." into verb + (everything after the first space) arg.
@@ -129,6 +130,10 @@ function twitch_irc_handle_line(_line) {
 		}
 		global.tw_irc_last_cmd = global.tw_irc_frame;
 	}
+
+	// POINTS ECONOMY (round 10h): pay for the verb, or hear why not. After the cooldown
+	// so a rejected command is never charged.
+	if (!tw_points_charge(_sender, tw_alias_verb(_verb))) return;
 
 	// hand off to the EXISTING dispatcher (itself gated on global.tw_enabled).
 	// Duration: pass EMPTY, not a number -- the hardcoded 300 here pinned EVERY
