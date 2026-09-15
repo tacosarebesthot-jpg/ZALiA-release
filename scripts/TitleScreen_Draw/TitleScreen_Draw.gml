@@ -104,12 +104,6 @@ function TitleScreen_Draw() {
 	    draw_sprite(TITLE_SPR,0, x,title_y);
 	}
 
-	// version tag, bottom right of the view (bug reports and stream VODs show which build this is)
-	{
-	    var _vtag = "V" + ZALIA_VERSION;
-	    draw_text_(viewXR() - (string_length(_vtag) << 3) - 8, viewYT() + viewH() - 16, _vtag, -1, global.PI_BGR4);
-	}
-
 
 
 
@@ -273,6 +267,15 @@ function TitleScreen_Draw() {
 
 	// Sword
 	draw_sprite_(SWORD_SPR,0, SWORD_SPR_X,SWORD_SPR_Y, global.PI_MOB_ORG);
+
+
+	// version tag, bottom right of the view (bug reports and stream VODs show which build this is).
+	// v2.1.4: drawn LAST. It used to sit right after the title sprite, so the FG terrain
+	// surfaces drawn below painted over it and the tag never showed.
+	{
+	    var _vtag = "V" + ZALIA_VERSION;
+	    draw_text_(viewXR() - (string_length(_vtag) << 3) - 8, viewYT() + viewH() - 16, _vtag, -1, global.PI_BGR4);
+	}
 
 
 
