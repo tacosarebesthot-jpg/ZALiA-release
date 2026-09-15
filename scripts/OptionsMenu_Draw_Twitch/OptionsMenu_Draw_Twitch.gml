@@ -118,6 +118,23 @@ function OptionsMenu_Draw_Twitch() {
 	        _text = _dg_state_text[#0, sign(variable_global_exists("tw_rl") && global.tw_rl)];
 	    break;
 
+	    // v2.1.4 player options
+	    case Twitch.TOAST_NP:   _text = tw_toast_secs_label("music"); break;
+	    case Twitch.TOAST_CHAT: _text = tw_toast_secs_label("chat");  break;
+	    case Twitch.TOAST_GAME: _text = tw_toast_secs_label("game");  break;
+
+	    case Twitch.SPLASH:
+	        _text = _dg_state_text[#0, sign(!variable_global_exists("tw_splash_enabled") || global.tw_splash_enabled)];
+	    break;
+
+	    case Twitch.JINGLE:
+	        _text = _dg_state_text[#0, sign(!variable_global_exists("tw_loz_jingle") || global.tw_loz_jingle)];
+	    break;
+
+	    case Twitch.BIGTIMER:
+	        _text = _dg_state_text[#0, sign(variable_global_exists("QuestTimer_scale") && global.QuestTimer_scale > 1)];
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

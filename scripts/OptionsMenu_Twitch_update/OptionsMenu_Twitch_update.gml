@@ -199,6 +199,63 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // TOASTS (v2.1.4, owner 09-14: "give the user options"): one row per toast type, OFF or
+	    // how many seconds a plate stays up. LEFT/RIGHT step, confirm cycles. Saved as
+	    // toast_music= / toast_chat= / toast_game= in twitch_config.txt (twitch_jokes helpers).
+	    case Twitch.TOAST_NP:
+	    case Twitch.TOAST_CHAT:
+	    case Twitch.TOAST_GAME:{
+	    var _td = _HORIZONTAL;
+	    if (_td == 0 && !timer && _InputConfirm_pressed2) _td = 1;
+	    if (_td != 0)
+	    {
+	        var _cat = "game";
+	        if (Twitch_cursor == Twitch.TOAST_NP)   _cat = "music";
+	        if (Twitch_cursor == Twitch.TOAST_CHAT) _cat = "chat";
+	        tw_toast_secs_step(_cat, _td);
+	        twitch_config_save();
+	        aud_play_sound(CURSOR_SOUND1);
+	        timer = DURATION0;
+	    }
+	    break;}
+
+	    // MK2 SPLASH: the arcade FLAWLESS / FATALITY animation + announcer on a flawless boss.
+	    // OFF falls back to a plain game toast. splash= in twitch_config.txt.
+	    case Twitch.SPLASH:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (!variable_global_exists("tw_splash_enabled")) global.tw_splash_enabled = true;
+	        global.tw_splash_enabled = !global.tw_splash_enabled;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
+	    // ZELDA 1 JINGLE: main items play the Zelda 1 treasure fanfare. OFF = the audio set's own.
+	    case Twitch.JINGLE:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (!variable_global_exists("tw_loz_jingle")) global.tw_loz_jingle = true;
+	        global.tw_loz_jingle = !global.tw_loz_jingle;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
+	    // BIG TIMER: the 1.25x run timer in the top bar. OFF = the original small sprite-font timer.
+	    case Twitch.BIGTIMER:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        var _big = variable_global_exists("QuestTimer_scale") && global.QuestTimer_scale > 1;
+	        global.QuestTimer_scale = _big ? 1 : 1.25;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // COMMANDS: read-only reference. The verb list lives in this row's description
 	    // string, so it draws in the info area like every other row's help text.
 	    case Twitch.COMMANDS:{ if (timer) break;

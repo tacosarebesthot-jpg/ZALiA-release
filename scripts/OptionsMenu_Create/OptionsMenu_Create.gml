@@ -246,7 +246,7 @@ function OptionsMenu_Create() {
 	// The browser hub moved to that page's COMPANION PAGES row.
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "TWITCH OPTIONS";
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "CHAT JOKES, ROCKET LEAGUE, POINTS, CHECKPOINTS, CHAT SETUP, AND THE JUKEBOX + TRACKER PAGES.";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "CHAT JOKES, TOASTS, ROCKET LEAGUE, POINTS, CHECKPOINTS, BIG TIMER, CHAT SETUP, JUKEBOX + TRACKER PAGES.";
 	//                                                                          //
 	MainOption_DEV_TOOLS         = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
@@ -869,7 +869,9 @@ function OptionsMenu_Create() {
 	// The oauth token is deliberately NEVER shown -- the owner streams this menu.
 	enum Twitch
 	{
-	    REWARDS, CHAT, COOLDOWN, DURATION, JOKES, AUTOSAVE, POINTS, RL, COMMANDS, SETUP,
+	    REWARDS, CHAT, COOLDOWN, DURATION, JOKES, AUTOSAVE, POINTS, RL,
+	    TOAST_NP, TOAST_CHAT, TOAST_GAME, SPLASH, JINGLE, BIGTIMER, // v2.1.4 player options
+	    COMMANDS, SETUP,
 	    PAGES, BACK,
 	    COUNT
 	}
@@ -893,6 +895,19 @@ function OptionsMenu_Create() {
 	Twitch_dg[#_i,0]="POINTS ECONOMY";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="VIEWERS EARN POINTS BY CHATTING (1 A MESSAGE, 5 EVERY 5 MINUTES) AND EVERY COMMAND COSTS SOME. !POINTS SHOWS A BALANCE. OFF = EVERYTHING IS FREE.";
 	             _i=Twitch.RL;
 	Twitch_dg[#_i,0]="ROCKET LEAGUE";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="QUICK-CHAT PLATES ON SAVES, WHIFFS, DEMOS AND DEATHS, AND !NICESHOT !WHATASAVE !GG IN CHAT. OFF HIDES ALL OF IT.";
+	// v2.1.4 player options (owner 09-14: "give the user options"). Toast rows: OFF or seconds.
+	             _i=Twitch.TOAST_NP;
+	Twitch_dg[#_i,0]="MUSIC TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="NOW PLAYING PLATE WHEN A NEW SONG STARTS. LEFT/RIGHT: OFF, OR HOW MANY SECONDS IT STAYS UP.";
+	             _i=Twitch.TOAST_CHAT;
+	Twitch_dg[#_i,0]="CHAT TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="PLATES FOR WHAT CHAT DID: !HEAL, !SWARM, QUICK-CHAT AND THE REST. LEFT/RIGHT: OFF, OR HOW MANY SECONDS IT STAYS UP.";
+	             _i=Twitch.TOAST_GAME;
+	Twitch_dg[#_i,0]="GAME TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="KILLED BY, CRUSHED, LEVEL UP, THE CAROCK HINT AND OTHER GAME CALLOUTS. LEFT/RIGHT: OFF, OR HOW MANY SECONDS IT STAYS UP.";
+	             _i=Twitch.SPLASH;
+	Twitch_dg[#_i,0]="MK2 SPLASH";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="ARCADE FLAWLESS VICTORY AND FATALITY ANIMATION WITH THE ANNOUNCER WHEN YOU BEAT A BOSS WITHOUT GETTING HIT.";
+	             _i=Twitch.JINGLE;
+	Twitch_dg[#_i,0]="ZELDA 1 JINGLE";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="MAIN ITEMS PLAY THE ZELDA 1 TREASURE FANFARE. OFF PLAYS THE AUDIO SET'S OWN FANFARE.";
+	             _i=Twitch.BIGTIMER;
+	Twitch_dg[#_i,0]="BIG TIMER";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="LARGER RUN TIMER IN THE TOP BAR. OFF IS THE ORIGINAL SMALL TIMER. SHOW OR HIDE THE TIMER UNDER OTHER.";
 	             _i=Twitch.COMMANDS;
 	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP !TAX !DMGUP !ATTRITION !SONG";
 	             _i=Twitch.SETUP;

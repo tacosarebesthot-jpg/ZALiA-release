@@ -40,6 +40,14 @@ function tw_jokes_init() {
 	global.tw_autosave   = (tw_num(tw_config_get("autosave", "1"), 1) != 0);
 	global.tw_rl         = (tw_num(tw_config_get("rl", "1"), 1) != 0);       // ROCKET LEAGUE quick-chat plates (round 11); most of it fires with no chat at all
 	global.tw_loz_jingle = (tw_num(tw_config_get("loz_jingle", "1"), 1) != 0); // loz_jingle=0 keeps the theme's own item fanfare
+	// v2.1.4 player options (TWITCH OPTIONS page). Runs after the g_Create defaults, so saved values win.
+	global.tw_toast_secs = {
+		music : clamp(tw_num(tw_config_get("toast_music", "5"), 5), 0, 10),
+		chat  : clamp(tw_num(tw_config_get("toast_chat",  "4"), 4), 0, 10),
+		game  : clamp(tw_num(tw_config_get("toast_game",  "5"), 5), 0, 10)
+	};
+	global.tw_splash_enabled = (tw_num(tw_config_get("splash", "1"), 1) != 0);
+	global.QuestTimer_scale  = (tw_num(tw_config_get("bigtimer", "1"), 1) != 0) ? 1.25 : 1;
 
 	tw_jokes_load();
 	tw_chatters_load();
@@ -375,9 +383,51 @@ function tw_font_clean(_s, _extra) {
 	return _out;
 }
 
+// ─── TOAST SETTINGS (v2.1.4, owner 09-14: "give the user options") ──────────────
+// Three player-facing toast types, each OFF or a hold time in seconds (TWITCH OPTIONS page):
+//   "music" = NOW PLAYING, "chat" = anything a viewer did (plate kind "chat"),
+//   "game"  = everything else (win/warn/info: killed by, crushed, level up, reflect hint,
+//             konami, chat link status, the MK2 fallback line).
+// Saved as toast_music= / toast_chat= / toast_game= in twitch_config.txt.
+function tw_toast_steps() {
+	static _steps = [0, 2, 3, 4, 5, 6, 8, 10];
+	return _steps;
+}
+
+function tw_toast_cat(_kind) {
+	if (_kind == "music") return "music";
+	if (_kind == "chat")  return "chat";
+	return "game";
+}
+
+function tw_toast_secs_get(_cat) {
+	if (!variable_global_exists("tw_toast_secs") || !is_struct(global.tw_toast_secs))
+		global.tw_toast_secs = { music : 5, chat : 4, game : 5 };
+	var _v = variable_struct_get(global.tw_toast_secs, _cat);
+	return is_undefined(_v) ? 5 : _v;
+}
+
+/// @description  tw_toast_secs_step(cat, dir) -- next/previous hold time for a toast type, wrapping OFF <-> 10S.
+function tw_toast_secs_step(_cat, _dir) {
+	var _steps = tw_toast_steps();
+	var _n   = array_length(_steps);
+	var _cur = tw_toast_secs_get(_cat);
+	var _idx = 0;
+	for (var _i = 0; _i < _n; _i++) { if (_steps[_i] <= _cur) _idx = _i; }
+	_idx = (_idx + sign(_dir) + _n) mod _n;
+	variable_struct_set(global.tw_toast_secs, _cat, _steps[_idx]);
+}
+
+function tw_toast_secs_label(_cat) {
+	var _v = tw_toast_secs_get(_cat);
+	return (_v <= 0) ? "OFF" : (string(_v) + "S");
+}
+
 /// @description  tw_toast_push(title, sub, kind) -- queue one plate. kind: chat/music/win/warn/info.
 function tw_toast_push(_title, _sub, _kind) {
 	if (!variable_global_exists("tw_toasts")) global.tw_toasts = [];
+	var _secs = tw_toast_secs_get(tw_toast_cat(string(_kind)));
+	if (_secs <= 0) return;   // this toast type is OFF on the TWITCH OPTIONS page
 	var _t = tw_toast_clean(_title);
 	var _s = tw_toast_clean(_sub);
 	if (_t == "") return;
@@ -404,7 +454,9 @@ function tw_toast_push(_title, _sub, _kind) {
 		var _last = global.tw_toasts[_n - 1];
 		if (_last.title == _t && _last.sub == _s && _last.age < 30) return;
 	}
-	var _life = (_kind == "music") ? 300 : ((_kind == "win") ? 300 : 240);
+	// hold time = the player's setting for this toast type (TWITCH OPTIONS page), in real seconds
+	var _fps  = game_get_speed(gamespeed_fps); if (_fps <= 0) _fps = 60;
+	var _life = max(30, round(_secs * _fps));
 	array_push(global.tw_toasts, { title : _t, title2 : _t2, sub : _s, kind : string(_kind), age : 0, life : _life });
 	while (array_length(global.tw_toasts) > 5) array_delete(global.tw_toasts, 0, 1);
 }

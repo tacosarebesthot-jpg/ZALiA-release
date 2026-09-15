@@ -55,6 +55,18 @@ function twitch_config_save() {
     var _wrote_rl  = false;
     var _rl_val    = (!variable_global_exists("tw_rl") || global.tw_rl) ? "1" : "0"; // defaults ON, like autosave
 
+    // v2.1.4 player options (TWITCH OPTIONS page): owned keys handled generically --
+    // [key, value]. toast_* = seconds a toast type stays up (0 = off); the rest 1/0.
+    var _own = [
+        ["toast_music", string(tw_toast_secs_get("music"))],
+        ["toast_chat",  string(tw_toast_secs_get("chat"))],
+        ["toast_game",  string(tw_toast_secs_get("game"))],
+        ["splash",      (!variable_global_exists("tw_splash_enabled") || global.tw_splash_enabled) ? "1" : "0"],
+        ["loz_jingle",  (!variable_global_exists("tw_loz_jingle")     || global.tw_loz_jingle)     ? "1" : "0"],
+        ["bigtimer",    (!variable_global_exists("QuestTimer_scale")  || global.QuestTimer_scale > 1) ? "1" : "0"]
+    ];
+    var _own_wrote = array_create(array_length(_own), false);
+
     for (var _i = 0; _i < array_length(_lines); _i++)
     {
         var _line = _lines[_i];
@@ -104,6 +116,21 @@ function twitch_config_save() {
             _lines[_i] = "rl=" + _rl_val;
             _wrote_rl  = true;
         }
+        else
+        {
+            for (var _o = 0; _o < array_length(_own); _o++)
+            {
+                if (_key == _own[_o][0])
+                {
+                    _lines[_i]     = _own[_o][0] + "=" + _own[_o][1];
+                    _own_wrote[_o] = true;
+                }
+            }
+        }
+    }
+    for (var _o2 = 0; _o2 < array_length(_own); _o2++)
+    {
+        if (!_own_wrote[_o2]) array_push(_lines, _own[_o2][0] + "=" + _own[_o2][1]);
     }
 
     if (!_wrote_cd)  array_push(_lines, "cooldown="    + string(global.tw_irc_cooldown_frames));
