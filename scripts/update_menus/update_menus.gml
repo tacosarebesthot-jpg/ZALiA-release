@@ -50,6 +50,15 @@ function update_menus() {
 	    if (f.xp>=f.xpNext)
 	    {   // Open LevelUp Menu
 	        gui_state = gui_state_LEVEL_UP;
+	        // chat-facing level-up callout (asm0deus, 09-04 stream: "make sure to add a
+	        // message that Jeff Rocks to everytime Lane levels up in Z2"). Text is whatever
+	        // global.tw_levelup_msg holds; empty string = silent. v2.1.4: lives here, where
+	        // the menu opens -- LevelUpMenu_Create runs once at boot and toasted every launch.
+	        if (variable_global_exists("tw_levelup_msg") && global.tw_levelup_msg != "")
+	        {
+	            global.tw_toast       = global.tw_levelup_msg;
+	            global.tw_toast_timer = 240;
+	        }
 	        //break;
 	    }
 	    else if (Input.Pause_pressed)
