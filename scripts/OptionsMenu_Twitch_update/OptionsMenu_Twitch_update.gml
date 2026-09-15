@@ -225,6 +225,17 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // COMPANION PAGES: the browser hub (jukebox, tracker, twitch setup). Was the MAIN
+	    // menu row until v2.1.4, when that row became the way into this page.
+	    case Twitch.PAGES:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (zweb_open_page("/home")) aud_play_sound(_SOUND2);
+	        else                         aud_play_sound(BACK_SOUND1);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    case Twitch.BACK:{ if (timer) break;
 	    if (_InputConfirm_pressed){ aud_play_sound(BACK_SOUND1); timer = DURATION1; menu_state = menu_state_MAIN; }
 	    break;}

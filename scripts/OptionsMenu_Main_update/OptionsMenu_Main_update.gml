@@ -108,23 +108,24 @@ function OptionsMenu_Main_update() {
 	    //  from the menu; its sweeps + test/capture tools now live under DEV TOOLS.)
 
 	    // ---------------------------------------------------------
-	    // TWITCH: opens the player-facing stream menu (was buried in DEV TOOLS).
-	    // ---- COMPANION PAGES ------------------------------------
-	    // These three no longer open submenus -- they hand a loopback URL to the
-	    // player's default browser. The old TWITCH submenu's contents moved onto the
-	    // setup page; see OptionsMenu_Create.
-	    //
-	    // A failed open plays the BACK sound rather than the confirm sound, so "the
-	    // port was busy" is audible instead of looking like a dead menu row. That
-	    // happens when a second copy of the game is already running.
+	    // TWITCH OPTIONS: opens the player-facing stream menu (menu_state_TWITCH).
+	    // v2.1.4: this row used to open the browser hub directly, which left the in-game
+	    // TWITCH page (CHAT JOKES, CHECKPOINTS, POINTS ECONOMY, ROCKET LEAGUE...) with no
+	    // way in at all. The hub is now the COMPANION PAGES row inside that page.
 	    case MainOption_TWITCH:{
 	    if (timer) break;
 
 	    if (_InputConfirm_pressed2)
 	    {
-	        if (zweb_open_page("/home")) aud_play_sound(CONFIRM_SOUND1);
-	        else                           aud_play_sound(BACK_SOUND1);
+	        for(Twitch_cursor=0; Twitch_cursor<Twitch.COUNT; Twitch_cursor++)
+	        {
+	            if (OptionsMenu_option_is_avail(menu_state_TWITCH,Twitch_cursor)) break;
+	        }
+	        if (Twitch_cursor>=Twitch.COUNT) Twitch_cursor = 0;
+	        aud_play_sound(CONFIRM_SOUND1);
 	        timer = DURATION1;
+	        menu_state = menu_state_TWITCH;
+	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	    }
 	    break;}//case MainOption_TWITCH
 

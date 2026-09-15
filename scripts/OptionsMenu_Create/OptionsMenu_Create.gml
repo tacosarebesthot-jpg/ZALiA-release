@@ -242,9 +242,11 @@ function OptionsMenu_Create() {
 	// lists all three, which also has room to explain what each one is.
 	MainOption_TWITCH            = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "COMPANION PAGES";
+	// v2.1.4: opens the in-game TWITCH page again (it had no entry point since round 10).
+	// The browser hub moved to that page's COMPANION PAGES row.
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,0] = "TWITCH OPTIONS";
 	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,1] = FONT2;
-	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "OPENS JUKEBOX, TRACKER AND TWITCH SETUP IN YOUR BROWSER.";
+	MainOptions_dg[#ds_grid_width(MainOptions_dg)-1,2] = "CHAT JOKES, ROCKET LEAGUE, POINTS, CHECKPOINTS, CHAT SETUP, AND THE JUKEBOX + TRACKER PAGES.";
 	//                                                                          //
 	MainOption_DEV_TOOLS         = ds_grid_width(MainOptions_dg);
 	ds_grid_resize(MainOptions_dg, ds_grid_width(MainOptions_dg)+1,MainOptions_dg_H);
@@ -868,7 +870,7 @@ function OptionsMenu_Create() {
 	enum Twitch
 	{
 	    REWARDS, CHAT, COOLDOWN, DURATION, JOKES, AUTOSAVE, POINTS, RL, COMMANDS, SETUP,
-	    BACK,
+	    PAGES, BACK,
 	    COUNT
 	}
 	Twitch_cursor = 0;
@@ -897,6 +899,8 @@ function OptionsMenu_Create() {
 	// Was "HOW TO SET UP", pointing at a .bat and a text file. The setup is a web page
 	// served by the game now, so this row OPENS it instead of describing homework.
 	Twitch_dg[#_i,0]="OPEN SETUP PAGE";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="OPENS THE SETUP PAGE IN YOUR BROWSER. SIGN IN ON TWITCH'S OWN SITE - NEVER TYPE A PASSWORD INTO THE GAME.";
+	             _i=Twitch.PAGES;
+	Twitch_dg[#_i,0]="COMPANION PAGES";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="OPENS JUKEBOX, TRACKER AND TWITCH SETUP IN YOUR BROWSER.";
 	             _i=Twitch.BACK;
 	Twitch_dg[#_i,0]="BACK";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="RETURN TO THE MAIN OPTIONS MENU.";
 
