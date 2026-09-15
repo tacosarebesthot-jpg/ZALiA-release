@@ -137,7 +137,7 @@ function PC_take_damage() {
 	        // a mob you are stuck inside re-hits every few iframes and would spam the drawer.
 	        // Skipped when this hit is also a one-container survival: WHAT A SAVE wins (below).
 	        if (variable_global_exists("tw_rl") && global.tw_rl && f.hp > Container_AMT && current_time - global.tw_rl_bump_t > 3000)
-	        {   global.tw_rl_bump_t = current_time; tw_toast_push("BUMPING!", "", "chat");  }
+	        {   global.tw_rl_bump_t = current_time; tw_toast_push("BUMPING!", "", "chat", "game");  } // game callout: GAME TOASTS setting
 	    }
 	    else
 	    {

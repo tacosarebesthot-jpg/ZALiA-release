@@ -1076,7 +1076,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					global.tw_rl_mute_until = current_time + 4000;
 					global.tw_rl_last_text  = "";
 					global.tw_rl_last_count = 0;
-					tw_toast_push("CHAT DISABLED FOR 4 SECONDS", "", "warn");
+					tw_toast_push("CHAT DISABLED FOR 4 SECONDS", "", "warn", "chat"); // chat-caused: CHAT TOASTS setting
 					break;
 				}
 				tw_toast_push(_rl_txt, "FROM " + _who_s, "chat");

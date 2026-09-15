@@ -46,7 +46,7 @@ function GameOverScreen_Create() {
 	if (variable_global_exists("tw_rl") && global.tw_rl
 	&&  variable_global_exists("tw_last_hurter") && global.tw_last_hurter != ""
 	&&  current_time - global.tw_last_hurter_t < 90000)
-	{   tw_toast_push(choose("GG", "EZ"), "", "chat");  }
+	{   tw_toast_push(choose("GG", "EZ"), "", "chat", "game");  } // game callout: GAME TOASTS setting
 
 
 

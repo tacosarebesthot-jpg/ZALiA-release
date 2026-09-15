@@ -64,7 +64,7 @@ function FallingBlock_update() {
 	        tw_toast_push("CRUSHED!", string(_crushed) + (_crushed == 1 ? " ENEMY" : " ENEMIES") + " UNDER A BLOCK (" + string(global.tw_crush_count) + " TOTAL)", "win");
 	        // ROCKET LEAGUE (round 11): a block kill IS a demo. Rides the CRUSHED! plate rather
 	        // than replacing it -- the count line is the useful half, this is the joke half.
-	        if (variable_global_exists("tw_rl") && global.tw_rl) tw_toast_push("NICE DEMO!", "", "chat");
+	        if (variable_global_exists("tw_rl") && global.tw_rl) tw_toast_push("NICE DEMO!", "", "chat", "game"); // game callout: GAME TOASTS setting
 	        aud_play_sound(get_audio_theme_track(dk_BlockBreak));
 	        counter = 1; // break apart
 	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!

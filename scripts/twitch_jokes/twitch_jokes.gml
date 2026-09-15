@@ -432,9 +432,12 @@ function tw_toast_secs_label(_cat) {
 }
 
 /// @description  tw_toast_push(title, sub, kind) -- queue one plate. kind: chat/music/win/warn/info.
-function tw_toast_push(_title, _sub, _kind) {
+/// cat (optional) = "music" / "chat" / "game" when the colour kind does not say which setting owns
+/// the plate -- e.g. Rocket League game callouts use the lime "chat" colour but are GAME TOASTS.
+function tw_toast_push(_title, _sub, _kind, _cat = "") {
 	if (!variable_global_exists("tw_toasts")) global.tw_toasts = [];
-	var _secs = tw_toast_secs_get(tw_toast_cat(string(_kind)));
+	var _c    = (string(_cat) != "") ? string(_cat) : tw_toast_cat(string(_kind));
+	var _secs = tw_toast_secs_get(_c);
 	if (_secs <= 0) return;   // this toast type is OFF on the TWITCH OPTIONS page
 	var _t = tw_toast_clean(_title);
 	var _s = tw_toast_clean(_sub);
@@ -465,7 +468,7 @@ function tw_toast_push(_title, _sub, _kind) {
 	// hold time = the player's setting for this toast type (TWITCH OPTIONS page), in real seconds
 	var _fps  = game_get_speed(gamespeed_fps); if (_fps <= 0) _fps = 60;
 	var _life = max(30, round(_secs * _fps));
-	array_push(global.tw_toasts, { title : _t, title2 : _t2, sub : _s, kind : string(_kind), age : 0, life : _life });
+	array_push(global.tw_toasts, { title : _t, title2 : _t2, sub : _s, kind : string(_kind), cat : _c, age : 0, life : _life });
 	while (array_length(global.tw_toasts) > 5) array_delete(global.tw_toasts, 0, 1);
 }
 
@@ -595,6 +598,13 @@ function tw_toast_draw() {
 	for (var _i = _n - 1; _i >= 0; _i--)
 	{
 		var _e = global.tw_toasts[_i];
+		// LIVE SETTINGS (v2.1.4): re-read the player's toast setting every frame, so a type switched
+		// OFF clears its plates at once and a changed hold time applies to plates already showing.
+		var _ecat  = variable_struct_exists(_e, "cat") ? _e.cat : tw_toast_cat(_e.kind);
+		var _esecs = tw_toast_secs_get(_ecat);
+		if (_esecs <= 0) { array_delete(global.tw_toasts, _i, 1); continue; }
+		var _efps = game_get_speed(gamespeed_fps); if (_efps <= 0) _efps = 60;
+		_e.life = max(30, round(_esecs * _efps));
 		_e.age++;
 		if (_e.age >= _e.life) { array_delete(global.tw_toasts, _i, 1); continue; }
 		if (_slot >= 3) continue;                  // older ones keep ageing off screen
@@ -654,6 +664,8 @@ function tw_help_show() {
 
 function tw_help_draw() {
 	if (!variable_global_exists("tw_help_timer") || global.tw_help_timer <= 0) return;
+	// chat asked for it, so it follows the CHAT TOASTS setting: OFF = no card (v2.1.4)
+	if (tw_toast_secs_get("chat") <= 0) { global.tw_help_timer = 0; return; }
 	global.tw_help_timer--;
 	static _rows = [
 		"HOW CHAT PLAYS: TYPE !WORD IN CHAT   V" + ZALIA_VERSION,
