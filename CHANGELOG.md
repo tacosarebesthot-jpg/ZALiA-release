@@ -2,6 +2,10 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
+## 2.1.4 — 2026-09-14 (hotfix)
+
+- **TWITCH page is back in the options menu.** Since 2.1.0 the in-game TWITCH page (CHAT JOKES, CHECKPOINTS, POINTS ECONOMY, ROCKET LEAGUE, cooldown, effect length) had no way in. Press O, pick **TWITCH OPTIONS**. The browser hub (jukebox, tracker, Twitch setup) is the COMPANION PAGES row on that page.
+
 ## 2.1.3 — 2026-09-12
 
 - **Rocket League quick-chat.** ROCKET LEAGUE toggle on the TWITCH page (on by default). The game throws quick-chat plates on its own: WHAT A SAVE! when you survive at one heart, WHOOPS / SORRY / NOOOO on a death and GG or EZ on the game over screen when chat did it, CALCULATED. on a boss kill that cost you health, WHIFF after five swings that hit nothing, NICE BLOCK! on a shield deflect, BUMPING! on knockback, NICE DEMO! on a crush, NEED BOOST! at empty magic, ALL YOURS. on the fairy spell, ROTATE! when you walk straight back into the room you just left. Chat gets `!niceshot` `!whatasave` `!calculated` `!savage` `!closeone` `!okay` `!faking` `!gg` `!ez` `!wow` `!noproblem` `!thanks`, free, and three of the same one inside six seconds earns CHAT DISABLED FOR 4 SECONDS.
