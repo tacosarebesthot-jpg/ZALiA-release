@@ -42,9 +42,9 @@ function tw_jokes_init() {
 	global.tw_loz_jingle = (tw_num(tw_config_get("loz_jingle", "1"), 1) != 0); // loz_jingle=0 keeps the theme's own item fanfare
 	// v2.1.4 player options (TWITCH OPTIONS page). Runs after the g_Create defaults, so saved values win.
 	global.tw_toast_secs = {
-		music : clamp(tw_num(tw_config_get("toast_music", "5"), 5), 0, 10),
-		chat  : clamp(tw_num(tw_config_get("toast_chat",  "4"), 4), 0, 10),
-		game  : clamp(tw_num(tw_config_get("toast_game",  "5"), 5), 0, 10)
+		music : clamp(round(tw_num(tw_config_get("toast_music", "5"), 5)), 0, TW_TOAST_SECS_MAX),
+		chat  : clamp(round(tw_num(tw_config_get("toast_chat",  "4"), 4)), 0, TW_TOAST_SECS_MAX),
+		game  : clamp(round(tw_num(tw_config_get("toast_game",  "5"), 5)), 0, TW_TOAST_SECS_MAX)
 	};
 	global.tw_splash_enabled = (tw_num(tw_config_get("splash", "1"), 1) != 0);
 	global.QuestTimer_scale  = (tw_num(tw_config_get("bigtimer", "1"), 1) != 0) ? 1.25 : 1;
@@ -389,8 +389,16 @@ function tw_font_clean(_s, _extra) {
 //   "game"  = everything else (win/warn/info: killed by, crushed, level up, reflect hint,
 //             konami, chat link status, the MK2 fallback line).
 // Saved as toast_music= / toast_chat= / toast_game= in twitch_config.txt.
+#macro TW_TOAST_SECS_MAX 30
+
 function tw_toast_steps() {
-	static _steps = [0, 2, 3, 4, 5, 6, 8, 10];
+	// OFF, then every whole second up to TW_TOAST_SECS_MAX (owner 09-14: "let them decide times")
+	static _steps = undefined;
+	if (is_undefined(_steps))
+	{
+		_steps = array_create(TW_TOAST_SECS_MAX + 1, 0);
+		for (var _i = 0; _i <= TW_TOAST_SECS_MAX; _i++) _steps[_i] = _i;
+	}
 	return _steps;
 }
 

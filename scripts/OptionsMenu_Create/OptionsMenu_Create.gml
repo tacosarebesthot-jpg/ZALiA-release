@@ -897,11 +897,11 @@ function OptionsMenu_Create() {
 	Twitch_dg[#_i,0]="ROCKET LEAGUE";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="QUICK-CHAT PLATES ON SAVES, WHIFFS, DEMOS AND DEATHS, AND !NICESHOT !WHATASAVE !GG IN CHAT. OFF HIDES ALL OF IT.";
 	// v2.1.4 player options (owner 09-14: "give the user options"). Toast rows: OFF or seconds.
 	             _i=Twitch.TOAST_NP;
-	Twitch_dg[#_i,0]="MUSIC TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="NOW PLAYING PLATE WHEN A NEW SONG STARTS. LEFT/RIGHT: OFF, OR HOW MANY SECONDS IT STAYS UP.";
+	Twitch_dg[#_i,0]="MUSIC TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="NOW PLAYING PLATE WHEN A NEW SONG STARTS. LEFT/RIGHT: OFF, OR 1-30 SECONDS ON SCREEN.";
 	             _i=Twitch.TOAST_CHAT;
-	Twitch_dg[#_i,0]="CHAT TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="PLATES FOR WHAT CHAT DID: !HEAL, !SWARM, QUICK-CHAT AND THE REST. LEFT/RIGHT: OFF, OR HOW MANY SECONDS IT STAYS UP.";
+	Twitch_dg[#_i,0]="CHAT TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="PLATES FOR WHAT CHAT DID: !HEAL, !SWARM, QUICK-CHAT AND THE REST. LEFT/RIGHT: OFF, OR 1-30 SECONDS ON SCREEN.";
 	             _i=Twitch.TOAST_GAME;
-	Twitch_dg[#_i,0]="GAME TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="KILLED BY, CRUSHED, LEVEL UP, THE CAROCK HINT AND OTHER GAME CALLOUTS. LEFT/RIGHT: OFF, OR HOW MANY SECONDS IT STAYS UP.";
+	Twitch_dg[#_i,0]="GAME TOASTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="KILLED BY, CRUSHED, LEVEL UP, THE CAROCK HINT AND OTHER GAME CALLOUTS. LEFT/RIGHT: OFF, OR 1-30 SECONDS ON SCREEN.";
 	             _i=Twitch.SPLASH;
 	Twitch_dg[#_i,0]="MK2 SPLASH";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="ARCADE FLAWLESS VICTORY AND FATALITY ANIMATION WITH THE ANNOUNCER WHEN YOU BEAT A BOSS WITHOUT GETTING HIT.";
 	             _i=Twitch.JINGLE;
