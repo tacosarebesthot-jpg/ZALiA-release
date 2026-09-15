@@ -26,6 +26,21 @@ function Surface_Draw_GUI_End() {
 	    }
 	}
 
+	// VERSION TAG on the title screen, bottom-right (v2.1.4). GUI space, default font, shadowed,
+	// the same way the run timer and the jukebox HUD draw -- the old room-space draw_text_ in
+	// TitleScreen_Draw went through the title palette and never showed in a build.
+	if (instance_exists(TitleScreen))
+	{
+	    var _vt_pf = draw_get_font(); var _vt_ph = draw_get_halign(); var _vt_pc = draw_get_colour();
+	    var _vt_gw = display_get_gui_width();  if (_vt_gw <= 0) _vt_gw = 320;
+	    var _vt_gh = display_get_gui_height(); if (_vt_gh <= 0) _vt_gh = 240;
+	    var _vt    = "V" + ZALIA_VERSION;
+	    draw_set_font(-1); draw_set_halign(fa_right);
+	    draw_set_colour(c_black); draw_text(_vt_gw - 7, _vt_gh - 17, _vt);
+	    draw_set_colour(c_white); draw_text(_vt_gw - 8, _vt_gh - 18, _vt);
+	    draw_set_font(_vt_pf); draw_set_halign(_vt_ph); draw_set_colour(_vt_pc);
+	}
+
 
 	// ------------------------------------------------------------------------------------
 	// DEV PLAYTEST FLAG: press 3 during normal play to log the current spot for later review.
