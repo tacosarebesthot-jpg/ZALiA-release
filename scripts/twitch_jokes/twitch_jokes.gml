@@ -42,9 +42,10 @@ function tw_jokes_init() {
 	global.tw_loz_jingle = (tw_num(tw_config_get("loz_jingle", "1"), 1) != 0); // loz_jingle=0 keeps the theme's own item fanfare
 	// v2.1.4 player options (TWITCH OPTIONS page). Runs after the g_Create defaults, so saved values win.
 	global.tw_toast_secs = {
-		music : clamp(round(tw_num(tw_config_get("toast_music", "5"), 5)), 0, TW_TOAST_SECS_MAX),
+		// owner 09-15: music and game toasts default OFF (players turn them on); chat stays 4 s
+		music : clamp(round(tw_num(tw_config_get("toast_music", "0"), 0)), 0, TW_TOAST_SECS_MAX),
 		chat  : clamp(round(tw_num(tw_config_get("toast_chat",  "4"), 4)), 0, TW_TOAST_SECS_MAX),
-		game  : clamp(round(tw_num(tw_config_get("toast_game",  "5"), 5)), 0, TW_TOAST_SECS_MAX)
+		game  : clamp(round(tw_num(tw_config_get("toast_game",  "0"), 0)), 0, TW_TOAST_SECS_MAX)
 	};
 	global.tw_splash_enabled = (tw_num(tw_config_get("splash", "1"), 1) != 0);
 	global.QuestTimer_scale  = (tw_num(tw_config_get("bigtimer", "1"), 1) != 0) ? 1.25 : 1;
@@ -408,9 +409,12 @@ function tw_toast_cat(_kind) {
 	return "game";
 }
 
+// "egg" = MK2 lines and easter eggs (Konami, dev code). Owner 09-15: those always show, 5 s,
+// and no setting gates them. MUSIC and GAME toasts default OFF; players turn them on in TWITCH OPTIONS.
 function tw_toast_secs_get(_cat) {
+	if (_cat == "egg") return 5;
 	if (!variable_global_exists("tw_toast_secs") || !is_struct(global.tw_toast_secs))
-		global.tw_toast_secs = { music : 5, chat : 4, game : 5 };
+		global.tw_toast_secs = { music : 0, chat : 4, game : 0 };
 	var _v = variable_struct_get(global.tw_toast_secs, _cat);
 	return is_undefined(_v) ? 5 : _v;
 }
@@ -512,7 +516,11 @@ function tw_toast_from_line(_line) {
 	||  string_pos("UNLOCKED", _u) > 0)  _kind = "win";
 	else if (string_pos("LOST", _u) > 0 || string_pos("RECONNECT", _u) > 0 || string_pos("FAIL", _u) > 0) _kind = "warn";
 	else if (string_pos("CHAT LINK", _u) > 0 || string_pos("TWITCH", _u) > 0 || string_pos("VS CHAT", _u) > 0) _kind = "info";
-	tw_toast_push(_l, "", _kind);
+	// MK2 lines (splash fallback, flawless tracker, mk strings) are easter eggs: always shown (owner 09-15)
+	var _cat = "";
+	if (string_pos("FLAWLESS", _u) > 0 || string_pos("FATALITY", _u) > 0 || string_pos("FRIENDSHIP", _u) > 0
+	||  string_pos("BABALITY", _u) > 0 || string_pos("TOASTY", _u) > 0) _cat = "egg";
+	tw_toast_push(_l, "", _kind, _cat);
 }
 
 /// @description  tw_toast_legacy_poll() -- adopt the old globals the moment a caller sets them.
@@ -541,7 +549,7 @@ function tw_toast_legacy_poll() {
 	{
 		if (global.konami_toast_timer > global.tw_konami_seen)
 		{
-			if (variable_global_exists("konami_toast")) tw_toast_push(global.konami_toast, "KONAMI", "win");
+			if (variable_global_exists("konami_toast")) tw_toast_push(global.konami_toast, "KONAMI", "win", "egg"); // easter egg: always shown
 			global.konami_toast_timer = 0;
 		}
 		global.tw_konami_seen = global.konami_toast_timer;
