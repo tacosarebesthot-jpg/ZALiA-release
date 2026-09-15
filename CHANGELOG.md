@@ -2,14 +2,14 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
-## 2.1.4 — 2026-09-14 (hotfix)
+## 2.1.4 — 2026-09-15 (hotfix)
 
 - **TWITCH page is back in the options menu.** Since 2.1.0 the in-game TWITCH page (CHAT JOKES, CHECKPOINTS, POINTS ECONOMY, ROCKET LEAGUE, cooldown, effect length) had no way in. Press O, pick **TWITCH OPTIONS**. The browser hub (jukebox, tracker, Twitch setup) is the COMPANION PAGES row on that page.
 - **Downloads for 2.1.1, 2.1.2 and 2.1.3 ran old game code.** A packaging mistake shipped the 2026-09-10 game data next to the new music, so chat jokes, Rocket League quick-chat, the points economy, checkpoints and the reshuffler were missing from those zips. 2.1.4 ships the real build; the packager now refuses to zip a build that does not carry its own version number.
 - **Version number** shows bottom-right of the title screen again.
 - **Run timer** (top left) sits in the black HUD bar instead of hanging over gameplay.
 - **LEVEL UP!** toast only pops on an actual level up, not every time the game starts.
-- **Player options** on the TWITCH OPTIONS page, all saved: MUSIC TOASTS, CHAT TOASTS and GAME TOASTS (each OFF or 1 to 30 seconds on screen, your pick), MK2 SPLASH, ZELDA 1 JINGLE and BIG TIMER on/off. The Twitch status dot only shows while Twitch is on, and the timer is a bit smaller.
+- **Player options** on the TWITCH OPTIONS page, all saved: MUSIC TOASTS, CHAT TOASTS and GAME TOASTS (each OFF or 1 to 30 seconds on screen, your pick), MK2 SPLASH, ZELDA 1 JINGLE and BIG TIMER on/off. Music and game toasts are **off by default** (chat toasts stay on, 4 seconds); the MK2 lines and the easter eggs always show. The Twitch status dot only shows while Twitch is on, and the timer is a bit smaller.
 
 ## 2.1.3 — 2026-09-12
 

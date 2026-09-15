@@ -115,13 +115,15 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | CHECKPOINTS | rolling save copies | `autosave=1/0` |
 | POINTS ECONOMY | viewers pay points for commands | `points=1/0` |
 | ROCKET LEAGUE | quick-chat plates and verbs | `rl=1/0` |
-| MUSIC TOASTS | NOW PLAYING plate: OFF or seconds on screen | `toast_music=0-30` |
-| CHAT TOASTS | plates for what chat did: OFF or seconds | `toast_chat=0-30` |
-| GAME TOASTS | killed by, crushed, level up, hints: OFF or seconds | `toast_game=0-30` |
+| MUSIC TOASTS | NOW PLAYING plate: OFF (default) or 1-30 seconds on screen | `toast_music=0-30` |
+| CHAT TOASTS | plates for what chat did: OFF or 1-30 seconds (default 4) | `toast_chat=0-30` |
+| GAME TOASTS | killed by, crushed, level up, hints: OFF (default) or 1-30 seconds | `toast_game=0-30` |
 | MK2 SPLASH | arcade FLAWLESS / FATALITY animation on a hitless boss | `splash=1/0` |
 | ZELDA 1 JINGLE | Zelda 1 treasure fanfare on main items | `loz_jingle=1/0` |
 | BIG TIMER | larger run timer in the top bar | `bigtimer=1/0` |
 | COMPANION PAGES | opens the jukebox, tracker and Twitch setup pages | |
+
+The MK2 FLAWLESS / FATALITY lines and the easter eggs always show, whatever the toast settings.
 
 ## Tuning it
 
