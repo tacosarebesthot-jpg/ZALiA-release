@@ -15,10 +15,13 @@ function Surface_Draw_GUI_End() {
 	    }
 	    else
 	    {
+	        // Owner 09-14: 1.5x size is right, but at the HUD line-1 y it hung below the black HUD
+	        // bar into gameplay. The big version hugs the top edge of the frame instead.
+	        var _qt_y  = 1;
 	        var _qt_pf = draw_get_font(); var _qt_ph = draw_get_halign(); var _qt_pc = draw_get_colour();
 	        draw_set_font(-1); draw_set_halign(fa_left);
-	        draw_set_colour(c_black); draw_text_transformed(global.QuestTimer_xl + 1, global.QuestTimer_yt + 1, global.QuestTimer_text, _qt_sc, _qt_sc, 0);
-	        draw_set_colour(c_white); draw_text_transformed(global.QuestTimer_xl,     global.QuestTimer_yt,     global.QuestTimer_text, _qt_sc, _qt_sc, 0);
+	        draw_set_colour(c_black); draw_text_transformed(global.QuestTimer_xl + 1, _qt_y + 1, global.QuestTimer_text, _qt_sc, _qt_sc, 0);
+	        draw_set_colour(c_white); draw_text_transformed(global.QuestTimer_xl,     _qt_y,     global.QuestTimer_text, _qt_sc, _qt_sc, 0);
 	        draw_set_font(_qt_pf); draw_set_halign(_qt_ph); draw_set_colour(_qt_pc);
 	    }
 	}
