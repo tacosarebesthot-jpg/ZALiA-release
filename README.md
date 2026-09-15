@@ -71,7 +71,7 @@ The game runs a small web server on `127.0.0.1:8777` and serves its own companio
 pages. **Loopback only** — it is not reachable from your network, and nothing is
 sent anywhere.
 
-Open them from **OPTIONS → COMPANION PAGES**, or point a browser at:
+Open them from **OPTIONS → TWITCH OPTIONS → COMPANION PAGES**, or point a browser at:
 
 | Page | Address |
 |---|---|
@@ -95,7 +95,7 @@ is never displayed or transmitted anywhere else.
 
 Viewers type commands in your chat to affect your run — healing, hindering, or
 stealing an item and giving it back a while later. Effect duration and cooldown
-are configurable on the setup page. The same OPTIONS → TWITCH page also holds
+are configurable on the setup page. The same OPTIONS → TWITCH OPTIONS page also holds
 **CHAT JOKES** (town folk talk like chat) and **CHECKPOINTS** (rolling save copies).
 See [TWITCH_SETUP.md](TWITCH_SETUP.md) for the full command list.
 

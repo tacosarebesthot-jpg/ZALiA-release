@@ -60,7 +60,7 @@ token from **that** account instead.
 
 ## Getting connected
 
-It is all on the **Twitch setup page** — open it from **OPTIONS → COMPANION
+It is all on the **Twitch setup page** — open it from **OPTIONS → TWITCH OPTIONS → COMPANION
 PAGES → Twitch**, or point a browser at `http://127.0.0.1:8777/twitch`.
 
 **1. Connect your Twitch account.** Click **CONNECT WITH TWITCH**. This opens
@@ -107,7 +107,7 @@ again before debugging anything else.
 
 ## Tuning it
 
-On the Twitch setup page (**OPTIONS → COMPANION PAGES**, or
+On the Twitch setup page (**OPTIONS → TWITCH OPTIONS → COMPANION PAGES**, or
 `http://127.0.0.1:8777/twitch`):
 
 - **CHAT COMMANDS on/off** — the master switch
@@ -202,14 +202,14 @@ they deserve.
 
 ### Rocket League
 
-**ROCKET LEAGUE** (OPTIONS → TWITCH, on by default) makes the game talk in quick-chat: WHAT A SAVE!
+**ROCKET LEAGUE** (OPTIONS → TWITCH OPTIONS, on by default) makes the game talk in quick-chat: WHAT A SAVE!
 on a one-heart survival, CALCULATED. on a bloody boss kill, WHIFF after five empty swings,
 NICE BLOCK!, BUMPING!, NICE DEMO!, NEED BOOST!, ALL YOURS., ROTATE!, and the death lines. Turn it
 off and all of it, verbs included, goes quiet.
 
 ### Chat jokes
 
-With **CHAT JOKES** on (OPTIONS → TWITCH), the town folk talk like chat: every idle
+With **CHAT JOKES** on (OPTIONS → TWITCH OPTIONS), the town folk talk like chat: every idle
 line, sign, healer and story-recorder has several alternates picked at random, with
 your chatters' names and the boss you are fighting dropped in. **CLEAN** keeps the
 cursing out, **DIRTY** lets it all through, **NORMAL** is the original text. Hints and
