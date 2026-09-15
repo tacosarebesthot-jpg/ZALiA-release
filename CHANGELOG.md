@@ -9,6 +9,7 @@ Version shows bottom-right of the title screen and answers `!version` in chat. P
 - **Version number** shows bottom-right of the title screen again.
 - **Run timer** (top left) sits in the black HUD bar instead of hanging over gameplay.
 - **LEVEL UP!** toast only pops on an actual level up, not every time the game starts.
+- **Player options** on the TWITCH OPTIONS page, all saved: MUSIC TOASTS, CHAT TOASTS and GAME TOASTS (each OFF or 2 to 10 seconds on screen), MK2 SPLASH, ZELDA 1 JINGLE and BIG TIMER on/off. The Twitch status dot only shows while Twitch is on, and the timer is a bit smaller.
 
 ## 2.1.3 — 2026-09-12
 

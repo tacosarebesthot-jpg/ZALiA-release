@@ -105,6 +105,24 @@ again before debugging anything else.
 
 ---
 
+## In-game options
+
+Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%LOCALAPPDATA%\ZALiA\twitch_config.txt`.
+
+| Row | What it does | Key |
+|---|---|---|
+| CHAT JOKES | NORMAL / CLEAN / DIRTY town text | `jokes=0/1/2` |
+| CHECKPOINTS | rolling save copies | `autosave=1/0` |
+| POINTS ECONOMY | viewers pay points for commands | `points=1/0` |
+| ROCKET LEAGUE | quick-chat plates and verbs | `rl=1/0` |
+| MUSIC TOASTS | NOW PLAYING plate: OFF or seconds on screen | `toast_music=0-10` |
+| CHAT TOASTS | plates for what chat did: OFF or seconds | `toast_chat=0-10` |
+| GAME TOASTS | killed by, crushed, level up, hints: OFF or seconds | `toast_game=0-10` |
+| MK2 SPLASH | arcade FLAWLESS / FATALITY animation on a hitless boss | `splash=1/0` |
+| ZELDA 1 JINGLE | Zelda 1 treasure fanfare on main items | `loz_jingle=1/0` |
+| BIG TIMER | larger run timer in the top bar | `bigtimer=1/0` |
+| COMPANION PAGES | opens the jukebox, tracker and Twitch setup pages | |
+
 ## Tuning it
 
 On the Twitch setup page (**OPTIONS → TWITCH OPTIONS → COMPANION PAGES**, or
