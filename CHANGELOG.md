@@ -5,6 +5,10 @@ Version shows bottom-right of the title screen and answers `!version` in chat. P
 ## 2.1.4 — 2026-09-14 (hotfix)
 
 - **TWITCH page is back in the options menu.** Since 2.1.0 the in-game TWITCH page (CHAT JOKES, CHECKPOINTS, POINTS ECONOMY, ROCKET LEAGUE, cooldown, effect length) had no way in. Press O, pick **TWITCH OPTIONS**. The browser hub (jukebox, tracker, Twitch setup) is the COMPANION PAGES row on that page.
+- **Downloads for 2.1.1, 2.1.2 and 2.1.3 ran old game code.** A packaging mistake shipped the 2026-09-10 game data next to the new music, so chat jokes, Rocket League quick-chat, the points economy, checkpoints and the reshuffler were missing from those zips. 2.1.4 ships the real build; the packager now refuses to zip a build that does not carry its own version number.
+- **Version number** shows bottom-right of the title screen again.
+- **Run timer** (top left) sits in the black HUD bar instead of hanging over gameplay.
+- **LEVEL UP!** toast only pops on an actual level up, not every time the game starts.
 
 ## 2.1.3 — 2026-09-12
 
