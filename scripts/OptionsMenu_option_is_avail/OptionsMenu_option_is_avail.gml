@@ -137,7 +137,9 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case Twitch.POINTS:         {return true; break;}
 	        case Twitch.RL:             {return true; break;}
 	        case Twitch.COMMANDS:       {return true; break;}
-	        case Twitch.SETUP:          {return true; break;}
+	        // OPEN SETUP PAGE hidden in v2.1.4 (owner 09-14: "don't need 2 ways in") --
+	        // COMPANION PAGES opens the hub, which links the Twitch setup page.
+	        case Twitch.SETUP:          {return false; break;}
 	        case Twitch.PAGES:          {return true; break;}
 	        case Twitch.BACK:           {return true; break;}
 	    }//switch(argument1)

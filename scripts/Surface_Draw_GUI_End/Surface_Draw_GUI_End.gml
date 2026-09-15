@@ -751,19 +751,20 @@ function Surface_Draw_GUI_End() {
 	// lime = IRC connected, aqua = connecting, red = error/no-config, orange =
 	// integration on without IRC (drop-file/manual), dark grey = integration off.
 	// Bottom-left 4x3 px -- clear of the toast (bottom-centre) and the HUD bar (top).
+	// v2.1.4 (owner 09-14): NOT drawn when Twitch is off -- a permanent grey dot read as a
+	// stray pixel. Shows only while TWITCH REWARDS or TWITCH IRC is on.
 	// Revert: delete this block.
+	var _dot_rw  = variable_global_exists("tw_enabled")     && global.tw_enabled;
+	var _dot_irc = variable_global_exists("tw_irc_enabled") && global.tw_irc_enabled;
+	if (_dot_rw || _dot_irc)
 	{
-		var _dot_c = c_dkgrey;
-		if (variable_global_exists("tw_enabled") && global.tw_enabled)
+		var _dot_c = c_orange;
+		if (_dot_irc)
 		{
-			_dot_c = c_orange;
-			if (variable_global_exists("tw_irc_enabled") && global.tw_irc_enabled)
-			{
-				var _dot_st = variable_global_exists("tw_irc_status") ? string(global.tw_irc_status) : "";
-				if (_dot_st == "connected")       _dot_c = c_lime;
-				else if (_dot_st == "connecting") _dot_c = c_aqua;
-				else if (string_pos("error", _dot_st) > 0 || _dot_st == "no config") _dot_c = c_red;
-			}
+			var _dot_st = variable_global_exists("tw_irc_status") ? string(global.tw_irc_status) : "";
+			if (_dot_st == "connected")       _dot_c = c_lime;
+			else if (_dot_st == "connecting") _dot_c = c_aqua;
+			else if (string_pos("error", _dot_st) > 0 || _dot_st == "no config") _dot_c = c_red;
 		}
 		var _dot_gh = display_get_gui_height(); if (_dot_gh <= 0) _dot_gh = 240;
 		var _dot_pc = draw_get_colour();
