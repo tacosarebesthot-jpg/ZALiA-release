@@ -598,11 +598,13 @@ function tw_toast_draw() {
 	var _cw = sprite_get_width(_font) * _s;
 	var _gap = 3 * _s;
 	var _x0 = 8 * _s;
-	var _yb = _gh - 10 * _s;                       // bottom edge of the newest plate
+	// TOP-LEFT (owner 2026-09-16): toasts used to stack UPWARD from the bottom edge.
+	// They now anchor near the top-left, below the HUD bar, and stack DOWNWARD.
+	var _yt = 20 * _s;                             // top edge of the newest plate
 
 	var _pa = draw_get_alpha(); var _pc = draw_get_colour();
 	var _slot = 0;
-	var _stack_y = _yb;   // plates stack upward from here, each by its own height
+	var _stack_y = _yt;   // plates stack downward from here, each by its own height
 	for (var _i = _n - 1; _i >= 0; _i--)
 	{
 		var _e = global.tw_toasts[_i];
@@ -628,8 +630,8 @@ function tw_toast_draw() {
 		var _tw = max(string_length(_e.title), string_length(_e.title2), string_length(_e.sub)) * _cw;
 		var _pw = max(112 * _s, _tw + 30 * _s);
 		var _x = round(-_pw + (_x0 + _pw) * _ease);
-		var _y = _stack_y - _ph;
-		_stack_y = _y - _gap;
+		var _y = _stack_y;
+		_stack_y = _y + _ph + _gap;
 		var _col = tw_toast_kind_colour(_e.kind);
 
 		draw_set_alpha(0.86); draw_set_colour(c_black);
@@ -808,12 +810,16 @@ function tw_reflect_hint(_where) {
 }
 
 // ─── item jingle (round 10h, owner's idea: the OG Zelda item fanfare) ──────────
-/// @description  item_get_jingle(theme_key) -- main items play the Zelda 1 treasure fanfare
-/// (snd_LoZ_ItemGet, ripped from the NSFe) when global.tw_loz_jingle is on, else the theme's own.
+/// @description  item_get_jingle(theme_key) -- main items play the Zelda 1 item-acquire jingle
+/// (mus_Z1_Get_Item_1a) when global.tw_loz_jingle is on, else the theme's own.
+/// WRONG-SOUND FIX (owner 2026-09-16): the toggle used snd_LoZ_ItemGet (a 3.0s rip that was
+/// the wrong item-acquire cue). mus_Z1_Get_Item_1a is the actual Zelda 1 "got item" fanfare
+/// (~1.4s) and is already in the project. Fall back to the old asset only if it's missing.
 function item_get_jingle(_theme_key) {
 	if (variable_global_exists("tw_loz_jingle") && global.tw_loz_jingle)
 	{
-		var _s = asset_get_index("snd_LoZ_ItemGet");
+		var _s = asset_get_index("mus_Z1_Get_Item_1a");
+		if (_s == -1) _s = asset_get_index("snd_LoZ_ItemGet");
 		// same call shape as the theme fanfare: the audiogroup_mus branch stops the room music,
 		// plays the stinger, and Audio_update_2 resumes the area track afterwards
 		if (_s != -1 && audio_exists(_s)) { aud_play_sound(_s, -1, false, -1, _theme_key); return; }

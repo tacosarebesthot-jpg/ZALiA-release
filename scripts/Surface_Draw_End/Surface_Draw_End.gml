@@ -91,8 +91,14 @@ function Surface_Draw_End() {
 	            // room/pixel mismatch is possible), and fully cover the destination so no
 	            // stale pixel can survive. Partial-region mirroring caused this; don't
 	            // reintroduce it without solving the coordinate-space problem first.
-	            var _sw = application_surface_w;
-	            var _sh = application_surface_h;
+	            // WIDE-ROOM VIEWPORT FIX (owner 2026-09-16, from a key-3 mark in rmA_Action_Wide /
+	            // _DthMt_1F): !flip and !party mirrored the frame LEFT, leaving a flat-background dead
+	            // zone on the right. Cause: this mirrored about the CACHED application_surface_w/_h that
+	            // Surface_Create read once at boot, but update_shaders_surf_resize() resizes the app
+	            // surface afterward (retro-shader/CRT scale, display mode) -- a stale width mirrors the
+	            // content about the wrong axis. Read the LIVE surface size; fall back only if it's gone.
+	            var _sw = surface_exists(application_surface) ? surface_get_width(application_surface)  : application_surface_w;
+	            var _sh = surface_exists(application_surface) ? surface_get_height(application_surface) : application_surface_h;
 
 	            var          _FSURF = surface_create(_sw, _sh);
 	            surface_copy(_FSURF, 0,0, application_surface); // pristine copy to sample from

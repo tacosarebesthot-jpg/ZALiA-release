@@ -152,6 +152,16 @@ function tw_nowplaying_set(_snd, _is_intro) {
 	if (string_pos("Square1_1a", _name) > 0 || string_pos("Triangle_Square", _name) > 0
 	||  string_pos("Square1_only", _name) > 0 || string_pos("Square2_1a", _name) > 0) return;
 	if (string_pos("_Intro", _name) > 0) return;
+	// NO SFX/JINGLE TOASTS (owner 2026-09-16, from the p1 VOD: "remove sound effects from
+	// toast ... the whole point of the toast is to tell what music's playing"). Short cues
+	// (get-spell, level-up, item-get, fanfares, chimes) live in audiogroup_mus so they funnel
+	// through here and were being announced like tracks. Suppress them by their name markers;
+	// real tracks are named after their game/stage and never carry these.
+	if (string_pos("GetSpell", _name) > 0 || string_pos("LevelUp", _name) > 0
+	||  string_pos("Fanfare", _name) > 0  || string_pos("ItemGet", _name) > 0
+	||  string_pos("Get_Item", _name) > 0 || string_pos("Jingle", _name) > 0
+	||  string_pos("Container", _name) > 0 || string_pos("Rescued", _name) > 0
+	||  string_pos("Victory", _name) > 0) return;
 	global.tw_np_asset = _snd;
 	global.tw_np_name  = tw_track_pretty(_name);
 	if (!variable_global_exists("tw_np_enabled") || global.tw_np_enabled)
