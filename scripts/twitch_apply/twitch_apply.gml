@@ -242,11 +242,18 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// different items also both restore correctly; two of the SAME item are
 			// prevented below, since the second would capture an already-stolen bit
 			// and give it back early.
+			// POOL NARROWED (v2.1.6): keep ONLY bits that gate a visible, live-checked
+			// feature, so every steal LANDS -- candle (dark rooms), glove, raft, boots
+			// (water), flute (warp), hammer, bracelet, lvl2 sword (pierce: Aruroda /
+			// Girubokku / waterfall cutscene), shield (projectile block: Daira / Geru /
+			// projectiles), ring (fall damage, FallScene). Quest/trade bits (FRY1 MASK
+			// BOOK MEAT NKLC NOTE MIRR TRPH MEDI CHLD BTL1 SKEY) gate nothing live, so
+			// stealing them read as broken (Sep-18 task). CROSS is out by Lane's own
+			// ruling ("not a big thing to worry about") -- its only live check is Moa
+			// visibility (Moa_update), so outside Moa screens it is a no-op.
 			var _steal_pool = [
-			    ITM_CAND, ITM_GLOV, ITM_RAFT, ITM_BOOT, ITM_FLUT, ITM_CROS,
-			    ITM_HAMM, ITM_BRAC, ITM_FRY1, ITM_MASK, ITM_BOOK, ITM_MEAT,
-			    ITM_SHLD, ITM_RING, ITM_NKLC, ITM_SWRD, ITM_NOTE, ITM_MIRR,
-			    ITM_TRPH, ITM_MEDI, ITM_CHLD, ITM_BTL1, ITM_SKEY
+			    ITM_CAND, ITM_GLOV, ITM_RAFT, ITM_BOOT, ITM_FLUT,
+			    ITM_HAMM, ITM_BRAC, ITM_SWRD, ITM_SHLD, ITM_RING
 			];
 			var _held = [];
 			for (var _si = 0; _si < array_length(_steal_pool); _si++)

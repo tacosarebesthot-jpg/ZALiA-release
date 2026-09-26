@@ -686,16 +686,19 @@ function PC_update_1() {
 	           &&  cs&$8       // Both CS_BTM && CS_TOP colliding w/ solid (Cucco is in 1 tile high space)
 	           && (!Disguise_enabled || global.Halloween1_enabled);
 	    //
-	    if (_C1 
+	    if (_C1
 	    ||  _C2 )
 	    {
-	        if (g.DevDash_state==2) hspd_max = Cucco_HSPD_MAX2_DASH;
-	        else                    hspd_max = Cucco_HSPD_MAX2;
+	        // fold tw_speed_mul here TOO: these raw assignments run AFTER the
+	        // top-of-function fold and were clobbering it -- speed/slow were
+	        // no-ops in cucco form (lane, 09-11 + 09-04 streams).
+	        if (g.DevDash_state==2) hspd_max = Cucco_HSPD_MAX2_DASH * tw_speed_mul;
+	        else                    hspd_max = Cucco_HSPD_MAX2 * tw_speed_mul;
 	    }
 	    else
 	    {
-	        if (g.DevDash_state==2) hspd_max = Cucco_HSPD_MAX1_DASH;
-	        else                    hspd_max = Cucco_HSPD_MAX1;
+	        if (g.DevDash_state==2) hspd_max = Cucco_HSPD_MAX1_DASH * tw_speed_mul;
+	        else                    hspd_max = Cucco_HSPD_MAX1 * tw_speed_mul;
 	    }
     
 	    if (_C1 
