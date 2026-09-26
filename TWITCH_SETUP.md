@@ -174,7 +174,7 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!poison` | ticking damage that can kill |
 | `!kill` | exactly what it says |
 | `!curse` | slow health drip, stops at 1 HP |
-| `!steal` `!rob` | takes one of your items and gives it back later |
+| `!steal` `!rob` | takes one of your traversal/combat items (candle, glove, raft, boots, flute, hammer, bracelet, sword, shield, ring) and gives it back later |
 | `!slow` | marsh-slow legs |
 | `!root` | no walking, no jumping — swinging still works |
 | `!spawn <enemy> <n>` | drop a named enemy next to you (daira, moblin, goriya, zora, stalfos, bat, atta, myu) |
