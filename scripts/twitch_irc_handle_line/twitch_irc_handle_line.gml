@@ -105,7 +105,27 @@ function twitch_irc_handle_line(_line) {
 			_verb = _letters;
 			if (string(_arg) == "") _arg = _digits;
 		}
-		else return;
+		else
+		{
+			// Typo hint (v2.1.7): a NEAR miss gets one "did you mean" plate, so chat can
+			// see why nothing happened (stasus / resuffle / refil / smimte / ivuln all
+			// happened live). The dispatcher's own "unknown:" toast is unreachable over
+			// IRC because this gate returns first. Throttled to one per 2 s so joke-spam
+			// (!papi !cheese) can't flood the plates; far-from-anything stays silent.
+			if (!variable_global_exists("tw_fz_toast_frame")) global.tw_fz_toast_frame = -1000;
+			if (variable_global_exists("tw_irc_frame")
+			&&  global.tw_irc_frame - global.tw_fz_toast_frame >= 120)
+			{
+				var _sugg = tw_fuzzy_verb(_verb);
+				if (_sugg != "")
+				{
+					global.tw_fz_toast_frame = global.tw_irc_frame;
+					global.tw_toast       = _sender + " -> !" + _verb + "? did you mean !" + _sugg;
+					global.tw_toast_timer = 240;
+				}
+			}
+			return;
+		}
 	}
 
 	// POINTS ECONOMY: can the viewer pay? Checked before the cooldown, so a broke viewer

@@ -81,7 +81,7 @@ function g_Step() {
 	    global.autosweep_room    = -1; // force timer reset on the next frame
 	}
 
-	if ((global.autosweep || global.bugprobe || global.sweep_single || global.cooptest) && !global.autosweep_started)
+	if ((global.autosweep || global.bugprobe || global.sweep_single || global.cooptest || global.tw_selftest) && !global.autosweep_started)
 	{
 	    if (room != global.autosweep_room) { global.autosweep_room = room; global.autosweep_t = 0; }
 	    global.autosweep_t++;
@@ -122,6 +122,10 @@ function g_Step() {
 	        {
 	            global.autosweep_started = true;
 	        }
+	        else if (global.tw_selftest) // twitch selftest: gameplay reached, the verb driver takes over
+	        {
+	            global.autosweep_started = true;
+	        }
 	        else if (global.cooptest) // co-op test: kick off the fairy state machine once gameplay (pc+f) is live
 	        {
 	            cooptest_start();
@@ -144,6 +148,7 @@ function g_Step() {
 	// Self-gated on DEV+global.bugprobe internally, so this call is a no-op (single
 	// boolean check, immediate exit) in any normal/ship build or autosweep-only run.
 	Dev_Bugprobe_Step();
+	Dev_TwSelftest_Step(); // DEV twitch-chat selftest (self-gates on global.tw_selftest; no-op otherwise)
 
 
 	// --------------------------------------------------------------------

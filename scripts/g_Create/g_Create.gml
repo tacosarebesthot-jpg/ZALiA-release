@@ -66,6 +66,16 @@ function g_Create() {
 	global.dev_inject_pause     = false;
 	global.sweep_note_active    = false; // true while the sweep note overlay is capturing typed input
 
+	// DEV TWITCH-CHAT SELFTEST harness (v2.1.7). Enabled by "_tw_selftest.flag" in
+	// working_directory: shares the bugprobe autopilot ride (boot -> file select ->
+	// load save 1), then fires the whole chat-verb matrix through the REAL IRC entry
+	// and grades every toast. Writes _tw_selftest_result.log + game_end().
+	// See Dev_TwSelftest_Step() in scripts\Dev_Bugprobe_Step.
+	global.tw_selftest          = DEV && file_exists(working_directory + "_tw_selftest.flag");
+	global.tw_selftest_t        = 0;
+	global.tw_selftest_i        = -1;
+	global.tw_selftest_log      = "";
+
 
 	// DEV GRANULAR SWEEP flags (Phase 1). Each runs ONE room-category sweep instead of the
 	// full RM->OW autosweep above, so a change to e.g. one palace can run ONLY the palace

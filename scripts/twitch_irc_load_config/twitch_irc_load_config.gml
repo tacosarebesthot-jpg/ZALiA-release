@@ -154,48 +154,12 @@ function tw_trim(_s) {
 /// can consume the cooldown. Mirrors the switch in twitch_apply() (aliases included).
 function tw_irc_is_verb(_v) {
 
-	// Canonicalise FIRST. The alias map (tiny/huge/filp/span/restore/gorilla...) used
-	// to live only inside twitch_apply(), so every alias shipped on 09-10 was dead
-	// over IRC: this gate returned false before the dispatcher ever saw the name
-	// (Lane, 09-11 stream 2:01:02 "I think tiny just doesn't work"; !filp x2 at 2:50).
-	switch (tw_alias_verb(string_lower(string(_v))))
-	{
-		case "heal":   case "hurt":  case "mp":    case "drain":  case "1up":
-		case "invuln": case "shake": case "dark":  case "music":
-		case "shrink": case "grow":  case "slow":  case "spell":  case "speed":
-		case "flame":  case "heckler":
-		case "spawn":  case "swarm":
-		case "flip":   case "confuse": case "disco":
-		case "freeze": case "stun":  case "smite": case "clearscreen":
-		case "curse":  case "party": case "refill":
-		case "arise":  case "chicken": case "cucco":
-		case "fairy":  case "fary":                  // advertised by !cmds, was dead -> now refill-alias
-		case "protect": case "prtc": case "shield":  // advertised by !cmds, was dead -> now spell
-		case "reflect": case "rflc":                 // advertised by !cmds, was dead -> now spell
-		case "fire":   case "thunder": case "thun":  // bare spell names (lane typed these himself)
-		case "enigma": case "spel": case "jump": case "life": case "summon": case "summ":
-		case "ice":    case "icefloor":              // Z3 port
-		case "moon":                                 // gravity verb (Z2 is a platformer)
-		case "root":   case "deny":                  // Z3-family ports
-		case "kill":   case "killlink": case "poison": case "suggest":
-		case "steal":  case "rob": case "thief": case "pickpocket": // dispatch case existed since 07-27, never passed this gate (verb audit 09-11)
-		case "fatality": case "friendship": case "flawless": case "finisher": // MK2 splash (fun / on-stream test)
-		case "song":   case "np": case "nowplaying": case "track": // "what song is this" (every stream)
-		case "link":   case "unchicken":                       // force Link form back (Lane 09-11 2:30:53 "exclamation point be link again")
-		case "donothing": case "rip": case "blip": case "coincidence": case "getfed": // joke verbs
-		case "tax": case "dmgup": case "attrition":   // Z3 ports, round 10b
-		case "meth": case "quantumentangle": case "help": case "challenge": case "disorient": // round 10c
-		case "stasis":   // Lane's freeze-Link ask
-		case "points": case "pts": case "bal": case "ghost": case "crush":   // round 10h
-		case "version": case "ver": case "build":
-		case "reshuffle":   // Lane's enemy reshuffler
-		case "niceshot": case "whatasave": case "calculated": case "savage":  // round 11: RL quick chat
-		case "closeone": case "okay": case "faking": case "gg": case "ez":
-		case "wow": case "noproblem": case "thanks":
-			return true;
-		default:
-			return false;
-	}
+	// Canonicalise FIRST (the shared alias map), then check THE list (tw_verb_all).
+	// v2.1.7: this used to be its own hardcoded switch AND the fuzzy matcher needed
+	// the same list -- two copies guaranteed drift, so the list lives in ONE place
+	// now (tw_verb_all below) and both callers read it.
+	var _cv = tw_alias_verb(string_lower(string(_v)));
+	return tw_verb_is_canon(_cv);
 }
 
 /// @description  tw_alias_verb(v) -- ONE alias map shared by the IRC gate and the dispatcher.
@@ -241,4 +205,82 @@ function tw_alias_verb(_v) {
 		case "ty":                        return "thanks";
 	}
 	return _v;
+}
+
+
+/// @description  tw_verb_all() -- THE canonical verb list, post-alias names only.
+/// Single source of truth: tw_irc_is_verb gates on it and tw_fuzzy_verb suggests
+/// from it. When you add a dispatch case in twitch_apply, add the name HERE.
+function tw_verb_all() {
+	static _all = [
+		"heal","hurt","mp","drain","1up","invuln","shake","dark","music",
+		"shrink","grow","slow","spell","speed","flame","heckler","spawn","swarm",
+		"flip","confuse","disco","freeze","stun","smite","clearscreen",
+		"curse","party","refill","arise","chicken","cucco","fairy","fary",
+		"protect","prtc","shield","reflect","rflc",
+		"fire","thunder","thun","enigma","spel","jump","life","summon","summ",
+		"ice","icefloor","moon","root","deny",
+		"kill","killlink","poison","suggest","steal","rob","thief","pickpocket",
+		"fatality","friendship","flawless","finisher","song","np","nowplaying","track",
+		"link","unchicken","donothing","rip","blip","coincidence","getfed",
+		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
+		"stasis","points","pts","bal","ghost","crush",
+		"version","ver","build","reshuffle",
+		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",
+		"ez","wow","noproblem","thanks"
+	];
+	return _all;
+}
+
+/// @description  tw_verb_is_canon(v) -- is v (already alias-canonicalised) a real verb?
+function tw_verb_is_canon(_v) {
+	var _all = tw_verb_all();
+	for (var _i = 0; _i < array_length(_all); _i++)
+		if (_all[_i] == _v) return true;
+	return false;
+}
+
+/// @description  tw_edit_le(a, b, cap) -- Levenshtein distance with an early bail:
+/// anything provably over cap returns cap+1. Inputs are tiny verb strings, so the
+/// two-row DP table costs nothing even called per unknown chat message.
+function tw_edit_le(_a, _b, _cap) {
+	var _la = string_length(_a), _lb = string_length(_b);
+	if (abs(_la - _lb) > _cap) return _cap + 1;
+	var _prev = array_create(_lb + 1, 0);
+	var _cur  = array_create(_lb + 1, 0);
+	for (var _j = 0; _j <= _lb; _j++) _prev[@_j] = _j;
+	for (var _i = 1; _i <= _la; _i++)
+	{
+		_cur[@0] = _i;
+		var _rowmin = _i;
+		var _ca = string_char_at(_a, _i);
+		for (var _j = 1; _j <= _lb; _j++)
+		{
+			var _cost = (_ca == string_char_at(_b, _j)) ? 0 : 1;
+			var _d = min(_prev[@_j] + 1, _cur[@(_j - 1)] + 1, _prev[@(_j - 1)] + _cost);
+			_cur[@_j] = _d;
+			if (_d < _rowmin) _rowmin = _d;
+		}
+		if (_rowmin > _cap) return _cap + 1;
+		var _t = _prev; _prev = _cur; _cur = _t;
+	}
+	return _prev[@_lb];
+}
+
+/// @description  tw_fuzzy_verb(typed) -- closest canonical verb within tolerance, or "".
+/// Powers the "did you mean" typo plate (stasus -> stasis, refil -> refill...). Distance
+/// 1 always counts; 2 only for verbs >= 6 chars so short verbs can't false-positive on
+/// each other. Returns "" for anything already real or too far from everything.
+function tw_fuzzy_verb(_typed) {
+	var _t = tw_alias_verb(string_lower(string(_typed)));
+	if (_t == "" || tw_verb_is_canon(_t)) return "";
+	var _best = "", _bestd = 99;
+	var _all = tw_verb_all();
+	for (var _i = 0; _i < array_length(_all); _i++)
+	{
+		var _d = tw_edit_le(_t, _all[_i], 2);
+		if (_d < _bestd) { _bestd = _d; _best = _all[_i]; }
+	}
+	if (_bestd <= ((string_length(_t) >= 6) ? 2 : 1)) return _best;
+	return "";
 }

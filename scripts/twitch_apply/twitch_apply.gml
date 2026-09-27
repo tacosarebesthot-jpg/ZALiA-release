@@ -395,6 +395,15 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 						}
 					});
 				}
+				else if (_q != "")
+				{
+					// v2.1.7: a miss used to be SILENT (Gainey 09-18, "!music punch out"
+					// x3 then "rip srry wanted the msuic and i faield lol"). Say why, and
+					// refuse so the points economy never charges for it.
+					global.tw_toast       = _who_s + " -> music: no match for \"" + string(_arg) + "\" (!music alone shuffles)";
+					global.tw_toast_timer = 240;
+					global.tw_apply_refused = true;
+				}
 			}
 			break;
 
@@ -553,6 +562,17 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 
 					global.tw_toast       = _who_s + " -> spell " + string(_arg);
 					global.tw_toast_timer = 180;
+				}
+				else
+				{
+					// v2.1.7: "!spell <garbage>" was silent. List the vocabulary (the bare
+					// names also work as verbs, !fire etc., so this is all of it).
+					if (_arg == "")
+						global.tw_toast = _who_s + " -> spell: which one? fire thunder protect reflect jump life fairy enigma";
+					else
+						global.tw_toast = _who_s + " -> spell: unknown \"" + string(_arg) + "\". try fire thunder protect reflect jump life fairy enigma";
+					global.tw_toast_timer = 300;
+					global.tw_apply_refused = true;
 				}
 			}
 			break;

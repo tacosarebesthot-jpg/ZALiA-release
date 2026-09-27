@@ -1336,3 +1336,216 @@ function Dev_Bugprobe_Step() {
 
 
 }
+
+
+// -- DEV TWITCH-CHAT SELFTEST (v2.1.7) -----------------------------------------
+// "_tw_selftest.flag" in working_directory. Rides the g_Step autopilot to gameplay,
+// then fires the whole chat-verb matrix through the REAL entry point
+// (twitch_irc_handle_line -- same parse/gate/cooldown/dispatch path live chat uses)
+// and grades every toast, so "do the chat commands work" is a build step, not a
+// Lane livestream. Writes _tw_selftest_result.log next to the flag, then game_end().
+// No IRC link needed: the harness raises global.tw_enabled itself. Gated on
+// global.tw_selftest (DEV + flag), so ship builds never enter any of this.
+
+function Dev_TwSelftest_Step() {
+
+	if (!variable_global_exists("tw_selftest") || !global.tw_selftest) return;
+
+	// wait for LIVE gameplay (scene "A" + file stats + PC + controller); reset the
+	// settle timer whenever we are not there, so a death/respawn mid-run re-settles
+	// before the next command fires.
+	if (!(instance_exists(g) && instance_exists(f) && instance_exists(global.pc)
+	&&    g.room_type == "A"))
+	{   global.tw_selftest_t = 0; exit;  }
+
+	global.tw_selftest_t++;
+
+	if (global.tw_selftest_i < 0)
+	{
+		if (global.tw_selftest_t != 90) exit; // ~1.5s settle, once
+		global.tw_enabled             = true;   // master gate (no IRC link needed)
+		global.tw_effect_secs         = 2;      // short effects: flip/party revert fast (viewport safety)
+		global.tw_irc_enabled         = false;  // NO live link during the run: this box autoconnects,
+		                                        // and real chat traffic/reconnect toasts interleave with injections
+		global.tw_irc_status          = "selftest";
+		global.tw_rl                  = false;  // deterministic: RL plates OFF -> the "is off" toast
+		global.tw_irc_frame           = 0;
+		global.tw_irc_last_cmd        = -999999;
+		global.tw_irc_cooldown_frames = 0;
+		global.tw_fz_toast_frame      = -1000;
+		global.tw_selftest_i   = 0;
+		global.tw_selftest_log = "== ZALiA twitch selftest v" + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ") =="
+			+ "#room: " + string(room_get_name(room));
+		// one-line plumbing diagnostic: gate, list, and the dispatcher itself
+		global.tw_toast = ""; global.tw_toast_timer = 0;
+		twitch_apply("version", "", "tst", "");
+		global.tw_selftest_log += "#diag: tw_enabled=" + string(global.tw_enabled)
+			+ " is_verb(heal)=" + string(tw_irc_is_verb("heal"))
+			+ " canon(heal)=" + string(tw_verb_is_canon("heal"))
+			+ " nverbs=" + string(array_length(tw_verb_all()))
+			+ " apply(version).toast=" + string(global.tw_toast) + "/" + string(global.tw_toast_timer);
+		exit;
+	}
+
+	if (global.tw_selftest_t mod 20 != 0) exit; // one command every 1/3 s
+
+	var _cases = tw_selftest_cases();
+	if (global.tw_selftest_i >= array_length(_cases))
+	{
+		var _nfail = string_count("FAIL", global.tw_selftest_log);
+		global.tw_selftest_log += "#DONE: " + string(_nfail) + " FAIL(s)";
+		var _rep = string_replace_all(global.tw_selftest_log, "#", chr(13) + chr(10));
+		var _rf = file_text_open_write(working_directory + "_tw_selftest_result.log");
+		file_text_write_string(_rf, _rep);
+		file_text_close(_rf);
+		// GM sandboxes writes differently per target: drop a second copy in the
+		// save area so exactly one of the two is where the operator looks.
+		var _rf2 = file_text_open_write("_tw_selftest_result.log");
+		file_text_write_string(_rf2, _rep);
+		file_text_close(_rf2);
+		show_debug_message("[TWSELFTEST] done, " + string(_nfail) + " FAIL(s)");
+		game_end();
+		exit;
+	}
+
+	var _c     = _cases[global.tw_selftest_i];
+	var _cmd   = _c[0], _expect = _c[1], _note = _c[2];
+
+	// clean slate for THIS command: no cooldown, no throttle, no stale toast.
+	// tw_enabled re-asserted every injection: something in the per-frame twitch
+	// step flips it back off when no IRC link is up (first run: EVERY verb came
+	// back silent), and the harness must win that race inside this frame.
+	global.tw_enabled        = true;
+	global.tw_irc_last_cmd   = -999999;
+	global.tw_fz_toast_frame = -1000;
+	global.tw_toast          = "";
+	global.tw_toast_timer    = 0;
+	global.tw_apply_refused  = false;
+
+	twitch_irc_handle_line(":tstchatter!tst@tmi.twitch.tv PRIVMSG #z :!" + _cmd);
+
+	var _ok  = false;
+	var _got = string(global.tw_toast);
+	switch (_expect)
+	{
+		case "toast":   _ok = (global.tw_toast_timer > 0 && string_pos("unknown:", _got) == 0); break;
+		case "silent":  _ok = (global.tw_toast_timer <= 0 || _got == "");                       break;
+		case "mean":    _ok = (string_pos("did you mean", _got) > 0);                           break;
+		case "nomatch": _ok = (string_pos("no match", _got) > 0);                               break;
+	}
+	global.tw_selftest_log += "#"
+		+ (_ok ? "PASS" : "FAIL") + "  [" + _expect + "]  " + _cmd
+		+ "  ->  " + ((_got == "") ? "(no toast)" : _got)
+		+ ((_note == "") ? "" : "   (" + _note + ")");
+
+	global.tw_selftest_i++;
+}
+
+function tw_selftest_cases() {
+	static _c = [
+		// -- stat pokes / instant helpers ----------------------------------------
+		["heal",       "toast", ""],
+		["heal 5",     "toast", "quarter-boxes arg"],
+		["hurt",       "toast", ""],
+		["hurt 4",     "toast", ""],
+		["mp",         "toast", ""],
+		["drain",      "toast", ""],
+		["1up",        "toast", ""],
+		["invuln",     "toast", ""],
+		["shake",      "toast", ""],
+		// -- timed screen effects -------------------------------------------------
+		["dark",       "toast", "may say no-dark-version -- still armed"],
+		["flip",       "toast", ""],
+		["confuse",    "toast", "10-30s RNG"],
+		["disco",      "toast", ""],
+		["party",      "toast", ""],
+		["ice",        "toast", ""],
+		["moon",       "toast", ""],
+		["shrink",     "toast", ""],
+		["grow 3",     "toast", "seconds arg"],
+		["slow",       "toast", ""],
+		["speed",      "toast", ""],
+		["speed 5",    "toast", "seconds arg"],
+		// -- music ----------------------------------------------------------------
+		["music",      "toast", "random pick"],
+		["music zzztop", "nomatch", "NEW no-match reason toast"],
+		// -- spells ----------------------------------------------------------------
+		["spell wibble", "toast", "NEW unknown-spell reason toast"],
+		["spell",      "toast", "NEW which-one hint"],
+		["fire",       "toast", "bare spell"],
+		["thunder",    "toast", "bare spell"],
+		["protect",    "toast", "bare spell"],
+		["reflect",    "toast", "bare spell"],
+		["jump",       "toast", "bare spell"],
+		["life",       "toast", "bare spell"],
+		["enigma",     "toast", "bare spell"],
+		["summon",     "toast", "bare spell"],
+		// -- hostile spawns -------------------------------------------------------
+		["flame",      "toast", ""],
+		["heckler",    "toast", ""],
+		["spawn",      "toast", "default daira"],
+		["spawn goriya", "toast", ""],
+		["spawn wibble", "toast", "unknown-enemy list toast"],
+		["swarm",      "toast", ""],
+		// -- crowd control --------------------------------------------------------
+		["freeze",     "toast", "counts enemies"],
+		["stun",       "toast", "freeze alias"],
+		["smite",      "toast", ""],
+		["clearscreen", "toast", "smite alias"],
+		["curse",      "toast", ""],
+		["poison",     "toast", ""],
+		["root",       "toast", "7-12s RNG"],
+		["deny",       "toast", "help listing"],
+		["deny jump",  "toast", ""],
+		["stasis",     "toast", ""],
+		["disorient",  "toast", ""],
+		// -- help / forms / misc --------------------------------------------------
+		["refill",     "toast", ""],
+		["fairy",      "toast", "refill alias since 09-12"],
+		["arise",      "toast", "chicken or link-again"],
+		["chicken",    "toast", ""],
+		["cucco",      "toast", ""],
+		["link",       "toast", ""],
+		["unchicken",  "toast", ""],
+		["tax",        "toast", ""],
+		["dmgup",      "toast", ""],
+		["attrition",  "toast", ""],
+		["meth",       "toast", "combo"],
+		["quantumentangle", "toast", ""],
+		["help",       "toast", "help card"],
+		["challenge",  "toast", "needs-a-palace outside palaces"],
+		["song",       "toast", ""],
+		["np",         "toast", "song alias"],
+		["fatality",   "toast", "MK2 splash on demand"],
+		["version",    "toast", ""],
+		["points",     "toast", "balance or off"],
+		["ghost",      "toast", ""],
+		["crush",      "toast", "needs-a-palace outside palaces"],
+		["reshuffle",  "toast", "ok or refused-with-reason"],
+		["suggest test idea from selftest", "toast", "writes chat_suggestions.txt"],
+		// -- rocket league quick chat (plates OFF in the harness) -----------------
+		["niceshot",   "toast", "rocket-league-is-off toast"],
+		["gg",         "toast", ""],
+		["thanks",     "toast", ""],
+		// -- aliases (gate canonicalisation) --------------------------------------
+		["tiny",       "toast", "alias -> shrink"],
+		["statis",     "toast", "alias -> stasis"],
+		["restore",    "toast", "alias -> refill"],
+		["smith",      "toast", "alias -> smite"],
+		// -- typos: NEAR miss -> NEW did-you-mean plate ----------------------------
+		["stasus",     "mean",  "-> stasis"],
+		["resuffle",   "mean",  "-> reshuffle"],
+		["refil",      "mean",  "-> refill"],
+		["smimte",     "mean",  "-> smite"],
+		["ivuln",      "mean",  "-> invuln"],
+		["chiken",     "mean",  "-> chicken"],
+		// -- far-from-anything -> silence is CORRECT -------------------------------
+		["zzz",        "silent", "no suggestion, no plate"],
+		["papi",       "silent", ""],
+		["butts",      "silent", ""],
+		// -- kill LAST (lethal), then put the meters back --------------------------
+		["kill",       "toast", "lethal: window-guarded toast at worst"],
+		["refill",     "toast", "final: undo the kill"]
+	];
+	return _c;
+}
