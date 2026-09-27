@@ -35,7 +35,7 @@ function Dev_RmWarper_Step() {
 	    exit; // !!! swallow input while taking a note
 	}
 
-	if (DEV && !note_typing() && g.room_type == "A") { // dev-only QA hotkeys (DEV is always true -- note_typing() is the real guard)
+	if (dev_hotkeys_avail() && !note_typing() && g.room_type == "A") { // owner-tier QA hotkeys: bare X starts a 793-room sweep, never on a tester build
 	    if (keyboard_check_pressed(ord("X")))  { if (sweep_active) sweep_stop(); else sweep_start(); }
 	    if (keyboard_check_pressed(ord("Y")))  sweep_stop();
 	    if (keyboard_check_pressed(ord("C"))) sweep_flag();
@@ -50,7 +50,7 @@ function Dev_RmWarper_Step() {
 	            sweep_flag();
 	    }
 	}
-	if (DEV && !note_typing() && g.room_type == "C") { // overworld sweep hotkeys (manual entry; no room change needed)
+	if (dev_hotkeys_avail() && !note_typing() && g.room_type == "C") { // overworld sweep hotkeys (manual entry; no room change needed)
 	    if (keyboard_check_pressed(ord("X"))) { if (sweep_active) sweep_stop(); else sweep_start_ow_manual(); }
 	    if (keyboard_check_pressed(ord("Y"))) sweep_stop();
 	}

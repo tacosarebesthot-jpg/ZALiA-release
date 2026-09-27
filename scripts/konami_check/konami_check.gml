@@ -172,9 +172,21 @@ function dev_unlock_fire() {
 	// Session-only. The permanent unlock is the dev_unlock.txt file in the save
 	// directory -- see dev_avail(). Nothing here is written to the save.
 	var _was = variable_global_exists("dev_unlocked") && global.dev_unlocked;
-	global.dev_unlocked = !_was; // second entry hides it again, so it can be demoed and put away
-
 	aud_play_sound(snd_Z1_Secret);
+
+	// A playtest build is ALREADY dev-unlocked (tester tier: no bare debug hotkeys).
+	// The first code entry there promotes it to full dev instead of hiding everything.
+	if (_was && variable_global_exists("dev_unlock_tester") && global.dev_unlock_tester
+	&& !(variable_global_exists("dev_code_unlocked") && global.dev_code_unlocked))
+	{
+		global.dev_code_unlocked  = true;
+		global.konami_toast       = "DEV HOTKEYS UNLOCKED";
+		global.konami_toast_timer = 180;
+		exit;
+	}
+
+	global.dev_unlocked = !_was; // second entry hides it again, so it can be demoed and put away
+	global.dev_code_unlocked = global.dev_unlocked; // the code grants FULL dev (bare hotkeys too) -- dev_hotkeys_avail()
 
 	// Reuse the Konami toast so there is one drawing path for both.
 	global.konami_toast       = global.dev_unlocked ? "DEV TOOLS UNLOCKED" : "DEV TOOLS HIDDEN";

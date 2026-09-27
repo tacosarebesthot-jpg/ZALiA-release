@@ -38,6 +38,8 @@ function dev_avail() {
     {
         global.dev_unlocked = false;
     }
+    if (!variable_global_exists("dev_unlock_tester")) global.dev_unlock_tester = false;
+    if (!variable_global_exists("dev_code_unlocked")) global.dev_code_unlocked = false;
 
     if (!variable_global_exists("dev_unlock_checked"))
     {
@@ -48,12 +50,36 @@ function dev_avail() {
         if (file_exists(working_directory + "dev_unlock.txt"))
         {
             global.dev_unlocked = true;
-            if (DEV) show_debug_message("[DEV] unlocked by dev_unlock.txt");
+            // TESTER tier: the -Tester playtest package writes a dev_unlock.txt whose
+            // text says "playtest" (stage_release.ps1 -- that word is load-bearing).
+            // Testers keep the menus, warping, item granting and keys 3/4, but NOT the
+            // bare single-key debug overlays -- see dev_hotkeys_avail().
+            var _fh = file_text_open_read(working_directory + "dev_unlock.txt");
+            if (_fh >= 0)
+            {
+                var _txt = "";
+                while (!file_text_eof(_fh)) { _txt += file_text_read_string(_fh); file_text_readln(_fh); }
+                file_text_close(_fh);
+                global.dev_unlock_tester = (string_pos("playtest", string_lower(_txt)) > 0);
+            }
+            if (DEV) show_debug_message("[DEV] unlocked by dev_unlock.txt" + (global.dev_unlock_tester ? " (TESTER tier)" : ""));
         }
     }
 
     return global.dev_unlocked;
 
+}
+
+/// @description  dev_hotkeys_avail() -- may BARE single-key debug toggles fire right now?
+/// Lane 09-18 (3:55:12-3:55:56): a stray L popped a box in his build and left him "scared
+/// to push buttons". Those keys (I K J L H R Z E U V -- Input_GameTesting) sat behind
+/// `if (DEV)`, which is hardcoded true, so dev_avail() was their only gate -- and the
+/// playtest package unlocks dev_avail() on purpose for keys 3/4 + warping. Now the bare
+/// overlays need the OWNER's unlock file, or the dev code entered this session.
+function dev_hotkeys_avail() {
+	if (!dev_avail()) return false;
+	if (global.dev_code_unlocked) return true;   // typed the dev code: full dev, on purpose
+	return !global.dev_unlock_tester;            // owner's dev_unlock.txt: yes; playtest one: no
 }
 
 /// @description  note_typing() -- true while the player is TYPING into an on-screen note

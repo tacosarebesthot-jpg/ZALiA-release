@@ -333,7 +333,7 @@ function Surface_Draw_GUI_End() {
 	// Reversible: delete this block + the MOVESPEED CHEAT blocks in g_Create / updateX /
 	// Overworld_Step. The multiplier itself is applied in updateX (action rooms) and
 	// Overworld_Step (overworld); here we only own the hotkey + the on-screen readout.
-	if (dev_avail() && !note_typing() && keyboard_check_pressed(ord("2")))
+	if (dev_hotkeys_avail() && !note_typing() && keyboard_check_pressed(ord("2"))) // owner tier: sits right next to the tester keys 3/4
 	{
 	    if (!variable_global_exists("cheat_movespeed")) global.cheat_movespeed = 1;
 	    global.cheat_movespeed++;

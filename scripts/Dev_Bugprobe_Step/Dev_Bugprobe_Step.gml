@@ -1383,7 +1383,9 @@ function Dev_TwSelftest_Step() {
 			+ " is_verb(heal)=" + string(tw_irc_is_verb("heal"))
 			+ " canon(heal)=" + string(tw_verb_is_canon("heal"))
 			+ " nverbs=" + string(array_length(tw_verb_all()))
-			+ " apply(version).toast=" + string(global.tw_toast) + "/" + string(global.tw_toast_timer);
+			+ " apply(version).toast=" + string(global.tw_toast) + "/" + string(global.tw_toast_timer)
+			+ "#tier: dev_avail=" + string(dev_avail()) + " tester=" + string(global.dev_unlock_tester)
+			+ " code=" + string(global.dev_code_unlocked) + " hotkeys=" + string(dev_hotkeys_avail());
 		exit;
 	}
 

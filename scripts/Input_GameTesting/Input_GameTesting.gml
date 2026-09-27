@@ -70,7 +70,7 @@ function Input_GameTesting() {
 
 	// ----------------------------------------------------------------------------
 	// --------------------------------------------------------------------
-	if (DEV) // The following is for making these debug tools more accessable to me.
+	if (dev_hotkeys_avail()) // owner-only bare-key overlays (NOT the playtest tier) -- see dev_hotkeys_avail()
 	{
 	    if(!_CTL 
 	    && !_SHF 
