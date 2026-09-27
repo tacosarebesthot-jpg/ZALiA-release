@@ -219,7 +219,7 @@ function tw_verb_all() {
 		"curse","party","refill","arise","chicken","cucco","fairy","fary",
 		"protect","prtc","shield","reflect","rflc",
 		"fire","thunder","thun","enigma","spel","jump","life","summon","summ",
-		"ice","icefloor","moon","root","deny",
+		"ice","icefloor","moon","root","deny","undeny",
 		"kill","killlink","poison","suggest","steal","rob","thief","pickpocket",
 		"fatality","friendship","flawless","finisher","song","np","nowplaying","track",
 		"link","unchicken","donothing","rip","blip","coincidence","getfed",

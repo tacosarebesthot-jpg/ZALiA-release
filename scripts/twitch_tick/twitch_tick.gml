@@ -66,8 +66,17 @@ function twitch_tick() {
 			global.tw_boss_room_loading = false;
 			global.tw_boss_seen         = false;
 			global.tw_boss_damaged      = false;
+			global.tw_boss_pc_died      = false;
 			global.tw_boss_frames       = 0;
 		}
+
+		// Lane 09-18 (3:58:23): dying to a boss awarded the BOSS a FLAWLESS VICTORY. Death
+		// has paths that never touch PC_take_damage (barrier/backwall/pit set is_dead
+		// directly), and the death-room exit isn't a ChangeRoom_timer transition -- so a
+		// dead or missing PC dirties the fight here, where the finisher is decided.
+		if (global.tw_boss_seen
+		&& (!instance_exists(global.pc) || global.pc.is_dead || f.hp <= 0))
+		{   global.tw_boss_damaged = true;  global.tw_boss_pc_died = true;  }
 
 		if (instance_exists(Boss))
 		{
@@ -88,9 +97,11 @@ function twitch_tick() {
 			// ROCKET LEAGUE (round 11): the consolation prize. A boss that died after landing a
 			// hit isn't flawless, so it gets the RL plate instead of the MK2 splash -- the two
 			// branches are exclusive, no kill ever throws both.
-			else if (variable_global_exists("tw_rl") && global.tw_rl && global.tw_boss_damaged)
+			else if (variable_global_exists("tw_rl") && global.tw_rl && global.tw_boss_damaged
+			     &&  !global.tw_boss_pc_died) // a death gets no finisher of any kind
 			{   tw_toast_push("CALCULATED.", "", "win");  }
 			global.tw_boss_damaged = false;
+			global.tw_boss_pc_died = false;
 			global.tw_boss_frames  = 0;
 		}
 	}

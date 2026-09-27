@@ -1201,6 +1201,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			global.tw_toast_timer = 240;
 			break;
 
+		case "undeny":
+			// Lane 09-25 (3:50:48-3:51:23): re-casting !deny only EXTENDED it and he had to
+			// wait it out mid-boss -- the dev got bitten too. "!undeny" == "!deny off",
+			// "!undeny jump" == "!deny jump off". Falls through into the deny parser.
+			_arg = "off " + string(_arg);
 		case "deny":
 			// HOSTILE (Z3 port, adapted): temporarily block a control family via the
 			// same pc_lock levers. "!deny spell", "!deny jump", "!deny upstab",
@@ -1213,6 +1218,15 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			{
 				var _dwhat = tw_slug(_arg);
 				var _dbits = 0;
+				// OFF form: "!deny off", "!deny jump off", "!deny off jump" (+ clear/none/stop).
+				var _doff  = false;
+				if (_dwhat == "off" || _dwhat == "clear" || _dwhat == "none" || _dwhat == "stop")
+				{   _doff = true;  _dwhat = "all";  }
+				else if (string_copy(_dwhat, 1, 3) == "off")
+				{   _doff = true;  _dwhat = string_delete(_dwhat, 1, 3);  }
+				else if (string_length(_dwhat) > 3 && string_copy(_dwhat, string_length(_dwhat) - 2, 3) == "off")
+				{   _doff = true;  _dwhat = string_copy(_dwhat, 1, string_length(_dwhat) - 3);  }
+				if (_doff && _dwhat == "") _dwhat = "all";
 				// Engine bits (PC_update_attack_1 / PC_update_vertical): ATK1 = standing
 				// stab, ATK2 = crouching stab (d-held on the ground), ATK3 = down-thrust
 				// (the jump-down attack), ATK4 = up-thrust. What Lane calls "downstab" is
@@ -1232,14 +1246,37 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					case "upstab": case "upthrust": case "ustab": case "up": _dbits = PC_LOCK_ATK4; break;
 					case "all":      case "everything":          _dbits = PC_LOCK_JUMP | PC_LOCK_ATK1 | PC_LOCK_ATK2 | PC_LOCK_ATK3 | PC_LOCK_ATK4 | PC_LOCK_SPEL; break;
 					default:
-						global.tw_toast       = "deny: spell/jump/stab/crouchstab/downstab/upstab/all";
+						global.tw_toast       = "deny: spell/jump/stab/crouchstab/downstab/upstab/all  (add OFF to lift, or !undeny)";
 						global.tw_toast_timer = 300;
 						break;
 				}
-				if (_dbits != 0)
+				if (_dbits != 0 && _doff)
+				{
+					// Lifting a deny is HELP -- blocked in VS / challenge like every other
+					// reprieve, except for the broadcaster, who can always free themselves.
+					if (_no_reprieve && !tw_points_is_free(_who))
+					{
+						global.tw_toast       = _who_s + " -> undeny BLOCKED" + ((variable_global_exists("tw_vs_mode") && global.tw_vs_mode) ? " (VS CHAT)" : " (CHALLENGE: NO REPRIEVE)");
+						global.tw_toast_timer = 180;
+						global.tw_apply_refused = true;
+					}
+					else if (tw_deny_clear(_dbits) > 0)
+					{
+						global.tw_toast       = _who_s + " -> undeny " + ((_dwhat == "all" || _dwhat == "everything") ? "all" : _dwhat);
+						global.tw_toast_timer = 180;
+					}
+					else
+					{
+						global.tw_toast       = _who_s + " -> nothing is denied";
+						global.tw_toast_timer = 180;
+						global.tw_apply_refused = true; // no charge for a no-op
+					}
+				}
+				else if (_dbits != 0)
 				{
 					g.pc_lock |= _dbits;
 					array_push(global.tw_active, {
+						deny    : true, // tw_deny_clear finds its own entries by this tag
 						frames  : _frames,
 						bits    : _dbits,
 						reapply : function() { if (instance_exists(g)) g.pc_lock |= self.bits;  },
@@ -1322,7 +1359,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		switch (_v)
 		{
 			case "heal": case "mp": case "refill": case "1up": case "life": case "fairy": case "fary":
-			case "invuln": case "link": case "unchicken": case "freeze": case "stun": case "smite": case "clearscreen":
+			case "invuln": case "link": case "unchicken": case "undeny": case "freeze": case "stun": case "smite": case "clearscreen":
 				global.tw_last_helper = _who_s; global.tw_last_helper_t = current_time; break;
 			case "hurt": case "drain": case "poison": case "kill": case "killlink": case "tax": case "dmgup":
 			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
@@ -1370,6 +1407,28 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 /// request against a track name without caring about spaces, underscores, case or punctuation.
 /// Chat types "Bloody Tears"; the jukebox display name is "CASTLEVANIA2_BLOODYTEARS_BODY".
 /// Both slug to a form where a substring test actually does what a human expects.
+/// @description  tw_deny_clear(bits) -- lift ONLY the pc_lock bits that !deny entries hold.
+/// Trims each matching tw_active deny entry (drops it once it holds nothing), so a
+/// partial "!undeny jump" leaves the rest of a "!deny all" running on its timer.
+/// Returns how many entries it touched (0 = nothing was denied).
+function tw_deny_clear(_bits) {
+
+	var _n = 0;
+	for (var _i = array_length(global.tw_active) - 1; _i >= 0; _i--)
+	{
+		var _e = global.tw_active[_i];
+		if (!variable_struct_exists(_e, "deny")) continue;
+		var _hit = _e.bits & _bits;
+		if (_hit == 0) continue;
+		if (instance_exists(g)) g.pc_lock &= ~_hit;
+		_e.bits &= ~_hit;
+		_n++;
+		if (_e.bits == 0) array_delete(global.tw_active, _i, 1);
+	}
+	return _n;
+}
+
+
 function tw_slug(_s) {
 
 	var _str = string_lower(string(_s));

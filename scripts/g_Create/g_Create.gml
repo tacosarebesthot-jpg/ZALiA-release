@@ -4223,6 +4223,7 @@ function g_Create() {
 	                       // set to whatever chat earned -- "JEFF ROCKS" is one companion-page edit away.
 	global.tw_boss_seen     = false; // FLAWLESS tracker (B65): a Boss instance is alive this room
 	global.tw_boss_damaged  = false; // PC took a hit while the boss was alive -> not flawless
+	global.tw_boss_pc_died  = false; // PC died while the boss was alive -> no finisher at all
 	global.tw_boss_frames   = 0;     // how long the boss has been alive (skip <5s flicker)
 	global.tw_boss_room_loading = false; // ChangeRoom_timer was >0 last frame -> new room, reset
 	global.tw_mk_strings    = ["FLAWLESS VICTORY!", "FATALITY.", "BABALITY?", "FRIENDSHIP. Friendship.", "TOASTY!!"];

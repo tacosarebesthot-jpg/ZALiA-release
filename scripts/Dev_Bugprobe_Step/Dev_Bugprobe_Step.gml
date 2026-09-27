@@ -1426,9 +1426,30 @@ function Dev_TwSelftest_Step() {
 
 	var _ok  = false;
 	var _got = string(global.tw_toast);
+	// deny-held lock bits (OR of every tw_active !deny entry) -- the undeny rows grade
+	// the actual lock state, not just "a toast appeared".
+	// _other = bits a NON-deny effect owns (e.g. !root holds JUMP for 7-12 s and
+	// re-asserts it every tick) -- those stay locked after an undeny by design, so
+	// the pc_lock half of each check only judges bits no other effect claims.
+	var _held = 0, _other = 0;
+	for (var _di = 0; _di < array_length(global.tw_active); _di++)
+	{
+		var _de = global.tw_active[_di];
+		if (!variable_struct_exists(_de, "bits")) continue;
+		if (variable_struct_exists(_de, "deny")) _held |= _de.bits; else _other |= _de.bits;
+	}
+	var _all6 = PC_LOCK_JUMP | PC_LOCK_ATK1 | PC_LOCK_ATK2 | PC_LOCK_ATK3 | PC_LOCK_ATK4 | PC_LOCK_SPEL;
+	var _lk   = g.pc_lock & ~_other; // pc_lock minus bits another effect legitimately holds
+	var _tst  = (global.tw_toast_timer > 0 && string_pos("unknown:", _got) == 0);
 	switch (_expect)
 	{
-		case "toast":   _ok = (global.tw_toast_timer > 0 && string_pos("unknown:", _got) == 0); break;
+		case "denyall":     _ok = _tst && (_held & _all6) == _all6 && ((g.pc_lock | _other) & _all6) == _all6; break;
+		case "denynojump":  _ok = _tst && (_held & PC_LOCK_JUMP) == 0 && (_lk & PC_LOCK_JUMP) == 0
+		                          && (_held & PC_LOCK_SPEL) != 0 && (g.pc_lock & PC_LOCK_SPEL) != 0; break;
+		case "denynone":    _ok = _tst && _held == 0 && (_lk & _all6) == 0;                   break;
+		case "denynoop":    _ok = _tst && _held == 0 && !global.tw_apply_ok // not ok = not charged
+		                          && string_pos("nothing is denied", _got) > 0;                  break;
+		case "toast":   _ok = _tst; break;
 		case "silent":  _ok = (global.tw_toast_timer <= 0 || _got == "");                       break;
 		case "mean":    _ok = (string_pos("did you mean", _got) > 0);                           break;
 		case "nomatch": _ok = (string_pos("no match", _got) > 0);                               break;
@@ -1436,7 +1457,8 @@ function Dev_TwSelftest_Step() {
 	global.tw_selftest_log += "#"
 		+ (_ok ? "PASS" : "FAIL") + "  [" + _expect + "]  " + _cmd
 		+ "  ->  " + ((_got == "") ? "(no toast)" : _got)
-		+ ((_note == "") ? "" : "   (" + _note + ")");
+		+ ((_note == "") ? "" : "   (" + _note + ")")
+		+ ((string_copy(_expect, 1, 4) == "deny") ? "   [held=" + string(_held) + " other=" + string(_other) + " pc_lock=" + string(g.pc_lock) + "]" : "");
 
 	global.tw_selftest_i++;
 }
@@ -1497,6 +1519,10 @@ function tw_selftest_cases() {
 		["root",       "toast", "7-12s RNG"],
 		["deny",       "toast", "help listing"],
 		["deny jump",  "toast", ""],
+		["deny all",   "denyall",    "all six control bits held"],
+		["undeny jump", "denynojump", "NEW partial lift: jump free, spell still denied"],
+		["deny off",   "denynone",   "NEW lifts the rest"],
+		["undeny",     "denynoop",   "NEW nothing-denied no-op, apply_ok=false = no charge"],
 		["stasis",     "toast", ""],
 		["disorient",  "toast", ""],
 		// -- help / forms / misc --------------------------------------------------

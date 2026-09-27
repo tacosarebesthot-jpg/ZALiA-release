@@ -91,7 +91,7 @@ function tw_points_cost(_v) {
 		case "hurt": case "drain": return 10;    case "poison": return 30;   case "kill": case "killlink": return 100;
 		case "curse": return 20;  case "steal": case "rob": case "thief": case "pickpocket": return 30;
 		case "slow": return 15;   case "root": return 20;  case "spawn": return 15;  case "swarm": return 25;
-		case "flame": case "heckler": return 5;  case "deny": return 25;
+		case "flame": case "heckler": return 5;  case "deny": case "undeny": return 25;
 		case "tax": case "dmgup": case "attrition": return 30;  case "stasis": return 20;  case "challenge": return 50;
 		case "confuse": return 15; case "disorient": return 25; case "flip": return 10;  case "dark": return 15;
 		case "ice": case "icefloor": return 15; case "moon": return 10;  case "disco": return 5;  case "party": return 15;
