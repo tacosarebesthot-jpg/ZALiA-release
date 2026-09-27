@@ -106,8 +106,13 @@ function Surface_Draw_End() {
 	            if (global.application_surface_draw_enable_state)
 	            {
 	                // Draw-time only -- never touches application_surface, so nothing persists.
+	                // ROOM-SPACE FIX (owner 2026-09-27, "view box is broken ... some areas are fine
+	                // some are not"): this branch draws with the CAMERA applied (room coords), but
+	                // the copy was placed in surface pixels at x=_sw. Right only while the camera
+	                // sits at room x=0; in _WestA_00 (view at x=144) it cropped the frame to the
+	                // left 70% and pushed the HUD off. Map the full surface onto the VIEW RECT.
 	                draw_clear_alpha(c_black,0);
-	                draw_surface_ext(_FSURF, _sw,0, -1,1, 0, c_white,1);
+	                draw_surface_ext(_FSURF, viewXL() + viewW(), viewYT(), -viewW() / _sw, viewH() / _sh, 0, c_white,1);
 	            }
 	            else
 	            {
