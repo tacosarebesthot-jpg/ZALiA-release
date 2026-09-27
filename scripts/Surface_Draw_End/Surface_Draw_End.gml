@@ -202,6 +202,31 @@ function Surface_Draw_End() {
 	    draw_text_(AppVersion_xl+AppVersion_PAD, AppVersion_yt+AppVersion_PAD, AppVersion_TEXT);
 	}
 
+	// HECKLER NAME TAG (Gainey 09-18 chat 3:21:31: "heckler should show the chatter name
+	// as the mob name but it dont"). !flame/!heckler tag their Blaze with chatter_name;
+	// nothing ever drew it. Float it over the flame in the game's own NES font, filtered
+	// to FONT_LAYOUT (a Twitch name char the font lacks would draw the wrong-char tile).
+	if (instance_exists(Blaze01))
+	{
+	    with (Blaze01)
+	    {
+	        if (!variable_instance_exists(id, "chatter_name")) continue;
+	        var _nt_raw = string_upper(string(chatter_name));
+	        var _nt = "";
+	        for (var _nti = 1; _nti <= string_length(_nt_raw) && string_length(_nt) < 12; _nti++)
+	        {
+	            var _ntc = string_char_at(_nt_raw, _nti);
+	            if (_ntc != " " && string_pos(_ntc, FONT_LAYOUT) > 1) _nt += _ntc;
+	        }
+	        if (_nt == "") continue;
+	        var _nt_w  = string_length(_nt) << 3;
+	        var _nt_xl = clamp(xc - (_nt_w >> 1), viewXL(), viewXR() - _nt_w);
+	        var _nt_yt = max(viewYT(), yt - 10);
+	        draw_sprite_(spr_1x1_WHT,0, _nt_xl - 1, _nt_yt - 1, -1, _nt_w + 2, 10, c_black);
+	        draw_text_(_nt_xl, _nt_yt, _nt);
+	    }
+	}
+
 
 
 

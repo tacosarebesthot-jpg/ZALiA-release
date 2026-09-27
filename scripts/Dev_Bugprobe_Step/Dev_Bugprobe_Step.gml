@@ -1387,6 +1387,16 @@ function Dev_TwSelftest_Step() {
 		exit;
 	}
 
+	// SHOT rows: 10 frames after the command fired (the spawned thing has drawn), save a
+	// screenshot next to the result log so a visual fix is checkable without a stream.
+	if ((global.tw_selftest_t mod 20) == 10 && variable_global_exists("tw_selftest_shot")
+	&&  global.tw_selftest_shot != "")
+	{
+		screen_save(working_directory + "_tw_selftest_" + global.tw_selftest_shot + ".png");
+		global.tw_selftest_log += "#  shot: _tw_selftest_" + global.tw_selftest_shot + ".png";
+		global.tw_selftest_shot = "";
+	}
+
 	if (global.tw_selftest_t mod 20 != 0) exit; // one command every 1/3 s
 
 	var _cases = tw_selftest_cases();
@@ -1423,6 +1433,7 @@ function Dev_TwSelftest_Step() {
 	global.tw_apply_refused  = false;
 
 	twitch_irc_handle_line(":tstchatter!tst@tmi.twitch.tv PRIVMSG #z :!" + _cmd);
+	global.tw_selftest_shot = (string_pos("SHOT", _note) > 0) ? tw_slug(_cmd) : "";
 
 	var _ok  = false;
 	var _got = string(global.tw_toast);
@@ -1504,7 +1515,7 @@ function tw_selftest_cases() {
 		["summon",     "toast", "bare spell"],
 		// -- hostile spawns -------------------------------------------------------
 		["flame",      "toast", ""],
-		["heckler",    "toast", ""],
+		["heckler",    "toast", "SHOT: name tag floats over the flame"],
 		["spawn",      "toast", "default daira"],
 		["spawn goriya", "toast", ""],
 		["spawn wibble", "toast", "unknown-enemy list toast"],
