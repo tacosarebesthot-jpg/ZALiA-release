@@ -213,6 +213,7 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!niceshot` `!whatasave` `!calculated` `!savage` `!closeone` `!okay` `!faking` `!gg` `!ez` `!wow` `!noproblem` `!thanks` | Rocket League quick-chat plates, free. Three of the same inside six seconds: chat disabled for 4 seconds |
 | `!points` | your balance, when the points economy is on (see below) |
 | `!suggest <idea>` | your idea goes in a file gainey reads |
+| typos | a near-miss command (like `!stasus` or `!refil`) gets a "did you mean ?stasis" toast; pure nonsense stays silent |
 
 Clean out a boss fight without taking a hit and the game plays the real Mortal
 Kombat II **FLAWLESS VICTORY** and **FATALITY** / **FRIENDSHIP** splash, announcer and
