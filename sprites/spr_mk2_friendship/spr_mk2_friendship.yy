@@ -2,7 +2,7 @@
   "$GMSprite":"v2",
   "%Name":"spr_mk2_friendship",
   "bboxMode":0,
-  "bbox_bottom":44,
+  "bbox_bottom":55,
   "bbox_left":0,
   "bbox_right":338,
   "bbox_top":0,
@@ -168,7 +168,7 @@
   ],
   "gridX":0,
   "gridY":0,
-  "height":45,
+  "height":56,
   "HTile":false,
   "layers":[
     {"$GMImageLayer":"","%Name":"77eba3f6-3368-4fe1-a462-f12ad3a87f7d","blendMode":0,"displayName":"default","isLocked":false,"name":"77eba3f6-3368-4fe1-a462-f12ad3a87f7d","opacity":100.0,"resourceType":"GMImageLayer","resourceVersion":"2.0","visible":true,},
