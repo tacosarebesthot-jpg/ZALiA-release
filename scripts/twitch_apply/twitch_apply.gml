@@ -803,14 +803,30 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			if (instance_exists(g) && instance_exists(global.pc) && g.mod_PC_CUCCO_1)
 			{
 				var _had_fary = (g.spells_active & SPL_FARY) != 0;
+				// Lane 09-25 (1:25:40): "I can't downstab with the twitch chicken. So I'm just
+				// useless." A player who has EARNED tier 2 (CuccoSpell2_Acquired, option on)
+				// gets the tier-2 bird from the real spell -- CuccoSpell2_Active is what lets
+				// a chicken's downward stab land (GOB_body_collide_pc_sword). The chat bird
+				// only raised FAIRY, i.e. a tier-1 downgrade. Match what they earned.
+				var _t2 = (g.CuccoSpell2_Acquired && g.CuccoSpell2_Option);
 				g.spells_active |= SPL_FARY;
+				if (_t2) g.CuccoSpell2_Active = 1;
 				array_push(global.tw_active, {
 					frames   : _frames,
 					had_fary : _had_fary,
-					reapply  : function() { if (instance_exists(g)) g.spells_active |= SPL_FARY; },
+					t2       : _t2,
+					reapply  : function() {
+						if (!instance_exists(g)) return;
+						g.spells_active |= SPL_FARY;
+						if (self.t2) g.CuccoSpell2_Active = 1;
+					},
 					// only clear the bit if the player wasn't already fairy/cucco before us,
 					// so we never strip a form the player set themselves.
-					restore  : function() { if (instance_exists(g) && !self.had_fary) g.spells_active &= ~SPL_FARY; }
+					restore  : function() {
+						if (!instance_exists(g) || self.had_fary) return;
+						g.spells_active &= ~SPL_FARY;
+						if (self.t2) g.CuccoSpell2_Active = 0; // back to the Link state a real cast leaves
+					}
 				});
 				global.tw_toast       = _who_s + " -> arise (CHICKEN!)";
 				global.tw_toast_timer = 180;
@@ -971,7 +987,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			global.tw_challenge = true;
 			global.tw_flip      = true;
 			array_push(global.tw_active, {
-				frames  : 999999,
+				frames        : 999999,
+				keep_on_death : true, // V9-4: the challenge lasts the palace, not one life
 				reapply : function() {
 					if (!global.tw_challenge) { self.frames = 0; return; }
 					global.tw_flip = true;
@@ -1288,21 +1305,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
-		case "kill":
-		case "killlink":
-			// HOSTILE (asked on three separate streams; chat's "polite assassin" meta
-			// builds to it: "I heal you up so I can kill you again"). Drives HP to 0
-			// through the same clamped lever as !hurt, so the death pipeline handles
-			// it like any lethal hit. Same window guard as the hostile spawns -- a
-			// kill landing inside a tally/cutscene is the 08-28 corruption class.
-			if (!tw_spawn_window_ok(_v, _who_s)) break;
-			if (instance_exists(f))
-			{
-				adjust_stat(-9999, 0);
-				global.tw_toast       = _who_s + " -> KILL. gg.";
-				global.tw_toast_timer = 240;
-			}
-			break;
+		// !kill / !killlink REMOVED 2026-09-28 (owner: too OP -- "we don't want easy-mode
+		// murder Lane"; never used live). !poison is the lethal option: slow, and it can be
+		// healed through. Don't re-add a one-shot kill verb.
 
 		case "poison":
 			// HOSTILE: a DoT that CAN kill -- the missing middle between !hurt (instant
@@ -1329,7 +1334,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// Catch the idea firehose in-band: lane invites ideas on stream constantly
 			// ("if you know any things that might be cool to add... let me know").
 			// Appends to chat_suggestions.txt next to the save/config files.
-			var _sf = file_text_open_append(working_directory + "chat_suggestions.txt");
+			// the selftest's !suggest row must never land in the owner's real inbox
+			var _sf = file_text_open_append(working_directory + ((variable_global_exists("tw_selftest") && global.tw_selftest) ? "_tw_selftest_suggestions.txt" : "chat_suggestions.txt"));
 			if (_sf != -1)
 			{
 				file_text_write_string(_sf, string(_who_s) + ": " + string(_arg));
@@ -1361,7 +1367,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "heal": case "mp": case "refill": case "1up": case "life": case "fairy": case "fary":
 			case "invuln": case "link": case "unchicken": case "undeny": case "freeze": case "stun": case "smite": case "clearscreen":
 				global.tw_last_helper = _who_s; global.tw_last_helper_t = current_time; break;
-			case "hurt": case "drain": case "poison": case "kill": case "killlink": case "tax": case "dmgup":
+			case "hurt": case "drain": case "poison": case "tax": case "dmgup":
 			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
 			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
 			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush": case "reshuffle":
@@ -1593,5 +1599,35 @@ function tw_force_link_form() {
 			}
 		}
 	}
-	if (!_keep_bit && instance_exists(g)) g.spells_active &= ~SPL_FARY;
+	if (!_keep_bit && instance_exists(g))
+	{
+		g.spells_active &= ~SPL_FARY;
+		// Tier-2 form is FARY && CuccoSpell2_Active; the real cast toggles Active, so leaving
+		// it at 1 with FARY cleared would make the player's next cast "turn back to human"
+		// while already human. Clear both, the same state a real un-cast leaves.
+		g.CuccoSpell2_Active = 0;
+	}
+}
+
+
+/// @description  tw_effects_clear_all(on_death) -- restore + drop every timed chat effect.
+/// Lane 09-25: "It's still ice floor from before ... wasn't expecting the ice floor to stick"
+/// (3:09:16, right after a death) and the chat chicken "persisted through two game loads"
+/// (2:48:28): tw_active was only ever emptied at boot, so reapply() kept re-asserting ice /
+/// FAIRY / locks onto the next life and even onto a freshly loaded file. Called from the
+/// death transition (PC_update_death) and file_load. on_death keeps entries tagged
+/// keep_on_death (!challenge lasts the palace, not one life). Returns how many it cleared.
+function tw_effects_clear_all(_on_death) {
+
+	if (!variable_global_exists("tw_active") || !is_array(global.tw_active)) return 0;
+	var _n = 0;
+	for (var _i = array_length(global.tw_active) - 1; _i >= 0; _i--) // newest first: had_fary chains unwind in order
+	{
+		var _e = global.tw_active[_i];
+		if (_on_death && is_struct(_e) && variable_struct_exists(_e, "keep_on_death") && _e.keep_on_death) continue;
+		if (is_struct(_e) && variable_struct_exists(_e, "restore") && is_method(_e.restore)) _e.restore();
+		array_delete(global.tw_active, _i, 1);
+		_n++;
+	}
+	return _n;
 }

@@ -23,6 +23,8 @@ function file_load(argument0) {
 	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
 
+	tw_effects_clear_all(false); // chat effects belong to the session's current file, never the next one
+
 
 	var _file      = file_text_open_read(working_directory+_FILE_NAME);
 	var _file_data = file_text_read_string(_file);

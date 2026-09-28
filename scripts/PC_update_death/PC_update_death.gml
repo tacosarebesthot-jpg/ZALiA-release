@@ -32,6 +32,7 @@ function PC_update_death() {
 	    audio_stop_sound(Audio.mus_rm_inst);
 	    aud_play_sound(get_audio_theme_track(STR_PC+STR_Death));
     
+	    tw_effects_clear_all(true); // a new life starts clean (ice/chicken/locks don't carry over)
 	    room_goto_(rmB_Death);
 	    return true;
 	}
