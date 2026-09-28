@@ -707,6 +707,60 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			});
 			break;
 
+		case "catslap":
+			// TANGIA TIE-IN (Lane 09-25 3:54: "you do cat slap and it's punching Link around").
+			// Three slaps from alternating sides, no damage: each one is exactly what a real
+			// enemy hit does to Link minus the HP loss (stun + pushback_pc). "!catslap N" or a
+			// drop-file dur delays the first slap N frames so it can land with an overlay
+			// animation (Gainey: "cat slap maybe move link if it hits time?"). Battle screens
+			// only, never inside a cutscene / tally (same guard as the hostile spawns).
+			if (!tw_spawn_window_ok(_v, _who_s)) break;
+			if (instance_exists(global.pc))
+			{
+				var _cs_delay = clamp(floor(tw_num(_arg, 0)), 0, 300);
+				if (_cs_delay <= 0) _cs_delay = clamp(floor(tw_num(_dur, 0)), 0, 300);
+				array_push(global.tw_active, {
+					frames  : _cs_delay + 3 * 26 + 2,
+					wait    : _cs_delay,
+					slaps   : 0,
+					reapply : function() {
+						if (self.wait > 0) { self.wait--; return; }
+						self.wait = 26;
+						if (self.slaps >= 3 || !instance_exists(global.pc) || global.pc.is_dead) return;
+						if (instance_exists(g) && (g.gui_state != g.gui_state_NONE || g.cutscene)) return;
+						var _side = (self.slaps mod 2 == 0) ? 1 : -1;   // right hand, left hand, right hand
+						self.slaps++;
+						with (global.pc)
+						{
+							attack_phase = 0;
+							stun_timer   = Stun_DURATION1;
+						}
+						pushback_pc(global.pc.x + _side, $D);
+					}
+				});
+				global.tw_toast       = _who_s + " -> CAT SLAP!";
+				global.tw_toast_timer = 180;
+			}
+			break;
+
+		case "flashbang":
+			// TANGIA TIE-IN (Lane 09-25 3:54:58: "flashbang would be like smite"). One white
+			// flash that fades out (a single flash, never a strobe), and every on-screen
+			// non-boss enemy takes the smite hit. The flash is draw-time only
+			// (global.tw_flash_timer, Surface_Draw_GUI_End), counted down in twitch_tick.
+			global.tw_flash_timer = global.tw_flash_len;
+			if (instance_exists(global.pc) && instance_exists(g))
+			{
+				with (Enemy)
+				{
+					if (state == state_NORMAL && hp > 0 && !is_ancestor(object_index, Boss))
+					{   damage_gob(id, 9999, 1);  }
+				}
+			}
+			global.tw_toast       = _who_s + " -> FLASHBANG!";
+			global.tw_toast_timer = 180;
+			break;
+
 		case "smite":
 		case "clearscreen":
 			// HELP: clear the screen -- deal lethal damage to every on-screen NON-BOSS enemy
@@ -1365,9 +1419,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		switch (_v)
 		{
 			case "heal": case "mp": case "refill": case "1up": case "life": case "fairy": case "fary":
-			case "invuln": case "link": case "unchicken": case "undeny": case "freeze": case "stun": case "smite": case "clearscreen":
+			case "invuln": case "link": case "unchicken": case "undeny": case "freeze": case "stun": case "smite": case "clearscreen": case "flashbang":
 				global.tw_last_helper = _who_s; global.tw_last_helper_t = current_time; break;
-			case "hurt": case "drain": case "poison": case "tax": case "dmgup":
+			case "hurt": case "drain": case "poison": case "catslap": case "tax": case "dmgup":
 			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
 			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
 			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush": case "reshuffle":

@@ -4238,6 +4238,8 @@ function g_Create() {
 	global.tw_boss_seen     = false; // FLAWLESS tracker (B65): a Boss instance is alive this room
 	global.tw_boss_damaged  = false; // PC took a hit while the boss was alive -> not flawless
 	global.tw_boss_pc_died  = false; // PC died while the boss was alive -> no finisher at all
+	global.tw_flash_timer   = 0;     // !flashbang: frames of white flash left (Surface_Draw_GUI_End)
+	global.tw_flash_len     = 90;    // ... full white for the first third, then a fade
 	global.tw_boss_frames   = 0;     // how long the boss has been alive (skip <5s flicker)
 	global.tw_boss_room_loading = false; // ChangeRoom_timer was >0 last frame -> new room, reset
 	global.tw_mk_strings    = ["FLAWLESS VICTORY!", "FATALITY.", "BABALITY?", "FRIENDSHIP. Friendship.", "TOASTY!!"];

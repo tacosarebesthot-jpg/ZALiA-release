@@ -17,6 +17,8 @@ function twitch_tick() {
 	if (variable_global_exists("tw_toast_timer") && global.tw_toast_timer > 0)
 	{   global.tw_toast_timer--;  }
 
+	if (variable_global_exists("tw_flash_timer") && global.tw_flash_timer > 0) global.tw_flash_timer--; // !flashbang fade
+
 	tw_checkpoint_tick();   // rolling checkpoints (round 10d) -- independent of the twitch mod
 	tw_points_tick();       // points stipend + throttled save (round 10h)
 

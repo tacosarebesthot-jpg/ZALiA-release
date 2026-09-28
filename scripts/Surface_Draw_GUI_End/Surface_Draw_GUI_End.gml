@@ -677,6 +677,19 @@ function Surface_Draw_GUI_End() {
 	// counted down in twitch_tick(); this block only reads it. Fully guarded; saves and
 	// restores font/halign/colour so it can't leak draw state into anything after it.
 	// Revert: delete this block + the twitch_* scripts + their wiring/globals.
+	// !flashbang: one white flash over the game, under the toasts so they stay readable.
+	if (variable_global_exists("tw_flash_timer") && global.tw_flash_timer > 0)
+	{
+		var _fb_gw = display_get_gui_width();  if (_fb_gw <= 0) _fb_gw = 480;
+		var _fb_gh = display_get_gui_height(); if (_fb_gh <= 0) _fb_gh = 270;
+		var _fb_pa = draw_get_alpha(); var _fb_pc = draw_get_colour();
+		var _fb_hold = global.tw_flash_len * 2 / 3;                       // fade over the last two thirds
+		draw_set_alpha(clamp(global.tw_flash_timer / max(1, _fb_hold), 0, 1));
+		draw_set_colour(c_white);
+		draw_rectangle(0, 0, _fb_gw, _fb_gh, false);
+		draw_set_alpha(_fb_pa); draw_set_colour(_fb_pc);
+	}
+
 	tw_toast_draw();
 	tw_help_draw();   // !help card (round 10c)
 

@@ -1408,6 +1408,8 @@ function tws_zone_cases() {
 		["ghost",      "toast", ""],
 		["crush",      "toast", ""],
 		["challenge",  "toast", ""],
+		["catslap",    "catslap", "TANGIA knocked around, no damage"],
+		["flashbang",  "toast", "SHOT TANGIA white flash + smite"],
 		["flawless",   "toast", "SHOT MK2 FLAWLESS VICTORY text"],
 		["fatality",   "toast", "SHOT LATE MK2 fatality art, nothing drawn over it"],
 		["friendship", "toast", "SHOT LATE MK2 friendship art"],
@@ -1559,17 +1561,18 @@ function Dev_TwSelftest_Step() {
 	case "zone_start":
 		var _zs = tws_zones();
 		if (global.tw_selftest_mode == "death") global.tws_zi = array_length(_zs);            // death test only
-		if ((global.tw_selftest_mode == "zones" || global.tw_selftest_mode == "splash") && global.tws_zi == 0) global.tws_zi = 1; // skip the full matrix
+		if ((global.tw_selftest_mode == "zones" || global.tw_selftest_mode == "splash" || global.tw_selftest_mode == "tangia") && global.tws_zi == 0) global.tws_zi = 1; // skip the full matrix
 		if (global.tws_zi >= array_length(_zs)) { tws_go("death"); break; }
 		var _z = _zs[global.tws_zi];
 		global.tws_zone_label = _z[0];
 		global.tws_cases      = (_z[2] == "all") ? tw_selftest_cases() : tws_zone_cases();
-		if (global.tw_selftest_mode == "splash")
-		{   // quick look at the MK2 splash only: town zone, the MK2 rows, no death test
-			if (global.tws_zi >= 2) { tws_finish("splash only"); exit; }
+		if (global.tw_selftest_mode == "splash" || global.tw_selftest_mode == "tangia")
+		{   // quick look at one family only (MK2 splash / Tangia verbs): town zone, no death test
+			if (global.tws_zi >= 2) { tws_finish(global.tw_selftest_mode + " only"); exit; }
+			var _tag = (global.tw_selftest_mode == "splash") ? "MK2" : "TANGIA";
 			var _mk = [];
 			for (var _mi = 0; _mi < array_length(global.tws_cases); _mi++)
-			{   if (string_pos("MK2", global.tws_cases[_mi][2]) > 0) array_push(_mk, global.tws_cases[_mi]);  }
+			{   if (string_pos(_tag, global.tws_cases[_mi][2]) > 0) array_push(_mk, global.tws_cases[_mi]);  }
 			global.tws_cases = _mk;
 		}
 		global.tws_ci         = 0;
@@ -1675,6 +1678,7 @@ function Dev_TwSelftest_Step() {
 			case "arise":      _ok = _tst && (pc_is_cucco() || string_pos("OFF", _got) > 0)
 			                        && (!pc_is_cucco() || !(g.CuccoSpell2_Acquired && g.CuccoSpell2_Option) || g.CuccoSpell2_Active); break;
 			case "toast":      _ok = _tst; break;
+			case "catslap":    _ok = _tst; global.tws_cs_x0 = global.pc.x; global.tws_cs_hp0 = f.hp; break; // graded in "after"
 			case "silent":     _ok = (global.tw_toast_timer <= 0 || _got == ""); break;
 			case "mean":       _ok = (string_pos("did you mean", _got) > 0); break;
 			case "nomatch":    _ok = (string_pos("no match", _got) > 0); break;
@@ -1695,7 +1699,8 @@ function Dev_TwSelftest_Step() {
 
 	case "expire":
 		var _n = tws_active_count();
-		var _splash = (variable_global_exists("tw_splash_spr") && global.tw_splash_spr >= 0);
+		var _splash = (variable_global_exists("tw_splash_spr") && global.tw_splash_spr >= 0)
+		           || (variable_global_exists("tw_flash_timer") && global.tw_flash_timer > 0);
 		if ((_n > 0 || _splash) && global.tws_t < 2100) { global.tws_prog = 0; exit; } // up to 35 s (!confuse RNG is 10-30 s)
 		if (_n > 0) tws_log("FAIL  OUTLIVED: " + string(_n) + " effect(s) still active 35 s later");
 		tws_go("after");
@@ -1712,6 +1717,15 @@ function Dev_TwSelftest_Step() {
 			_leak = string_replace(_leak, " tw_flip", "");
 			tws_log("   (challenge is ON and persistent by design -- cleared by the harness before the next verb)");
 		}
+		if (_ca[1] == "catslap" && string_pos("PASS", global.tws_row) == 1)
+		{   // the slap must have MOVED Link (or fizzled with a reason off a battle screen) and cost no HP
+			var _moved_px = abs(global.pc.x - global.tws_cs_x0);
+			var _fizz     = (string_pos("needs a battle screen", global.tws_row) > 0) || (string_pos("fizzled", global.tws_row) > 0);
+			if (!_fizz && (_moved_px < 4 || f.hp < global.tws_cs_hp0))
+			{   tws_log("FAIL  catslap: moved " + string(_moved_px) + " px, hp " + string(global.tws_cs_hp0) + " -> " + string(f.hp));  }
+			else tws_log("   catslap: moved " + string(_moved_px) + " px, hp unchanged" + (_fizz ? " (fizzled by design here)" : ""));
+		}
+		if (variable_global_exists("tw_flash_timer") && global.tw_flash_timer > 0) _leak += " flash-still-on";
 		if (_leak != "") tws_log("FAIL  LEAK after " + _ca[0] + ":" + _leak);
 		if (string_pos("SHOT", _ca[2]) > 0) tws_shot(tw_slug(_ca[0]) + "_after");
 		global.tws_ci++;

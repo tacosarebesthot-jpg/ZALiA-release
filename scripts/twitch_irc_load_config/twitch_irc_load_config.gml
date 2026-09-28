@@ -196,6 +196,8 @@ function tw_alias_verb(_v) {
 		case "reroll": case "reshuffleenemies": case "enemyreshuffle": case "reshuffler": return "reshuffle";
 		// round 11 RL quick chat -- the short forms chat will actually type. Deliberately NO
 		// "np" alias for "noproblem": !np is already NOW PLAYING and every stream uses it.
+		case "slap": case "catslaps": case "cat_slap": return "catslap";     // Tangia's "Cat Slap"
+		case "flash": case "flashbag": case "flash_bang": return "flashbang"; // Tedw3rd typed !flashbang 09-25
 		case "nice":                      return "niceshot";
 		case "save":                      return "whatasave";
 		case "calc":                      return "calculated";
@@ -220,7 +222,7 @@ function tw_verb_all() {
 		"protect","prtc","shield","reflect","rflc",
 		"fire","thunder","thun","enigma","spel","jump","life","summon","summ",
 		"ice","icefloor","moon","root","deny","undeny",
-		"poison","suggest","steal","rob","thief","pickpocket",
+		"poison","catslap","flashbang","suggest","steal","rob","thief","pickpocket",
 		"fatality","friendship","flawless","finisher","song","np","nowplaying","track",
 		"link","unchicken","donothing","rip","blip","coincidence","getfed",
 		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
