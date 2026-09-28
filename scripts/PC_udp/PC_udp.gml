@@ -220,6 +220,9 @@ function PC_udp() {
 	}
 
 	Draw_surface_size = max(Draw_surface_w,Draw_surface_h);
+	// !grow draws Link 1.5x into this surface: a sprite-sized surface clipped the scaled
+	// sprite. Grow the surface with the scale (kept even so size>>1 stays exact).
+	if (tw_scale_mul > 1) Draw_surface_size = ceil(Draw_surface_size * tw_scale_mul / 2) * 2;
 
 
 
@@ -321,6 +324,16 @@ function PC_udp() {
 	    case 2:{Draw_surface_xl+=Draw_surface_size; Draw_surface_yt+=Draw_surface_size; break;} // square 2
 	    case 3:{Draw_surface_xl+=Draw_surface_size;                        break;} // square 3
 	    }//switch(_val)
+	}
+
+	// !grow / !shrink FEET FIX (owner 09-27: "when he's big and small it breaks placement on
+	// the floor ... the change in size is not accounted for"). The sprite scales about the
+	// surface CENTRE (drawY), but the hurt box and the ground contact scale from the FEET
+	// (yb) -- update_body_hb_1a. At 1.5x the feet sank into the floor, at 0.6x they floated.
+	// Shift the draw so the feet stay where they are at 1x: d*(1-m), d = yb - drawY.
+	if (tw_scale_mul != 1)
+	{
+	    Draw_surface_yt += round((yb - drawY) * (1 - tw_scale_mul));
 	}
 
 
