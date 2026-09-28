@@ -1338,142 +1338,454 @@ function Dev_Bugprobe_Step() {
 }
 
 
-// -- DEV TWITCH-CHAT SELFTEST (v2.1.7) -----------------------------------------
-// "_tw_selftest.flag" in working_directory. Rides the g_Step autopilot to gameplay,
-// then fires the whole chat-verb matrix through the REAL entry point
-// (twitch_irc_handle_line -- same parse/gate/cooldown/dispatch path live chat uses)
-// and grades every toast, so "do the chat commands work" is a build step, not a
-// Lane livestream. Writes _tw_selftest_result.log next to the flag, then game_end().
-// No IRC link needed: the harness raises global.tw_enabled itself. Gated on
-// global.tw_selftest (DEV + flag), so ship builds never enter any of this.
+// -- DEV TWITCH-CHAT SELFTEST (v2.1.8: ISOLATED + ZONES) ------------------------
+// "_tw_selftest.flag" in the save dir (%LOCALAPPDATA%\ZALiA). One-shot: g_Create deletes the
+// flag the moment it is seen, so a crashed run can never hijack the owner's next launch.
+//
+// v2.1.7 fired a verb every 1/3 s, so effects stacked and hid each other (owner 09-27: "it
+// triggers it all at the same time so even if something is broken you're unlikely to catch
+// it"; proved by the shrink/grow shots being taken while !flip was still up). Now ONE verb at
+// a time, per zone:
+//   PREP   clear every effect, refill, wait for a live, settled screen, take a baseline
+//   FIRE   the real IRC entry (twitch_irc_handle_line), grade the toast
+//   DURING screenshot while the effect is up (SHOT rows)
+//   EXPIRE wait until every timed effect has ended (timeout -> "OUTLIVED" FAIL)
+//   AFTER  settle, check nothing leaked (flags, locks, scale, room), screenshot again
+// ZONES (owner: "test in all the different types of zone ... some are fine some are not"):
+// the load room runs the full matrix; then town / palace / boss / wide / cave / overworld
+// each run the view- and spawn-sensitive set. Then a harness-forced DEATH checks that a new
+// life starts clean (no chat verb -- !kill was removed 09-28).
+// Link is dev-invulnerable (g.dev_invState 2) for the whole run except the death test.
+// Log is appended line by line (_tw_selftest_result.log) so a crash keeps what ran.
+// Watchdog: 60 s without progress -> "STUCK" line + game_end().
+
+function tws_log(_line) {
+	global.tw_selftest_log += "#" + _line;
+	var _fh = file_text_open_append(working_directory + "_tw_selftest_result.log");
+	if (_fh >= 0) { file_text_write_string(_fh, _line); file_text_writeln(_fh); file_text_close(_fh); }
+	show_debug_message("[TWSELFTEST] " + _line);
+}
+
+function tws_zones() {
+	static _z = [
+		// [label, goto room ("" = stay, "OW" = overworld), case set]
+		["start",     "",          "all"],
+		["town",      "_TownA_01", "zone"],
+		["palace",    "_PalcA_01", "zone"],
+		["boss",      "_PalcA_0D", "zone"],   // Horsehead
+		["wide",      "_DthMt_1F", "zone"],   // the owner's 09-16 wide-room viewport mark
+		["cave",      "_WestA_0A", "zone"],
+		["overworld", "OW",        "zone"]
+	];
+	return _z;
+}
+
+/// the verbs whose behaviour depends on WHERE you are: view/draw effects, spawns (battle-screen
+/// guard), forms, locks, the MK splash, the help card. Parse/gate/points logic is zone-free and
+/// only runs in the full "start" matrix.
+function tws_zone_cases() {
+	static _c = [
+		["flip",       "toast", "SHOT"],
+		["party",      "toast", "SHOT"],
+		["disco",      "toast", ""],
+		["dark",       "toast", "SHOT"],
+		["shake",      "toast", ""],
+		["shrink",     "toast", "SHOT feet on the floor?"],
+		["grow 3",     "toast", "SHOT feet on the floor, not clipped?"],
+		["moon",       "toast", ""],
+		["ice",        "toast", ""],
+		["slow",       "toast", ""],
+		["speed",      "toast", ""],
+		["confuse 3",  "toast", ""],
+		["arise",      "arise", "SHOT"],
+		["heckler",    "toast", "SHOT name tag"],
+		["spawn goriya", "toast", ""],
+		["swarm",      "toast", ""],
+		["freeze",     "toast", ""],
+		["root 3",     "toast", ""],
+		["deny all",   "denyall",  ""],
+		["stasis",     "toast", ""],
+		["ghost",      "toast", ""],
+		["crush",      "toast", ""],
+		["challenge",  "toast", ""],
+		["flawless",   "toast", "SHOT MK2 FLAWLESS VICTORY text"],
+		["fatality",   "toast", "SHOT LATE MK2 fatality art, nothing drawn over it"],
+		["friendship", "toast", "SHOT LATE MK2 friendship art"],
+		["help",       "toast", "SHOT help card"]
+	];
+	return _c;
+}
+
+function tws_live() {
+	return instance_exists(g) && instance_exists(f) && instance_exists(global.pc)
+	    && (g.room_type == "A" || g.room_type == "C")
+	    && g.ChangeRoom_timer <= 0 && !g.cutscene && !g.FallScene_timer
+	    && g.gui_state == g.gui_state_NONE;
+}
+
+function tws_warp(_goto) {
+	if (_goto == "OW")
+	{
+		g.exit_leave = Exit_construct(EXIT_NAME_GAME_START);
+		with (g.exit_leave) { goToExitName = Area_OvrwA + hex_str($0000); }
+		return true;
+	}
+	var _ex = -1;
+	with (Dev_RmWarper) { Dev_RmWarper_update_1a(_goto); if (ds_list_size(dl_Rm_ExitIDs) > 0) _ex = dl_Rm_ExitIDs[|0]; }
+	if (_ex < 0) return false;
+	var _name = _goto + hex_str(_ex);
+	g.exit_leave = Exit_construct(EXIT_NAME_GAME_START);
+	with (g.exit_leave)
+	{
+		goToExitName = _name;
+		goToExitNum  = str_hex(string_copy(goToExitName, RmName_LEN - 1, 2));
+		goToRoom     = string_copy(goToExitName, 1, RmName_LEN);
+	}
+	return true;
+}
+
+/// every effect flag / lock / scale a timed verb may leave behind -- "" if clean
+function tws_leaks(_b) {
+	var _l = "";
+	var _flags = ["tw_flip","tw_disco","tw_ice","tw_moon","tw_confuse","tw_confuse_v","tw_ghost","tw_stasis","tw_dark"];
+	for (var _i = 0; _i < array_length(_flags); _i++)
+	{   if (variable_global_exists(_flags[_i]) && variable_global_get(_flags[_i]) == true) _l += " " + _flags[_i];  }
+	if (variable_global_exists("tw_dmg_mult") && global.tw_dmg_mult != 1) _l += " tw_dmg_mult=" + string(global.tw_dmg_mult);
+	if (instance_exists(global.pc))
+	{
+		if (global.pc.tw_scale_mul != 1) _l += " scale=" + string(global.pc.tw_scale_mul);
+		if (variable_instance_exists(global.pc, "tw_speed_mul") && global.pc.tw_speed_mul != 1) _l += " speed=" + string(global.pc.tw_speed_mul);
+		if (pc_is_cucco() && !_b.cucco) _l += " still-chicken";
+	}
+	var _all7 = PC_LOCK_JUMP | PC_LOCK_ATK1 | PC_LOCK_ATK2 | PC_LOCK_ATK3 | PC_LOCK_ATK4 | PC_LOCK_SPEL | PC_LOCK_HSPD;
+	if (instance_exists(g) && (g.pc_lock & _all7) != (_b.lock & _all7)) _l += " pc_lock=" + string(g.pc_lock) + "(was " + string(_b.lock) + ")";
+	var _n = 0;
+	for (var _i = 0; _i < array_length(global.tw_active); _i++)
+	{   var _e = global.tw_active[_i]; if (!(variable_struct_exists(_e, "keep_on_death") && _e.keep_on_death)) _n++;  }
+	if (_n > 0) _l += " active=" + string(_n);
+	return _l;
+}
+
+function tws_shot(_tag) {
+	var _fn = "_tw_selftest_" + string(global.tws_zone_label) + "_" + _tag + ".png";
+	screen_save(working_directory + _fn);
+	tws_log("   shot: " + _fn);
+}
+
+function tws_finish(_why) {
+	var _nfail = string_count("FAIL", global.tw_selftest_log);
+	tws_log("DONE (" + _why + "): " + string(_nfail) + " FAIL(s)");
+	if (instance_exists(g)) { g.dev_invState = 0; g.DevTools_state = global.tws_devtools0; }
+	game_end();
+}
+
+function tws_active_count() {
+	var _n = 0;
+	for (var _i = 0; _i < array_length(global.tw_active); _i++)
+	{   var _e = global.tw_active[_i]; if (!(variable_struct_exists(_e, "keep_on_death") && _e.keep_on_death)) _n++;  }
+	return _n;
+}
+
+function tws_go(_phase) {
+	global.tws_phase = _phase;
+	global.tws_prog  = 0;
+	global.tws_t     = 0;
+}
+
+function tws_say(_line) {
+	twitch_irc_handle_line(":tstchatter!tst@tmi.twitch.tv PRIVMSG #z :!" + _line);
+}
 
 function Dev_TwSelftest_Step() {
 
 	if (!variable_global_exists("tw_selftest") || !global.tw_selftest) return;
-
-	// wait for LIVE gameplay (scene "A" + file stats + PC + controller); reset the
-	// settle timer whenever we are not there, so a death/respawn mid-run re-settles
-	// before the next command fires.
-	if (!(instance_exists(g) && instance_exists(f) && instance_exists(global.pc)
-	&&    g.room_type == "A"))
-	{   global.tw_selftest_t = 0; exit;  }
-
-	global.tw_selftest_t++;
-
-	if (global.tw_selftest_i < 0)
+	if (!variable_global_exists("tws_phase"))
 	{
-		if (global.tw_selftest_t != 90) exit; // ~1.5s settle, once
-		global.tw_enabled             = true;   // master gate (no IRC link needed)
-		global.tw_effect_secs         = 2;      // short effects: flip/party revert fast (viewport safety)
-		global.tw_irc_enabled         = false;  // NO live link during the run: this box autoconnects,
-		                                        // and real chat traffic/reconnect toasts interleave with injections
-		global.tw_irc_status          = "selftest";
-		global.tw_rl                  = false;  // deterministic: RL plates OFF -> the "is off" toast
-		global.tw_irc_frame           = 0;
-		global.tw_irc_last_cmd        = -999999;
-		global.tw_irc_cooldown_frames = 0;
-		global.tw_fz_toast_frame      = -1000;
-		global.tw_selftest_i   = 0;
-		global.tw_selftest_log = "== ZALiA twitch selftest v" + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ") =="
-			+ "#room: " + string(room_get_name(room));
-		// one-line plumbing diagnostic: gate, list, and the dispatcher itself
-		global.tw_toast = ""; global.tw_toast_timer = 0;
-		twitch_apply("version", "", "tst", "");
-		global.tw_selftest_log += "#diag: tw_enabled=" + string(global.tw_enabled)
-			+ " is_verb(heal)=" + string(tw_irc_is_verb("heal"))
-			+ " canon(heal)=" + string(tw_verb_is_canon("heal"))
-			+ " nverbs=" + string(array_length(tw_verb_all()))
-			+ " apply(version).toast=" + string(global.tw_toast) + "/" + string(global.tw_toast_timer)
-			+ "#tier: dev_avail=" + string(dev_avail()) + " tester=" + string(global.dev_unlock_tester)
-			+ " code=" + string(global.dev_code_unlocked) + " hotkeys=" + string(dev_hotkeys_avail());
+		global.tws_phase = "boot";  global.tws_t = 0;  global.tws_zi = 0;  global.tws_ci = 0;
+		global.tws_zone_label = "start";  global.tws_prog = 0;  global.tws_b = undefined;
+		global.tws_cases = [];  global.tws_death_stage = 0;  global.tws_row = "";
+		global.tws_devtools0 = instance_exists(g) ? g.DevTools_state : false;
+		if (!variable_global_exists("tw_selftest_mode")) global.tw_selftest_mode = "";
+		file_delete(working_directory + "_tw_selftest_result.log"); // fresh log (an empty open_write left a NUL byte)
+	}
+	global.tws_t++;
+	global.tws_prog++;
+	if (global.tws_prog > 3600)
+	{
+		tws_log("FAIL  STUCK 60s in phase=" + global.tws_phase + " zone=" + global.tws_zone_label + " case=" + string(global.tws_ci));
+		tws_finish("watchdog");
 		exit;
 	}
 
-	// SHOT rows: 10 frames after the command fired (the spawned thing has drawn), save a
-	// screenshot next to the result log so a visual fix is checkable without a stream.
-	if ((global.tw_selftest_t mod 20) == 10 && variable_global_exists("tw_selftest_shot")
-	&&  global.tw_selftest_shot != "")
+	// keep the harness in charge every frame
+	global.tw_enabled             = true;
+	global.tw_irc_enabled         = false;
+	global.tw_irc_status          = "selftest";
+	global.tw_rl                  = false;
+	global.tw_irc_cooldown_frames = 0;
+	if (global.tws_death_stage == 0)
 	{
-		screen_save(working_directory + "_tw_selftest_" + global.tw_selftest_shot + ".png");
-		global.tw_selftest_log += "#  shot: _tw_selftest_" + global.tw_selftest_shot + ".png";
-		global.tw_selftest_shot = "";
+		// PC_take_damage only honours dev_invState while g.DevTools_state is on. Run 1 had it
+		// off: chat-spawned enemies killed Link over and over (4 lives -> game over -> STUCK).
+		if (instance_exists(g)) { g.DevTools_state = true; g.dev_invState = 2; } // no damage, no knockback
+		if (instance_exists(f) && f.hp < 16) adjust_stat(9999, 9999);   // !hurt/!poison bypass PC_take_damage
+		// Run 2 stuck here: !smite killed 7 spawned enemies, the XP opened the LEVEL-UP menu, and
+		// that menu waits for a button the harness cannot press. Same isolation the co-op test
+		// uses (Dev_CoopTest_Step): hold XP under the threshold and close the menu.
+		if (instance_exists(f))
+		{
+			f.xpPending = 0;
+			f.xpDrain   = 0;
+			if (f.xp >= f.xpNext) f.xp = max(0, f.xpNext - 1);
+		}
+		if (instance_exists(g) && g.gui_state == g.gui_state_LEVEL_UP)
+		{
+			g.gui_state = g.gui_state_NONE;
+			tws_log("   (harness closed a LEVEL-UP menu)");
+		}
 	}
 
-	if (global.tw_selftest_t mod 20 != 0) exit; // one command every 1/3 s
-
-	var _cases = tw_selftest_cases();
-	if (global.tw_selftest_i >= array_length(_cases))
+	switch (global.tws_phase)
 	{
-		var _nfail = string_count("FAIL", global.tw_selftest_log);
-		global.tw_selftest_log += "#DONE: " + string(_nfail) + " FAIL(s)";
-		var _rep = string_replace_all(global.tw_selftest_log, "#", chr(13) + chr(10));
-		var _rf = file_text_open_write(working_directory + "_tw_selftest_result.log");
-		file_text_write_string(_rf, _rep);
-		file_text_close(_rf);
-		// GM sandboxes writes differently per target: drop a second copy in the
-		// save area so exactly one of the two is where the operator looks.
-		var _rf2 = file_text_open_write("_tw_selftest_result.log");
-		file_text_write_string(_rf2, _rep);
-		file_text_close(_rf2);
-		show_debug_message("[TWSELFTEST] done, " + string(_nfail) + " FAIL(s)");
-		game_end();
-		exit;
+	case "boot":
+		if (!tws_live()) { global.tws_t = 0; exit; }
+		if (global.tws_t < 90) exit;
+		global.tw_effect_secs = 2; // short effects: each verb expires quickly, one at a time
+		tws_log("== ZALiA twitch selftest v" + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ") -- ISOLATED, per zone ==");
+		tws_log("tier: dev_avail=" + string(dev_avail()) + " tester=" + string(global.dev_unlock_tester) + " hotkeys=" + string(dev_hotkeys_avail()));
+		tws_go("zone_start");
+		break;
+
+	case "zone_start":
+		var _zs = tws_zones();
+		if (global.tw_selftest_mode == "death") global.tws_zi = array_length(_zs);            // death test only
+		if ((global.tw_selftest_mode == "zones" || global.tw_selftest_mode == "splash") && global.tws_zi == 0) global.tws_zi = 1; // skip the full matrix
+		if (global.tws_zi >= array_length(_zs)) { tws_go("death"); break; }
+		var _z = _zs[global.tws_zi];
+		global.tws_zone_label = _z[0];
+		global.tws_cases      = (_z[2] == "all") ? tw_selftest_cases() : tws_zone_cases();
+		if (global.tw_selftest_mode == "splash")
+		{   // quick look at the MK2 splash only: town zone, the MK2 rows, no death test
+			if (global.tws_zi >= 2) { tws_finish("splash only"); exit; }
+			var _mk = [];
+			for (var _mi = 0; _mi < array_length(global.tws_cases); _mi++)
+			{   if (string_pos("MK2", global.tws_cases[_mi][2]) > 0) array_push(_mk, global.tws_cases[_mi]);  }
+			global.tws_cases = _mk;
+		}
+		global.tws_ci         = 0;
+		tw_effects_clear_all(false);
+		if (_z[1] == "")
+		{
+			tws_log("---- zone " + _z[0] + " (" + g.rm_name + "), " + string(array_length(global.tws_cases)) + " verbs");
+			tws_go("prep");
+		}
+		else if (tws_warp(_z[1]))
+		{
+			tws_log("---- zone " + _z[0] + " -> warp " + _z[1] + ", " + string(array_length(global.tws_cases)) + " verbs");
+			tws_go("zone_wait");
+		}
+		else
+		{
+			tws_log("FAIL  zone " + _z[0] + ": no exit found for " + _z[1]);
+			global.tws_zi++;
+			tws_go("zone_start");
+		}
+		break;
+
+	case "zone_wait":
+		if (!tws_live()) { global.tws_t = 0; exit; }
+		if (global.tws_t < 120) exit; // settle after the room change
+		tws_log("   now in " + g.rm_name + " (type " + g.room_type + ")  view " + string(viewW()) + "x" + string(viewH())
+		      + " at " + string(viewXL()) + "," + string(viewYT()));
+		tws_shot("arrive");
+		tws_go("prep");
+		break;
+
+	case "prep":
+		if (global.tws_t == 1)
+		{
+			tw_effects_clear_all(false);
+			global.tw_swarm_queue    = [];
+			global.tw_help_timer     = 0;
+			global.tw_toast          = "";
+			global.tw_toast_timer    = 0;
+			global.tw_irc_last_cmd   = -999999;
+			global.tw_fz_toast_frame = -1000;
+			if (instance_exists(f)) adjust_stat(9999, 9999);
+		}
+		var _splash_busy = (variable_global_exists("tw_splash_spr") && global.tw_splash_spr >= 0)
+		                || (variable_global_exists("tw_splash_queue") && is_array(global.tw_splash_queue)
+		                    && array_length(global.tw_splash_queue) > 0);
+		if (!tws_live() || _splash_busy) { global.tws_t = 2; exit; }
+		if (global.tws_t < 30) exit;
+		if (global.tws_ci >= array_length(global.tws_cases))
+		{
+			global.tws_zi++;
+			tws_go("zone_start");
+			break;
+		}
+		global.tws_b = { lock : g.pc_lock, cucco : pc_is_cucco(), room : room };
+		tws_go("fire");
+		break;
+
+	case "fire":
+		var _c = global.tws_cases[global.tws_ci];
+		global.tw_toast = ""; global.tw_toast_timer = 0; global.tw_apply_refused = false;
+		if (_c[1] == "denyseq")
+		{   // the chain depends on state carried between steps, so it runs within ONE frame
+			var _A6 = PC_LOCK_JUMP | PC_LOCK_ATK1 | PC_LOCK_ATK2 | PC_LOCK_ATK3 | PC_LOCK_ATK4 | PC_LOCK_SPEL;
+			var _steps = [["deny all", "all"], ["undeny jump", "nojump"], ["deny off", "none"], ["undeny", "noop"]];
+			var _sok = true, _sd = "";
+			for (var _si = 0; _si < array_length(_steps); _si++)
+			{
+				global.tw_toast = ""; global.tw_toast_timer = 0; global.tw_apply_ok = false;
+				global.tw_irc_last_cmd = -999999;
+				tws_say(_steps[_si][0]);
+				var _h = 0;
+				for (var _dj = 0; _dj < array_length(global.tw_active); _dj++)
+				{   var _dd = global.tw_active[_dj]; if (variable_struct_exists(_dd, "deny")) _h |= _dd.bits;  }
+				var _pass = false;
+				switch (_steps[_si][1])
+				{
+					case "all":    _pass = (_h & _A6) == _A6; break;
+					case "nojump": _pass = (_h & PC_LOCK_JUMP) == 0 && (_h & PC_LOCK_SPEL) != 0; break;
+					case "none":   _pass = (_h == 0); break;
+					case "noop":   _pass = (_h == 0) && !global.tw_apply_ok && string_pos("nothing is denied", string(global.tw_toast)) > 0; break;
+				}
+				if (!_pass) _sok = false;
+				_sd += "  [" + _steps[_si][0] + ": " + (_pass ? "ok" : "BAD") + " held=" + string(_h) + "]";
+			}
+			global.tws_row = (_sok ? "PASS" : "FAIL") + "  [denyseq]" + _sd;
+			tws_go("during");
+			break;
+		}
+		tws_say(_c[0]);
+		var _ok = false, _got = string(global.tw_toast), _expect = _c[1];
+		var _held = 0;
+		for (var _di = 0; _di < array_length(global.tw_active); _di++)
+		{   var _de = global.tw_active[_di]; if (variable_struct_exists(_de, "deny")) _held |= _de.bits;  }
+		var _all6 = PC_LOCK_JUMP | PC_LOCK_ATK1 | PC_LOCK_ATK2 | PC_LOCK_ATK3 | PC_LOCK_ATK4 | PC_LOCK_SPEL;
+		var _tst  = (global.tw_toast_timer > 0 && string_pos("unknown:", _got) == 0);
+		switch (_expect)
+		{
+			case "denyall":    _ok = _tst && (_held & _all6) == _all6; break;
+			case "denynojump": _ok = _tst && (_held & PC_LOCK_JUMP) == 0 && (_held & PC_LOCK_SPEL) != 0; break;
+			case "denynone":   _ok = _tst && _held == 0; break;
+			case "denynoop":   _ok = _tst && _held == 0 && !global.tw_apply_ok && string_pos("nothing is denied", _got) > 0; break;
+			case "arise":      _ok = _tst && (pc_is_cucco() || string_pos("OFF", _got) > 0)
+			                        && (!pc_is_cucco() || !(g.CuccoSpell2_Acquired && g.CuccoSpell2_Option) || g.CuccoSpell2_Active); break;
+			case "toast":      _ok = _tst; break;
+			case "silent":     _ok = (global.tw_toast_timer <= 0 || _got == ""); break;
+			case "mean":       _ok = (string_pos("did you mean", _got) > 0); break;
+			case "nomatch":    _ok = (string_pos("no match", _got) > 0); break;
+		}
+		global.tws_row = (_ok ? "PASS" : "FAIL") + "  [" + _expect + "]  " + _c[0] + "  ->  "
+		               + ((_got == "") ? "(no toast)" : _got) + ((_c[2] == "") ? "" : "   (" + _c[2] + ")");
+		tws_go("during");
+		break;
+
+	case "during":
+		var _cd = global.tws_cases[global.tws_ci];
+		// LATE rows: the finisher art starts ~1.3 s after the FLAWLESS VICTORY text, so shoot at 3.5 s
+		if (global.tws_t < ((string_pos("LATE", _cd[2]) > 0) ? 210 : 40)) exit;
+		tws_log(global.tws_row);
+		if (string_pos("SHOT", _cd[2]) > 0) tws_shot(tw_slug(_cd[0]) + "_during");
+		tws_go("expire");
+		break;
+
+	case "expire":
+		var _n = tws_active_count();
+		var _splash = (variable_global_exists("tw_splash_spr") && global.tw_splash_spr >= 0);
+		if ((_n > 0 || _splash) && global.tws_t < 2100) { global.tws_prog = 0; exit; } // up to 35 s (!confuse RNG is 10-30 s)
+		if (_n > 0) tws_log("FAIL  OUTLIVED: " + string(_n) + " effect(s) still active 35 s later");
+		tws_go("after");
+		break;
+
+	case "after":
+		if (global.tws_t < 30) exit;
+		var _ca   = global.tws_cases[global.tws_ci];
+		var _leak = tws_leaks(global.tws_b);
+		var _moved = (room != global.tws_b.room);
+		if (_moved) _leak += " room-changed(now " + string(g.rm_name) + " hp=" + string(f.hp) + ")";
+		if (_ca[0] == "challenge" && variable_global_exists("tw_challenge") && global.tw_challenge)
+		{   // by design the challenge (flip + 4 hearts) lasts until the palace is left
+			_leak = string_replace(_leak, " tw_flip", "");
+			tws_log("   (challenge is ON and persistent by design -- cleared by the harness before the next verb)");
+		}
+		if (_leak != "") tws_log("FAIL  LEAK after " + _ca[0] + ":" + _leak);
+		if (string_pos("SHOT", _ca[2]) > 0) tws_shot(tw_slug(_ca[0]) + "_after");
+		global.tws_ci++;
+		if (_moved && global.tws_zone_label != "start")
+		{   // bounced out of the zone (fall/exit) -- re-warp and carry on with the next verb
+			tws_warp(tws_zones()[global.tws_zi][1]);
+			tws_go("zone_wait");
+			break;
+		}
+		tws_go("prep");
+		break;
+
+	case "death":
+		// harness-forced death (no chat verb): arm a 60 s ice + chicken, die, and the new life
+		// must start clean -- Lane 09-25: ice "stuck" after a death, chicken survived loads.
+		if (global.tws_death_stage == 0)
+		{   // run 3 ran this on the OVERWORLD, where is_dead does nothing: Link never died and
+			// the check was meaningless. Go to a side-scroll room first.
+			if (!tws_live()) exit;
+			tw_effects_clear_all(false);
+			global.tws_zone_label = "death";
+			tws_warp("_WestA_0A");
+			global.tws_death_stage = 10;
+			tws_go("death");
+			exit;
+		}
+		if (global.tws_death_stage == 10)
+		{
+			if (!tws_live() || g.room_type != "A") { global.tws_t = 0; exit; }
+			if (global.tws_t < 120) exit;
+			tws_log("---- death test in " + g.rm_name + " (type " + g.room_type + ")");
+			tws_say("icefloor 60");
+			tws_say("arise 60");
+			global.tws_lives0 = global.pc_lives;
+			tws_log("   armed: ice=" + string(global.tw_ice) + " cucco=" + string(pc_is_cucco())
+			      + " active=" + string(array_length(global.tw_active)) + " lives=" + string(global.pc_lives));
+			global.tws_death_stage = 1;
+			global.tws_saw_death   = false;
+			tws_go("death");
+			g.dev_invState   = 0;
+			g.DevTools_state = global.tws_devtools0;
+			adjust_stat(-9999, 0);
+			global.pc.is_dead = true;
+			exit;
+		}
+		if (global.tws_death_stage == 1)
+		{   // the death must actually take us off the live screen (death room)
+			if (room == rmB_Death || !instance_exists(global.pc)) global.tws_saw_death = true;
+			if (!global.tws_saw_death && global.tws_t < 600) exit;
+			if (!global.tws_saw_death)
+			{
+				tws_log("FAIL  [afterdeath]  Link never died (10 s) -- test invalid");
+				tws_finish("death test invalid");
+				exit;
+			}
+			global.tws_death_stage = 2;
+			tws_go("death");
+			exit;
+		}
+		if (global.tws_death_stage == 2)
+		{   // respawned: settle, then check the new life
+			if (!tws_live()) { global.tws_t = 0; exit; }
+			if (global.tws_t < 90) exit;
+			var _dl = tws_leaks({ lock : 0, cucco : false });
+			var _clean = (_dl == "" && !global.tw_ice && !pc_is_cucco());
+			tws_log((_clean ? "PASS" : "FAIL") + "  [afterdeath]  new life in " + g.rm_name + " starts clean   [lives "
+			      + string(global.tws_lives0) + " -> " + string(global.pc_lives) + "  ice=" + string(global.tw_ice)
+			      + " cucco=" + string(pc_is_cucco()) + " leaks:" + ((_dl == "") ? " none" : _dl) + "]");
+			tws_shot("after_death");
+			global.tws_death_stage = 3;
+			tws_finish("complete");
+		}
+		break;
 	}
-
-	var _c     = _cases[global.tw_selftest_i];
-	var _cmd   = _c[0], _expect = _c[1], _note = _c[2];
-
-	// clean slate for THIS command: no cooldown, no throttle, no stale toast.
-	// tw_enabled re-asserted every injection: something in the per-frame twitch
-	// step flips it back off when no IRC link is up (first run: EVERY verb came
-	// back silent), and the harness must win that race inside this frame.
-	global.tw_enabled        = true;
-	global.tw_irc_last_cmd   = -999999;
-	global.tw_fz_toast_frame = -1000;
-	global.tw_toast          = "";
-	global.tw_toast_timer    = 0;
-	global.tw_apply_refused  = false;
-
-	twitch_irc_handle_line(":tstchatter!tst@tmi.twitch.tv PRIVMSG #z :!" + _cmd);
-	global.tw_selftest_shot = (string_pos("SHOT", _note) > 0) ? tw_slug(_cmd) : "";
-
-	var _ok  = false;
-	var _got = string(global.tw_toast);
-	// deny-held lock bits (OR of every tw_active !deny entry) -- the undeny rows grade
-	// the actual lock state, not just "a toast appeared".
-	// _other = bits a NON-deny effect owns (e.g. !root holds JUMP for 7-12 s and
-	// re-asserts it every tick) -- those stay locked after an undeny by design, so
-	// the pc_lock half of each check only judges bits no other effect claims.
-	var _held = 0, _other = 0;
-	for (var _di = 0; _di < array_length(global.tw_active); _di++)
-	{
-		var _de = global.tw_active[_di];
-		if (!variable_struct_exists(_de, "bits")) continue;
-		if (variable_struct_exists(_de, "deny")) _held |= _de.bits; else _other |= _de.bits;
-	}
-	var _all6 = PC_LOCK_JUMP | PC_LOCK_ATK1 | PC_LOCK_ATK2 | PC_LOCK_ATK3 | PC_LOCK_ATK4 | PC_LOCK_SPEL;
-	var _lk   = g.pc_lock & ~_other; // pc_lock minus bits another effect legitimately holds
-	var _tst  = (global.tw_toast_timer > 0 && string_pos("unknown:", _got) == 0);
-	switch (_expect)
-	{
-		case "denyall":     _ok = _tst && (_held & _all6) == _all6 && ((g.pc_lock | _other) & _all6) == _all6; break;
-		case "denynojump":  _ok = _tst && (_held & PC_LOCK_JUMP) == 0 && (_lk & PC_LOCK_JUMP) == 0
-		                          && (_held & PC_LOCK_SPEL) != 0 && (g.pc_lock & PC_LOCK_SPEL) != 0; break;
-		case "denynone":    _ok = _tst && _held == 0 && (_lk & _all6) == 0;                   break;
-		case "denynoop":    _ok = _tst && _held == 0 && !global.tw_apply_ok // not ok = not charged
-		                          && string_pos("nothing is denied", _got) > 0;                  break;
-		case "toast":   _ok = _tst; break;
-		case "silent":  _ok = (global.tw_toast_timer <= 0 || _got == "");                       break;
-		case "mean":    _ok = (string_pos("did you mean", _got) > 0);                           break;
-		case "nomatch": _ok = (string_pos("no match", _got) > 0);                               break;
-	}
-	global.tw_selftest_log += "#"
-		+ (_ok ? "PASS" : "FAIL") + "  [" + _expect + "]  " + _cmd
-		+ "  ->  " + ((_got == "") ? "(no toast)" : _got)
-		+ ((_note == "") ? "" : "   (" + _note + ")")
-		+ ((string_copy(_expect, 1, 4) == "deny") ? "   [held=" + string(_held) + " other=" + string(_other) + " pc_lock=" + string(g.pc_lock) + "]" : "");
-
-	global.tw_selftest_i++;
 }
 
 function tw_selftest_cases() {
@@ -1487,17 +1799,17 @@ function tw_selftest_cases() {
 		["drain",      "toast", ""],
 		["1up",        "toast", ""],
 		["invuln",     "toast", ""],
-		["shake",      "toast", ""],
+		["shake",      "toast", "SHOT screenshake placement"],
 		// -- timed screen effects -------------------------------------------------
-		["dark",       "toast", "may say no-dark-version -- still armed"],
-		["flip",       "toast", ""],
+		["dark",       "toast", "SHOT may say no-dark-version -- still armed"],
+		["flip",       "toast", "SHOT view while flipped"],
 		["confuse",    "toast", "10-30s RNG"],
-		["disco",      "toast", ""],
-		["party",      "toast", ""],
+		["disco",      "toast", "SHOT"],
+		["party",      "toast", "SHOT view during party"],
 		["ice",        "toast", ""],
 		["moon",       "toast", ""],
-		["shrink",     "toast", ""],
-		["grow 3",     "toast", "seconds arg"],
+		["shrink",     "toast", "SHOT"],
+		["grow 3",     "toast", "SHOT seconds arg"],
 		["slow",       "toast", ""],
 		["speed",      "toast", ""],
 		["speed 5",    "toast", "seconds arg"],
@@ -1505,7 +1817,7 @@ function tw_selftest_cases() {
 		["music",      "toast", "random pick"],
 		["music zzztop", "nomatch", "NEW no-match reason toast"],
 		// -- spells ----------------------------------------------------------------
-		["spell wibble", "toast", "NEW unknown-spell reason toast"],
+		["spell wibble", "toast", "SHOT = view AFTER flip/party/shrink/grow expired"],
 		["spell",      "toast", "NEW which-one hint"],
 		["fire",       "toast", "bare spell"],
 		["thunder",    "toast", "bare spell"],
@@ -1532,10 +1844,7 @@ function tw_selftest_cases() {
 		["root",       "toast", "7-12s RNG"],
 		["deny",       "toast", "help listing"],
 		["deny jump",  "toast", ""],
-		["deny all",   "denyall",    "all six control bits held"],
-		["undeny jump", "denynojump", "NEW partial lift: jump free, spell still denied"],
-		["deny off",   "denynone",   "NEW lifts the rest"],
-		["undeny",     "denynoop",   "NEW nothing-denied no-op, apply_ok=false = no charge"],
+		["(deny chain)", "denyseq", "deny all -> undeny jump -> deny off -> undeny, same frame, real lock bits"],
 		["stasis",     "toast", ""],
 		["disorient",  "toast", ""],
 		// -- help / forms / misc --------------------------------------------------
@@ -1561,7 +1870,7 @@ function tw_selftest_cases() {
 		["ghost",      "toast", ""],
 		["crush",      "toast", "needs-a-palace outside palaces"],
 		["reshuffle",  "toast", "ok or refused-with-reason"],
-		["suggest test idea from selftest", "toast", "writes chat_suggestions.txt"],
+		["suggest test idea from selftest", "toast", "writes _tw_selftest_suggestions.txt (never the real inbox)"],
 		// -- rocket league quick chat (plates OFF in the harness) -----------------
 		["niceshot",   "toast", "rocket-league-is-off toast"],
 		["gg",         "toast", ""],
@@ -1582,9 +1891,8 @@ function tw_selftest_cases() {
 		["zzz",        "silent", "no suggestion, no plate"],
 		["papi",       "silent", ""],
 		["butts",      "silent", ""],
-		// -- kill LAST (lethal), then put the meters back --------------------------
-		["kill",       "toast", "lethal: window-guarded toast at worst"],
-		["refill",     "toast", "final: undo the kill"]
+		// -- (the death test is harness-driven, after the zones -- !kill was removed) --
+		["refill",     "toast", "final"]
 	];
 	return _c;
 }

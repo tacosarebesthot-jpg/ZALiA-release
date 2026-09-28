@@ -72,6 +72,20 @@ function g_Create() {
 	// and grades every toast. Writes _tw_selftest_result.log + game_end().
 	// See Dev_TwSelftest_Step() in scripts\Dev_Bugprobe_Step.
 	global.tw_selftest          = DEV && file_exists(working_directory + "_tw_selftest.flag");
+	// ONE-SHOT (09-28): the flag outlived every run and would have turned the owner's next
+	// normal launch into a selftest that quits itself. Consume it the moment it is seen.
+	// Flag TEXT picks the run: empty = everything, "zones" = skip the full matrix, "death" = death test only.
+	global.tw_selftest_mode = "";
+	if (global.tw_selftest)
+	{
+		var _tfh = file_text_open_read(working_directory + "_tw_selftest.flag");
+		if (_tfh >= 0)
+		{
+			if (!file_text_eof(_tfh)) global.tw_selftest_mode = string_lower(string_trim(file_text_read_string(_tfh)));
+			file_text_close(_tfh);
+		}
+		file_delete(working_directory + "_tw_selftest.flag");
+	}
 	global.tw_selftest_t        = 0;
 	global.tw_selftest_i        = -1;
 	global.tw_selftest_log      = "";
