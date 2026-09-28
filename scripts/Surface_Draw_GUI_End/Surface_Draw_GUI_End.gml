@@ -677,6 +677,12 @@ function Surface_Draw_GUI_End() {
 	// counted down in twitch_tick(); this block only reads it. Fully guarded; saves and
 	// restores font/halign/colour so it can't leak draw state into anything after it.
 	// Revert: delete this block + the twitch_* scripts + their wiring/globals.
+	tw_toast_draw();
+	tw_help_draw();   // !help card (round 10c)
+
+	// DRAW ORDER (owner 09-27: "I can't see if the MK stuff works ... it's covered by the
+	// help menu thing"): the toasts + !help card used to paint AFTER the splash, i.e. on top
+	// of FLAWLESS VICTORY / FATALITY. They draw first now; the splash (and its dim) go last.
 	// MK2 SPLASH (2026-09-12): dim the whole GUI, then the ripped arcade text animation at
 	// the arcade's own position (top-centre), one sprite frame per arcade frame.
 	if (variable_global_exists("tw_splash_spr") && global.tw_splash_spr >= 0 && sprite_exists(global.tw_splash_spr))
@@ -691,15 +697,21 @@ function Surface_Draw_GUI_End() {
 		}
 		draw_set_alpha(1); draw_set_colour(c_white);
 		var _sp_f = floor(global.tw_splash_frame);
-		draw_sprite_ext(global.tw_splash_spr, _sp_f, _sp_gw * 0.5, global.tw_splash_cur_y, global.tw_splash_scale, global.tw_splash_scale, 0, c_white, 1);
+		// SIZE FIX (owner 09-27: "tiny itty bitty ... doesn't match the MK2 arcade"; Lane 09-18
+		// 3:25: "much bigger"). tw_splash_scale 0.8 and the y values were tuned for a 320x203 GUI
+		// (arcade 400x254 * 0.8), but the GUI is 480x270 -- or the whole WINDOW in the SHARP/PIXEL
+		// display modes, where a 110 px title on a 1920 px GUI is ~6% of the screen. Scale from
+		// the LIVE GUI height so the arcade frame always fills the screen height, like the cabinet.
+		var _sp_k  = (_sp_gh / 254) / 0.8;
+		var _sp_sc = global.tw_splash_scale * _sp_k;
+		var _sp_y  = global.tw_splash_cur_y * _sp_k;
+		draw_sprite_ext(global.tw_splash_spr, _sp_f, _sp_gw * 0.5, _sp_y, _sp_sc, _sp_sc, 0, c_white, 1);
 		draw_set_alpha(_sp_pa); draw_set_colour(_sp_pc);
 	}
 
 	// TOASTS (2026-09-12): every text toast goes through the achievement-plate drawer
 	// in twitch_jokes.gml. Callers still set tw_toast / tw_np_timer / konami_toast;
 	// tw_toast_draw() adopts them (tw_toast_legacy_poll) and draws the stacked plates.
-	tw_toast_draw();
-	tw_help_draw();   // !help card (round 10c)
 
 	// ── TWITCH IRC (no-bot mode) status line: top-left, only while the IRC client is
 	// enabled. Reads global.tw_irc_status (idle/connecting/connected/error/no config)
