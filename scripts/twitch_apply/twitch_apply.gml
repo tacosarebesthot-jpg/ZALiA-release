@@ -135,6 +135,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// fairy below only heralds REAL commands, never a typo or stray drop file.
 	var _known = true;
 	global.tw_apply_refused = false; // set by a verb that bailed with its own toast (no palace, no battle screen...)
+	// how many timed effects existed before this verb: whatever it pushes gets tagged with
+	// the verb + chatter below, for the EFFECT TIMERS strip (tw_effects_draw)
+	var _n_active_before = (variable_global_exists("tw_active") && is_array(global.tw_active)) ? array_length(global.tw_active) : 0;
 
 
 	// feedback toast (plain ASCII arrow for default-font glyph safety; the
@@ -1208,6 +1211,33 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			global.tw_toast_timer = 240;
 			break;
 
+		// ---- 09-30 review: vote, kills, top -----------------------------------------
+		// vote: "!vote dark flip [secs]" -- chat picks between two effects; the winner fires
+		// through this dispatcher as "CHAT" when the clock runs out (twitch_vote.gml).
+		case "vote":
+			if (!tw_vote_start(_arg, _who_s)) global.tw_apply_refused = true; // start() toasted why
+			break;
+
+		// kills: who has killed the runner most this session (death blame, DeathScreen_Step)
+		case "kills":
+		{
+			var _kt = tw_kills_top(3);
+			global.tw_toast       = (_kt == "") ? "nobody has killed " + (instance_exists(f) ? "the runner" : "anyone") + " yet. chat, do better." : "KILLS: " + _kt;
+			global.tw_toast_timer = 300;
+			break;
+		}
+
+		// top: the points leaderboard (twitch_points)
+		case "top":
+			if (variable_global_exists("tw_points_on") && global.tw_points_on)
+			{
+				var _pt = tw_points_top(3);
+				global.tw_toast = (_pt == "") ? "no points yet. talk more." : "RICHEST: " + _pt;
+			}
+			else global.tw_toast = _who_s + " -> points are off. everyone is equally broke.";
+			global.tw_toast_timer = 300;
+			break;
+
 		// ---- round 10h: points, ghost, crush ---------------------------------------
 		case "points": case "pts": case "bal":
 			if (variable_global_exists("tw_points_on") && global.tw_points_on)
@@ -1448,7 +1478,20 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
 			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
 			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush": case "reshuffle":
-				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; break;
+				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; global.tw_last_hurt_verb = _v; break;
+		}
+
+		// EFFECT TIMERS strip: tag whatever this verb just pushed onto tw_active with the verb
+		// and the chatter. Done here, once, instead of at ~40 push sites.
+		if (variable_global_exists("tw_active") && is_array(global.tw_active))
+		{
+			for (var _ti = _n_active_before; _ti < array_length(global.tw_active); _ti++)
+			{
+				var _te = global.tw_active[_ti];
+				if (!is_struct(_te)) continue;
+				if (!variable_struct_exists(_te, "verb")) _te.verb = _v;
+				if (!variable_struct_exists(_te, "who"))  _te.who  = _who_s;
+			}
 		}
 	}
 
@@ -1710,5 +1753,34 @@ function tw_effects_clear_all(_on_death) {
 		array_delete(global.tw_active, _i, 1);
 		_n++;
 	}
+	return _n;
+}
+
+
+/// @description  tw_kills_top(n) -- "name x3, name x1" for the n chatters with the most kills this session.
+function tw_kills_top(_n) {
+	if (!variable_global_exists("tw_kills") || !ds_exists(global.tw_kills, ds_type_map)) return "";
+	var _rows = [];
+	var _k = ds_map_find_first(global.tw_kills);
+	while (!is_undefined(_k))
+	{
+		array_push(_rows, { who : string(_k), n : global.tw_kills[? _k] });
+		_k = ds_map_find_next(global.tw_kills, _k);
+	}
+	if (array_length(_rows) == 0) return "";
+	array_sort(_rows, function(_a, _b) { return _b.n - _a.n; });
+	var _out = "";
+	for (var _i = 0; _i < min(_n, array_length(_rows)); _i++)
+		_out += (_i > 0 ? ", " : "") + _rows[_i].who + " x" + string(_rows[_i].n);
+	return _out;
+}
+
+/// @description  tw_kills_add(who) -- credit one runner death to a chatter; returns their new total.
+function tw_kills_add(_who) {
+	if (!variable_global_exists("tw_kills") || !ds_exists(global.tw_kills, ds_type_map)) global.tw_kills = ds_map_create();
+	var _k = string_lower(string(_who));
+	var _n = global.tw_kills[? _k];
+	_n = (is_undefined(_n) ? 0 : _n) + 1;
+	global.tw_kills[? _k] = _n;
 	return _n;
 }

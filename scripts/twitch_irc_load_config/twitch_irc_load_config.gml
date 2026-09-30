@@ -89,6 +89,10 @@ function twitch_irc_load_config() {
 			// a reload after a menu toggle or a web save never drops it.
 			case "rl": global.tw_rl = (tw_num(_val, 1) != 0); break;
 			case "points": if (variable_global_exists("tw_points_on")) global.tw_points_on = (tw_num(_val, 0) != 0); break;
+			// 09-30 review: per-user cooldown (FRAMES, like cooldown=), mod bypass, effect timers HUD
+			case "user_cooldown": global.tw_user_cooldown_frames = clamp(floor(tw_num(_val, 1800)), 0, 7200); break;
+			case "mod_bypass":    global.tw_mod_bypass  = (tw_num(_val, 1) != 0); break;
+			case "effects_hud":   global.tw_effects_hud = (tw_num(_val, 1) != 0); break;
 		}
 	}
 	file_text_close(_fh);
@@ -197,6 +201,9 @@ function tw_alias_verb(_v) {
 		case "invisible": case "invis": case "ghosts": return "ghost";
 		case "drop": case "block": case "squash": return "crush";
 		case "reroll": case "reshuffleenemies": case "enemyreshuffle": case "reshuffler": return "reshuffle";
+		case "poll": case "votes":                        return "vote";     // chat picks between two effects
+		case "leaderboard": case "leaders": case "rich": case "richest": return "top";
+		case "killers": case "blame": case "deaths": case "killcount":  return "kills";
 		// round 11 RL quick chat -- the short forms chat will actually type. Deliberately NO
 		// "np" alias for "noproblem": !np is already NOW PLAYING and every stream uses it.
 		case "slap": case "catslaps": case "cat_slap": return "catslap";     // Tangia's "Cat Slap"
@@ -231,6 +238,7 @@ function tw_verb_all() {
 		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
 		"stasis","points","pts","bal","ghost","crush",
 		"version","ver","build","reshuffle","gorilla",
+		"vote","top","kills",
 		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",
 		"ez","wow","noproblem","thanks"
 	];
@@ -288,4 +296,58 @@ function tw_fuzzy_verb(_typed) {
 	}
 	if (_bestd <= ((string_length(_t) >= 6) ? 2 : 1)) return _best;
 	return "";
+}
+
+
+// ─── IGNORE LIST (09-30 review) ────────────────────────────────────────────────
+// Mods (and the broadcaster) type !ignore <name>; that chatter's messages are dropped
+// before anything else looks at them. Persists in ignored.txt (save area, one lowercase
+// name per line) so a restart does not un-mute anyone.
+function tw_ignore_load() {
+	global.tw_ignored = [];
+	if (!file_exists("ignored.txt")) return;
+	var _fh = file_text_open_read("ignored.txt");
+	if (_fh == -1) return;
+	while (!file_text_eof(_fh))
+	{
+		var _n = string_lower(tw_trim(file_text_readln(_fh)));
+		if (_n != "") array_push(global.tw_ignored, _n);
+	}
+	file_text_close(_fh);
+}
+
+function tw_ignore_save() {
+	if (!variable_global_exists("tw_ignored")) return;
+	var _text = "";
+	for (var _i = 0; _i < array_length(global.tw_ignored); _i++) _text += global.tw_ignored[_i] + "\r\n";
+	file_text_write_atomic(working_directory + "ignored.txt", _text);
+}
+
+function tw_ignore_has(_who) {
+	if (!variable_global_exists("tw_ignored")) tw_ignore_load();
+	var _k = string_lower(string(_who));
+	for (var _i = 0; _i < array_length(global.tw_ignored); _i++) if (global.tw_ignored[_i] == _k) return true;
+	return false;
+}
+
+function tw_ignore_count() {
+	if (!variable_global_exists("tw_ignored")) tw_ignore_load();
+	return array_length(global.tw_ignored);
+}
+
+function tw_ignore_add(_who) {
+	if (tw_ignore_has(_who)) return false;
+	array_push(global.tw_ignored, string_lower(string(_who)));
+	tw_ignore_save();
+	return true;
+}
+
+function tw_ignore_remove(_who) {
+	if (!variable_global_exists("tw_ignored")) tw_ignore_load();
+	var _k = string_lower(string(_who));
+	for (var _i = array_length(global.tw_ignored) - 1; _i >= 0; _i--)
+	{
+		if (global.tw_ignored[_i] == _k) { array_delete(global.tw_ignored, _i, 1); tw_ignore_save(); return true; }
+	}
+	return false;
 }

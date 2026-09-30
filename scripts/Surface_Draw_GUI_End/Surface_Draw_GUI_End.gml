@@ -691,7 +691,8 @@ function Surface_Draw_GUI_End() {
 	}
 
 	tw_toast_draw();
-	tw_help_draw();   // !help card (round 10c)
+	tw_help_draw();      // !help card (round 10c)
+	tw_effects_draw();   // EFFECT TIMERS strip + !vote tally, top-right (09-30 review)
 
 	// DRAW ORDER (owner 09-27: "I can't see if the MK stuff works ... it's covered by the
 	// help menu thing"): the toasts + !help card used to paint AFTER the splash, i.e. on top

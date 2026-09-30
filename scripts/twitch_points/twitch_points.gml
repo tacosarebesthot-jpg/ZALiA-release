@@ -75,7 +75,7 @@ function tw_points_cost(_v) {
 	{
 		case "points": case "pts": case "bal": case "help": case "song": case "np": case "nowplaying": case "track":
 		case "suggest": case "donothing": case "rip": case "blip": case "coincidence": case "getfed": case "link": case "unchicken":
-		case "version": case "ver": case "build":
+		case "version": case "ver": case "build": case "vote": case "kills": case "top":
 		// round 11 RL quick chat: free on purpose. They change nothing in the game, and a
 		// paywall on the spam gag would just stop the gag from ever happening.
 		case "niceshot": case "whatasave": case "calculated": case "savage":
@@ -166,4 +166,24 @@ function tw_points_set_on(_on) {
 	global.tw_points_on = _on;
 	twitch_config_save();
 	if (!_on && variable_global_exists("tw_points_dirty") && global.tw_points_dirty) tw_points_save();
+}
+
+
+/// @description  tw_points_top(n) -- "name 120, name 88" for the n richest chatters (the !top toast).
+function tw_points_top(_n) {
+	if (!variable_global_exists("tw_points") || !ds_exists(global.tw_points, ds_type_map)) return "";
+	var _rows = [];
+	var _k = ds_map_find_first(global.tw_points);
+	while (!is_undefined(_k))
+	{
+		var _v = global.tw_points[? _k];
+		if (is_real(_v) && _v > 0) array_push(_rows, { who : string(_k), n : floor(_v) });
+		_k = ds_map_find_next(global.tw_points, _k);
+	}
+	if (array_length(_rows) == 0) return "";
+	array_sort(_rows, function(_a, _b) { return _b.n - _a.n; });
+	var _out = "";
+	for (var _i = 0; _i < min(_n, array_length(_rows)); _i++)
+		_out += (_i > 0 ? ", " : "") + _rows[_i].who + " " + string(_rows[_i].n);
+	return _out;
 }

@@ -120,6 +120,14 @@ function FileSelect_Draw() {
     
 	    // ==================================================
 	    case State_ELIMINATE:{
+	    // 09-30: erase confirm -- the armed slot flashes "ERASE? START" beside its name
+	    if (variable_instance_exists(id, "Eliminate_confirm") && Eliminate_confirm > 0
+	    &&  ((g.counter0 >> 3) & 1))
+	    {
+	        _x = saveNameX + (9<<3);
+	        _y = saveNameY + (SAVE_FILE_PAD*(Eliminate_confirm-1));
+	        draw_text_(_x,_y, "ERASE? START", -1,PI_MENU1);
+	    }
 	    break;}//case State_ELIMINATE
     
     

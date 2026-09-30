@@ -22,6 +22,7 @@ function FileSelect_Eliminate_update() {
 	if (_cursor_dir!=0)
 	{
 	    FileSelect_cursor_move(State_ELIMINATE,_cursor_dir);
+	    Eliminate_confirm = 0; // moving off the slot disarms the erase
 	    REGISTER_new_save_file_name = 0;
 	    aud_play_sound(get_audio_theme_track(CURSOR_SOUND_THEME2));
 	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -36,6 +37,17 @@ function FileSelect_Eliminate_update() {
 	    {
 	        var _file;
 	        var _FILE_NUM = Eliminate_cursor+1;
+
+	        // 09-30: a slot that holds a real save needs START TWICE. The NES erased on one
+	        // press, but this fork's rando data and checkpoints ride on the slot, so a slip
+	        // here costs a lot more than it used to. FileSelect_Draw flashes "ERASE? START".
+	        if (get_saved_value(_FILE_NUM, f.SDNAME_saveCreated, 0) && Eliminate_confirm != _FILE_NUM)
+	        {
+	            Eliminate_confirm = _FILE_NUM;
+	            aud_play_sound(get_audio_theme_track(CURSOR_SOUND_THEME2));
+	            exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	        }
+	        Eliminate_confirm = 0;
         
 	        // Erase rando data files
 	        f.dl_save_names[|_FILE_NUM-1] = SAVE_NAME_NULL;

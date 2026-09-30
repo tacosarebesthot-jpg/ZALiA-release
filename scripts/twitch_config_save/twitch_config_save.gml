@@ -63,7 +63,11 @@ function twitch_config_save() {
         ["toast_game",  string(tw_toast_secs_get("game"))],
         ["splash",      (!variable_global_exists("tw_splash_enabled") || global.tw_splash_enabled) ? "1" : "0"],
         ["loz_jingle",  (!variable_global_exists("tw_loz_jingle")     || global.tw_loz_jingle)     ? "1" : "0"],
-        ["bigtimer",    (!variable_global_exists("QuestTimer_scale")  || global.QuestTimer_scale > 1) ? "1" : "0"]
+        ["bigtimer",    (!variable_global_exists("QuestTimer_scale")  || global.QuestTimer_scale > 1) ? "1" : "0"],
+        // 09-30 review: per-user cooldown (frames), mod cooldown bypass, effect timers HUD
+        ["user_cooldown", string(variable_global_exists("tw_user_cooldown_frames") ? global.tw_user_cooldown_frames : 1800)],
+        ["mod_bypass",    (!variable_global_exists("tw_mod_bypass")  || global.tw_mod_bypass)  ? "1" : "0"],
+        ["effects_hud",   (!variable_global_exists("tw_effects_hud") || global.tw_effects_hud) ? "1" : "0"]
     ];
     var _own_wrote = array_create(array_length(_own), false);
 

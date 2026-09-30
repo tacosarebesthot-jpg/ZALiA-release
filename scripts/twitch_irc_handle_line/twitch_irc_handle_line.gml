@@ -18,6 +18,28 @@ function twitch_irc_handle_line(_line) {
 
 	if (_line == "") return;
 
+	// ---- IRCv3 tags (CAP REQ :twitch.tv/tags): "@k=v;k=v :prefix CMD ..." ----------
+	// Strip them off the front and keep the two we use: badges (broadcaster/moderator)
+	// and mod=1. Everything below parses the untagged line exactly as before.
+	var _is_mod = false;
+	if (string_char_at(_line, 1) == "@")
+	{
+		var _tsp = string_pos(" ", _line);
+		if (_tsp <= 0) return;
+		var _tags = string_copy(_line, 2, _tsp - 2);
+		_line     = string_delete(_line, 1, _tsp);
+		var _tl = string_lower(_tags);
+		if (string_pos("badges=", _tl) > 0)
+		{
+			var _b0 = string_pos("badges=", _tl) + 7;
+			var _b1 = string_pos(";", string_delete(_tl, 1, _b0 - 1));
+			var _badges = (_b1 > 0) ? string_copy(_tl, _b0, _b1 - 1) : string_delete(_tl, 1, _b0 - 1);
+			if (string_pos("broadcaster/", _badges) > 0 || string_pos("moderator/", _badges) > 0) _is_mod = true;
+		}
+		if (string_pos(";mod=1", ";" + _tl) > 0) _is_mod = true;
+	}
+	if (_line == "") return;
+
 	// ---- keepalive: Twitch PINGs, we must PONG or we get dropped -----------
 	if (string_copy(_line, 1, 4) == "PING")
 	{
@@ -95,9 +117,23 @@ function twitch_irc_handle_line(_line) {
 	}
 
 	_msg = tw_trim(_msg); // strip a trailing CR and any padding
+
+	// the channel owner is a mod whether or not the badge tag arrived
+	if (variable_global_exists("tw_irc_channel") && string_lower(_sender) == string_lower(string(global.tw_irc_channel))) _is_mod = true;
+
+	// IGNORE LIST (!ignore <name>, mods only): a muted chatter is invisible to the whole
+	// system -- no commands, no votes, no points, not even the joke pools.
+	if (tw_ignore_has(_sender)) return;
+
 	tw_chatter_note(_sender); // CHAT JOKES: {chatter} pool -- every talker, command or not
 	tw_points_earn(_sender);  // POINTS: 1 per message (twitch_points)
-	if (_msg == "" || string_char_at(_msg, 1) != "!") return;
+	if (_msg == "") return;
+
+	// A running !vote reads plain chat: "dark", "!dark", "1", "2" all count. Consumed here
+	// so "!dark" typed as a vote is a vote, not a command.
+	if (tw_vote_active() && tw_vote_cast(_sender, _msg)) return;
+
+	if (string_char_at(_msg, 1) != "!") return;
 
 	// split "!verb arg..." into verb + (everything after the first space) arg.
 	var _verb = _msg;
@@ -117,6 +153,43 @@ function twitch_irc_handle_line(_line) {
 	// in the VOD rips (CHAT_IDEAS_2026-09-10.md).
 	_verb = tw_clean_command(string_delete(string(_verb), 1, 1)); // strip "!", then clean
 	if (_verb == "") return;
+
+	// ---- MOD VERBS: handled here because only this layer knows who is a mod --------
+	// !ignore <name> / !unignore <name> (aliases !mute / !unmute). Never cost points, never
+	// touch the cooldowns, never reach the dispatcher.
+	if (_verb == "ignore" || _verb == "mute" || _verb == "unignore" || _verb == "unmute")
+	{
+		var _target = string_lower(tw_trim(string_replace(string(_arg), "@", "")));
+		var _sp2 = string_pos(" ", _target); if (_sp2 > 0) _target = string_copy(_target, 1, _sp2 - 1);
+		if (!_is_mod)
+		{
+			global.tw_toast       = _sender + " -> !" + _verb + " is mods only";
+			global.tw_toast_timer = 180;
+		}
+		else if (_target == "")
+		{
+			global.tw_toast       = "!" + _verb + " <name>   (" + string(tw_ignore_count()) + " ignored)";
+			global.tw_toast_timer = 240;
+		}
+		else if (variable_global_exists("tw_irc_channel") && _target == string_lower(string(global.tw_irc_channel)))
+		{
+			global.tw_toast       = _sender + " -> nice try. the streamer stays.";
+			global.tw_toast_timer = 240;
+		}
+		else if (_verb == "ignore" || _verb == "mute")
+		{
+			tw_ignore_add(_target);
+			global.tw_toast       = _sender + " -> " + _target + " IGNORED (mods: !unignore " + _target + ")";
+			global.tw_toast_timer = 300;
+		}
+		else
+		{
+			var _was = tw_ignore_remove(_target);
+			global.tw_toast       = _sender + " -> " + _target + (_was ? " can play again" : " was not ignored");
+			global.tw_toast_timer = 240;
+		}
+		return;
+	}
 
 	if (!tw_irc_is_verb(_verb))
 	{
@@ -158,10 +231,38 @@ function twitch_irc_handle_line(_line) {
 	var _bill_verb = tw_alias_verb(_verb);
 	if (!tw_points_afford(_sender, _bill_verb)) return;
 
-	// ---- global cooldown (spam guard) -------------------------------------
-	// One throttle for everyone: ignore any accepted command within
+	// ---- cooldowns (spam guard) ----------------------------------------------
+	// Mods and the broadcaster skip both when MOD BYPASS is on (mod_bypass= in the config,
+	// default on) -- and a bypassed command does not arm the global timer for everyone else.
+	var _bypass = _is_mod && (!variable_global_exists("tw_mod_bypass") || global.tw_mod_bypass);
+
+	// PER-USER cooldown (user_cooldown= frames, default 30 s): one chatter cannot chain
+	// !root / !stasis every global tick and hold Link still forever (review 09-30).
+	if (!_bypass && variable_global_exists("tw_irc_frame")
+	&&  variable_global_exists("tw_user_cooldown_frames") && global.tw_user_cooldown_frames > 0)
+	{
+		if (!variable_global_exists("tw_irc_user_last") || !ds_exists(global.tw_irc_user_last, ds_type_map))
+			global.tw_irc_user_last = ds_map_create();
+		var _uk   = string_lower(_sender);
+		var _ul   = global.tw_irc_user_last[? _uk];
+		if (!is_undefined(_ul) && global.tw_irc_frame - _ul < global.tw_user_cooldown_frames)
+		{
+			if (!variable_global_exists("tw_ucd_toast_frame")) global.tw_ucd_toast_frame = -1000;
+			if (global.tw_irc_frame - global.tw_ucd_toast_frame >= 120)
+			{
+				global.tw_ucd_toast_frame = global.tw_irc_frame;
+				var _ucd_left = ceil((global.tw_user_cooldown_frames - (global.tw_irc_frame - _ul)) / 60);
+				global.tw_toast       = _sender + " -> WAIT " + string(_ucd_left) + "S (your cooldown)";
+				global.tw_toast_timer = 120;
+			}
+			return;
+		}
+	}
+
+	// GLOBAL cooldown: one throttle for everyone: ignore any accepted command within
 	// global.tw_irc_cooldown_frames of the previous accepted one.
-	if (variable_global_exists("tw_irc_cooldown_frames")
+	if (!_bypass
+	&&  variable_global_exists("tw_irc_cooldown_frames")
 	&&  variable_global_exists("tw_irc_last_cmd")
 	&&  variable_global_exists("tw_irc_frame"))
 	{
@@ -180,6 +281,9 @@ function twitch_irc_handle_line(_line) {
 		}
 		global.tw_irc_last_cmd = global.tw_irc_frame;
 	}
+	if (!_bypass && variable_global_exists("tw_irc_user_last") && ds_exists(global.tw_irc_user_last, ds_type_map)
+	&&  variable_global_exists("tw_irc_frame"))
+	{   global.tw_irc_user_last[? string_lower(_sender)] = global.tw_irc_frame;  }
 
 	// hand off to the EXISTING dispatcher (itself gated on global.tw_enabled).
 	// Duration: pass EMPTY, not a number -- the hardcoded 300 here pinned EVERY

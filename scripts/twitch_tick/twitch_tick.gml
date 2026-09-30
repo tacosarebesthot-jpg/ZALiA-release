@@ -21,6 +21,7 @@ function twitch_tick() {
 
 	tw_checkpoint_tick();   // rolling checkpoints (round 10d) -- independent of the twitch mod
 	tw_points_tick();       // points stipend + throttled save (round 10h)
+	tw_vote_tick();         // !vote clock; fires the winner through twitch_apply (twitch_vote.gml)
 
 	if (!variable_global_exists("tw_active")) return;
 

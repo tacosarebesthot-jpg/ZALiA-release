@@ -248,6 +248,18 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // EFFECT TIMERS: the top-right strip of running chat effects (tw_effects_draw). effects_hud= in twitch_config.txt.
+	    case Twitch.EFFECTS_HUD:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (!variable_global_exists("tw_effects_hud")) global.tw_effects_hud = true;
+	        global.tw_effects_hud = !global.tw_effects_hud;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // BIG TIMER: the 1.25x run timer in the top bar. OFF = the original small sprite-font timer.
 	    case Twitch.BIGTIMER:{ if (timer) break;
 	    if (_InputConfirm_pressed2)

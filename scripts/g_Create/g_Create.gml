@@ -4346,6 +4346,14 @@ function g_Create() {
 	global.tw_help_timer          = 0;         // !help card frames left (tw_help_draw)
 	global.tw_last_helper         = "";  global.tw_last_helper_t = 0;   // death-toast assists
 	global.tw_last_hurter         = "";  global.tw_last_hurter_t = 0;
+	global.tw_last_hurt_verb      = "";                                 // ... and WHICH verb ("KILLED BY x (!SWARM)")
+	global.tw_kills               = ds_map_create();                    // chatter -> kills credited this session (!kills)
+	// 09-30 review: per-user cooldown, mod bypass, effect timers HUD, !vote
+	global.tw_user_cooldown_frames = 1800;             // one chatter: 30 s between accepted commands (user_cooldown= in twitch_config.txt)
+	global.tw_mod_bypass          = true;              // mods + broadcaster skip both cooldowns (mod_bypass=)
+	global.tw_irc_user_last       = ds_map_create();   // lowercase name -> frame of their last accepted command
+	global.tw_effects_hud         = true;              // top-right strip of running chat effects with seconds left (effects_hud=)
+	global.tw_vote                = undefined;         // running !vote struct (twitch_vote.gml), undefined = none
 	global.tw_autosave            = true;      // rolling checkpoints (tw_checkpoint_tick); autosave= in twitch_config.txt
 	global.tw_ckpt_due            = "";        // "levelup" etc. -> checkpoint on the next live frame
 	global.tw_last_dungeon_seen   = 0;         // reflect hint fires once per palace entry

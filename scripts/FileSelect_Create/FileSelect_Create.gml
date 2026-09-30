@@ -354,6 +354,7 @@ function FileSelect_Create() {
 	EliminateOption_END   = _i++;
 	EliminateOption_COUNT = _i;
 	Eliminate_cursor = 0;
+	Eliminate_confirm = 0; // 09-30: slot number armed for erase (START once = arm, START again = erase)
 
 
 

@@ -135,6 +135,10 @@ function OptionsMenu_Draw_Twitch() {
 	        _text = _dg_state_text[#0, sign(variable_global_exists("QuestTimer_scale") && global.QuestTimer_scale > 1)];
 	    break;
 
+	    case Twitch.EFFECTS_HUD:
+	        _text = _dg_state_text[#0, sign(!variable_global_exists("tw_effects_hud") || global.tw_effects_hud)];
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

@@ -692,6 +692,7 @@ function tw_help_draw() {
 		"FUN   !SONG !SUGGEST !METH !FATALITY",
 		"      !QUANTUMENTANGLE !HELP !POINTS",
 		"      !GHOST !CRUSH !RESHUFFLE",
+		"      !VOTE A B !KILLS !TOP !IGNORE (MODS)",
 		// round 11 quick chat. Two rows, not one: the card is a fixed 8 px sprite font and the
 		// widest row it can hold is ~41 characters before it runs off a 320 px GUI.
 		"RL    !NICESHOT !WHATASAVE !CALCULATED",
@@ -719,6 +720,62 @@ function tw_help_draw() {
 	draw_set_alpha(_fade);
 	for (var _r = 0; _r < array_length(_rows); _r++)
 		tw_toast_text(_x + 6 * _s, _y + 6 * _s + _r * _lh, _rows[_r], _s, _font, (_r == 0) ? -1 : -2);
+	draw_set_alpha(_pa); draw_set_colour(_pc);
+}
+
+// ─── EFFECT TIMERS strip (09-30 review) ─────────────────────────────────────────
+// Lane 09-25: "It's still ice floor from before ... wasn't expecting the ice floor to stick".
+// Top-right, one row per running chat effect with the seconds it has left, plus the live
+// tally of a !vote. Entries are tagged .verb / .who by twitch_apply's epilogue. Rows with an
+// open-ended timer (!challenge) show no number. EFFECT TIMERS row on the TWITCH page.
+function tw_effects_draw() {
+	if (variable_global_exists("tw_effects_hud") && !global.tw_effects_hud) return;
+	var _rows = [];
+	var _vl = tw_vote_line();
+	if (_vl != "") array_push(_rows, { text : _vl, kind : "chat" });
+
+	if (variable_global_exists("tw_active") && is_array(global.tw_active))
+	{
+		var _seen = [];
+		for (var _i = 0; _i < array_length(global.tw_active); _i++)
+		{
+			var _e = global.tw_active[_i];
+			if (!is_struct(_e) || !variable_struct_exists(_e, "verb")) continue;
+			var _label = string_upper(string(_e.verb));
+			var _fr    = variable_struct_exists(_e, "frames") ? _e.frames : 0;
+			var _found = -1;
+			for (var _j = 0; _j < array_length(_seen); _j++) if (_seen[_j].label == _label) { _found = _j; break; }
+			if (_found < 0) array_push(_seen, { label : _label, frames : _fr });
+			else _seen[_found].frames = max(_seen[_found].frames, _fr);
+		}
+		for (var _k = 0; _k < array_length(_seen) && array_length(_rows) < 7; _k++)
+		{
+			var _sc = _seen[_k];
+			var _t  = _sc.label + ((_sc.frames > 36000) ? "" : " " + string(ceil(_sc.frames / 60)) + "S");
+			array_push(_rows, { text : _t, kind : "warn" });
+		}
+	}
+	if (array_length(_rows) == 0) return;
+
+	var _gw = display_get_gui_width();  if (_gw <= 0) _gw = 320;
+	var _gh = display_get_gui_height(); if (_gh <= 0) _gh = 240;
+	var _s  = max(1, floor(_gh / 240));
+	var _font = global.dl_game_font[| global.game_font_idx];
+	var _cw = sprite_get_width(_font) * _s;
+	var _lh = 10 * _s;
+	var _y  = 20 * _s;                       // same top edge as the toast stack, opposite corner
+	var _pa = draw_get_alpha(); var _pc = draw_get_colour();
+	for (var _r = 0; _r < array_length(_rows); _r++)
+	{
+		var _row = _rows[_r];
+		var _w = string_length(_row.text) * _cw;
+		var _x = _gw - 6 * _s - _w;
+		draw_set_alpha(0.7); draw_set_colour(c_black);
+		draw_rectangle(_x - 3 * _s, _y - 2 * _s, _x + _w + 2 * _s, _y + _lh - 3 * _s, false);
+		draw_set_alpha(1);
+		tw_toast_text(_x, _y, _row.text, _s, _font, (_row.kind == "chat") ? tw_toast_kind_colour("chat") : -1);
+		_y += _lh;
+	}
 	draw_set_alpha(_pa); draw_set_colour(_pc);
 }
 

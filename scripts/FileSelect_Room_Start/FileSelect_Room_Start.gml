@@ -46,6 +46,7 @@ function FileSelect_Room_Start() {
 	Main_cursor = 0;
 	Register_cursor = 0;
 	Eliminate_cursor = 0;
+	Eliminate_confirm = 0;
 
 
 

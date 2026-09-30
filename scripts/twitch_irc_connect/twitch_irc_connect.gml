@@ -75,8 +75,11 @@ function twitch_irc_login() {
 	// (the IRC path needs the shared master gate up; confirmed again on welcome 001).
 	global.tw_enabled = true;
 
-	// IRC login handshake: password (OAuth), nick, then join the channel.
+	// IRC login handshake: capabilities, password (OAuth), nick, then join the channel.
+	// twitch.tv/tags prefixes every PRIVMSG with "@badges=...;mod=1;..." so the handler can
+	// tell mods and the broadcaster apart (cooldown bypass, !ignore). Harmless if refused.
 	// load_config() stores the token BARE, so re-add the "oauth:" prefix here.
+	twitch_irc_send(global.tw_irc_socket, "CAP REQ :twitch.tv/tags");
 	twitch_irc_send(global.tw_irc_socket, "PASS oauth:" + string(global.tw_irc_token));
 	twitch_irc_send(global.tw_irc_socket, "NICK " + string(global.tw_irc_user));
 	twitch_irc_send(global.tw_irc_socket, "JOIN #" + string(global.tw_irc_channel));

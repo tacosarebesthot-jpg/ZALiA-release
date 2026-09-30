@@ -4,8 +4,10 @@ Type these in the streamer's Twitch chat once TWITCH IRC is connected.
 Syntax:  !verb [arg]      Aliases in (brackets). Typos get a "did you mean" hint.
 Timed effects last the streamer's EFFECT LENGTH setting (5-60 s, default 5) unless
 noted. Most timed verbs take a number of SECONDS:  !slow 20   (capped at 60).
-A shared cooldown throttles all of chat. When the POINTS ECONOMY is on, every
-verb has a price and !points shows your balance; the broadcaster is always free.
+A shared cooldown throttles all of chat, and each chatter also has their own
+(30 s by default, user_cooldown= in twitch_config.txt). When the POINTS ECONOMY is
+on, every verb has a price and !points shows your balance; the broadcaster is free.
+The EFFECT TIMERS row on the TWITCH OPTIONS page shows what is running, top-right.
 !help in chat puts a one-screen cheat sheet on stream.
 
 HELP THE RUNNER
@@ -57,8 +59,18 @@ FUN / META
   !meth               moon + jump + speed          !quantumentangle (!qe)   a joke, tiny side effect
   !fatality  !friendship  !flawless  !finisher     fire the MK2 splash (no gameplay effect)
   !suggest <idea>     log an idea for the dev      !points (!bal)   your balance
+  !top (!leaderboard) richest chatters             !kills (!blame)  who has killed the runner most
+  !vote <x> <y> [s]   (!poll) chat picks between two effects, 20 s default (10-60).
+                      While it runs, type  x  or  y  (or 1 / 2) in chat to vote. The winner
+                      fires as CHAT; a tie fires both.     e.g. !vote dark flip 30
   !help (!cmds)       cheat sheet on stream        !version         build info
   !donothing  !rip  !blip  !coincidence  !getfed   just toasts
+
+MODS AND THE BROADCASTER
+  !ignore <name>      (!mute) that chatter is muted for the whole system: no commands,
+                      no votes, no points. Survives a restart (ignored.txt).
+  !unignore <name>    (!unmute) let them play again
+  Mods skip both cooldowns (MOD BYPASS, mod_bypass= in twitch_config.txt).
 
 ROCKET LEAGUE QUICK CHAT (plates only, always free; needs the RL row on)
   !niceshot  !whatasave  !calculated  !savage  !closeone  !okay  !faking

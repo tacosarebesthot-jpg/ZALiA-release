@@ -23,13 +23,18 @@ function DeathScreen_Step() {
 	            global.tw_toast       = "CHAT KILL!  x" + string(global.tw_vs_kills);
 	            global.tw_toast_timer = 240;
 	        }
-	        // assists on the death toast (round 10c): who last hurt / helped within 90 s
+	        // assists on the death toast (round 10c): who last hurt / helped within 90 s.
+	        // 09-30: names the VERB and keeps a per-chatter kill tally ("!SWARM  KILL #3", !kills).
 	        if (variable_global_exists("tw_last_hurter") && global.tw_last_hurter != "" && current_time - global.tw_last_hurter_t < 90000)
 	        {
+	            var _kn = tw_kills_add(global.tw_last_hurter);
 	            var _dt_sub = "";
-	            if (variable_global_exists("tw_last_helper") && global.tw_last_helper != "" && current_time - global.tw_last_helper_t < 90000)
+	            if (variable_global_exists("tw_last_hurt_verb") && global.tw_last_hurt_verb != "")
+	                _dt_sub = "!" + string_upper(string(global.tw_last_hurt_verb)) + "  KILL #" + string(_kn);
+	            else if (variable_global_exists("tw_last_helper") && global.tw_last_helper != "" && current_time - global.tw_last_helper_t < 90000)
 	                _dt_sub = "HEALED BY " + string(global.tw_last_helper);
 	            tw_toast_push("KILLED BY " + string(global.tw_last_hurter), _dt_sub, "win");
+	            global.tw_last_hurter = ""; // one death, one credit -- the next one needs a fresh hurt
 	        }
 	        // ROCKET LEAGUE (round 11): the apology plate. Random so the same death never reads
 	        // the same way twice. Pushed AFTER the assists plate so the credit line stays on top.
