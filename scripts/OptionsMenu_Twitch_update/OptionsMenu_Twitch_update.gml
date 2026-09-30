@@ -248,6 +248,35 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // CHATTER COOLDOWN: per-viewer seconds between their own commands (twitch_irc_handle_line).
+	    // Stored in FRAMES like the shared cooldown; 0..120 s in 5 s steps; 0 = off. user_cooldown= in twitch_config.txt.
+	    case Twitch.USER_COOLDOWN:{
+	    if (_HORIZONTAL != 0)
+	    {
+	        var _ufps = game_get_speed(gamespeed_fps);
+	        if (_ufps <= 0) _ufps = 60;
+	        if (!variable_global_exists("tw_user_cooldown_frames")) global.tw_user_cooldown_frames = 1800;
+	        var _usecs = round(global.tw_user_cooldown_frames / _ufps) + (_HORIZONTAL * 5);
+	        _usecs = clamp(_usecs, 0, 120);
+	        global.tw_user_cooldown_frames = _usecs * _ufps;
+	        twitch_config_save();
+	        aud_play_sound(CURSOR_SOUND1);
+	        timer = DURATION0;
+	    }
+	    break;}
+
+	    // MODS SKIP COOLDOWN: mods + broadcaster bypass both cooldowns. mod_bypass= in twitch_config.txt.
+	    case Twitch.MOD_BYPASS:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (!variable_global_exists("tw_mod_bypass")) global.tw_mod_bypass = true;
+	        global.tw_mod_bypass = !global.tw_mod_bypass;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // EFFECT TIMERS: the top-right strip of running chat effects (tw_effects_draw). effects_hud= in twitch_config.txt.
 	    case Twitch.EFFECTS_HUD:{ if (timer) break;
 	    if (_InputConfirm_pressed2)

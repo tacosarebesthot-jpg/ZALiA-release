@@ -84,6 +84,10 @@ function Input_System() {
 	        case "gamepad lost":{
 	        gamepad_name = gamepad_get_description(_SLOT);
 	        show_debug_message("gamepad lost"+", slot: "+string(_SLOT)+", gamepad name: "+gamepad_name);
+	        // 09-30 review: a pad dropping mid-run used to be silent on screen (keyboard still works,
+	        // so the game just "stopped listening"). One GAME TOASTS plate, follows that setting.
+	        if (gamepad_slot == _SLOT || gamepad_slot_p2 == _SLOT)
+	        {   tw_toast_push((gamepad_slot_p2 == _SLOT && gamepad_slot != _SLOT) ? "P2 CONTROLLER LOST" : "CONTROLLER LOST", "plug it back in, or use the keyboard", "warn", "game");  }
         
 	        if (gamepad_slot == _SLOT)
 	        {   gamepad_slot =  -1;  }

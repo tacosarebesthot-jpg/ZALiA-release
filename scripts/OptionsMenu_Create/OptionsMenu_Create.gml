@@ -871,7 +871,7 @@ function OptionsMenu_Create() {
 	{
 	    REWARDS, CHAT, COOLDOWN, DURATION, JOKES, AUTOSAVE, POINTS, RL,
 	    TOAST_NP, TOAST_CHAT, TOAST_GAME, SPLASH, JINGLE, BIGTIMER, // v2.1.4 player options
-	    EFFECTS_HUD, // 09-30: top-right strip of running chat effects with seconds left
+	    EFFECTS_HUD, USER_COOLDOWN, MOD_BYPASS, // 09-30: effect strip, per-chatter cooldown, mods skip cooldowns
 	    COMMANDS, SETUP,
 	    PAGES, BACK,
 	    COUNT
@@ -909,6 +909,10 @@ function OptionsMenu_Create() {
 	Twitch_dg[#_i,0]="ZELDA 1 JINGLE";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="MAIN ITEMS PLAY THE ZELDA 1 TREASURE FANFARE. OFF PLAYS THE AUDIO SET'S OWN FANFARE.";
 	             _i=Twitch.BIGTIMER;
 	Twitch_dg[#_i,0]="BIG TIMER";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="LARGER RUN TIMER IN THE TOP BAR. OFF IS THE ORIGINAL SMALL TIMER. SHOW OR HIDE THE TIMER UNDER OTHER.";
+	             _i=Twitch.USER_COOLDOWN;
+	Twitch_dg[#_i,0]="CHATTER COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="SECONDS ONE VIEWER MUST WAIT BETWEEN THEIR OWN COMMANDS, ON TOP OF THE SHARED COOLDOWN. STOPS ONE PERSON CHAINING !ROOT FOREVER. LEFT/RIGHT.";
+	             _i=Twitch.MOD_BYPASS;
+	Twitch_dg[#_i,0]="MODS SKIP COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="YOUR MODS AND YOU IGNORE BOTH COOLDOWNS. MODS CAN ALSO !IGNORE A CHATTER.";
 	             _i=Twitch.EFFECTS_HUD;
 	Twitch_dg[#_i,0]="EFFECT TIMERS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="TOP-RIGHT LIST OF THE CHAT EFFECTS RUNNING RIGHT NOW AND HOW MANY SECONDS ARE LEFT, PLUS THE LIVE !VOTE COUNT.";
 	             _i=Twitch.COMMANDS;

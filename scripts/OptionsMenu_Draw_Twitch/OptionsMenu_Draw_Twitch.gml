@@ -139,6 +139,16 @@ function OptionsMenu_Draw_Twitch() {
 	        _text = _dg_state_text[#0, sign(!variable_global_exists("tw_effects_hud") || global.tw_effects_hud)];
 	    break;
 
+	    case Twitch.USER_COOLDOWN:
+	        var _ucd_f = variable_global_exists("tw_user_cooldown_frames") ? global.tw_user_cooldown_frames : 1800;
+	        var _ucd_s = round(_ucd_f / _fps);
+	        _text = (_ucd_s <= 0) ? "NONE" : (string(_ucd_s) + "S");
+	    break;
+
+	    case Twitch.MOD_BYPASS:
+	        _text = _dg_state_text[#0, sign(!variable_global_exists("tw_mod_bypass") || global.tw_mod_bypass)];
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

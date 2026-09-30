@@ -42,6 +42,14 @@ Ported from GameMaker:Studio 1.4 to GameMaker LTS 2026, plus:
 
 Plus a range of gameplay and 1.4 -> 2026 port fixes.
 
+### Where things live
+
+- Saves, settings, `twitch_config.txt`, `points.txt`, `ignored.txt` and the rolling
+  `checkpoints\` folder: `%LOCALAPPDATA%\ZALiA\`
+- Twitch setup and the full chat command list: [`ZALiA_Twitch_IRC_Setup/`](ZALiA_Twitch_IRC_Setup/)
+  (start with `START_HERE.txt`, or in-game **Options -> TWITCH OPTIONS**)
+- Controls: [`notes/notes/notes.txt`](notes/notes/notes.txt), or rebind in-game under **EDIT CONTROLS**
+
 ---
 
 ## License

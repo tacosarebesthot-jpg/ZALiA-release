@@ -143,6 +143,8 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case Twitch.JINGLE:         {return true; break;}
 	        case Twitch.BIGTIMER:       {return true; break;}
 	        case Twitch.EFFECTS_HUD:    {return true; break;}
+	        case Twitch.USER_COOLDOWN:  {return true; break;}
+	        case Twitch.MOD_BYPASS:     {return true; break;}
 	        case Twitch.COMMANDS:       {return true; break;}
 	        // OPEN SETUP PAGE hidden in v2.1.4 (owner 09-14: "don't need 2 ways in") --
 	        // COMPANION PAGES opens the hub, which links the Twitch setup page.
