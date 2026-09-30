@@ -1525,6 +1525,8 @@ function Dev_TwSelftest_Step() {
 	global.tw_irc_status          = "selftest";
 	global.tw_rl                  = false;
 	global.tw_irc_cooldown_frames = 0;
+	global.tw_autosave            = false; // the harness mangles slot 1 (XP cap, forced death): no checkpoints of that, and no pruning the owner's real ones
+	global.tw_points_on           = false; // "tstchatter" has 0 pts; with points on every paid verb is refused yet still grades PASS
 	if (global.tws_death_stage == 0)
 	{
 		// PC_take_damage only honours dev_invState while g.DevTools_state is on. Run 1 had it

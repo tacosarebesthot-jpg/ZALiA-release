@@ -86,7 +86,7 @@ if exist "%CFG%" (
 
 echo(
 echo   Next, in-game:
-echo     Options - DEV TOOLS - TEST/CAPTURE - TWITCH IRC   (turn ON)
+echo     Options - TWITCH OPTIONS - TWITCH IRC   (turn ON)
 echo   Watch the top-left status line:  TWITCH: connecting -^> connected
 echo   Then type  !heal 4  in your Twitch chat to test.
 echo(

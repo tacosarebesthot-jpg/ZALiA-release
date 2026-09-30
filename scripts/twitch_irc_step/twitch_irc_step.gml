@@ -39,15 +39,23 @@ function twitch_irc_step() {
 
 	// ---- auto-reconnect after a drop -----------------------------------------------
 	// obj_twitch_irc arms tw_irc_reconnect_at on network_type_disconnect; a failed
-	// connect() leaves status "error: ..." and we back off to 30s between tries.
+	// connect() leaves status "error: ..." and we back off (30s doubling to 5min) between
+	// tries. "error: bad token" arms nothing (reconnect_at = -1): a retry can't fix it.
 	if (variable_global_exists("tw_irc_reconnect_at") && global.tw_irc_reconnect_at >= 0
 	&&  variable_global_exists("tw_irc_status") && string_copy(string(global.tw_irc_status), 1, 5) == "error"
 	&&  variable_global_exists("tw_irc_frame") && global.tw_irc_frame >= global.tw_irc_reconnect_at)
 	{
 		global.tw_irc_reconnect_n  = (variable_global_exists("tw_irc_reconnect_n") ? global.tw_irc_reconnect_n : 0) + 1;
-		global.tw_irc_reconnect_at = global.tw_irc_frame + 1800; // next try in 30s if this one fails
-		global.tw_toast       = "CHAT LINK: reconnect try " + string(global.tw_irc_reconnect_n);
-		global.tw_toast_timer = 180;
+		// Back off: 30s, 60s, 2min, 4min, then every 5min. Toast only the first three
+		// tries -- a real outage used to nag the stream every 30 s forever; after that the
+		// persistent "TWITCH: error" status line is the signal.
+		var _wait = min(1800 * power(2, global.tw_irc_reconnect_n - 1), 18000);
+		global.tw_irc_reconnect_at = global.tw_irc_frame + _wait;
+		if (global.tw_irc_reconnect_n <= 3)
+		{
+			global.tw_toast       = "CHAT LINK: reconnect try " + string(global.tw_irc_reconnect_n);
+			global.tw_toast_timer = 180;
+		}
 		twitch_irc_connect();
 	}
 

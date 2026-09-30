@@ -37,7 +37,8 @@ function DeathScreen_Step() {
 	        // (FONT_LAYOUT) and tw_font_clean would drop them, leaving a bare "%!".
 	        if (variable_global_exists("tw_rl") && global.tw_rl)
 	        {   tw_toast_push(choose("WHOOPS...", "SORRY!", "NOOOO!", "%&*!"), "", "warn");  }
-	        if (variable_global_exists("tw_challenge")) global.tw_challenge = false; // !challenge ends on death
+	        // (!challenge used to be cleared here; it now survives a death on purpose -- the entry is
+	        //  tagged keep_on_death in twitch_apply and tw_effects_clear_all honours that.)
 	        if (global.pc_lives>0) room_goto_(rmB_NextLife);
 	        else         room_goto_(rmB_GameOver);
 	    }

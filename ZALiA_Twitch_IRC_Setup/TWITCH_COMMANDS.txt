@@ -1,47 +1,74 @@
 ZALiA - Twitch IRC chat commands
 =================================
 Type these in the streamer's Twitch chat once TWITCH IRC is connected.
-Syntax:  !verb [arg]      Unknown commands are ignored.
-Timed effects last ~5 seconds. A shared cooldown throttles all of chat.
+Syntax:  !verb [arg]      Aliases in (brackets). Typos get a "did you mean" hint.
+Timed effects last the streamer's EFFECT LENGTH setting (5-60 s, default 5) unless
+noted. Most timed verbs take a number of SECONDS:  !slow 20   (capped at 60).
+A shared cooldown throttles all of chat. When the POINTS ECONOMY is on, every
+verb has a price and !points shows your balance; the broadcaster is always free.
+!help in chat puts a one-screen cheat sheet on stream.
 
-PLAYER
-  !heal <amount>     heal HP
-  !hurt <amount>     chip damage (non-lethal)
-  !mp <amount>       give magic
-  !drain <amount>    drain magic
-  !1up               +1 life
-  !refill            full HP + MP
-  !curse             slow non-lethal HP drip (stops at 1 HP) [timed]
-  !arise             turn Link into a CHICKEN (cucco) [timed]   (aliases: !chicken !cucco)
-  !spell <name>      CAST a spell (shows its visual/effect)
-                     names: PROTECT JUMP HEAL FAIRY FIRE REFLECT ENIGMA THUNDER SUMMON
+HELP THE RUNNER
+  !heal [n]          full HP, or n quarter-boxes        !mp [n]     full MP, or n points
+  !refill (!fairy)   full HP + MP                        !1up        +1 life
+  !invuln            brief invincibility                 !link (!unchicken)  end a chat chicken early
+  !protect  !reflect !jump  !life  !fire  !thunder  !enigma  !summon
+                     cast that spell for real (its visual plays)   -- also  !spell <name>
 
-BUFFS / SCREEN (all timed)
-  !invuln            brief invincibility
-  !speed <secs>      speed buff (default 10s, max 60s)   e.g. !speed 20
-  !slow              marsh-slow legs
-  !shrink / !grow    shrink / embiggen Link
-  !shake             screen shake
-  !dark              darken room (need fire/candle to see)
-  !flip              mirror screen left/right
-  !confuse           swap LEFT/RIGHT controls ("drunk")
-  !disco             color-cycling overlay
-  !party             disco + flip together
+HURT THE RUNNER
+  !hurt [n]          chip damage: n quarter-boxes (1-8), never lethal (stops at 1 HP)
+  !drain [n]         drain magic
+  !poison            slow lethal HP drip (can be healed through)  [timed]
+  !curse             slow NON-lethal HP drip (stops at 1 HP)      [timed]
+  !attrition (!bleed !hunger)  life drips away, never kills         [timed]
+  !tax [pct]         (!xp !taxes) take 10% of your XP, or pct% (1-50)
+  !dmgup (!doubledamage)  every hit on Link does double damage      [timed]
+  !steal (!rob !thief !pickpocket)  borrow one of your items         [timed]
+  !catslap [n]       three slaps that knock Link around, no damage  (Tangia "Cat Slap")
 
-ENEMIES / DUNGEON MASTER
-  !spawn <enemy> [n] spawn n of a named enemy (default 1, max 6)
-                     names: daira moblin goriya zora stalfos bat(ache) atta myu
-                     e.g. !spawn moblin 3   or   !spawn 3   (3 of the default)
-  !swarm <1-6>       spawn a pack of RANDOM enemies (default 3, max 6)
-  !flame  (!heckler) spawn a jumping-flame heckler named after the chatter
-  !freeze (!stun)    freeze on-screen non-boss mobs [timed]
-  !smite  (!clearscreen)  kill all on-screen non-boss mobs
+CHAOS / SCREEN (all timed)
+  !speed [s]  !slow        fast / marsh-slow legs
+  !shrink (!tiny !small)   !grow (!huge)
+  !flip                    mirror the screen           !confuse   swap LEFT/RIGHT
+  !disorient               confuse + swap UP/DOWN      !party     disco + flip
+  !disco  !shake  !dark    color cycle / screen shake / darken (need a candle)
+  !ice (!icefloor)         the floor is ice            !moon      quarter gravity
+  !root                    can't walk or jump (can still swing)
+  !stasis [s] (!hold !freezelink)  freeze Link in place, 3 s default, max 10
+  !deny <what> [s]         lock a move: spell / jump / stab / crouchstab / downstab /
+                           upstab / all.    !undeny [what]  (or  !deny <what> off)  lifts it
+  !ghost (!invis)          enemies on screen turn nearly invisible
+  !flashbang (!flash)      one white flash; every non-boss enemy on screen takes the smite hit
 
-AUDIO
-  !music <track>     play a jukebox track (matches part of the track name)
+MOBS / DUNGEON MASTER
+  !spawn <enemy> [n]  spawn n (max 6) of: daira moblin goriya zora stalfos bat(ache) atta myu
+  !swarm [1-6]        a pack of RANDOM enemies (default 3)
+  !flame (!heckler)   a jumping flame with the chatter's name over it
+  !freeze (!stun)     freeze on-screen non-boss mobs [timed]
+  !smite (!clearscreen)  kill all on-screen non-boss mobs
+  !crush (!drop !block)  a palace block falls from above Link
+  !arise (!chicken !cucco)  turn Link into a CHICKEN [timed]  (needs CUCCO mode on that save)
+  !reshuffle (!reroll)   re-roll the seed's enemy randomizer mid-run (rando saves)
+  !challenge (!nomercy)  flipped screen + 4 hearts max + no helpful verbs until you leave the palace
+
+FUN / META
+  !music <track>      play a jukebox track (part of the name is enough); !music alone shuffles
+  !song (!np !nowplaying !track)   what's playing
+  !meth               moon + jump + speed          !quantumentangle (!qe)   a joke, tiny side effect
+  !fatality  !friendship  !flawless  !finisher     fire the MK2 splash (no gameplay effect)
+  !suggest <idea>     log an idea for the dev      !points (!bal)   your balance
+  !help (!cmds)       cheat sheet on stream        !version         build info
+  !donothing  !rip  !blip  !coincidence  !getfed   just toasts
+
+ROCKET LEAGUE QUICK CHAT (plates only, always free; needs the RL row on)
+  !niceshot  !whatasave  !calculated  !savage  !closeone  !okay  !faking
+  !gg  !ez  !wow  !noproblem  !thanks
 
 Notes:
-  - Bosses are never affected by !freeze / !smite.
-  - Nothing touches the save file. Every effect is runtime-only and reversible.
+  - Bosses are never affected by !freeze / !smite / !flashbang / !ghost.
+  - Effects end on death and on loading a file. Turning TWITCH IRC or TWITCH
+    REWARDS OFF in the options menu ends everything chat started (panic button).
+  - Runtime effects never write to the save. !tax IS permanent (XP is saved) and
+    a level-up can be lost to it.
 
-Examples:  !heal 4   !spawn moblin   !swarm 5   !spell fire   !music forest   !party
+Examples:  !heal 4   !spawn moblin 3   !swarm 5   !spell fire   !music forest   !party 20

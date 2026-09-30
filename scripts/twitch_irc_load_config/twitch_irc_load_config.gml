@@ -29,6 +29,7 @@ function twitch_irc_load_config() {
 	if (!variable_global_exists("tw_effect_secs"))         global.tw_effect_secs         = 5;
 
 	var _path = working_directory + "twitch_config.txt";
+	file_text_recover_tmp(_path);
 	if (!file_exists(_path))
 	{
 		global.tw_irc_status = "no config";
@@ -105,8 +106,10 @@ function twitch_irc_load_config() {
 	global.tw_irc_token           = _token;
 	global.tw_irc_user            = string_lower(_user);
 	global.tw_irc_channel         = _channel;
-	global.tw_irc_cooldown_frames = max(0, floor(_cooldown));
-	global.tw_effect_secs         = max(1, floor(_effect)); // same clamp /twitch/save applies live
+	// Same clamps the menu and /twitch/save apply: a hand-edited effect_secs=100000 made
+	// every timed effect ~28 h (the 60 s cap in twitch_apply only covers explicit "!verb N").
+	global.tw_irc_cooldown_frames = clamp(floor(_cooldown), 0, 3600);
+	global.tw_effect_secs         = clamp(floor(_effect), 1, 60);
 
 	if (_token == "" || _user == "" || _channel == "")
 	{
@@ -227,7 +230,7 @@ function tw_verb_all() {
 		"link","unchicken","donothing","rip","blip","coincidence","getfed",
 		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
 		"stasis","points","pts","bal","ghost","crush",
-		"version","ver","build","reshuffle",
+		"version","ver","build","reshuffle","gorilla",
 		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",
 		"ez","wow","noproblem","thanks"
 	];

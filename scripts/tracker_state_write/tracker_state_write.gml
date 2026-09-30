@@ -390,8 +390,14 @@ function tracker_state_write() {
 	_s.boulder_complete = val(f.dm_quests[? STR_Boulder + STR_Circle + STR_Complete]) ? 1 : 0;
 
 	// ── write ───────────────────────────────────────────────────────────────────
+	// Skip the write when nothing changed (title, menus, pause): this runs at ~15 Hz and used
+	// to truncate + rewrite the file every call, which the browser tracker could read half-done.
+	var _json = json_stringify(_s);
+	if (variable_global_exists("tracker_last_json") && global.tracker_last_json == _json) return;
+	global.tracker_last_json = _json;
 	var _fh = file_text_open_write("tracker_state.json");
-	file_text_write_string(_fh, json_stringify(_s));
+	if (_fh == -1) return;
+	file_text_write_string(_fh, _json);
 	file_text_close(_fh);
 
 }

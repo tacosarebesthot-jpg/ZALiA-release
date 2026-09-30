@@ -142,19 +142,15 @@ function twitch_config_save() {
     if (!_wrote_rl)  array_push(_lines, "rl=" + _rl_val);          // 1 = ROCKET LEAGUE quick-chat plates + verbs (round 11)
 
     // ---- write it back ------------------------------------------------------
-    var _fw = file_text_open_write(_path);
-    if (_fw == -1)
+    // Atomic: the old open_write truncated FIRST, so a crash mid-write lost the token this
+    // whole function is careful to preserve.
+    var _text = "";
+    for (var _j = 0; _j < array_length(_lines); _j++) _text += string(_lines[_j]) + "\r\n";
+    if (!file_text_write_atomic(_path, _text))
     {
         if (DEV) show_debug_message("[TWITCH] config save FAILED: " + _path);
         return false;
     }
-
-    for (var _j = 0; _j < array_length(_lines); _j++)
-    {
-        file_text_write_string(_fw, string(_lines[_j]));
-        file_text_writeln(_fw);
-    }
-    file_text_close(_fw);
 
     if (DEV) show_debug_message("[TWITCH] config saved: cooldown="
         + string(global.tw_irc_cooldown_frames) + "f effect=" + string(global.tw_effect_secs) + "s");

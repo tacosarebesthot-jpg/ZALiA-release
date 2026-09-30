@@ -16,6 +16,7 @@ function twitch_irc_disconnect() {
 		network_destroy(global.tw_irc_socket);
 
 	global.tw_irc_socket  = -1;
+	global.tw_irc_rx      = "";
 	global.tw_irc_enabled = false;
 	global.tw_irc_status  = "idle";
 

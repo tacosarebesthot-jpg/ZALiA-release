@@ -449,7 +449,7 @@ switch (_path)
         {
             _sm[? "effect_secs"] = zweb_qs(_query, "effect");
             // Never 0 -- a zero-length effect is indistinguishable from a failed command.
-            global.tw_effect_secs = max(1, floor(tw_num(_sm[? "effect_secs"], 5)));
+            global.tw_effect_secs = clamp(floor(tw_num(_sm[? "effect_secs"], 5)), 1, 60); // menu range
         }
         // MASTER GATE for chat commands (!steal etc). Canonically "enabled".
         // "rewards" is the ORIGINAL name and is kept as an alias: it is a

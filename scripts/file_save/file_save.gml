@@ -127,7 +127,10 @@ function file_save() {
 	_dm_save_data[?f.SDNAME_cont_pieces_mp]         = f.cont_pieces_mp;
 
 	_dm_save_data[?f.SDNAME_spells]                 = f.spells;
-	_dm_save_data[?f.SDNAME_items]                  = f.items;
+	// A chat !steal clears an item bit at RUNTIME only and gives it back when it expires.
+	// Save the bits the player really owns, or a checkpoint (or a death save) taken
+	// during the theft loses the item for good.
+	_dm_save_data[?f.SDNAME_items]                  = f.items | ((variable_global_exists("tw_stolen") && is_real(global.tw_stolen)) ? global.tw_stolen : 0);
 	_dm_save_data[?f.SDNAME_skills]                 = f.skills;
 	_dm_save_data[?STR_Skill+STR_Cucco]             = f.Cucco_skills;
 	_dm_save_data[?STR_Cucco+STR_Spell+"02"+STR_Acquired] = g.CuccoSpell2_Acquired;
@@ -163,12 +166,7 @@ function file_save() {
 
 	if (_CHECKPOINT_PATH != "")
 	{
-	    _file = file_text_open_write(_CHECKPOINT_PATH);
-	    if (_file != -1)
-	    {
-	        file_text_write_string(_file, json_encode(_dm_save_data));
-	        file_text_close(_file);
-	    }
+	    file_text_write_atomic(_CHECKPOINT_PATH, json_encode(_dm_save_data));
 	    ds_map_destroy(_dm_save_data); _dm_save_data=undefined;
 	    return; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
@@ -176,9 +174,7 @@ function file_save() {
 	if (file_exists(_FILE_NAME))
 	{
 	    var _SAVE_DATA = json_encode(_dm_save_data);
-	    _file = file_text_open_write(working_directory+_FILE_NAME);
-	            file_text_write_string(_file,_SAVE_DATA);
-	            file_text_close(_file);
+	    file_text_write_atomic(working_directory+_FILE_NAME, _SAVE_DATA); // never leaves a half-written slot
 	    //
 	    global.dm_save_file_data[?STR_Save+STR_File+hex_str(_FILE_NUM)+STR_Encoded] = _SAVE_DATA;
 	    ds_map_copy(global.dm_save_file, _dm_save_data);

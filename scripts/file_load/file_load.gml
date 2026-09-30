@@ -15,6 +15,7 @@ function file_load(argument0) {
 	var _FILE_NUM  = clamp(argument0, 1,SAVE_FILE_MAX);
 	var _FILE_NAME = f.dl_file_names[|_FILE_NUM-1];
 
+	file_text_recover_tmp(working_directory+_FILE_NAME); // a save that died between delete and rename
 	if(!file_exists(_FILE_NAME))
 	{
 	    show_debug_message("");
@@ -106,28 +107,21 @@ function file_load(argument0) {
 
 
 
-	ds_map_clear(f.dm_1up_doll);
-	             f.dm_1up_doll    = json_decode(_1up_dolls);
+	f.dm_1up_doll = json_decode_map(_1up_dolls, f.dm_1up_doll); // -1-safe: missing/corrupt -> emptied map, never a crash
 	//if (f.dm_1up_doll!=-1) db_LifeDoll_data_1a();
 	//show_debug_message("file_load(). ds_map_size(f.dm_1up_doll)="+string(ds_map_size(f.dm_1up_doll)));
 	//
-	ds_map_clear(f.dm_kakusu);
-	             f.dm_kakusu      = json_decode(_kakusu);
+	f.dm_kakusu = json_decode_map(_kakusu, f.dm_kakusu); // -1-safe: missing/corrupt -> emptied map, never a crash
 	//
-	ds_map_clear(f.dm_keys);
-	             f.dm_keys        = json_decode(_taken_keys);
+	f.dm_keys = json_decode_map(_taken_keys, f.dm_keys); // -1-safe: missing/corrupt -> emptied map, never a crash
 	//
-	ds_map_clear(f.dm_openedLocks);
-	             f.dm_openedLocks = json_decode(_opened_locks);
+	f.dm_openedLocks = json_decode_map(_opened_locks, f.dm_openedLocks); // -1-safe: missing/corrupt -> emptied map, never a crash
 	//
-	ds_map_clear(f.dm_PBags);
-	             f.dm_PBags       = json_decode(_pbags);
+	f.dm_PBags = json_decode_map(_pbags, f.dm_PBags); // -1-safe: missing/corrupt -> emptied map, never a crash
 	//
-	ds_map_clear(f.dm_explored);
-	             f.dm_explored    = json_decode(_explored_rooms);
+	f.dm_explored = json_decode_map(_explored_rooms, f.dm_explored); // -1-safe: missing/corrupt -> emptied map, never a crash
 	//
-	ds_map_clear(f.dm_quests);
-	             f.dm_quests      = json_decode(_quests);
+	f.dm_quests = json_decode_map(_quests, f.dm_quests); // -1-safe: missing/corrupt -> emptied map, never a crash
 	//
 
 

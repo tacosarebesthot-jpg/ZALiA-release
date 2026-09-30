@@ -4,7 +4,8 @@
 // "!commands" into the existing twitch_apply() dispatcher.
 //
 // twitch_irc_connect() -- load config, open a raw TCP socket to Twitch's IRC
-// gateway, and log in (PASS/NICK/JOIN). The socket RECEIVE is event-driven in
+// gateway (async), and once it is up log in (PASS/NICK/JOIN, twitch_irc_login()).
+// Both the connect result and the socket RECEIVE are event-driven in
 // obj_twitch_irc's Async-Networking event, so we just ensure a host instance
 // exists for that event before connecting. Idempotent enough to double as a
 // reconnect (any prior socket is dropped first so we never leak one).
@@ -46,8 +47,15 @@ function twitch_irc_connect() {
 		return; // socket alloc failed
 	}
 
-	// Connect to the Twitch IRC gateway (plain, non-TLS port). Blocking variant.
-	var _res = network_connect_raw(global.tw_irc_socket, "irc.chat.twitch.tv", 6667);
+	// Connect to the Twitch IRC gateway (plain, non-TLS port). ASYNC: the blocking
+	// variant stalled the whole frame for the OS connect timeout whenever the route was
+	// down, and the auto-reconnect loop called it every 30 s -- on stream. The result
+	// arrives as network_type_non_blocking_connect in obj_twitch_irc's Async-Networking
+	// event, which then runs twitch_irc_login() below (or marks "error: connect").
+	global.tw_irc_rx          = "";    // fresh receive buffer for the new socket
+	global.tw_irc_auth_failed = false; // a new attempt gets to fail on its own
+	network_set_config(network_config_connect_timeout, 10000);
+	var _res = network_connect_raw_async(global.tw_irc_socket, "irc.chat.twitch.tv", 6667);
 	if (_res < 0)
 	{
 		global.tw_irc_status = "error: connect";
@@ -55,6 +63,13 @@ function twitch_irc_connect() {
 		global.tw_irc_socket = -1;
 		return;
 	}
+}
+
+/// @description  twitch_irc_login() -- the IRC handshake, sent once the async connect succeeds.
+/// Called from obj_twitch_irc's networking event on network_type_non_blocking_connect.
+function twitch_irc_login() {
+
+	if (!variable_global_exists("tw_irc_socket") || global.tw_irc_socket < 0) return;
 
 	// Master gate ON so accepted chat verbs actually fire through twitch_apply()
 	// (the IRC path needs the shared master gate up; confirmed again on welcome 001).

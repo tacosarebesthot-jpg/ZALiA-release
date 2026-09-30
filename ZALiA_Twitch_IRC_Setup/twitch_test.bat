@@ -5,7 +5,7 @@ title ZALiA - Twitch command test
 rem ============================================================================
 rem  Simulate a Twitch command WITHOUT live chat by dropping a command file into
 rem  the game's drop folder. Proves the effect/verb side works even if IRC isn't
-rem  connected. TWITCH (or TWITCH IRC) must be ON in-game.
+rem  connected. TWITCH REWARDS (or TWITCH IRC) must be ON in-game.
 rem
 rem  Usage:   twitch_test.bat <verb> <arg>
 rem  Examples:
@@ -22,12 +22,15 @@ if "%VERB%"=="" set "VERB=heal"
 set "ARG=%~2"
 if "%ARG%"=="" set "ARG=4"
 
-> "%DROP%\test_%RANDOM%%RANDOM%.txt" echo %VERB%^|%ARG%^|tester^|300
+rem  Duration is left EMPTY so the game applies its own EFFECT LENGTH setting,
+rem  exactly like a live chat command (a hardcoded 300 pinned tests at 5 s).
+> "%DROP%\test_%RANDOM%%RANDOM%.txt" echo %VERB%^|%ARG%^|tester^|
 
-echo Simulated trigger dropped:  %VERB%^|%ARG%^|tester^|300
+echo Simulated trigger dropped:  %VERB%^|%ARG%^|tester^|
 echo into:  %DROP%
 echo(
-echo (Twitch must be ON in-game: DEV TOOLS - TEST/CAPTURE - TWITCH [IRC])
+echo (Twitch must be ON in-game: Options - TWITCH OPTIONS - TWITCH REWARDS or TWITCH IRC)
+echo (Note: drop files skip the chat cooldown and the points economy.)
 echo Usage:  twitch_test.bat ^<verb^> ^<arg^>    e.g.  twitch_test.bat spawn daira
 echo(
 pause

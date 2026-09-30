@@ -107,9 +107,7 @@ function save_game_pref() {
 	}
 
 	var _ENCODED = json_encode(_dm_save_data);
-	var _FILE = file_text_open_write(working_directory+_FILE_NAME);
-	            file_text_write_string(_FILE, _ENCODED);
-	            file_text_close(_FILE);
+	file_text_write_atomic(working_directory+_FILE_NAME, _ENCODED); // never leaves half-written prefs
 	show_debug_message("save_game_pref():  '"+_FILE_NAME+"'  saved!");
 	// ---------------------------------------------------------------
 

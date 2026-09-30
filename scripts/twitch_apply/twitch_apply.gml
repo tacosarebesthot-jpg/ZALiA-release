@@ -151,10 +151,28 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		// EXPLICIT N on heal/hurt = QUARTER-HEART BOXES (SivUO, 09-04 stream: "!heal 1"
 		// healed a sliver -- "I thought 1 would be 1 square"). 8 raw points = one
 		// quarter box (16 = half a box, per lane's own on-stream read of a bare !hurt).
-		case "heal":  if (instance_exists(f)) adjust_stat( (_amt > 0 ? _amt * 8 : 9999), 0); break;
-		case "hurt":  if (instance_exists(f)) adjust_stat(-(_amt > 0 ? _amt * 8 : 16),   0); break;
-		case "mp":    if (instance_exists(f)) adjust_stat(0,  (_amt > 0 ? _amt : 9999)); break;
-		case "drain": if (instance_exists(f)) adjust_stat(0, -(_amt > 0 ? _amt : 16));   break;
+		// CAPS: "!hurt 999" used to zero the bar (adjust_stat clamps at 0, is_dead is only set
+		// by a real hit) so the next touch killed -- while the docs promise "non-lethal" and
+		// !kill was removed as too strong. N is 1..8 quarter boxes (two hearts) and the chip
+		// never lands the last hit: floor at 1 HP like !curse. !drain caps at four bars of MP.
+		case "heal":  if (instance_exists(f)) adjust_stat( (_amt > 0 ? _amt * 8 : 9999), 0); else global.tw_apply_refused = true; break;
+		case "hurt":
+			if (instance_exists(f))
+			{
+				var _chip = (_amt > 0) ? clamp(_amt, 1, 8) * 8 : 16;
+				_chip = min(_chip, max(0, f.hp - 1));
+				if (_chip > 0) adjust_stat(-_chip, 0);
+				else
+				{
+					global.tw_toast       = _who_s + " -> hurt: already at 1 HP";
+					global.tw_toast_timer = 180;
+					global.tw_apply_refused = true;
+				}
+			}
+			else global.tw_apply_refused = true;
+			break;
+		case "mp":    if (instance_exists(f)) adjust_stat(0,  (_amt > 0 ? _amt : 9999)); else global.tw_apply_refused = true; break;
+		case "drain": if (instance_exists(f)) adjust_stat(0, -(_amt > 0 ? clamp(_amt, 1, 4 * Container_AMT) : 16)); else global.tw_apply_refused = true; break;
 
 		case "1up":
 			if (instance_exists(f) && variable_global_exists("pc_lives"))
@@ -269,6 +287,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			{
 			    global.tw_toast       = _who_s + " -> NOTHING TO STEAL";
 			    global.tw_toast_timer = 180;
+			    global.tw_apply_refused = true; // no charge for a no-op
 			    break;
 			}
 
@@ -405,6 +424,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					global.tw_apply_refused = true;
 				}
 			}
+			else global.tw_apply_refused = true; // no jukebox loaded: nothing happened, nothing to pay for
 			break;
 
 		case "shrink":
@@ -891,6 +911,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				// save settings? What does that mean?" ... "Twitch mod?"). Name the thing.
 				global.tw_toast       = _who_s + " -> arise: CUCCO mode is OFF for this save (game settings)";
 				global.tw_toast_timer = 300;
+				global.tw_apply_refused = true; // no charge for a no-op
 			}
 			break;
 
@@ -1022,7 +1043,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 
 		// challenge: Lane's design (09-11 2:53): flip stays on for the WHOLE palace, life
 		// capped at 4 containers, no reprieve (helpful verbs blocked). Ends when he leaves
-		// the palace or dies (twitch_tick / DeathScreen_Step clear it). Only in a palace.
+		// the palace (twitch_tick clears it); it SURVIVES a death (keep_on_death -- the old
+		// DeathScreen_Step clear fought that flag and won). Only in a palace.
 		case "challenge":
 			if (!instance_exists(g) || g.dungeon_num <= 0)
 			{
@@ -1181,7 +1203,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
-		case "version":
+		case "version": case "ver": case "build": // all three are in tw_verb_all + tw_points_cost
 			global.tw_toast       = "ZALiA " + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ")";
 			global.tw_toast_timer = 240;
 			break;
@@ -1319,6 +1341,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					default:
 						global.tw_toast       = "deny: spell/jump/stab/crouchstab/downstab/upstab/all  (add OFF to lift, or !undeny)";
 						global.tw_toast_timer = 300;
+						global.tw_apply_refused = true; // a help message is not a 25-pt effect
 						break;
 				}
 				if (_dbits != 0 && _doff)
@@ -1672,6 +1695,10 @@ function tw_force_link_form() {
 /// death transition (PC_update_death) and file_load. on_death keeps entries tagged
 /// keep_on_death (!challenge lasts the palace, not one life). Returns how many it cleared.
 function tw_effects_clear_all(_on_death) {
+
+	// A !swarm typed off a battle screen waits in tw_swarm_queue for the next one; left
+	// alone it landed on the first fight of the next life, or of a freshly loaded file.
+	if (variable_global_exists("tw_swarm_queue") && is_array(global.tw_swarm_queue)) global.tw_swarm_queue = [];
 
 	if (!variable_global_exists("tw_active") || !is_array(global.tw_active)) return 0;
 	var _n = 0;

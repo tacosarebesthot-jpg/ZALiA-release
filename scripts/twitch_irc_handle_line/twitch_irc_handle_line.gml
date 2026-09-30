@@ -26,9 +26,33 @@ function twitch_irc_handle_line(_line) {
 		return;
 	}
 
+	// ---- login rejected: Twitch says so once, then closes the socket ------
+	// ":tmi.twitch.tv NOTICE * :Login authentication failed" (expired / revoked token),
+	// "...Login unsuccessful" or "...Improperly formatted auth". A retry cannot fix any
+	// of these, so flag it: the disconnect event that follows keeps a readable status
+	// and does NOT arm the reconnect loop.
+	if (string_copy(_line, 1, 23) == ":tmi.twitch.tv NOTICE *")
+	{
+		var _notice = string_lower(_line);
+		if (string_pos("authentication failed", _notice) > 0
+		||  string_pos("login unsuccessful", _notice) > 0
+		||  string_pos("improperly formatted auth", _notice) > 0)
+		{
+			global.tw_irc_auth_failed  = true;
+			global.tw_irc_status       = "error: bad token";
+			global.tw_irc_reconnect_at = -1;
+			global.tw_toast       = "TWITCH LOGIN FAILED -- token expired? re-run setup";
+			global.tw_toast_timer = 600;
+		}
+		return;
+	}
+
 	// ---- welcome (numeric 001): we are logged in --------------------------
 	// flip status -> connected AND raise the shared master gate so verbs fire.
-	if (string_pos(" 001 ", _line) > 0)
+	// Anchored on the server prefix: a bare string_pos(" 001 ") also matched any CHAT
+	// message containing " 001 " ("room 001 is brutal"), which faked a connect, reset
+	// the reconnect counters and swallowed the message.
+	if (string_copy(_line, 1, 19) == ":tmi.twitch.tv 001 ")
 	{
 		global.tw_irc_status = "connected";
 		// arm the auto-hide timer so the "connected" status line shows only

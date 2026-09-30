@@ -1,0 +1,13 @@
+{
+  "$GMScript":"v1",
+  "%Name":"zalia_file_util",
+  "isCompatibility":false,
+  "isDnD":false,
+  "name":"zalia_file_util",
+  "parent":{
+    "name":"other",
+    "path":"folders/Scripts/other.yy",
+  },
+  "resourceType":"GMScript",
+  "resourceVersion":"2.0",
+}

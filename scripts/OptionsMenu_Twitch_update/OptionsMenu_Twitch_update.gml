@@ -71,6 +71,9 @@ function OptionsMenu_Twitch_update() {
 	    {
 	        if (!variable_global_exists("tw_enabled")) global.tw_enabled = false;
 	        global.tw_enabled = !global.tw_enabled;
+	        // OFF is the panic button: a 60 s !deny all / !dark / !dmgup must not keep running
+	        // after the streamer kills chat (twitch_tick keeps draining timers regardless).
+	        if (!global.tw_enabled) tw_effects_clear_all(false);
 	        aud_play_sound(_SOUND2);
 	        timer = DURATION1;
 	    }
@@ -84,6 +87,7 @@ function OptionsMenu_Twitch_update() {
 	        if (variable_global_exists("tw_irc_enabled") && global.tw_irc_enabled)
 	        {
 	            twitch_irc_disconnect();
+	            tw_effects_clear_all(false);       // panic button: end everything chat started
 	            global.tw_irc_autoconnect = false; // OFF sticks across restarts too
 	            twitch_config_save();
 	        }

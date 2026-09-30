@@ -13,6 +13,7 @@ function load_game_pref() {
 	// Set here (before the first-run save below) so save_game_pref() always has it defined.
 	global.start_with_reflect = false;
 
+	file_text_recover_tmp(working_directory+_FILE_NAME); // a save that died between delete and rename
 	if(!file_exists(_FILE_NAME)) save_game_pref();
 
 
@@ -70,14 +71,16 @@ function load_game_pref() {
 	if(!is_undefined(_val)) Audio.audio_set = string(_val);
 
 	_val = _dm_FILE_DATA[?STR_Audio+STR_Random+STR_Custom];
-	if(!is_undefined(_val)) Audio.dm_random_custom = json_decode(_val);
+	if(!is_undefined(_val)) Audio.dm_random_custom = json_decode_map(_val, Audio.dm_random_custom); // -1-safe, no leak
 
 
 
 	_val = _dm_FILE_DATA[?STR_Input+STR_Preferences];
 	if(!is_undefined(_val))
 	{
-	    var _dm = json_decode(_val);
+	    // A corrupt sub-string used to hand -1 to ds_map_copy and crash EVERY boot (prefs only
+	    // rewrite on a settings change, so it never healed). Empty map -> the val() defaults below.
+	    var _dm = json_decode_map(_val);
 	    ds_map_copy(Input.dm_UserInputConfig, _dm);
 	    ds_map_destroy(_dm); _dm=undefined;
 	}

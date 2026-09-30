@@ -681,11 +681,12 @@ function tw_help_draw() {
 		"HOW CHAT PLAYS: TYPE !WORD IN CHAT   V" + ZALIA_VERSION,
 		"HELP  !HEAL !MP !REFILL !1UP !FAIRY !LINK",
 		"      !PROTECT !REFLECT !INVULN",
-		"HURT  !HURT !DRAIN !POISON !KILL !TAX",
-		"      !DMGUP !ATTRITION !CURSE !STEAL",
+		"HURT  !HURT !DRAIN !POISON !TAX !DMGUP",
+		"      !ATTRITION !CURSE !STEAL !CATSLAP",
 		"CHAOS !SLOW !SPEED !FLIP !CONFUSE !DARK",
-		"      !SHAKE !DISCO !MOON !ICE !ROOT !DENY",
-		"      !STASIS !DISORIENT !TAX !DMGUP",
+		"      !SHAKE !DISCO !MOON !ICE !ROOT",
+		"      !DENY !UNDENY !STASIS !DISORIENT",
+		"      !FLASHBANG",
 		"MOBS  !SPAWN !SWARM !FREEZE !SMITE !PARTY",
 		"      !FLAME !ARISE !CUCCO !CHALLENGE",
 		"FUN   !SONG !SUGGEST !METH !FATALITY",
@@ -783,10 +784,13 @@ function tw_checkpoint_tick() {
 	if (g.room_type == "B") return;
 	if (g.gui_state != g.gui_state_NONE || g.cutscene || g.ChangeRoom_timer > 0) return;
 	if (!instance_exists(global.pc)) return;
-	if (!variable_global_exists("tw_ckpt_items")) { global.tw_ckpt_items = f.items; global.tw_ckpt_frames = 0; }
+	// Compare OWNED bits: a chat !steal flips a bit at runtime and would otherwise fire an
+	// "item" checkpoint the same frame (file_save folds the stolen bits back in too).
+	var _items_owned = f.items | ((variable_global_exists("tw_stolen") && is_real(global.tw_stolen)) ? global.tw_stolen : 0);
+	if (!variable_global_exists("tw_ckpt_items")) { global.tw_ckpt_items = _items_owned; global.tw_ckpt_frames = 0; }
 	if (!variable_global_exists("tw_ckpt_due")) global.tw_ckpt_due = "";
 	var _why = "";
-	if (f.items != global.tw_ckpt_items) { global.tw_ckpt_items = f.items; _why = "item"; }
+	if (_items_owned != global.tw_ckpt_items) { global.tw_ckpt_items = _items_owned; _why = "item"; }
 	if (global.tw_ckpt_due != "") { _why = global.tw_ckpt_due; global.tw_ckpt_due = ""; }
 	global.tw_ckpt_frames++;
 	if (_why == "" && global.tw_ckpt_frames >= 3600) _why = "timer";
