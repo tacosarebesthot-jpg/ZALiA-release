@@ -22,7 +22,9 @@ function twitch_irc_send(_sock, _str) {
 	var _buf = buffer_create(_sz, buffer_fixed, 1);
 	buffer_write(_buf, buffer_text, _line);
 
-	network_send_raw(_sock, _buf, buffer_get_size(_buf));
+	// Over the WebSocket transport (tls=1) Twitch wants TEXT frames; a raw TCP socket ignores the flag.
+	if (variable_global_exists("tw_irc_tls") && global.tw_irc_tls) network_send_raw(_sock, _buf, buffer_get_size(_buf), network_send_text);
+	else                                                            network_send_raw(_sock, _buf, buffer_get_size(_buf));
 
 	buffer_delete(_buf);
 }

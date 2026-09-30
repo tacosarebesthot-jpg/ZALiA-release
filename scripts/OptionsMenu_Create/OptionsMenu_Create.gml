@@ -1517,6 +1517,22 @@ function OptionsMenu_Create() {
 	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "TURNING THIS ON GIVES THE PLAYER DOUBLE JUMP.";
 	//                                                                          //
 	_j=0; _k=0;
+	Other_DEATH_COUNTER = ++_i; // 09-30 review: was DEV TOOLS-only and never saved, though the README advertises it
+	_dk2 = _dk0+hex_str(_i);
+	dm_options[?_dk2+STR_Font]                         = FONT2;
+	dm_options[?_dk2+STR_Option+STR_Text]              = "DEATH COUNTER";
+	dm_options[?_dk2+STR_State+hex_str(_j++)+STR_Text] = "HIDE";
+	dm_options[?_dk2+STR_State+hex_str(_j++)+STR_Text] = "SHOW";
+	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "DEATHS THIS QUEST ON THE HUD (D:N), NEXT TO LIVES. NEEDS THE EXTRA HUD.";
+	//                                                                          //
+	_j=0; _k=0;
+	Other_RESET = ++_i; // 09-30 review: nothing but controls had a way back to defaults
+	_dk2 = _dk0+hex_str(_i);
+	dm_options[?_dk2+STR_Font]                         = FONT2;
+	dm_options[?_dk2+STR_Option+STR_Text]              = "RESET ALL SETTINGS";
+	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "AUDIO, DISPLAY, HUD, TWITCH AND THIS PAGE BACK TO DEFAULTS. CONTROLS AND YOUR TWITCH LOGIN ARE KEPT. PRESS TWICE.";
+	//                                                                          //
+	_j=0; _k=0;
 	Other_GEE = ++_i; // GEE: Graphics Effects Editor
 	_dk2 = _dk0+hex_str(_i);
 	dm_options[?_dk2+STR_Font]                         = FONT2;
@@ -1534,6 +1550,7 @@ function OptionsMenu_Create() {
 
 	OptionsMenu_Create_1(_dk0, _i+1);
 	Other_cursor = 0;
+	Other_reset_armed = false; // RESET ALL SETTINGS: first press arms, second resets
 
 
 

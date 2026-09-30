@@ -1,12 +1,12 @@
 {
   "$GMScript":"v1",
-  "%Name":"Bot_update_Old1",
+  "%Name":"options_reset_to_defaults",
   "isCompatibility":false,
   "isDnD":false,
-  "name":"Bot_update_Old1",
+  "name":"options_reset_to_defaults",
   "parent":{
-    "name":"bot",
-    "path":"folders/Scripts/game_object/gob/gob1/enemy/bot.yy",
+    "name":"other",
+    "path":"folders/Scripts/other.yy",
   },
   "resourceType":"GMScript",
   "resourceVersion":"2.0",

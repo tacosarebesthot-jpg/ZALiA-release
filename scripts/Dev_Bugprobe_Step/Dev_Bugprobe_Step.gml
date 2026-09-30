@@ -1525,6 +1525,8 @@ function Dev_TwSelftest_Step() {
 	global.tw_irc_status          = "selftest";
 	global.tw_rl                  = false;
 	global.tw_irc_cooldown_frames = 0;
+	if (variable_global_exists("tws_cs_x0") && variable_global_exists("tws_cs_maxd") && instance_exists(global.pc))
+	{   global.tws_cs_maxd = max(global.tws_cs_maxd, abs(global.pc.x - global.tws_cs_x0));  } // catslap: track the peak every frame
 	global.tw_autosave            = false; // the harness mangles slot 1 (XP cap, forced death): no checkpoints of that, and no pruning the owner's real ones
 	global.tw_points_on           = false; // "tstchatter" has 0 pts; with points on every paid verb is refused yet still grades PASS
 	if (global.tws_death_stage == 0)
@@ -1680,7 +1682,7 @@ function Dev_TwSelftest_Step() {
 			case "arise":      _ok = _tst && (pc_is_cucco() || string_pos("OFF", _got) > 0)
 			                        && (!pc_is_cucco() || !(g.CuccoSpell2_Acquired && g.CuccoSpell2_Option) || g.CuccoSpell2_Active); break;
 			case "toast":      _ok = _tst; break;
-			case "catslap":    _ok = _tst; global.tws_cs_x0 = global.pc.x; global.tws_cs_hp0 = f.hp; break; // graded in "after"
+			case "catslap":    _ok = _tst; global.tws_cs_x0 = global.pc.x; global.tws_cs_hp0 = f.hp; global.tws_cs_maxd = 0; break; // graded in "after" on PEAK displacement
 			case "silent":     _ok = (global.tw_toast_timer <= 0 || _got == ""); break;
 			case "mean":       _ok = (string_pos("did you mean", _got) > 0); break;
 			case "nomatch":    _ok = (string_pos("no match", _got) > 0); break;
@@ -1721,7 +1723,8 @@ function Dev_TwSelftest_Step() {
 		}
 		if (_ca[1] == "catslap" && string_pos("PASS", global.tws_row) == 1)
 		{   // the slap must have MOVED Link (or fizzled with a reason off a battle screen) and cost no HP
-			var _moved_px = abs(global.pc.x - global.tws_cs_x0);
+			// peak, not net: the three slaps alternate sides, so the net move can be ~0 against a wall
+			var _moved_px = max(abs(global.pc.x - global.tws_cs_x0), variable_global_exists("tws_cs_maxd") ? global.tws_cs_maxd : 0);
 			var _fizz     = (string_pos("needs a battle screen", global.tws_row) > 0) || (string_pos("fizzled", global.tws_row) > 0);
 			if (!_fizz && (_moved_px < 4 || f.hp < global.tws_cs_hp0))
 			{   tws_log("FAIL  catslap: moved " + string(_moved_px) + " px, hp " + string(global.tws_cs_hp0) + " -> " + string(f.hp));  }
@@ -1769,6 +1772,11 @@ function Dev_TwSelftest_Step() {
 			tws_go("death");
 			g.dev_invState   = 0;
 			g.DevTools_state = global.tws_devtools0;
+			if (global.pc_lives < 2)
+			{   // on a 1-life save the death landed on GAME OVER and the watchdog logged STUCK instead of a result
+				global.pc_lives = 2;
+				tws_log("   (harness topped lives up to 2 so the death lands on NEXT LIFE, not GAME OVER)");
+			}
 			adjust_stat(-9999, 0);
 			global.pc.is_dead = true;
 			exit;

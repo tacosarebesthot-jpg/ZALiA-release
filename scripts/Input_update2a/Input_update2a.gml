@@ -38,6 +38,7 @@ function Input_update2a() {
 	    _D_KEY = (Key_down  >0 && keyboard_check(Key_down  )) || (Key_down_alt  >0 && keyboard_check(Key_down_alt  ));
 	    _U_KEY = (Key_up    >0 && keyboard_check(Key_up    )) || (Key_up_alt    >0 && keyboard_check(Key_up_alt    ));
 	    _S_KEY = (Key_pause >0 && keyboard_check(Key_pause )) || (Key_pause_alt >0 && keyboard_check(Key_pause_alt ));
+	    if (keyboard_check(vk_alt) && (Key_pause == vk_enter || Key_pause_alt == vk_enter)) _S_KEY = false; // Alt+Enter = fullscreen, not pause
 	    _E_KEY = (Key_magic >0 && keyboard_check(Key_magic )) || (Key_magic_alt >0 && keyboard_check(Key_magic_alt ));
 	    _B_KEY = (Key_attack>0 && keyboard_check(Key_attack)) || (Key_attack_alt>0 && keyboard_check(Key_attack_alt));
 	    _A_KEY = (Key_jump  >0 && keyboard_check(Key_jump  )) || (Key_jump_alt  >0 && keyboard_check(Key_jump_alt  ));

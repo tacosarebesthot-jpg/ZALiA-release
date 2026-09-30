@@ -319,7 +319,7 @@ function PC_update_1c() {
 	        {
 	            hspd = 0;
 	            g.exit_leave = _exit;
-	            show_debug_message("exit side");
+	            if (global.DB0) show_debug_message("exit side");
 	            exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	        }
 	    }
@@ -344,7 +344,7 @@ function PC_update_1c() {
 	        {
 	            _exit = g.exit_leave_pending;
 	            g.exit_leave = _exit;
-	            show_debug_message("exit down");
+	            if (global.DB0) show_debug_message("exit down");
 	            exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	        }
 	    }
@@ -374,7 +374,7 @@ function PC_update_1c() {
 	            {   // D901
 	                set_xy(id, $78, y);
 	                g.exit_leave = _exit;
-	                show_debug_message("exit elevator");
+	                if (global.DB0) show_debug_message("exit elevator");
 	            }
 	        }
 	        break;}//case g.EXIT_TYPE_ELEVATOR:{
@@ -393,7 +393,7 @@ function PC_update_1c() {
 	        {   // E0E2
 	            pipe_sink_timer = 37; // timer. Will exit rm at 0
 	            g.exit_leave = _exit;
-	            show_debug_message("exit pipe");
+	            if (global.DB0) show_debug_message("exit pipe");
 	        }
 	        break;}//case g.EXIT_TYPE_PIPE:{
         
@@ -413,7 +413,7 @@ function PC_update_1c() {
 	            //if (_exit.exit_type&g.EXIT_BIT_TELEPORT) g.exit_leave = _exit;
 	            //else                                     g.exit_leave = _exit;
 	            g.exit_leave = _exit;
-	            show_debug_message("exit door");
+	            if (global.DB0) show_debug_message("exit door");
 	        }
 	        break;}//case g.EXIT_TYPE_DOOR:{
         
@@ -435,7 +435,7 @@ function PC_update_1c() {
 	                {   // E173
 	                    hspd = 0;
 	                    g.exit_leave = _exit;
-	                    show_debug_message("exit side");
+	                    if (global.DB0) show_debug_message("exit side");
 	                }
 	            }
             
@@ -453,7 +453,7 @@ function PC_update_1c() {
 	            {
 	                if (g.exit_leave_pending) g.exit_leave = g.exit_leave_pending;
 	                else                      g.exit_leave = _exit;
-	                show_debug_message("exit down");
+	                if (global.DB0) show_debug_message("exit down");
 	            }
             
 	            break;//case g.EXIT_TYPE_STANDARD:{

@@ -392,8 +392,22 @@ function tracker_state_write() {
 	// ── write ───────────────────────────────────────────────────────────────────
 	// Skip the write when nothing changed (title, menus, pause): this runs at ~15 Hz and used
 	// to truncate + rewrite the file every call, which the browser tracker could read half-done.
+	// ...and the run timer changes every frame, so a plain "did anything change" check still
+	// wrote at 15 Hz during play: compare WITHOUT the clock, and let clock-only changes
+	// through at most twice a second.
 	var _json = json_stringify(_s);
-	if (variable_global_exists("tracker_last_json") && global.tracker_last_json == _json) return;
+	var _qt = _s.quest_timer_text, _qu = _s.quest_timer_us;
+	_s.quest_timer_text = ""; _s.quest_timer_us = 0;
+	var _key = json_stringify(_s);
+	_s.quest_timer_text = _qt; _s.quest_timer_us = _qu;
+	if (!variable_global_exists("tracker_last_key")) { global.tracker_last_key = ""; global.tracker_last_tick = -1000; global.tracker_last_json = ""; }
+	if (_key == global.tracker_last_key)
+	{
+		if (global.tracker_last_json == _json) return;                 // nothing at all changed
+		if (global.TW_tick - global.tracker_last_tick < 30) return;    // only the clock moved: 2 Hz
+	}
+	global.tracker_last_key  = _key;
+	global.tracker_last_tick = global.TW_tick;
 	global.tracker_last_json = _json;
 	var _fh = file_text_open_write("tracker_state.json");
 	if (_fh == -1) return;

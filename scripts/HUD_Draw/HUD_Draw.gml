@@ -95,10 +95,9 @@ function HUD_Draw() {
 	    draw_text_(Keys_xl+8,Keys_yt, Keys_text, -1,-1);
 	}
 	// Deaths ---------------------------
-	// On-screen HUD death-counter ("D:N"): default OFF, toggle via Dev Tools (DEATH
-	// COUNTER). This HUD draw is mispositioned; the real death readout is moving to the
-	// 2nd tracker window, so it's gated behind global.dbg_death_counter_show (init in
-	// g_Create, default false). Revert: drop this gate to restore the always-on draw.
+	// On-screen HUD death-counter ("D:N"): default OFF. Player toggle: OPTIONS -> OTHER ->
+	// DEATH COUNTER (saved in prefs since 09-30); DEV TOOLS -> OVERLAYS flips the same flag.
+	// The tracker window has the full readout; this is the in-game one next to lives/keys.
 	if (global.dbg_death_counter_show)
 	{
 	    if (Deaths_can_draw)

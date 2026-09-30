@@ -2,9 +2,13 @@
 function GO_instance_end() {
 
 
-	// TODO: This could be called up to 3 times on inst end. 
-	// It is in GameObject events; Destroy, Game End, Room End.
-	// Find a way that it only has to be called once.
+	// Called from three GameObject events (Destroy, Game End, Room End), so it used to run up
+	// to three times per instance; the second pass tore down lists the first had already
+	// freed (Kakusu001_end grew a crash guard for exactly that). Run once: the flag is reset
+	// where dl_sprites is (re)created (init_vars_draw_1a), so a re-initialised instance
+	// gets its cleanup again.
+	if (variable_instance_exists(id, "go_instance_ended") && go_instance_ended) return;
+	go_instance_ended = true;
 
 	if (variable_instance_exists(id,"ocs_draw_x"))
 	{                                ocs_draw_x = 0;  }

@@ -286,6 +286,8 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        //case Other_SCENE_COLORS_EDITOR:{return true;  break;}
 	        //case Other_BGR_COLOR_EDITOR:   {return true;  break;}
 	        case Other_DOUBLE_JUMP:        {return f.items&ITM_FTHR; break;}
+	        case Other_DEATH_COUNTER:      {return true;  break;}
+	        case Other_RESET:              {return true;  break;}
 	        case Other_GEE:                {return true;  break;}
 	        case Other_BACK:               {return true;  break;}
 	    }//switch(argument1)

@@ -93,6 +93,9 @@ function twitch_irc_load_config() {
 			case "user_cooldown": global.tw_user_cooldown_frames = clamp(floor(tw_num(_val, 1800)), 0, 7200); break;
 			case "mod_bypass":    global.tw_mod_bypass  = (tw_num(_val, 1) != 0); break;
 			case "effects_hud":   global.tw_effects_hud = (tw_num(_val, 1) != 0); break;
+			// tls=1: the token crosses the wire inside TLS (wss://irc-ws.chat.twitch.tv:443). Opt-in
+			// because the WebSocket transport is untested on this runtime; plaintext 6667 is the default.
+			case "tls": case "ssl": case "wss": global.tw_irc_tls = (tw_num(_val, 0) != 0); break;
 		}
 	}
 	file_text_close(_fh);

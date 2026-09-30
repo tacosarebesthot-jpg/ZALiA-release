@@ -84,28 +84,19 @@ function update_game_window_1a() {
 	//{   window_set_colour(   c_black);  }
 
 	//if(!g.WindowScale_changed) // If was not scaled prev frame
+	// 09-30 review: Escape used to LEAVE fullscreen first, so quitting took two presses and
+	// the controls note had to explain it. It now opens the quit menu in fullscreen exactly
+	// as it does windowed (update_QuitAppMenu). Alt+Enter toggles fullscreen like every
+	// other PC game, next to the F key; Input_update2a ignores Enter while Alt is held so
+	// the pause menu does not open on the same press.
 	var _will_toggle_fullscreen = false;
-	if (Input.keypressed_prev==0 
-	&&  (keyboard_check_pressed(g.Fullscreen_KEY) || (keyboard_check_pressed(vk_escape) && window_get_fullscreen())) )
+	if (Input.keypressed_prev==0 && keyboard_check_pressed(g.Fullscreen_KEY))
 	{
-	    if (keyboard_check_pressed(vk_escape))
-	    {   // As of 2025/06/11, the following app states will close with `vk_escape`
-	        if(!g.app_paused 
-	        &&  g.gui_state!=g.gui_state_OPTIONS 
-	        &&  g.gui_state!=g.gui_state_QUIT_APP 
-	        &&  g.gui_state!=g.gui_state_EDIT_PAL 
-	        &&  g.gui_state!=g.gui_state_GEE 
-	        &&  Dev_RmWarper.state==Dev_RmWarper.STATE_IDLE )
-	        {
-	            _will_toggle_fullscreen = true;
-	        }
-	    }
-	    else
-	    {
-	        _will_toggle_fullscreen = true;
-	    }
-    
-	    //_will_toggle_fullscreen = true;
+	    _will_toggle_fullscreen = true;
+	}
+	if (keyboard_check(vk_alt) && keyboard_check_pressed(vk_enter))
+	{
+	    _will_toggle_fullscreen = true;
 	}
 
 

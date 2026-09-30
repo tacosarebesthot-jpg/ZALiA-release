@@ -38,7 +38,7 @@ Pause screen (randomizer saves):
 '8': hint overlay    '9': key overlay    '0': show the game version
 
 Window:
-Fullscreen: 'F'
+Fullscreen: 'F'  or  'Alt' + 'Enter'
 Scale non-fullscreen Up: hold 'Ctrl', press 'G'
 Scale non-fullscreen Down:hold 'Ctrl' + 'Shift', press 'G'
 
@@ -46,7 +46,7 @@ Stuck on the overworld (softlock):
 Hold 'Ctrl' + 'Backspace' for a moment: returns to the last save point.
 
 Quit App:
-'Escape' (twice if in fullscreen)  or  hold Xbox Right Trigger + Xbox Left Trigger + Xbox Back(Select) + Xbox Start
+'Escape'  or  hold Xbox Right Trigger + Xbox Left Trigger + Xbox Back(Select) + Xbox Start
 
 Twitch chat: Options -> TWITCH OPTIONS. Viewers type !commands; !help in chat
 shows the card, ZALiA_Twitch_IRC_Setup\TWITCH_COMMANDS.txt has the full list.

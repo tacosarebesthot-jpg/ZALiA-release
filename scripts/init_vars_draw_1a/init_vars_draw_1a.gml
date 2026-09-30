@@ -38,6 +38,7 @@ function init_vars_draw_1a() {
 	   placement so xl, yt, ogX, ogY are acurate.  */
 	sprite = 0;
 	dl_sprites = ds_list_create();
+	go_instance_ended = false; // GO_instance_end runs once per (re)init -- see that script
 	GO_sprite_init(spr_Placement_16x16);
 
 

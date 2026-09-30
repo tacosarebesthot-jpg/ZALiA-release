@@ -149,6 +149,9 @@ function load_game_pref() {
 	_val = _dm_FILE_DATA[?STR_Quest+STR_Timer+"_Show"];
 	if(!is_undefined(_val)) global.QuestTimer_show = _val;
 
+	_val = _dm_FILE_DATA[?"_DeathCounter_Show"];
+	if(!is_undefined(_val)) global.dbg_death_counter_show = _val;
+
 	_val = _dm_FILE_DATA[?STR_Frenzy+STR_Stab];
 	if(!is_undefined(_val)) g.mod_StabFrenzy = _val;
 

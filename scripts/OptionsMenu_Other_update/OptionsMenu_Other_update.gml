@@ -60,6 +60,8 @@ function OptionsMenu_Other_update() {
 
 
 	// -------------------------------------------------------------------------------
+	if (Other_cursor != Other_RESET) Other_reset_armed = false; // moving off the row disarms it
+
 	switch(Other_cursor)
 	{
 	    // -------------------------------------------------
@@ -350,6 +352,40 @@ function OptionsMenu_Other_update() {
 	    }
 	    break;}
     
+	    // -------------------------------------------------
+	    case Other_DEATH_COUNTER:{
+	    if (timer) break;
+
+	    if (_InputConfirm_pressed2)
+	    {
+	        global.dbg_death_counter_show = !global.dbg_death_counter_show;
+	        save_game_pref();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
+	    // -------------------------------------------------
+	    case Other_RESET:{
+	    if (timer) break;
+
+	    if (_InputConfirm_pressed)
+	    {
+	        if (!Other_reset_armed)
+	        {   // arm: the row shows PRESS AGAIN? until the next press or a cursor move
+	            Other_reset_armed = true;
+	            aud_play_sound(CURSOR_SOUND1);
+	        }
+	        else
+	        {
+	            Other_reset_armed = false;
+	            options_reset_to_defaults();
+	            aud_play_sound(_SOUND2);
+	        }
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // -------------------------------------------------
 	    case Other_GEE:{
 	    if (timer) break;

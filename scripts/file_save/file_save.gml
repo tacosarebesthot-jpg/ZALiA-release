@@ -146,13 +146,13 @@ function file_save() {
 	_dm_save_data[?f.SDNAME_exploredRooms]          = json_encode(f.dm_explored);
 
 	/*
-	show_debug_message("file_save(). "+"f.dm_kakusu size="+string(ds_map_size(f.dm_kakusu)));
-	show_debug_message("file_save(). "+"f.dm_keys size="+string(ds_map_size(f.dm_keys)));
-	show_debug_message("file_save(). "+"f.dm_openedLocks size="+string(ds_map_size(f.dm_openedLocks)));
-	show_debug_message("file_save(). "+"f.dm_PBags size="+string(ds_map_size(f.dm_PBags)));
-	show_debug_message("file_save(). "+"f.dm_1up_doll size="+string(ds_map_size(f.dm_1up_doll)));
-	show_debug_message("file_save(). "+"f.dm_quests size="+string(ds_map_size(f.dm_quests)));
-	show_debug_message("file_save(). "+"f.dm_explored size="+string(ds_map_size(f.dm_explored)));
+	if (global.DB0) show_debug_message("file_save(). "+"f.dm_kakusu size="+string(ds_map_size(f.dm_kakusu)));
+	if (global.DB0) show_debug_message("file_save(). "+"f.dm_keys size="+string(ds_map_size(f.dm_keys)));
+	if (global.DB0) show_debug_message("file_save(). "+"f.dm_openedLocks size="+string(ds_map_size(f.dm_openedLocks)));
+	if (global.DB0) show_debug_message("file_save(). "+"f.dm_PBags size="+string(ds_map_size(f.dm_PBags)));
+	if (global.DB0) show_debug_message("file_save(). "+"f.dm_1up_doll size="+string(ds_map_size(f.dm_1up_doll)));
+	if (global.DB0) show_debug_message("file_save(). "+"f.dm_quests size="+string(ds_map_size(f.dm_quests)));
+	if (global.DB0) show_debug_message("file_save(). "+"f.dm_explored size="+string(ds_map_size(f.dm_explored)));
 
 	show_debug_message("file_save(). "+"_dm_save_data size="+string(ds_map_size(_dm_save_data)));
 	*/
@@ -180,7 +180,7 @@ function file_save() {
 	    ds_map_copy(global.dm_save_file, _dm_save_data);
     
 	    show_debug_message("");
-	    show_debug_message("Save File  '"+_FILE_NAME+"', Save Name  '"+_SAVE_NAME+"',   saved!");
+	    if (global.DB0) show_debug_message("Save File  '"+_FILE_NAME+"', Save Name  '"+_SAVE_NAME+"',   saved!");
 	    show_debug_message("");
 	}
 
@@ -268,7 +268,7 @@ function file_save() {
 	/*
 	if (DEV)
 	{
-	    show_debug_message("file_save() END. "+string(current_time-_START_TIME));
+	    if (global.DB0) show_debug_message("file_save() END. "+string(current_time-_START_TIME));
 	    repeat(1) show_debug_message("");
 	}
 	*/

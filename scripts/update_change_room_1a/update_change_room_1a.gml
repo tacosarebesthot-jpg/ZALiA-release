@@ -317,8 +317,11 @@ function update_change_room_1a() {
     
 	    room_goto_(_ROOM, _VIEW_W,_VIEW_H);
     
+	    if (global.DB0) // room-exit trace, dev only
+	    {
 	    if (g.exit_leave!=noone) show_debug_message("update_change_room_1a().  "+"g.exit_leave.exitName '"+string(val(g.exit_leave.exitName))+"', room_goto("+_RM_NAME+")"+",  f.reen: '"+f.reen+"'"+", _GOING_TO_OW="+string(_GOING_TO_OW));
 	    else                     show_debug_message("update_change_room_1a().  "+"g.exit_leave==noone"                                       + ", room_goto("+_RM_NAME+")"+",  f.reen: '"+f.reen+"'"+", _GOING_TO_OW="+string(_GOING_TO_OW));
+	    }
 	}
 
 

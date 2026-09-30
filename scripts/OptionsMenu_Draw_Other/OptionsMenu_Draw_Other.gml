@@ -202,6 +202,17 @@ function OptionsMenu_Draw_Other() {
 	        */
 
 	        // --------------------------------------------------------------------
+	        case Other_DEATH_COUNTER:{
+	        _text = val(dm_options[?_dk+hex_str(global.dbg_death_counter_show)+STR_Text],_STR_UNDEFINED);
+	             if (_i==Other_cursor)               _pi = PI_MENU1;
+	        else if(!global.dbg_death_counter_show) _pi = PI_DARK1;
+	        else                                    _pi = PI_MENU2;
+	        break;}
+	        // --------------------------------------------------------------------
+	        case Other_RESET:{
+	        if (Other_reset_armed) { _text = "PRESS AGAIN?"; _pi = PI_MENU1; }
+	        break;}
+	        // --------------------------------------------------------------------
 	        case Other_DOUBLE_JUMP:{
 	        _text = val(dm_options[?_dk+hex_str(g.DoubleJump_state)+STR_Text],_STR_UNDEFINED);
 	             if (_i==Other_cursor)   _pi = PI_MENU1;

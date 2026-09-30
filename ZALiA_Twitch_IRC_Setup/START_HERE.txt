@@ -25,4 +25,9 @@ FILES IN THIS FOLDER
 
 The config it writes lives at:
   %LOCALAPPDATA%\ZALiA\twitch_config.txt
+Optional lines you can add by hand:
+  tls=1             connect over TLS (wss, port 443) so the token is never sent in the
+                    clear. Off by default; if chat stops connecting, remove it.
+  user_cooldown=N   per-viewer cooldown in frames (60 = 1 s); also on the TWITCH OPTIONS page
+  mod_bypass=0      make mods obey the cooldowns too
 (You can re-run setup any time to change it, then toggle TWITCH IRC OFF then ON.)

@@ -40,7 +40,8 @@ function twitch_irc_connect() {
 
 	global.tw_irc_status = "connecting";
 
-	global.tw_irc_socket = network_create_socket(network_socket_tcp);
+	var _tls = variable_global_exists("tw_irc_tls") && global.tw_irc_tls;
+	global.tw_irc_socket = network_create_socket(_tls ? network_socket_wss : network_socket_tcp);
 	if (global.tw_irc_socket < 0)
 	{
 		global.tw_irc_status = "error: socket";
@@ -55,7 +56,8 @@ function twitch_irc_connect() {
 	global.tw_irc_rx          = "";    // fresh receive buffer for the new socket
 	global.tw_irc_auth_failed = false; // a new attempt gets to fail on its own
 	network_set_config(network_config_connect_timeout, 10000);
-	var _res = network_connect_raw_async(global.tw_irc_socket, "irc.chat.twitch.tv", 6667);
+	var _res = _tls ? network_connect_raw_async(global.tw_irc_socket, "wss://irc-ws.chat.twitch.tv", 443)   // tls=1: token never crosses the wire in the clear
+	                : network_connect_raw_async(global.tw_irc_socket, "irc.chat.twitch.tv", 6667);
 	if (_res < 0)
 	{
 		global.tw_irc_status = "error: connect";

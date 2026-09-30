@@ -28,6 +28,7 @@ function save_game_pref() {
 	_dm_save_data[?STR_Torch+STR_Lighting]                  = g.torch_lighting_method;
 	_dm_save_data[?STR_HUD+STR_Type]                        = global.HUD_state;
 	_dm_save_data[?STR_Quest+STR_Timer+"_Show"]             = global.QuestTimer_show;
+	_dm_save_data[?"_DeathCounter_Show"]                    = global.dbg_death_counter_show; // OTHER -> DEATH COUNTER (09-30)
 	_dm_save_data[?STR_Frenzy+STR_Stab]                     = g.mod_StabFrenzy;
 	_dm_save_data[?STR_Cucco+STR_Spell+"02"+STR_Preference] = g.CuccoSpell2_Option;
 	_dm_save_data[?STR_Overworld+STR_Mark+STR_Hidden+STR_Exit] = g.HiddenExitIndicator_enabled;
@@ -103,12 +104,12 @@ function save_game_pref() {
 	if (DEV 
 	&& !file_exists(_FILE_NAME) )
 	{
-	    show_debug_message("save_game_pref():  '"+_FILE_NAME+"'  created!");
+	    if (global.DB0) show_debug_message("save_game_pref():  '"+_FILE_NAME+"'  created!");
 	}
 
 	var _ENCODED = json_encode(_dm_save_data);
 	file_text_write_atomic(working_directory+_FILE_NAME, _ENCODED); // never leaves half-written prefs
-	show_debug_message("save_game_pref():  '"+_FILE_NAME+"'  saved!");
+	if (global.DB0) show_debug_message("save_game_pref():  '"+_FILE_NAME+"'  saved!");
 	// ---------------------------------------------------------------
 
 

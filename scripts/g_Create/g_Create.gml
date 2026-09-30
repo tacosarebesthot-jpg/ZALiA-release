@@ -4305,6 +4305,7 @@ function g_Create() {
 	global.tw_irc_user    = "";    // bot/login nick
 	global.tw_irc_channel = "";    // channel to join (no leading '#')
 	global.tw_irc_socket  = -1;    // live TCP socket id (-1 = not connected)
+	global.tw_irc_tls     = false; // tls=1 in twitch_config.txt: WebSocket-over-TLS to irc-ws.chat.twitch.tv:443 instead of plaintext 6667
 	// Connection settings come from %LOCALAPPDATA%\ZALiA\twitch_config.txt (the user
 	// creates it: token=/user=/channel=/cooldown=) -> twitch_irc_load_config().
 	global.tw_irc_status          = "idle";    // human-readable: idle/connecting/connected/error/no config

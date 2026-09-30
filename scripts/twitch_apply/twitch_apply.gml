@@ -250,6 +250,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			break;
 
 		case "steal": case "rob": case "thief": case "pickpocket":
+			if (!instance_exists(f) || !instance_exists(g)) { global.tw_apply_refused = true; break; }
 			// HOSTILE: chat temporarily TAKES one of your items.
 			//
 			// Picks from what you ACTUALLY HOLD, so early-game chat cannot steal a

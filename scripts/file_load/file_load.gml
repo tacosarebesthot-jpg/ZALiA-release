@@ -517,7 +517,7 @@ function file_load(argument0) {
 
 
 	show_debug_message("");
-	show_debug_message("FILE '"+_FILE_NAME+"'  LOADED!");
+	if (global.DB0) show_debug_message("FILE '"+_FILE_NAME+"'  LOADED!");
 	//show_debug_message("file num "+string(f.file_num)+"  LOADED!");
 	show_debug_message("");
 

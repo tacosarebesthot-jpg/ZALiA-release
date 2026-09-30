@@ -44,7 +44,11 @@ param(
 
     [int]$SettleSec = 8,
 
-    [int]$RunStartTimeoutSec = 180
+    [int]$RunStartTimeoutSec = 180,
+
+    # Where Igor's `Run` drops its output on this machine. Override with -RunOutputDir or the
+    # ZALIA_RUN_OUTPUT environment variable; the default is the dev box's path.
+    [string]$RunOutputDir = $(if ($env:ZALIA_RUN_OUTPUT) { $env:ZALIA_RUN_OUTPUT } else { 'C:\zelda2_workspace\output\ZALiA' })
 )
 
 $ErrorActionPreference = 'Stop'
@@ -78,7 +82,7 @@ $BundleDir = Join-Path $DistDir "ZALiA_play_b$BuildNum"
 # Invoke-ZaliaTest.ps1's harness artifacts live downstream of, just the raw
 # Run output -- confirm this path is still current before relying on it; if
 # GameMaker/Igor version changes, this is the first thing to re-verify.
-$RunOutputDir = 'C:\zelda2_workspace\output\ZALiA'
+# ($RunOutputDir is a parameter now -- see the param block / ZALIA_RUN_OUTPUT.)
 
 $RunnerSourceExe = Join-Path $RuntimePath 'windows\x64\Runner.exe'
 
@@ -309,9 +313,9 @@ robocopy "%LOCALAPPDATA%\ZALiA\bugprobe"     "%DEST%\bugprobe"     /E /NFL /NDL 
 robocopy "%LOCALAPPDATA%\ZALiA\screen_check" "%DEST%\screen_check" /E /NFL /NDL /NJH /NJS /NP >nul
 if exist "%LOCALAPPDATA%\ZALiA\crash.txt" copy /Y "%LOCALAPPDATA%\ZALiA\crash.txt" "%DEST%\" >nul
 echo Logs copied to "%DEST%".
-if exist "C:\dev_stack\" (
-  robocopy "%DEST%" "C:\dev_stack\ZALiA_LOGS" /E /NFL /NDL /NJH /NJS /NP >nul
-  echo Also copied to C:\dev_stack\ZALiA_LOGS for the dev VM.
+if defined ZALIA_DEV_LOGS if exist "%ZALIA_DEV_LOGS%\" (
+  robocopy "%DEST%" "%ZALIA_DEV_LOGS%" /E /NFL /NDL /NJH /NJS /NP >nul
+  echo Also copied to %ZALIA_DEV_LOGS% for the dev VM.
 )
 echo.
 echo Done. Send the "ZALiA_LOGS" folder (or paste session.txt / crash.txt).
@@ -384,7 +388,7 @@ WALK TUNING  (optional — the walk is already fixed; only if you
   Run  PLAY.bat  to play  ->  it auto-collects your marks on exit.
   (or run the game directly, then double-click EXPORT_LOGS.bat)
   Your marks/screenshots/logs end up in the  ZALiA_LOGS  folder
-  (and C:\dev_stack\ZALiA_LOGS if this is the dev machine).
+  (and %ZALIA_DEV_LOGS% if that variable is set on this machine).
 ==========================================================
 '@
     Set-Content -LiteralPath $controlsTxtPath -Value $controlsTxtContent -Encoding utf8
