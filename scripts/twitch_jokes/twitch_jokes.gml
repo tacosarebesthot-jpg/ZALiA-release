@@ -668,16 +668,109 @@ function tw_toast_draw() {
 // !commands / !howto arm global.tw_help_timer; tw_help_draw() paints a panel top-centre
 // for 8 s in the sprite font. Content is a fixed list, grouped, so it stays readable.
 
-function tw_help_show() {
+function tw_help_show(_cat = "") {
 	global.tw_help_timer = 480;
+	global.tw_help_cat   = tw_help_cat_canon(_cat);
 }
 
-function tw_help_draw() {
-	if (!variable_global_exists("tw_help_timer") || global.tw_help_timer <= 0) return;
-	// chat asked for it, so it follows the CHAT TOASTS setting: OFF = no card (v2.1.4)
-	if (tw_toast_secs_get("chat") <= 0) { global.tw_help_timer = 0; return; }
-	global.tw_help_timer--;
-	static _rows = [
+/// @description  tw_help_cat_canon(word) -> "help" / "hurt" / "chaos" / "mobs" / "fun" / "rl" / "mods", or "" (the full card).
+/// 09-30 review: the full card is ~50 verbs on one screen; "!help hurt" pages it.
+function tw_help_cat_canon(_w) {
+	switch (string_lower(tw_trim(string(_w))))
+	{
+		case "help": case "heal": case "good": case "nice": case "helpful":       return "help";
+		case "hurt": case "bad": case "evil": case "damage": case "hostile":     return "hurt";
+		case "chaos": case "screen": case "troll": case "controls":              return "chaos";
+		case "mobs": case "mob": case "enemies": case "enemy": case "spawn":     return "mobs";
+		case "fun": case "meta": case "jokes": case "misc":                      return "fun";
+		case "rl": case "rocket": case "rocketleague": case "quickchat":         return "rl";
+		case "mods": case "mod": case "vote": case "ignore":                      return "mods";
+	}
+	return "";
+}
+
+/// @description  tw_help_rows(cat) -- the rows of one category page (verb + what it does), or the full card.
+/// Rows are at most 40 chars (8 px sprite font on a 320 px GUI) and use only FONT_LAYOUT glyphs
+/// (no < > [ ] =): "N" or "S" after a verb means an optional number / seconds.
+function tw_help_rows(_cat) {
+	switch (_cat)
+	{
+		case "help": return [
+			"HELP THE RUNNER         (!HELP HURT NEXT)",
+			"!HEAL N    FULL HP, OR N QUARTER BOXES",
+			"!MP N      FULL MP, OR N POINTS",
+			"!REFILL    FULL HP AND MP   !1UP  A LIFE",
+			"!INVULN S  BRIEF INVINCIBILITY",
+			"!LINK      END A CHAT CHICKEN EARLY",
+			"!PROTECT !REFLECT !JUMP !LIFE !FIRE",
+			"!THUNDER   CAST THAT SPELL FOR REAL"
+		];
+		case "hurt": return [
+			"HURT THE RUNNER        (!HELP CHAOS NEXT)",
+			"!HURT N    N QUARTER BOXES, NEVER LETHAL",
+			"!DRAIN N   DRAIN MAGIC",
+			"!POISON    SLOW LETHAL DRIP",
+			"!CURSE     SLOW DRIP, STOPS AT 1 HP",
+			"!ATTRITION LIFE DRIPS, NEVER KILLS",
+			"!TAX N     TAKE 10% (OR N%) OF YOUR XP",
+			"!DMGUP     EVERY HIT DOES DOUBLE",
+			"!STEAL     BORROW ONE OF YOUR ITEMS",
+			"!CATSLAP N SLAPS THAT KNOCK LINK AROUND"
+		];
+		case "chaos": return [
+			"CHAOS, ALL TIMED        (!HELP MOBS NEXT)",
+			"!SPEED !SLOW   FAST OR MARSH LEGS",
+			"!SHRINK !GROW  TINY OR HUGE LINK",
+			"!FLIP  MIRROR  !CONFUSE  SWAP LEFT/RIGHT",
+			"!DISORIENT  ALSO UP/DOWN   !PARTY  BOTH",
+			"!DISCO !SHAKE !DARK  COLOURS/SHAKE/DARK",
+			"!ICE  SLIPPY FLOOR  !MOON  LOW GRAVITY",
+			"!ROOT  NO WALK/JUMP  !STASIS S  FREEZE",
+			"!DENY MOVE S  LOCK A MOVE  !UNDENY",
+			"!GHOST  INVISIBLE MOBS  !FLASHBANG",
+			"ADD SECONDS: !SLOW 20  (5 TO 60)"
+		];
+		case "mobs": return [
+			"MOBS / DUNGEON MASTER    (!HELP FUN NEXT)",
+			"!SPAWN ENEMY N  UP TO 6: DAIRA MOBLIN",
+			"   GORIYA ZORA STALFOS BAT ATTA MYU",
+			"!SWARM N   RANDOM PACK   !FLAME  HECKLER",
+			"!FREEZE S  FREEZE MOBS   !SMITE  KILL EM",
+			"!CRUSH  BLOCK FROM ABOVE !ARISE  CHICKEN",
+			"!RESHUFFLE  REROLL ENEMY RANDO",
+			"!CHALLENGE  FLIP, 4 HEARTS, NO HELP,",
+			"            FOR THE WHOLE PALACE",
+			"BOSSES: NEVER FROZEN, SMITED, GHOSTED"
+		];
+		case "fun": return [
+			"FUN / META               (!HELP RL NEXT)",
+			"!MUSIC NAME  PLAY IT    !SONG  WHATS ON",
+			"!METH  MOON+JUMP+SPEED  !QUANTUMENTANGLE",
+			"!FATALITY !FRIENDSHIP !FLAWLESS  SPLASH",
+			"!SUGGEST IDEA  LOG IT FOR THE DEV",
+			"!POINTS  BALANCE   !TOP  RICHEST CHAT",
+			"!KILLS  WHO KILLED THE RUNNER MOST",
+			"!VOTE X Y S  CHAT PICKS ONE OF TWO",
+			"!VERSION  BUILD   !HELP PAGE  THIS CARD"
+		];
+		case "rl": return [
+			"ROCKET LEAGUE QUICK CHAT (PLATES, FREE)",
+			"!NICESHOT !WHATASAVE !CALCULATED",
+			"!SAVAGE !CLOSEONE !OKAY !FAKING",
+			"!GG !EZ !WOW !NOPROBLEM !THANKS",
+			"SAME PLATE 3X IN 6S MUTES CHAT 4S."
+		];
+		case "mods": return [
+			"MODS AND THE STREAMER",
+			"!IGNORE NAME    MUTE THEM FOR EVERYTHING",
+			"!UNIGNORE NAME  LET THEM PLAY AGAIN",
+			"MODS SKIP BOTH COOLDOWNS",
+			"!VOTE X Y S  ANYONE CAN START ONE:",
+			"  TYPE X OR Y (OR 1 / 2) TO VOTE,",
+			"  THE WINNER FIRES WHEN TIME IS UP"
+		];
+	}
+	return [
 		"HOW CHAT PLAYS: TYPE !WORD IN CHAT   V" + ZALIA_VERSION,
 		"HELP  !HEAL !MP !REFILL !1UP !FAIRY !LINK",
 		"      !PROTECT !REFLECT !INVULN",
@@ -697,8 +790,17 @@ function tw_help_draw() {
 		// widest row it can hold is ~41 characters before it runs off a 320 px GUI.
 		"RL    !NICESHOT !WHATASAVE !CALCULATED",
 		"      !GG !EZ !WOW !SAVAGE !OKAY !THANKS",
-		"ADD A NUMBER FOR SECONDS: !SLOW 20"
+		"ADD A NUMBER FOR SECONDS: !SLOW 20",
+		"!HELP HURT/CHAOS/MOBS/FUN/RL/MODS FOR MORE"
 	];
+}
+
+function tw_help_draw() {
+	if (!variable_global_exists("tw_help_timer") || global.tw_help_timer <= 0) return;
+	// chat asked for it, so it follows the CHAT TOASTS setting: OFF = no card (v2.1.4)
+	if (tw_toast_secs_get("chat") <= 0) { global.tw_help_timer = 0; return; }
+	global.tw_help_timer--;
+	var _rows = tw_help_rows(variable_global_exists("tw_help_cat") ? global.tw_help_cat : "");
 	var _gw = display_get_gui_width();  if (_gw <= 0) _gw = 320;
 	var _gh = display_get_gui_height(); if (_gh <= 0) _gh = 240;
 	var _s  = max(1, floor(_gh / 240));

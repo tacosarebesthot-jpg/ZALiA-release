@@ -1,7 +1,8 @@
 /// @description  twitch_points -- the chat points economy (round 10h, 2026-09-12).
 //
-// Chat kept asking "is it points based?" (asm0deus, HungSo1o). OFF by default: the
-// TWITCH page row POINTS ECONOMY (points= in twitch_config.txt) turns it on.
+// Chat kept asking "is it points based?" (asm0deus, HungSo1o). ON by default since the
+// 09-30 review (it was off, and nobody found the row); the TWITCH page row POINTS ECONOMY
+// (points= in twitch_config.txt) turns it off, and an existing points=0 is honoured.
 // Earning: 1 point per chat message (any message, max 6 a minute per person) and
 // 5 points every 5 minutes to everyone who talked in the last 10 minutes. Balance
 // cap 999. Spending: every verb has a cost (tw_points_cost); a command a viewer
@@ -11,7 +12,7 @@
 // points.txt (save area, "name=points" per line), written at most once a minute.
 
 function tw_points_init() {
-	global.tw_points_on     = false;
+	global.tw_points_on     = true;
 	global.tw_points        = ds_map_create();   // lowercase name -> points
 	global.tw_points_rate   = ds_map_create();   // lowercase name -> "frame,count" this minute
 	global.tw_points_seen   = ds_map_create();   // lowercase name -> last frame heard
@@ -19,7 +20,7 @@ function tw_points_init() {
 	global.tw_points_frame  = 0;
 	global.tw_points_saved  = 0;
 	global.tw_points_stipend= 0;
-	global.tw_points_on = (tw_num(tw_config_get("points", "0"), 0) != 0);
+	global.tw_points_on = (tw_num(tw_config_get("points", "1"), 1) != 0);
 	if (file_exists("points.txt"))
 	{
 		var _fh = file_text_open_read("points.txt");

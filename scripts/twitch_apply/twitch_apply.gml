@@ -1039,10 +1039,20 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 
 		// help: the one-screen "how chat plays" card (tw_help_draw). MrMaseTV 09-11.
 		case "help":
-			tw_help_show();
-			global.tw_toast       = _who_s + " -> help card on screen";
+		{
+			// "!help hurt" pages the card by category (09-30 review); bare !help = the full list
+			var _hc = tw_help_cat_canon(_arg);
+			if (string(_arg) != "" && _hc == "")
+			{
+				global.tw_toast       = "!help hurt / chaos / mobs / fun / rl / mods  (or just !help)";
+				global.tw_toast_timer = 300;
+				break;
+			}
+			tw_help_show(_hc);
+			global.tw_toast       = _who_s + " -> help" + (_hc != "" ? " " + _hc : "") + " on screen";
 			global.tw_toast_timer = 120;
 			break;
+		}
 
 		// challenge: Lane's design (09-11 2:53): flip stays on for the WHOLE palace, life
 		// capped at 4 containers, no reprieve (helpful verbs blocked). Ends when he leaves

@@ -4344,6 +4344,7 @@ function g_Create() {
 	global.tw_challenge           = false;     // !challenge: flip for the whole palace, 4 hearts, no reprieve
 	global.tw_swarm_queue         = [];        // !swarm typed off a battle screen waits here
 	global.tw_help_timer          = 0;         // !help card frames left (tw_help_draw)
+	global.tw_help_cat            = "";        // "" = the full card, else one page: help/hurt/chaos/mobs/fun/rl/mods
 	global.tw_last_helper         = "";  global.tw_last_helper_t = 0;   // death-toast assists
 	global.tw_last_hurter         = "";  global.tw_last_hurter_t = 0;
 	global.tw_last_hurt_verb      = "";                                 // ... and WHICH verb ("KILLED BY x (!SWARM)")

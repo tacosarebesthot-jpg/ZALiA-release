@@ -8,7 +8,9 @@ A shared cooldown throttles all of chat, and each chatter also has their own
 (30 s by default, user_cooldown= in twitch_config.txt). When the POINTS ECONOMY is
 on, every verb has a price and !points shows your balance; the broadcaster is free.
 The EFFECT TIMERS row on the TWITCH OPTIONS page shows what is running, top-right.
-!help in chat puts a one-screen cheat sheet on stream.
+!help in chat puts a one-screen cheat sheet on stream; !help hurt (or chaos,
+mobs, fun, rl, mods) shows one page with what each verb does. Points are ON
+by default; the POINTS ECONOMY row turns them off.
 
 HELP THE RUNNER
   !heal [n]          full HP, or n quarter-boxes        !mp [n]     full MP, or n points
