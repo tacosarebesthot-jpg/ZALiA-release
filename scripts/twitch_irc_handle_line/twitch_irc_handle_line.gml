@@ -65,6 +65,9 @@ function twitch_irc_handle_line(_line) {
 			global.tw_irc_reconnect_at = -1;
 			global.tw_toast       = "TWITCH LOGIN FAILED -- token expired? re-run setup";
 			global.tw_toast_timer = 600;
+			// Twitch closes its end next and no event tells us (twitch_irc_dropped): free the
+			// socket now. With auth_failed set this keeps the status and arms no retry.
+			twitch_irc_dropped("error: bad token");
 		}
 		return;
 	}
@@ -168,7 +171,7 @@ function twitch_irc_handle_line(_line) {
 		}
 		else if (_target == "")
 		{
-			global.tw_toast       = "!" + _verb + " <name>   (" + string(tw_ignore_count()) + " ignored)";
+			global.tw_toast       = "!" + _verb + " name   (" + string(tw_ignore_count()) + " ignored)"; // no < > in the sprite font
 			global.tw_toast_timer = 240;
 		}
 		else if (variable_global_exists("tw_irc_channel") && _target == string_lower(string(global.tw_irc_channel)))
@@ -290,6 +293,20 @@ function twitch_irc_handle_line(_line) {
 	// chat effect to 5s and silently defeated the owner's EFFECT LENGTH setting
 	// (the options-menu value never reached IRC effects at all). Empty ->
 	// twitch_apply falls back to global.tw_effect_secs, same as the drop-file path.
+	var _pts_on  = variable_global_exists("tw_points_on") && global.tw_points_on;
+	var _bal0    = _pts_on ? tw_points_get(_sender) : 0;
+	var _queue0  = (variable_global_exists("tw_swarm_queue") && is_array(global.tw_swarm_queue)) ? array_length(global.tw_swarm_queue) : 0;
+
 	twitch_apply(_verb, _arg, _sender, "");
 	if (variable_global_exists("tw_apply_ok") && global.tw_apply_ok) tw_points_deduct(_sender, _bill_verb);
+
+	// A queued !swarm is paid for now and delivered later. Note what was really paid on the
+	// queue entry itself, so tw_effects_clear_all can hand it back if a death or a file load
+	// empties the queue before it lands.
+	var _paid = _pts_on ? (_bal0 - tw_points_get(_sender)) : 0;
+	if (_paid > 0 && variable_global_exists("tw_swarm_queue") && is_array(global.tw_swarm_queue) && array_length(global.tw_swarm_queue) > _queue0)
+	{
+		var _qe = global.tw_swarm_queue[array_length(global.tw_swarm_queue) - 1];
+		_qe.paid = _paid;  _qe.payer = _sender;
+	}
 }

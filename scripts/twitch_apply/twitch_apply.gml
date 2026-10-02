@@ -188,8 +188,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 
 		// ---- self-reverting timers (decremented by existing game code) -------------
 		case "invuln":
-			// update_game_timers.gml:18 ticks iframes_timer down to 0 on its own.
-			if (instance_exists(global.pc)) global.pc.iframes_timer = _frames;
+			// update_game_timers.gml:18 ticks iframes_timer down to 0 on its own -- but NOT once
+			// a frame: only when timer_b wraps, every timer_b_DURATION1+1 = 21 frames. Storing
+			// FRAMES in it made the default 5 s !invuln last ~105 s, and "!invuln 60" 21 minutes
+			// (the same unit mix-up !spawn's i-frames had). Convert to ticks; never shorten
+			// i-frames he already has.
+			if (instance_exists(global.pc) && instance_exists(g))
+			{   global.pc.iframes_timer = max(global.pc.iframes_timer, ceil(_frames / (g.timer_b_DURATION1 + 1)));  }
 			break;
 
 		case "shake":
@@ -674,6 +679,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					array_push(global.tw_swarm_queue, { n : floor(tw_num(_arg, 3)), who : _who_s });
 					global.tw_toast       = _who_s + " -> swarm QUEUED for the next battle screen";
 					global.tw_toast_timer = 240;
+					// queued = accepted, so it is paid for now. tw_spawn_window_ok() marked it
+					// refused, and the drain in twitch_tick calls the dispatcher with no billing:
+					// every swarm typed off a battle screen used to be free. (What was paid is
+					// noted on the queue entry by twitch_irc_handle_line, and handed back by
+					// tw_effects_clear_all if a death or a file load empties the queue first.)
+					global.tw_apply_refused = false;
+					global.tw_apply_queued  = true; // nothing has touched Link yet: no kill credit until it lands
 				}
 				break;
 			}
@@ -902,7 +914,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					// so we never strip a form the player set themselves.
 					restore  : function() {
 						if (!instance_exists(g) || self.had_fary) return;
-						g.spells_active &= ~SPL_FARY;
+						tw_cucco_unmorph();
 						if (self.t2) g.CuccoSpell2_Active = 0; // back to the Link state a real cast leaves
 					}
 				});
@@ -1350,7 +1362,12 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			// request there is nothing to deny there.
 			if (instance_exists(g))
 			{
-				var _dwhat = tw_slug(_arg);
+				// "!deny jump 10": the number is the seconds, not part of the name. The slug kept
+				// the digits ("jump10"), matched nothing, and the documented form only ever
+				// showed the help toast.
+				var _dwhat = string_letters(tw_slug(_arg));
+				var _dsecs = tw_num(string_digits(string(_arg)), 0);
+				if (_dsecs > 0) _frames = floor(min(_dsecs, 60) * 60);
 				var _dbits = 0;
 				// OFF form: "!deny off", "!deny jump off", "!deny off jump" (+ clear/none/stop).
 				var _doff  = false;
@@ -1480,7 +1497,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	// death-toast assists (chat's polite-assassin meta): who last helped, who last hurt
 	if (_known)
 	{
-		switch (_v)
+		// a command that did nothing ("already at 1 HP", "needs a palace", a help toast) earns no
+		// credit: the death plate and !kills counted those, a free way up the leaderboard
+		var _queued_only = (variable_global_exists("tw_apply_queued") && global.tw_apply_queued); // a swarm that is only waiting
+		global.tw_apply_queued = false;
+		if (!global.tw_apply_refused && !_queued_only) switch (_v)
 		{
 			case "heal": case "mp": case "refill": case "1up": case "life": case "fairy": case "fary":
 			case "invuln": case "link": case "unchicken": case "undeny": case "freeze": case "stun": case "smite": case "clearscreen": case "flashbang":
@@ -1698,10 +1719,13 @@ function tw_spawn_window_ok(_v, _who_s) {
 		return false;
 	}
 
+	// ChangeRoom_timer: a vote, a queued swarm or a drop-file can land mid room-change, when
+	// global.pc and room_type "A" still describe the room being torn down.
 	if (instance_exists(g)
 	&&  (g.gui_state != g.gui_state_NONE
 	||  g.cutscene
-	||  g.FallScene_timer))
+	||  g.FallScene_timer
+	||  g.ChangeRoom_timer > 0))
 	{
 		global.tw_toast       = _who_s + " -> " + string(_v) + " fizzled (busy)";
 		global.tw_toast_timer = 180;
@@ -1709,6 +1733,34 @@ function tw_spawn_window_ok(_v, _who_s) {
 		return false;
 	}
 	return true;
+}
+
+/// @description  tw_cucco_unmorph() -- drop the FAIRY bit the way the game's own un-cast does.
+/// A chicken is half Link's height, so it rests 8 px lower than he does. cast_spell() lifts
+/// him by that 8 px before the form changes (tier 2 back to human); the chat chicken only
+/// cleared the bit, so every chat chicken that wore off left Link 8 px INSIDE the floor: he
+/// read as touching a wall on both sides and a knockback could not move him (selftest
+/// 2026-10-01: !catslap moved 0 px after any !arise, 31 px without one). Feet stay where
+/// they were; only his head goes up. The bit test makes a second call a no-op.
+///
+/// ONLY where he has room to stand. Under a ceiling too low for Link (the headroom test is
+/// cast_spell's own: rows are 8 px, he needs 4) nothing is lifted and the un-morph behaves
+/// exactly as it always did -- that is the "chicken wore off in a tight spot" case the owner
+/// ruled expected on 2026-08-15, and it is not this function's business to change it.
+/// Side-scroll rooms only: on the overworld map the same 8 px would knock him off the grid.
+function tw_cucco_unmorph() {
+	if (!instance_exists(g)) return;
+	if ((g.spells_active & SPL_FARY) && g.room_type == "A" && instance_exists(global.pc) && global.pc.is_cucco)
+	{
+		with (global.pc)
+		{
+			var _row_under = yb >> 3;
+			    _row_under = find_row_solid(TID_SOLID1|TID_ONEWY1, x>>3, _row_under,    1,0, _row_under);
+			var _row_above = find_row_solid(TID_SOLID1,            x>>3, _row_under-1, -1,0, 0);
+			if (_row_under - _row_above > 4) set_xy(id, x, y - 8);
+		}
+	}
+	g.spells_active &= ~SPL_FARY;
 }
 
 /// @description  tw_force_link_form() -- end every chat-cast !arise now (frames -> 0 so the
@@ -1732,7 +1784,7 @@ function tw_force_link_form() {
 	}
 	if (!_keep_bit && instance_exists(g))
 	{
-		g.spells_active &= ~SPL_FARY;
+		tw_cucco_unmorph();
 		// Tier-2 form is FARY && CuccoSpell2_Active; the real cast toggles Active, so leaving
 		// it at 1 with FARY cleared would make the player's next cast "turn back to human"
 		// while already human. Clear both, the same state a real un-cast leaves.
@@ -1752,7 +1804,16 @@ function tw_effects_clear_all(_on_death) {
 
 	// A !swarm typed off a battle screen waits in tw_swarm_queue for the next one; left
 	// alone it landed on the first fight of the next life, or of a freshly loaded file.
-	if (variable_global_exists("tw_swarm_queue") && is_array(global.tw_swarm_queue)) global.tw_swarm_queue = [];
+	if (variable_global_exists("tw_swarm_queue") && is_array(global.tw_swarm_queue))
+	{
+		// a queued swarm was paid for when it was queued; one that never lands is refunded
+		for (var _qi = 0; _qi < array_length(global.tw_swarm_queue); _qi++)
+		{
+			var _qe = global.tw_swarm_queue[_qi];
+			if (is_struct(_qe) && variable_struct_exists(_qe, "paid") && _qe.paid > 0) tw_points_add(_qe.payer, _qe.paid);
+		}
+		global.tw_swarm_queue = [];
+	}
 
 	if (!variable_global_exists("tw_active") || !is_array(global.tw_active)) return 0;
 	var _n = 0;

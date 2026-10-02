@@ -47,6 +47,7 @@ function GameOverScreen_Create() {
 	&&  variable_global_exists("tw_last_hurter") && global.tw_last_hurter != ""
 	&&  current_time - global.tw_last_hurter_t < 90000)
 	{   tw_toast_push(choose("GG", "EZ"), "", "chat", "game");  } // game callout: GAME TOASTS setting
+	if (variable_global_exists("tw_last_hurter")) global.tw_last_hurter = ""; // credit spent (DeathScreen_Step leaves it for this screen)
 
 
 

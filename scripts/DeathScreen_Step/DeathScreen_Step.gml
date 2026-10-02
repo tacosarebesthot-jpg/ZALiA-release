@@ -34,7 +34,9 @@ function DeathScreen_Step() {
 	            else if (variable_global_exists("tw_last_helper") && global.tw_last_helper != "" && current_time - global.tw_last_helper_t < 90000)
 	                _dt_sub = "HEALED BY " + string(global.tw_last_helper);
 	            tw_toast_push("KILLED BY " + string(global.tw_last_hurter), _dt_sub, "win");
-	            global.tw_last_hurter = ""; // one death, one credit -- the next one needs a fresh hurt
+	            // one death, one credit -- the next one needs a fresh hurt. Kept on the LAST life:
+	            // the game-over screen's GG/EZ callout reads it next and clears it there.
+	            if (global.pc_lives > 0) global.tw_last_hurter = "";
 	        }
 	        // ROCKET LEAGUE (round 11): the apology plate. Random so the same death never reads
 	        // the same way twice. Pushed AFTER the assists plate so the credit line stays on top.

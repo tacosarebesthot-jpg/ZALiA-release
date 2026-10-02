@@ -411,8 +411,10 @@ function tw_toast_cat(_kind) {
 
 // "egg" = MK2 lines and easter eggs (Konami, dev code). Owner 09-15: those always show, 5 s,
 // and no setting gates them. MUSIC and GAME toasts default OFF; players turn them on in TWITCH OPTIONS.
+// "system" = notices the player has to see (unreadable save, controller lost, settings reset).
+// They were first filed under "game", which is OFF by default, so none of them ever showed.
 function tw_toast_secs_get(_cat) {
-	if (_cat == "egg") return 5;
+	if (_cat == "egg" || _cat == "system") return 5;
 	if (!variable_global_exists("tw_toast_secs") || !is_struct(global.tw_toast_secs))
 		global.tw_toast_secs = { music : 0, chat : 4, game : 0 };
 	var _v = variable_struct_get(global.tw_toast_secs, _cat);
@@ -715,7 +717,7 @@ function tw_help_rows(_cat) {
 			"!TAX N     TAKE 10% (OR N%) OF YOUR XP",
 			"!DMGUP     EVERY HIT DOES DOUBLE",
 			"!STEAL     BORROW ONE OF YOUR ITEMS",
-			"!CATSLAP N SLAPS THAT KNOCK LINK AROUND"
+			"!CATSLAP  3 SLAPS THAT KNOCK LINK AROUND"
 		];
 		case "chaos": return [
 			"CHAOS, ALL TIMED        (!HELP MOBS NEXT)",
@@ -945,7 +947,7 @@ function tw_checkpoint_tick() {
 	if (!instance_exists(global.pc)) return;
 	// Compare OWNED bits: a chat !steal flips a bit at runtime and would otherwise fire an
 	// "item" checkpoint the same frame (file_save folds the stolen bits back in too).
-	var _items_owned = f.items | ((variable_global_exists("tw_stolen") && is_real(global.tw_stolen)) ? global.tw_stolen : 0);
+	var _items_owned = f.items | ((variable_global_exists("tw_stolen") && is_numeric(global.tw_stolen)) ? global.tw_stolen : 0); // is_numeric: tw_stolen is an int64 after "|="
 	if (!variable_global_exists("tw_ckpt_items")) { global.tw_ckpt_items = _items_owned; global.tw_ckpt_frames = 0; }
 	if (!variable_global_exists("tw_ckpt_due")) global.tw_ckpt_due = "";
 	var _why = "";

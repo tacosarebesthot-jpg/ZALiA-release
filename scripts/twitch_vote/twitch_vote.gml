@@ -1,10 +1,12 @@
 /// @description  twitch_vote -- "!vote dark flip [secs]": chat picks between two effects (09-30 review).
 //
-// Anyone starts one (normal cooldown / points rules apply to the START; the verb itself is
-// free). While it runs, plain chat counts as a ballot: "dark", "!dark", "a" or "1" for the
-// first option, the same shapes for the second. One vote per chatter, last one wins. When
-// the clock runs out the winner fires through twitch_apply() as "CHAT" -- no cooldown, no
-// points -- and a tie with votes on both sides fires both. Nobody voted: nothing happens.
+// Anyone starts one (normal cooldown rules apply to the START). Starting is FREE and so is
+// the winner -- owner's ruling 2026-10-01, knowing that this lets chat vote a paid effect in
+// for nothing; do not add a price. While it runs, plain chat counts as a ballot: "dark",
+// "!dark", "a" or "1" for the first option, the same shapes for the second. One vote per
+// chatter, last one wins. When the clock runs out the winner fires through twitch_apply() in
+// the starter's name -- no cooldown, no points -- and a tie with votes on both sides fires
+// both. Nobody voted: nothing happens.
 // State lives in global.tw_vote (undefined = no vote). Drawn by tw_effects_draw().
 
 function tw_vote_active() {
@@ -32,7 +34,7 @@ function tw_vote_start(_arg, _who) {
 	}
 	if (array_length(_verbs) != 2)
 	{
-		global.tw_toast       = "!vote <effect> <effect> [secs]   e.g. !vote dark flip 20";
+		global.tw_toast       = "!vote dark flip 20   (two effects, seconds optional)"; // no < > [ ] in the sprite font
 		global.tw_toast_timer = 300;
 		return false;
 	}
@@ -109,6 +111,9 @@ function tw_vote_tick() {
 
 	var _v  = global.tw_vote;
 	var _a = _v.a, _b = _v.b, _na = _v.na, _nb = _v.nb;
+	// The winner fires in the STARTER's name: he called it, and a death it causes is his kill.
+	// Fired as "CHAT", every vote kill went to a chatter called "chat" who then sat on top of !kills.
+	var _by = (string(_v.who) != "") ? string(_v.who) : "CHAT";
 	if (ds_exists(_v.voters, ds_type_map)) ds_map_destroy(_v.voters);
 	global.tw_vote = undefined;                         // cleared BEFORE the winner fires: its toast must win
 
@@ -117,13 +122,13 @@ function tw_vote_tick() {
 		tw_toast_push("VOTE: NOBODY VOTED", "chat is asleep", "chat");
 		return;
 	}
-	if (_na > _nb)       { tw_toast_push("VOTE: " + string_upper(_a) + " WINS " + string(_na) + "-" + string(_nb), "", "chat"); twitch_apply(_a, "", "CHAT", ""); }
-	else if (_nb > _na)  { tw_toast_push("VOTE: " + string_upper(_b) + " WINS " + string(_nb) + "-" + string(_na), "", "chat"); twitch_apply(_b, "", "CHAT", ""); }
+	if (_na > _nb)       { tw_toast_push("VOTE: " + string_upper(_a) + " WINS " + string(_na) + "-" + string(_nb), "", "chat"); twitch_apply(_a, "", _by, ""); }
+	else if (_nb > _na)  { tw_toast_push("VOTE: " + string_upper(_b) + " WINS " + string(_nb) + "-" + string(_na), "", "chat"); twitch_apply(_b, "", _by, ""); }
 	else
 	{
 		tw_toast_push("VOTE: TIE " + string(_na) + "-" + string(_nb), "both it is", "chat");
-		twitch_apply(_a, "", "CHAT", "");
-		twitch_apply(_b, "", "CHAT", "");
+		twitch_apply(_a, "", _by, "");
+		twitch_apply(_b, "", _by, "");
 	}
 }
 
