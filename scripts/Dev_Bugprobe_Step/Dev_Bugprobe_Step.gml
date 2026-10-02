@@ -1509,6 +1509,128 @@ function tws_feat(_name, _ok, _detail) {
 	tws_log((_ok ? "PASS" : "FAIL") + "  [feat]  " + _name + "  ->  " + string(_detail));
 }
 
+/// next stage of the "edge" / "erase" runs
+function tws_stage(_n) {
+	global.tws_es   = _n;
+	global.tws_et   = 0;
+	global.tws_prog = 0;
+}
+
+/// newest toast plate whose title contains `part` -> "TITLE / SUB", or "" when there is none
+function tws_plate(_part) {
+	if (!variable_global_exists("tw_toasts") || !is_array(global.tw_toasts)) return "";
+	for (var _i = array_length(global.tw_toasts) - 1; _i >= 0; _i--)
+	{
+		var _p = global.tw_toasts[_i];
+		if (string_pos(_part, _p.title) > 0) return _p.title + " / " + _p.sub;
+	}
+	return "";
+}
+
+/// harness-forced death, the same three lines the death test uses
+function tws_kill() {
+	g.dev_invState   = 0;
+	g.DevTools_state = global.tws_devtools0;
+	adjust_stat(-9999, 0);
+	global.pc.is_dead = true;
+}
+
+/// first line of a file in the save folder ("" when it is not there)
+function tws_file_text(_name) {
+	if (!file_exists(_name)) return "";
+	var _fh = file_text_open_read(working_directory + _name);
+	if (_fh == -1) return "";
+	var _s = file_text_read_string(_fh);
+	file_text_close(_fh);
+	return _s;
+}
+
+/// Flag text "erase" (~6 s): the ELIMINATION MODE confirm, worked on the file-select screen.
+/// START once arms the slot ("ERASE? START" flashes), a second START inside 0.4 s is a pad
+/// bounce and must do nothing, a later START erases. Slot 3's file NAME and file-name prefix
+/// are aimed at "_tws_scratch*" files first, so the erase lands on a copy: the real slot,
+/// its rando data and its spoiler are never opened. START goes in through the same
+/// dev_inject_pause hook the boot autopilot uses; the autopilot itself is switched off the
+/// moment the file-select screen is up, so nothing loads a save.
+function tws_erase_step() {
+	if (!variable_global_exists("tws_es")) { global.tws_es = 0; global.tws_et = 0; }
+	if (room != rmB_FileSelect || !instance_exists(FileSelect)) exit; // the autopilot is still getting us off the title screen
+	global.autosweep_started = true;
+	global.tws_et++;
+	var _slot = 3;
+	var _scr  = "_tws_scratch_save.txt";
+	switch (global.tws_es)
+	{
+	case 0:
+		if (FileSelect.state != FileSelect.State_MAIN) { global.tws_et = 0; break; }
+		if (global.tws_et < 60) break;
+		tws_log("== ZALiA twitch selftest v" + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ") -- erase confirm, file-select screen ==");
+		global.tws_zone_label = "erase";
+		var _txt = global.dm_save_file_data[? STR_Save + STR_File + hex_str(_slot) + STR_Encoded];
+		if (!is_string(_txt) || !get_saved_value(_slot, f.SDNAME_saveCreated, 0))
+		{
+			tws_log("FAIL  [erase]  slot " + string(_slot) + " holds no save: there is nothing to arm");
+			tws_finish("erase only");
+			exit;
+		}
+		var _wh = file_text_open_write(working_directory + _scr);
+		file_text_write_string(_wh, _txt);
+		file_text_close(_wh);
+		f.dl_file_names[| _slot - 1]       = _scr;
+		f.dl_FILE_NAME_PREFIX[| _slot - 1] = "_tws_scratch";
+		global.tws_er_len = string_length(_txt);
+		with (FileSelect) Main_cursor = SAVE_FILE_MAX + 1; // ELIMINATION MODE
+		global.dev_inject_pause = true;
+		tws_stage(1);
+		break;
+
+	case 1:
+		if (FileSelect.state == FileSelect.State_ELIMINATE) { tws_stage(10); break; }
+		if (global.tws_et > 600) { tws_log("FAIL  [erase]  never reached ELIMINATION MODE (10 s)"); tws_finish("erase only"); exit; }
+		break;
+
+	case 10:
+		if (global.tws_et < 40) break; // let the screen settle
+		with (FileSelect) { Eliminate_cursor = _slot - 1; Eliminate_confirm = 0; }
+		global.dev_inject_pause = true;                 // START no. 1
+		tws_stage(2);
+		break;
+
+	case 2:
+		if (global.tws_et == 4)
+		{
+			tws_feat("START on a slot with a save arms it and erases nothing", FileSelect.Eliminate_confirm == _slot && string_length(tws_file_text(_scr)) == global.tws_er_len,
+			         "armed slot=" + string(FileSelect.Eliminate_confirm) + "  file " + string(global.tws_er_len) + " -> " + string(string_length(tws_file_text(_scr))) + " chars");
+			global.dev_inject_pause = true;             // START no. 2, about 0.1 s after the first
+		}
+		if (global.tws_et == 10)
+		{
+			tws_feat("a second START 0.1 s later (a bouncing pad) does not erase", FileSelect.Eliminate_confirm == _slot && string_length(tws_file_text(_scr)) == global.tws_er_len,
+			         "armed slot=" + string(FileSelect.Eliminate_confirm) + "  file still " + string(string_length(tws_file_text(_scr))) + " chars");
+		}
+		if (global.tws_et == 20 || global.tws_et == 28) tws_shot("armed_" + string(global.tws_et)); // the prompt flashes: one of the two shots has it
+		if (global.tws_et == 70) global.dev_inject_pause = true; // START no. 3, a full second after arming
+		if (global.tws_et == 78)
+		{
+			var _after = tws_file_text(_scr);
+			tws_feat("START again after 0.4 s erases the slot", FileSelect.Eliminate_confirm == 0 && string_length(_after) < global.tws_er_len && !get_saved_value(_slot, f.SDNAME_saveCreated, 0),
+			         "armed slot=" + string(FileSelect.Eliminate_confirm) + "  file " + string(global.tws_er_len) + " -> " + string(string_length(_after)) + " chars: " + string_copy(_after, 1, 60));
+			tws_shot("erased");
+			// leave nothing behind: the scratch slot the erase landed on, and the real names back
+			var _px = f.dl_FILE_NAME_PREFIX[| _slot - 1];
+			file_delete(working_directory + _scr);
+			file_delete(working_directory + _px + dk_RandoDungeonTilesetData + ".txt");
+			file_delete(working_directory + _px + STR_Rando + STR_Data + ".txt");
+			file_delete(working_directory + _px + STR_Rando + "_Spoiler" + ".txt");
+			f.dl_FILE_NAME_PREFIX[| _slot - 1] = "SaveFile_" + string(_slot);
+			f.dl_file_names[| _slot - 1]       = f.dl_FILE_NAME_PREFIX[| _slot - 1] + ".txt";
+			tws_finish("erase only");
+			exit;
+		}
+		break;
+	}
+}
+
 function Dev_TwSelftest_Step() {
 
 	if (!variable_global_exists("tw_selftest") || !global.tw_selftest) return;
@@ -1519,6 +1641,11 @@ function Dev_TwSelftest_Step() {
 		global.tws_cases = [];  global.tws_death_stage = 0;  global.tws_row = "";
 		global.tws_devtools0 = instance_exists(g) ? g.DevTools_state : false;
 		if (!variable_global_exists("tw_selftest_mode")) global.tw_selftest_mode = "";
+		// No real chat during a selftest. tw_irc_enabled is forced off below, but the boot
+		// auto-connect (frame 120) had already opened the socket by then: every run logged in
+		// to the owner's channel and stayed there, and a live chat's commands would have landed
+		// in the middle of the test (seen 2026-10-02: "TWITCH: connected" on the erase run).
+		global.tw_irc_autoconnect_done = true;
 		file_delete(working_directory + "_tw_selftest_result.log"); // fresh log (an empty open_write left a NUL byte)
 	}
 	global.tws_t++;
@@ -1530,13 +1657,16 @@ function Dev_TwSelftest_Step() {
 		exit;
 	}
 
+	// Flag text "erase" never reaches gameplay: it runs on the file-select screen.
+	if (global.tw_selftest_mode == "erase") { tws_erase_step(); exit; }
+
 	// keep the harness in charge every frame
 	global.tw_enabled             = true;
 	global.tw_irc_enabled         = false;
 	global.tw_irc_status          = "selftest";
-	global.tw_rl                  = false;
+	global.tw_rl                  = (variable_global_exists("tws_rl_on") && global.tws_rl_on); // off, except for the edge run's game-over callout
 	global.tw_irc_cooldown_frames = 0;
-	var _feat = (global.tws_phase == "feat" || global.tws_phase == "menus"); // these two set the per-chatter cooldown and the points gate themselves
+	var _feat = (global.tws_phase == "feat" || global.tws_phase == "menus" || global.tws_phase == "edge"); // these set the per-chatter cooldown and the points gate themselves
 	if (!_feat) global.tw_user_cooldown_frames = 0; // every row is typed by "tstchatter": the 30 s per-chatter cooldown would refuse all but the first
 	if (variable_global_exists("tws_cs_x0") && variable_global_exists("tws_cs_maxd") && instance_exists(global.pc))
 	{   // catslap: track the peak every frame
@@ -1576,6 +1706,8 @@ function Dev_TwSelftest_Step() {
 		tws_log("== ZALiA twitch selftest v" + ZALIA_VERSION + " (" + ZALIA_BUILD_DATE + ") -- ISOLATED, per zone ==");
 		tws_log("tier: dev_avail=" + string(dev_avail()) + " tester=" + string(global.dev_unlock_tester) + " hotkeys=" + string(dev_hotkeys_avail()));
 		if (global.tw_selftest_mode == "menus") tws_go("menus");
+		else if (global.tw_selftest_mode == "edge")  { global.tws_es = 0; global.tws_et = 0; tws_go("edge"); }
+		else if (global.tw_selftest_mode == "edge2") tws_go("edge2");
 		else tws_go((global.tw_selftest_mode == "feat" || global.tw_selftest_mode == "") ? "feat" : "zone_start");
 		break;
 
@@ -1770,6 +1902,423 @@ function Dev_TwSelftest_Step() {
 			if (global.tw_selftest_mode == "feat") { tws_finish("feat only"); exit; }
 			tws_go("zone_start");
 		}
+		break;
+
+	case "edge":
+		// Flag text "edge" (~75 s): the rows the 2026-10-01 review left as "fixed, not exercised"
+		// or "not tested". Stages, in order:
+		//   0  a wiped queued !swarm is refunded; !spawn mid room-change; !ice 20 on the strip
+		//   2  file_load on corrupt slot files; the writer and file_save against a locked file
+		//  50  !challenge through a death in a palace, and off when the palace is left
+		//   3  the DEATH COUNTER and CHATTER COOLDOWN rows worked with real key presses
+		//   4  Alt+Enter and Escape in fullscreen, also real key presses
+		//   6  last life: KILLED BY plate, then GG / EZ on the game-over screen (ends the run)
+		// Keys go in through keyboard_key_press, so the game reads them exactly as it reads the
+		// keyboard -- but only while the window has focus (selftest_edge.ps1 raises it). The file
+		// checks never touch a real slot: the slot's file NAME is aimed at a scratch file for the
+		// one call. selftest_edge.ps1 also holds "_tws_locked.txt" open for the locked-file
+		// checks, backs up and restores every settings and save file, and boots a second time
+		// with flag text "edge2" to see what survived the restart.
+		if (variable_global_exists("tw_points_frame")) global.tw_points_saved = global.tw_points_frame; // no points.txt write while test chatters are in the map
+		global.tws_et++;
+		var _eom = global.OPTIONS_MENU;
+		switch (global.tws_es)
+		{
+		case 0:
+			if (!tws_live()) { global.tws_et = 0; break; }
+			if (global.tws_et < 30) break;
+			tws_log("---- edge checks in " + g.rm_name);
+			global.tws_zone_label = "edge";
+			global.tws_edge0 = {
+				dirty : (variable_global_exists("tw_points_dirty") && global.tw_points_dirty),
+				hud   : (!variable_global_exists("tw_effects_hud") || global.tw_effects_hud),
+				game  : tw_toast_secs_get("game")
+			};
+			global.tw_user_cooldown_frames = 0;
+			var _et;
+
+			// a paid, queued !swarm that a death wipes before it lands is handed back
+			global.tw_points_on = true;
+			tw_points_add("tstrich", 100);
+			var _ecut = g.cutscene;
+			g.cutscene = true;
+			_et = tws_line("tstrich", "!swarm 3");
+			g.cutscene = _ecut;
+			var _ebalq = tw_points_get("tstrich");
+			var _eqn   = array_length(global.tw_swarm_queue);
+			tw_effects_clear_all(true);
+			tws_feat("a queued !swarm wiped by a death is refunded", _eqn == 1 && _ebalq < 100 && tw_points_get("tstrich") == _ebalq + 25 && array_length(global.tw_swarm_queue) == 0,
+			         "queued=" + string(_eqn) + "  balance after paying " + string(_ebalq) + " -> after the wipe " + string(tw_points_get("tstrich")) + "   " + _et);
+
+			// a spawn that arrives while the room is being changed
+			var _een  = instance_number(Enemy);
+			var _ecrt = g.ChangeRoom_timer;
+			var _ebal = tw_points_get("tstrich");
+			g.ChangeRoom_timer = 5;
+			_et = tws_line("tstrich", "!spawn goriya");
+			g.ChangeRoom_timer = _ecrt;
+			tws_feat("!spawn during a room change fizzles, spawns nothing, costs nothing", string_pos("fizzled", _et) > 0 && instance_number(Enemy) == _een && tw_points_get("tstrich") >= _ebal,
+			         "enemies " + string(_een) + " -> " + string(instance_number(Enemy)) + "  balance " + string(_ebal) + " -> " + string(tw_points_get("tstrich")) + "   " + _et);
+			global.tw_points_on = false;
+
+			// "!ice 20 shows ICE 20S top-right": the entry the strip reads, then a screenshot of it
+			global.tw_effects_hud = true;
+			_et = tws_line("tstchatter", "!ice 20");
+			var _eie = undefined;
+			for (var _ei = 0; _ei < array_length(global.tw_active); _ei++)
+			{   var _eix = global.tw_active[_ei]; if (is_struct(_eix) && variable_struct_exists(_eix, "verb") && string_pos("ice", string(_eix.verb)) == 1) _eie = _eix;  }
+			tws_feat("!ice 20 runs 20 s and carries the tag the EFFECT TIMERS strip prints", is_struct(_eie) && _eie.frames >= 1190 && _eie.frames <= 1200,
+			         (is_struct(_eie) ? "strip row '" + string_upper(string(_eie.verb)) + " " + string(ceil(_eie.frames / 60)) + "S'" : "no tagged entry") + "   " + _et);
+			tws_stage(1);
+			break;
+
+		case 1:
+			if (global.tws_et < 40) break;
+			tws_shot("ice20_strip");
+			tw_effects_clear_all(false);
+			global.tw_effects_hud = global.tws_edge0.hud;
+			tws_stage(2);
+			break;
+
+		case 2:
+			var _esl  = f.file_num;                      // the slot in play; its file NAME is re-aimed, the file is never opened
+			var _enm0 = f.dl_file_names[| _esl - 1];
+			var _epx0 = f.dl_FILE_NAME_PREFIX[| _esl - 1];
+			var _escr = "_tws_scratch_save.txt";
+			var _ebad = ["", " ", "garbage", "{\"a\":", "[1,2]", "{}"];
+			var _esig0 = string(f.quest_num) + "/" + string(f.death_count) + "/" + string(g.rm_name);
+			var _ecnt = 0, _ecd = "";
+			for (var _ebi = 0; _ebi < array_length(_ebad); _ebi++)
+			{
+				var _ebh = file_text_open_write(working_directory + _escr);
+				file_text_write_string(_ebh, _ebad[_ebi]);
+				file_text_close(_ebh);
+				global.tw_toasts = []; // the same plate twice within half a second is dropped as spam
+				f.dl_file_names[| _esl - 1] = _escr;
+				file_load(_esl);
+				f.dl_file_names[| _esl - 1] = _enm0;
+				var _ehit = (tws_plate("UNREADABLE") != "");
+				if (_ehit) _ecnt++;
+				_ecd += "  [" + _ebad[_ebi] + "]=" + (_ehit ? "refused" : "LOADED");
+			}
+			file_delete(working_directory + _escr);
+			var _esig1 = string(f.quest_num) + "/" + string(f.death_count) + "/" + string(g.rm_name);
+			tws_feat("file_load on six kinds of corrupt slot file: refused each time, the game in play untouched", _ecnt == array_length(_ebad) && _esig0 == _esig1,
+			         tws_plate("UNREADABLE") + _ecd + "   state " + _esig0 + " -> " + _esig1);
+
+			// an ordinary save, onto a scratch file nothing is holding: the writer reads its own
+			// .tmp back before it swaps (file_text_holds), and a wrong "no" there would report
+			// every save as failed. Real save text, real size.
+			var _eok  = "_tws_scratch_save.txt";
+			var _eoh  = file_text_open_write(working_directory + _eok);
+			file_text_write_string(_eoh, "{\"save_name\":\"TWS\"}");
+			file_text_close(_eoh);
+			var _eokey = STR_Save + STR_File + hex_str(_esl) + STR_Encoded;
+			var _eoenc = global.dm_save_file_data[? _eokey];
+			var _eodm  = ds_map_create();
+			ds_map_copy(_eodm, global.dm_save_file);
+			global.tw_toasts = [];
+			f.dl_file_names[| _esl - 1]       = _eok;
+			f.dl_FILE_NAME_PREFIX[| _esl - 1] = "_tws_scratch";
+			file_save(_esl, false);
+			f.dl_file_names[| _esl - 1]       = _enm0;
+			f.dl_FILE_NAME_PREFIX[| _esl - 1] = _epx0;
+			var _eonew = global.dm_save_file_data[? _eokey];
+			if (is_undefined(_eoenc)) ds_map_delete(global.dm_save_file_data, _eokey); else global.dm_save_file_data[? _eokey] = _eoenc;
+			ds_map_copy(global.dm_save_file, _eodm);
+			ds_map_destroy(_eodm);
+			var _eolen = string_length(tws_file_text(_eok));
+			tws_feat("an ordinary save writes the whole save, leaves no .tmp and raises no alarm", is_string(_eonew) && _eolen == string_length(_eonew) && _eolen > 500 && !file_exists(_eok + ".tmp") && tws_plate("NOT WRITTEN") == "",
+			         "file " + string(_eolen) + " chars, save text " + (is_string(_eonew) ? string(string_length(_eonew)) : "-") + " chars, .tmp left=" + string(file_exists(_eok + ".tmp")) + ", plate '" + tws_plate("NOT WRITTEN") + "'");
+			file_delete(working_directory + _eok);
+
+			var _elk = "_tws_locked.txt";
+			if (!file_exists(_elk)) tws_log("SKIP  [edge]  locked-file checks: selftest_edge.ps1 holds " + _elk + " open, and it is not there");
+			else
+			{
+				// Another process holds the file open (others may read it, nobody may write or
+				// delete it). First run of this, 2026-10-01: file_delete and file_rename both
+				// returned false, file_text_open_write still handed back handle 1, the text did
+				// not change, and the writer deleted its .tmp and reported success.
+				var _ewr  = file_text_write_atomic(working_directory + _elk, "NEW TEXT");
+				var _etmp = file_exists(_elk + ".tmp");
+				tws_feat("a locked file: the writer says it failed and keeps the new text beside it", !_ewr && _etmp && tws_file_text(_elk + ".tmp") == "NEW TEXT",
+				         "returned " + string(_ewr) + "  .tmp kept=" + string(_etmp) + "  .tmp holds '" + tws_file_text(_elk + ".tmp") + "'");
+				if (_etmp) file_delete(working_directory + _elk + ".tmp");
+
+				// file_save also refreshes its in-memory copies of the slot: put those back after
+				var _ekey  = STR_Save + STR_File + hex_str(_esl) + STR_Encoded;
+				var _eenc0 = global.dm_save_file_data[? _ekey];
+				var _edm0  = ds_map_create();
+				ds_map_copy(_edm0, global.dm_save_file);
+				global.tw_toasts = [];
+				f.dl_file_names[| _esl - 1]       = _elk;
+				f.dl_FILE_NAME_PREFIX[| _esl - 1] = "_tws_scratch"; // keeps the slot's rando data / spoiler files out of it
+				file_save(_esl, false);
+				f.dl_file_names[| _esl - 1]       = _enm0;
+				f.dl_FILE_NAME_PREFIX[| _esl - 1] = _epx0;
+				if (is_undefined(_eenc0)) ds_map_delete(global.dm_save_file_data, _ekey); else global.dm_save_file_data[? _ekey] = _eenc0;
+				ds_map_copy(global.dm_save_file, _edm0);
+				ds_map_destroy(_edm0);
+				tws_feat("file_save on a locked slot file puts up SAVE " + string(_esl) + " NOT WRITTEN", tws_plate("NOT WRITTEN") != "", tws_plate("NOT WRITTEN"));
+				if (file_exists(_elk + ".tmp")) file_delete(working_directory + _elk + ".tmp");
+			}
+			global.tw_toasts = [];
+			tws_stage(50);
+			break;
+
+		case 50:
+			if (!tws_live()) { global.tws_et = 0; break; }
+			tw_effects_clear_all(false);
+			if (!tws_warp("_PalcA_01")) { tws_log("FAIL  [edge]  !challenge test: no exit found for _PalcA_01"); tws_stage(3); break; }
+			tws_stage(51);
+			break;
+
+		case 51:
+			if (!tws_live()) { global.tws_et = 0; break; }
+			if (global.tws_et < 120) break;
+			if (g.dungeon_num <= 0) { tws_log("FAIL  [edge]  !challenge test: the warp did not land in a palace (" + g.rm_name + ")"); tws_stage(3); break; }
+			tws_log("---- !challenge through a death, in " + g.rm_name + " (palace " + string(g.dungeon_num) + ")");
+			global.tw_toast = ""; global.tw_toast_timer = 0;
+			tws_say("challenge");
+			global.tws_chal_lost = "";
+			tws_feat("!challenge switches on in a palace", global.tw_challenge && global.tw_flip, string(global.tw_toast));
+			tws_stage(52);
+			break;
+
+		case 52:
+			if (global.tws_et < 60) break;
+			tws_feat("the challenge holds life at 4 containers", f.hp <= 4 * Container_AMT, "hp=" + string(f.hp) + "  (4 containers = " + string(4 * Container_AMT) + ")");
+			global.tws_lives0 = max(global.pc_lives, 3);
+			global.pc_lives   = global.tws_lives0;       // the death must land on NEXT LIFE, not GAME OVER
+			global.tws_death_stage = 1;                  // harness invulnerability off
+			global.tws_saw_death   = false;
+			tws_kill();
+			tws_stage(53);
+			break;
+
+		case 53:
+			if (!global.tw_challenge && global.tws_chal_lost == "") global.tws_chal_lost = "switched off in " + room_get_name(room) + ", dungeon_num=" + string(g.dungeon_num);
+			if (room == rmB_Death || !instance_exists(global.pc)) global.tws_saw_death = true;
+			if (!global.tws_saw_death && global.tws_et < 600) break;
+			if (!global.tws_saw_death) { tws_log("FAIL  [edge]  !challenge test: Link never died (10 s)"); global.tws_death_stage = 0; tws_stage(3); break; }
+			tws_stage(54);
+			break;
+
+		case 54:
+			if (!global.tw_challenge && global.tws_chal_lost == "") global.tws_chal_lost = "switched off in " + room_get_name(room) + ", dungeon_num=" + string(g.dungeon_num);
+			if (!tws_live()) { global.tws_et = 0; break; }
+			if (global.tws_et < 90) break;
+			var _ekeep = 0;
+			for (var _eki = 0; _eki < array_length(global.tw_active); _eki++)
+			{   var _eke = global.tw_active[_eki]; if (is_struct(_eke) && variable_struct_exists(_eke, "keep_on_death") && _eke.keep_on_death) _ekeep++;  }
+			tws_feat("!challenge is still on after the death", global.tw_challenge && global.tw_flip && _ekeep == 1 && f.hp <= 4 * Container_AMT,
+			         "new life in " + g.rm_name + " (palace " + string(g.dungeon_num) + ")  lives " + string(global.tws_lives0) + " -> " + string(global.pc_lives)
+			         + "  challenge=" + string(global.tw_challenge) + " flip=" + string(global.tw_flip) + " entries=" + string(_ekeep) + " hp=" + string(f.hp)
+			         + ((global.tws_chal_lost == "") ? "" : "   " + global.tws_chal_lost));
+			tws_shot("challenge_after_death");
+			global.tws_death_stage = 0;                  // invulnerable again
+			if (!tws_warp("_TownA_01")) { tws_log("FAIL  [edge]  !challenge test: no exit found for _TownA_01"); tws_stage(3); break; }
+			tws_stage(55);
+			break;
+
+		case 55:
+			if (!tws_live()) { global.tws_et = 0; break; }
+			if (global.tws_et < 120) break;
+			tws_feat("!challenge ends when the palace is left", g.dungeon_num <= 0 && !global.tw_challenge && !global.tw_flip && array_length(global.tw_active) == 0,
+			         "now in " + g.rm_name + "  challenge=" + string(global.tw_challenge) + " flip=" + string(global.tw_flip) + " active=" + string(array_length(global.tw_active)));
+			tw_effects_clear_all(false);
+			tws_stage(3);
+			break;
+
+		case 3:
+			// the two new option rows, worked the way a player works them
+			if (global.tws_et < 10 && !tws_live()) { global.tws_et = 0; break; }
+			var _ekJ = (Input.Key_jump  > 0) ? Input.Key_jump  : Input.Key_jump_alt;
+			var _ekR = (Input.Key_right > 0) ? Input.Key_right : Input.Key_right_alt;
+			if (global.tws_et == 10)
+			{
+				tws_log("---- option rows by key press, in " + g.rm_name + "  (window has focus: " + string(window_has_focus()) + ")");
+				with (_eom)
+				{
+					anim_frame = 0; MainOption = 0; draw_rows_count = 0;
+					gui_state_backup = g.gui_state;
+					g.gui_state      = g.gui_state_OPTIONS;
+					menu_state        = menu_state_MAIN;
+					InputConfigState  = InputConfigState_MAIN;
+					InputConfigOption = InputConfigOption_RIGHT;
+					timer = 0;
+					sub_state = sub_state_OPENING1;
+				}
+			}
+			if (global.tws_et == 90)  { with (_eom) { Other_state = Other_state_MAIN; menu_state = menu_state_OTHER; Other_cursor = Other_DEATH_COUNTER; timer = 0; } }
+			if (global.tws_et == 110) { global.tws_dc0 = global.dbg_death_counter_show; keyboard_key_press(_ekJ); }
+			if (global.tws_et == 113) keyboard_key_release(_ekJ);
+			if (global.tws_et == 135)
+			{
+				tws_feat("DEATH COUNTER row: the jump key flips it", global.dbg_death_counter_show != global.tws_dc0, string(global.tws_dc0) + " -> " + string(global.dbg_death_counter_show));
+				with (_eom) { menu_state = menu_state_TWITCH; Twitch_cursor = Twitch.USER_COOLDOWN; timer = 0; }
+				global.tw_user_cooldown_frames = 1800;
+			}
+			if (global.tws_et == 155) keyboard_key_press(_ekR);
+			if (global.tws_et == 158) keyboard_key_release(_ekR);
+			if (global.tws_et == 180)
+			{
+				tws_feat("CHATTER COOLDOWN row: one press right adds 5 s", global.tw_user_cooldown_frames == 2100, "1800 frames -> " + string(global.tw_user_cooldown_frames));
+				tws_shot("menu_twitch_cooldown_35s");
+				// what the second boot (flag text "edge2") must read back from the two files
+				var _exh = file_text_open_write(working_directory + "_tws_edge_expect.txt");
+				file_text_write_string(_exh, string(real(global.dbg_death_counter_show)) + "," + string(global.tw_user_cooldown_frames));
+				file_text_close(_exh);
+				with (_eom) { menu_state = menu_state_MAIN; timer = 0; sub_state = sub_state_CLOSING1; }
+			}
+			if (global.tws_et == 270)
+			{
+				tws_feat("the options menu closed again", g.gui_state == g.gui_state_NONE, "gui_state=" + string(g.gui_state));
+				global.tw_user_cooldown_frames = 0;
+				global.tws_fs0    = window_get_fullscreen();
+				global.tws_fs_seq = global.tws_fs0 ? ["tog", "tog", "esc"] : ["tog", "esc", "tog"]; // the Escape check needs fullscreen; end as we started
+				global.tws_fs_i   = 0;
+				tws_log("---- fullscreen keys (started " + (global.tws_fs0 ? "fullscreen" : "windowed") + ")");
+				tws_stage(4);
+			}
+			break;
+
+		case 4:
+			if (global.tws_fs_i >= array_length(global.tws_fs_seq))
+			{
+				tws_feat("the window is back the way it started", window_get_fullscreen() == global.tws_fs0, "fullscreen=" + string(window_get_fullscreen()));
+				tws_stage(60);
+				break;
+			}
+			if (global.tws_fs_seq[global.tws_fs_i] == "tog")
+			{
+				if (global.tws_et == 1)  { global.tws_fs_a = window_get_fullscreen(); keyboard_key_press(vk_alt); }
+				if (global.tws_et == 3)  keyboard_key_press(vk_enter);
+				if (global.tws_et == 6)  keyboard_key_release(vk_enter);
+				if (global.tws_et == 8)  keyboard_key_release(vk_alt);
+				if (global.tws_et == 60)
+				{
+					tws_feat("Alt+Enter: " + (global.tws_fs_a ? "fullscreen -> window" : "window -> fullscreen") + ", and no pause menu", window_get_fullscreen() != global.tws_fs_a && g.gui_state == g.gui_state_NONE,
+					         "fullscreen " + string(global.tws_fs_a) + " -> " + string(window_get_fullscreen()) + "  gui_state=" + string(g.gui_state));
+					global.tws_fs_i++;
+					tws_stage(4);
+				}
+			}
+			else
+			{
+				if (global.tws_et == 1)  keyboard_key_press(vk_escape);
+				if (global.tws_et == 4)  keyboard_key_release(vk_escape);
+				if (global.tws_et == 50)
+				{
+					tws_feat("Escape in fullscreen opens the quit menu and stays fullscreen", window_get_fullscreen() && g.gui_state == g.gui_state_QUIT_APP,
+					         "fullscreen=" + string(window_get_fullscreen()) + "  gui_state=" + string(g.gui_state) + " (quit menu = " + string(g.gui_state_QUIT_APP) + ")");
+					tws_shot("fullscreen_escape_quitmenu");
+				}
+				if (global.tws_et == 60) keyboard_key_press(vk_escape);
+				if (global.tws_et == 63) keyboard_key_release(vk_escape);
+				if (global.tws_et == 110)
+				{
+					tws_feat("Escape again closes the quit menu, still fullscreen", window_get_fullscreen() && g.gui_state == g.gui_state_NONE,
+					         "fullscreen=" + string(window_get_fullscreen()) + "  gui_state=" + string(g.gui_state));
+					global.tws_fs_i++;
+					tws_stage(4);
+				}
+			}
+			break;
+
+		case 60:
+			// back into the palace for the last death: the challenge has to END at a game over
+			// (it only rides through the death and next-life screens), or the flip would follow
+			// the player to the continue screen and the title
+			if (!tws_live()) { global.tws_et = 0; break; }
+			tw_effects_clear_all(false);
+			if (!tws_warp("_PalcA_01")) tws_log("   (no exit found for _PalcA_01: the last-life test runs here, without the challenge)");
+			tws_stage(6);
+			break;
+
+		case 6:
+			// last life, with a chatter to blame: the KILLED BY plate, then chat's last word on
+			// the game-over screen. Both are GAME TOASTS, OFF by default: switched on for this.
+			if (global.tws_et <= 120 && !tws_live()) { global.tws_et = 0; break; } // settle in the palace first; after the kill nothing is "live"
+			if (global.tws_et < 120) break;
+			if (global.tws_et == 120)
+			{
+				tws_log("---- last life in " + g.rm_name + ": KILLED BY plate, then the game-over callout");
+				variable_struct_set(global.tw_toast_secs, "game", 4);
+				global.tws_rl_on = true;
+				global.tw_rl     = true;
+				tws_say("challenge");
+				global.tws_chal_go = global.tw_challenge;
+				global.tw_toasts = [];
+				var _ekt = tws_line("tstkiller", "!swarm 3");
+				tws_log("   " + _ekt + "   (last hurter '" + string(global.tw_last_hurter) + "')");
+				global.pc_lives = 1;
+				global.tws_death_stage = 1;
+				global.tws_kplate = "";
+				global.tws_gplate = "";
+				global.tws_go_t   = -1;
+				tws_kill();
+			}
+			if (global.tws_et > 120)
+			{
+				if (global.tws_kplate == "") global.tws_kplate = tws_plate("KILLED BY");
+				for (var _egi = 0; _egi < array_length(global.tw_toasts); _egi++)
+				{   var _egt = global.tw_toasts[_egi].title; if (_egt == "GG" || _egt == "EZ") global.tws_gplate = _egt;  }
+				if (room == rmB_GameOver && global.tws_go_t < 0) global.tws_go_t = global.tws_et;
+				if ((global.tws_go_t >= 0 && global.tws_et >= global.tws_go_t + 60) || global.tws_et > 1500)
+				{
+					var _ekills = tw_kills_top(5);
+					tws_feat("the game went to GAME OVER on the last life", room == rmB_GameOver, "room " + room_get_name(room) + "  lives=" + string(global.pc_lives));
+					tws_feat("death plate names the chatter, the verb and the tally", string_pos("TSTKILLER", global.tws_kplate) > 0 && string_pos("!SWARM  KILLS: 1", global.tws_kplate) > 0, (global.tws_kplate == "") ? "(no plate)" : global.tws_kplate);
+					tws_feat("the kill is on the !kills board", string_pos("tstkiller x1", _ekills) > 0, (_ekills == "") ? "(nobody)" : _ekills);
+					tws_feat("GG / EZ callout on the game-over screen", global.tws_gplate != "", (global.tws_gplate == "") ? "(no plate)" : global.tws_gplate);
+					if (global.tws_chal_go) tws_feat("a game over ends the challenge (no mirrored continue screen or title)", !global.tw_challenge && !global.tw_flip,
+					                                 "challenge=" + string(global.tw_challenge) + " flip=" + string(global.tw_flip));
+					else tws_log("   (the challenge was not on for the last life: its game-over check did not run)");
+					tws_shot("gameover_callout");
+					// leave nothing behind
+					var _enames = ["tstchatter", "tstrich", "tstkiller"];
+					for (var _eni = 0; _eni < array_length(_enames); _eni++)
+					{
+						if (variable_global_exists("tw_points")      && ds_exists(global.tw_points,      ds_type_map)) ds_map_delete(global.tw_points,      _enames[_eni]);
+						if (variable_global_exists("tw_points_seen") && ds_exists(global.tw_points_seen, ds_type_map)) ds_map_delete(global.tw_points_seen, _enames[_eni]);
+						if (variable_global_exists("tw_points_rate") && ds_exists(global.tw_points_rate, ds_type_map)) ds_map_delete(global.tw_points_rate, _enames[_eni]);
+					}
+					global.tw_points_dirty = global.tws_edge0.dirty;
+					variable_struct_set(global.tw_toast_secs, "game", global.tws_edge0.game);
+					tws_finish("edge only");
+					exit;
+				}
+			}
+			break;
+		}
+		break;
+
+	case "edge2":
+		// Second boot of the edge run: what the first boot changed through the real menu rows
+		// has to come back from UserPreferences.txt and twitch_config.txt.
+		if (!tws_live()) { global.tws_t = 0; exit; }
+		if (global.tws_t == 30)
+		{
+			var _xexp = "";
+			if (file_exists("_tws_edge_expect.txt"))
+			{
+				var _xh = file_text_open_read(working_directory + "_tws_edge_expect.txt");
+				_xexp = file_text_read_string(_xh);
+				file_text_close(_xh);
+				file_delete(working_directory + "_tws_edge_expect.txt");
+			}
+			var _xp = string_split(_xexp, ",");
+			if (array_length(_xp) < 2) { tws_log("FAIL  [edge2]  no _tws_edge_expect.txt -- the edge run did not reach the option rows"); tws_finish("edge2 only"); exit; }
+			tws_log("---- after a restart");
+			twitch_irc_load_config(); // the harness zeroes the cooldown every frame: read the file again, now
+			tws_feat("DEATH COUNTER setting survives a restart", real(global.dbg_death_counter_show) == real(_xp[0]), "saved " + _xp[0] + ", booted with " + string(real(global.dbg_death_counter_show)));
+			tws_feat("CHATTER COOLDOWN setting survives a restart", global.tw_user_cooldown_frames == real(_xp[1]), "saved " + _xp[1] + " frames, booted with " + string(global.tw_user_cooldown_frames));
+			global.dbg_death_counter_show = true; // for the screenshot
+		}
+		if (global.tws_t == 70) tws_shot("hud_deathcounter_after_restart");
+		if (global.tws_t >= 80) { tws_finish("edge2 only"); exit; }
 		break;
 
 	case "zone_start":
@@ -2054,7 +2603,7 @@ function Dev_TwSelftest_Step() {
 			      + " cucco=" + string(pc_is_cucco()) + " leaks:" + ((_dl == "") ? " none" : _dl) + "]");
 			tws_shot("after_death");
 			// death blame: the last hurt verb before the death was tstchatter's !icefloor, so the
-			// kill is his ("KILLED BY ... / !ICEFLOOR  KILL #1" plate, !kills)
+			// kill is his ("KILLED BY ... / !ICEFLOOR  KILLS: 1" plate, !kills)
 			var _kt = tw_kills_top(5);
 			tws_log(((string_pos("tstchatter x1", _kt) > 0) ? "PASS" : "FAIL") + "  [afterdeath]  the death was credited to the chatter who armed the ice   [!kills -> " + ((_kt == "") ? "(nobody)" : _kt) + "]");
 			global.tws_death_stage = 3;
