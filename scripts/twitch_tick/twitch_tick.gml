@@ -25,8 +25,14 @@ function twitch_tick() {
 
 	if (!variable_global_exists("tw_active")) return;
 
-	// !challenge ends the moment the palace is left (round 10c)
-	if (variable_global_exists("tw_challenge") && global.tw_challenge && instance_exists(g) && g.dungeon_num <= 0)
+	// !challenge ends the moment the palace is left (round 10c). g_Room_Start zeroes dungeon_num
+	// for every room that is not a scene, the death and next-life screens included, so the bare
+	// test ended the challenge at the first death -- the one thing keep_on_death exists to
+	// prevent (selftest "edge" 2026-10-01: "switched off in rmB_Death, dungeon_num=0"). Those two
+	// screens are the only exception: a game over, the continue screen and the title all end it,
+	// or the flip would follow the player out and mirror the menus.
+	if (variable_global_exists("tw_challenge") && global.tw_challenge && instance_exists(g) && g.dungeon_num <= 0
+	&&  room != rmB_Death && room != rmB_NextLife)
 	{   global.tw_challenge = false;  }
 
 	// queued swarms land on the next live battle screen, 60 frames after it settles

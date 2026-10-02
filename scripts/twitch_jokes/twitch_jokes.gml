@@ -285,7 +285,9 @@ function tw_chatter_note(_name) {
 		array_push(global.tw_chatters_live, _n);
 		while (array_length(global.tw_chatters_live) > 40) array_delete(global.tw_chatters_live, 0, 1);
 	}
-	tw_chatter_pool_add(_n, true);
+	// the selftest types as "tstchatter", "tstcd" ...: those must not be remembered for the next
+	// stream (six of them were found in the owner's chatters.txt, 2026-10-01)
+	tw_chatter_pool_add(_n, !(variable_global_exists("tw_selftest") && global.tw_selftest));
 }
 
 /// @description  tw_chatter_pick() -- a font-safe chatter name: 2 in 3 from the last few live
@@ -971,7 +973,7 @@ function tw_reflect_hint(_where) {
 	if (current_time - global.tw_reflect_hint_time < 20000) return;   // not twice in 20 s
 	global.tw_reflect_hint_time = current_time;
 	if (_where == "boss") tw_toast_push("CAROCK NEEDS REFLECT", "YOU DONT HAVE IT. HE WONT DIE.", "warn");
-	else                  tw_toast_push("THIS PALACE ENDS IN CAROCK", "HE NEEDS REFLECT. YOU HAVE NONE.", "warn");
+	else                  tw_toast_push("THIS PALACE ENDS IN CAROCK", "NEEDS REFLECT. YOU HAVE NONE.", "warn");
 }
 
 // ─── item jingle (round 10h, owner's idea: the OG Zelda item fanfare) ──────────

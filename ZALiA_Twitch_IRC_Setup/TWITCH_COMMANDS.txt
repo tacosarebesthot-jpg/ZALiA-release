@@ -61,6 +61,7 @@ MOBS / DUNGEON MASTER
   !arise (!chicken !cucco)  turn Link into a CHICKEN [timed]  (needs CUCCO mode on that save)
   !reshuffle (!reroll)   re-roll the seed's enemy randomizer mid-run (rando saves)
   !challenge (!nomercy)  flipped screen + 4 hearts max + no helpful verbs until you leave the palace
+                         (a death does not end it; a game over does)
 
 FUN / META
   !music <track>      play a jukebox track (part of the name is enough); !music alone shuffles.

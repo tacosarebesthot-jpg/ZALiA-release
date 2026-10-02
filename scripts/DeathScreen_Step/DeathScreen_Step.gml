@@ -24,13 +24,14 @@ function DeathScreen_Step() {
 	            global.tw_toast_timer = 240;
 	        }
 	        // assists on the death toast (round 10c): who last hurt / helped within 90 s.
-	        // 09-30: names the VERB and keeps a per-chatter kill tally ("!SWARM  KILL #3", !kills).
+	        // 09-30: names the VERB and keeps a per-chatter kill tally ("!SWARM  KILLS: 3", !kills).
+	        // (It was written "KILL #3"; the sprite font has no "#", so the plate read "KILL 3".)
 	        if (variable_global_exists("tw_last_hurter") && global.tw_last_hurter != "" && current_time - global.tw_last_hurter_t < 90000)
 	        {
 	            var _kn = tw_kills_add(global.tw_last_hurter);
 	            var _dt_sub = "";
 	            if (variable_global_exists("tw_last_hurt_verb") && global.tw_last_hurt_verb != "")
-	                _dt_sub = "!" + string_upper(string(global.tw_last_hurt_verb)) + "  KILL #" + string(_kn);
+	                _dt_sub = "!" + string_upper(string(global.tw_last_hurt_verb)) + "  KILLS: " + string(_kn);
 	            else if (variable_global_exists("tw_last_helper") && global.tw_last_helper != "" && current_time - global.tw_last_helper_t < 90000)
 	                _dt_sub = "HEALED BY " + string(global.tw_last_helper);
 	            tw_toast_push("KILLED BY " + string(global.tw_last_hurter), _dt_sub, "win");

@@ -88,7 +88,7 @@ function Input_System() {
 	        // so the game just "stopped listening"). A "system" plate: GAME TOASTS is OFF by
 	        // default, and filed under that this warning never showed for anyone.
 	        if (gamepad_slot == _SLOT || gamepad_slot_p2 == _SLOT)
-	        {   tw_toast_push((gamepad_slot_p2 == _SLOT && gamepad_slot != _SLOT) ? "P2 CONTROLLER LOST" : "CONTROLLER LOST", "plug it back in, or use the keyboard", "warn", "system");  }
+	        {   tw_toast_push((gamepad_slot_p2 == _SLOT && gamepad_slot != _SLOT) ? "P2 CONTROLLER LOST" : "CONTROLLER LOST", "plug it in or use the keyboard", "warn", "system");  }
         
 	        if (gamepad_slot == _SLOT)
 	        {   gamepad_slot =  -1;  }

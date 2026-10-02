@@ -48,7 +48,11 @@ function json_decode_map(_encoded, _existing = undefined) {
 /// loaders promote with file_text_recover_tmp(). Returns true when the NEW text is in `path`.
 /// If the swap does not happen (the live file is held open by antivirus / cloud sync, so the
 /// delete and the rename both fail) the old file is still there and the new text sits only in
-/// the .tmp, which the next write would overwrite: fall back to writing `path` directly.
+/// the .tmp, which the next write would overwrite: fall back to writing `path` directly, and
+/// then READ IT BACK. On this runtime file_text_open_write hands back a good-looking handle for
+/// a file it cannot write, and the write and the close report nothing (measured 2026-10-01
+/// against a file another process held open: handle 1, text unchanged). The first cut trusted
+/// that handle, deleted the .tmp -- the only copy of the new text -- and returned true.
 function file_text_write_atomic(_path, _text) {
 	var _tmp = _path + ".tmp";
 	var _fh = file_text_open_write(_tmp);
@@ -56,17 +60,43 @@ function file_text_write_atomic(_path, _text) {
 	file_text_write_string(_fh, string(_text));
 	file_text_close(_fh);
 	if (!file_exists(_tmp)) return false;
-	if (file_exists(_path)) file_delete(_path);
-	file_rename(_tmp, _path);
-	if (file_exists(_tmp))
+	// The same silence applies to the .tmp itself: an old .tmp that cannot be written would
+	// still be there, and swapping it in would put OLDER text in the live file. Swap only a
+	// .tmp that reads back as the new text; otherwise leave the live file alone and try the
+	// direct write below.
+	if (file_text_holds(_tmp, _text))
 	{
-		var _fh2 = file_text_open_write(_path);
-		if (_fh2 == -1) return false; // .tmp is kept: it is the only copy of the new text
+		if (file_exists(_path)) file_delete(_path);
+		file_rename(_tmp, _path);
+		if (!file_exists(_tmp)) return file_exists(_path); // swapped
+	}
+
+	var _fh2 = file_text_open_write(_path);
+	if (_fh2 != -1)
+	{
 		file_text_write_string(_fh2, string(_text));
 		file_text_close(_fh2);
-		file_delete(_tmp);
 	}
-	return file_exists(_path);
+	if (!file_text_holds(_path, _text)) return false; // .tmp is kept: it is the only copy of the new text
+	file_delete(_tmp);
+	return true;
+}
+
+/// @description  file_text_holds(path, text) -- true when the file at `path` reads back as `text` (line breaks ignored).
+function file_text_holds(_path, _text) {
+	if (!file_exists(_path)) return false;
+	var _fh = file_text_open_read(_path);
+	if (_fh == -1) return false;
+	var _got = "";
+	while (!file_text_eof(_fh))
+	{
+		_got += file_text_read_string(_fh);
+		file_text_readln(_fh);
+	}
+	file_text_close(_fh);
+	_got      = string_replace_all(string_replace_all(_got, "\r", ""), "\n", "");
+	var _want = string_replace_all(string_replace_all(string(_text), "\r", ""), "\n", "");
+	return _got == _want;
 }
 
 /// @description  file_text_recover_tmp(path) -- if `path` is missing but a finished path + ".tmp" exists, promote it.

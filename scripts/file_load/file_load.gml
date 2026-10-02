@@ -45,7 +45,7 @@ function file_load(argument0) {
 	    show_debug_message("");
 	    // 09-30 review: this used to fail silently -- the slot just would not load. Say so, and
 	    // point at the checkpoints folder, which is exactly what it is for.
-	    tw_toast_push("SAVE " + string(_FILE_NUM) + " UNREADABLE", "restore a checkpoint (see checkpoints folder)", "warn", "system");
+	    tw_toast_push("SAVE " + string(_FILE_NUM) + " UNREADABLE", "see the checkpoints folder", "warn", "system");
 	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
 

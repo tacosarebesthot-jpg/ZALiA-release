@@ -177,7 +177,7 @@ function file_save() {
 	    var _SAVE_DATA = json_encode(_dm_save_data);
 	    if (!file_text_write_atomic(working_directory+_FILE_NAME, _SAVE_DATA)) // never leaves a half-written slot
 	    {   // nothing could be written at all (the file is held open by something else): say so
-	        tw_toast_push("SAVE " + string(_FILE_NUM) + " NOT WRITTEN", "the save file is locked - save again", "warn", "system");
+	        tw_toast_push("SAVE " + string(_FILE_NUM) + " NOT WRITTEN", "file is locked - save again", "warn", "system");
 	    }
 	    //
 	    global.dm_save_file_data[?STR_Save+STR_File+hex_str(_FILE_NUM)+STR_Encoded] = _SAVE_DATA;
