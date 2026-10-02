@@ -178,7 +178,7 @@ function tw_points_top(_n) {
 	while (!is_undefined(_k))
 	{
 		var _v = global.tw_points[? _k];
-		if (is_real(_v) && _v > 0) array_push(_rows, { who : string(_k), n : floor(_v) });
+		if (is_numeric(_v) && _v > 0) array_push(_rows, { who : string(_k), n : floor(_v) });
 		_k = ds_map_find_next(global.tw_points, _k);
 	}
 	if (array_length(_rows) == 0) return "";

@@ -25,6 +25,7 @@ function file_load(argument0) {
 	}
 
 	tw_effects_clear_all(false); // chat effects belong to the session's current file, never the next one
+	global.tw_last_hurter = "";  // and so does the kill credit (DeathScreen_Step keeps it across the last life for the game-over screen)
 
 
 	var _file      = file_text_open_read(working_directory+_FILE_NAME);
@@ -32,14 +33,19 @@ function file_load(argument0) {
 	                 file_text_close(      _file);
 	var _dm_file_data = json_decode(_file_data);
 
-	if (_dm_file_data==-1) // `json_decode` returns -1 if it fails
+	// A blank, cut-off or garbage file does NOT come back as -1 on this runtime: json_decode
+	// hands back a live map with no save in it, a ref never equals -1, and the load used to
+	// carry on with every field defaulted -- a blank game the next save then wrote over the
+	// slot. Every real save, the empty-slot placeholder included, carries its save name.
+	if (!ds_map_is_live(_dm_file_data) || is_undefined(_dm_file_data[?f.SDNAME_save_name]))
 	{
+	    if (ds_map_is_live(_dm_file_data)) ds_map_destroy(_dm_file_data);
 	    show_debug_message("");
 	    show_debug_message("file_load(). !!!! WARNING! file_load(). `_dm_file_data` failed to get data from '"+_FILE_NAME+"' !!!!");
 	    show_debug_message("");
 	    // 09-30 review: this used to fail silently -- the slot just would not load. Say so, and
 	    // point at the checkpoints folder, which is exactly what it is for.
-	    tw_toast_push("SAVE " + string(_FILE_NUM) + " UNREADABLE", "restore a checkpoint (see checkpoints folder)", "warn", "game");
+	    tw_toast_push("SAVE " + string(_FILE_NUM) + " UNREADABLE", "restore a checkpoint (see checkpoints folder)", "warn", "system");
 	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
 

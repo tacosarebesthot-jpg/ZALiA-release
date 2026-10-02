@@ -17,6 +17,10 @@ function init_save_files() {
 	    _file_num  = _i+1;
 	    _file_name = f.dl_file_names[|_i]; // _file_name example: "SaveFile_1.txt"
     
+	    // A save that died between the atomic writer's delete and rename lives only in its
+	    // .tmp. Promote it BEFORE deciding the slot is missing: this runs at boot, ahead of
+	    // any file_load, and would otherwise write a blank slot over the top of it.
+	    file_text_recover_tmp(working_directory+_file_name);
 	    if(!file_exists(_file_name))
 	    {
 	        _file = file_text_open_write(working_directory+_file_name);

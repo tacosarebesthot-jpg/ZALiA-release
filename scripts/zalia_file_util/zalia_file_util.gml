@@ -7,24 +7,35 @@
 //   * every writer did open_write (truncate) -> write -> close on the live file, so a crash
 //     or power loss mid-write left an empty file and the loader silently gave up on it.
 
+/// @description  ds_map_is_live(m) -- true when `m` is a ds_map that exists right now.
+/// On this runtime (LTS 2026) a ds id is a `ref` handle: typeof() says "ref" and is_real() is
+/// FALSE. The first cut of json_decode_map tested is_real(), so it threw away every good
+/// decode and handed back an empty map -- a loaded save lost its keys, locks, quests and
+/// explored rooms (caught by a boot probe 2026-10-01, before any save was loaded). Never
+/// test a ds id with is_real / >= 0; ask ds_exists. -1 and non-handles are screened first
+/// because ds_exists itself rejects undefined and strings.
+function ds_map_is_live(_m) {
+	if (is_undefined(_m) || is_string(_m) || is_array(_m) || is_struct(_m)) return false;
+	if (is_real(_m) && _m < 0) return false;
+	return ds_exists(_m, ds_type_map);
+}
+
 /// @description  json_decode_map(encoded, existing) -- json_decode() for a ds_map slot; ALWAYS returns a live ds_map.
-/// Decoded object -> that map (and `existing`, if a live map, is destroyed so a reload never leaks it).
-/// Anything else (undefined, 0 from val(), "", corrupt JSON, a JSON array) -> `existing` emptied,
-/// or a fresh empty map when `existing` is not a live map.
+/// Decoded -> that map (and `existing`, if a live map, is destroyed so a reload never leaks it).
+/// Anything else (undefined, 0 from val(), "", a failed decode) -> `existing` emptied, or a
+/// fresh empty map when `existing` is not a live map. (Measured on this runtime: json_decode
+/// of garbage text does NOT return -1, it returns a live 1-entry map, so garbage lands in the
+/// "decoded" branch exactly as it did before this helper existed.)
 function json_decode_map(_encoded, _existing = undefined) {
-	var _have = (is_real(_existing) && _existing >= 0 && ds_exists(_existing, ds_type_map));
+	var _have = ds_map_is_live(_existing);
 	if (is_string(_encoded) && _encoded != "")
 	{
 		var _dec = -1;
 		try { _dec = json_decode(_encoded); } catch (_e) { _dec = -1; }
-		if (is_real(_dec) && _dec >= 0)
+		if (ds_map_is_live(_dec))
 		{
-			if (ds_exists(_dec, ds_type_map))
-			{
-				if (_have) ds_map_destroy(_existing);
-				return _dec;
-			}
-			if (ds_exists(_dec, ds_type_list)) ds_list_destroy(_dec); // a JSON array: not what a map slot wants
+			if (_have && _existing != _dec) ds_map_destroy(_existing);
+			return _dec;
 		}
 	}
 	if (_have) { ds_map_clear(_existing); return _existing; }
@@ -34,7 +45,10 @@ function json_decode_map(_encoded, _existing = undefined) {
 /// @description  file_text_write_atomic(path, text) -- write `text` to `path` without ever leaving it half-written.
 /// Writes path + ".tmp" first, then swaps it in (delete old, rename). A crash before the swap
 /// leaves the previous file intact; a crash after the delete leaves a COMPLETE .tmp that the
-/// loaders promote with file_text_recover_tmp(). Returns true when `path` exists afterwards.
+/// loaders promote with file_text_recover_tmp(). Returns true when the NEW text is in `path`.
+/// If the swap does not happen (the live file is held open by antivirus / cloud sync, so the
+/// delete and the rename both fail) the old file is still there and the new text sits only in
+/// the .tmp, which the next write would overwrite: fall back to writing `path` directly.
 function file_text_write_atomic(_path, _text) {
 	var _tmp = _path + ".tmp";
 	var _fh = file_text_open_write(_tmp);
@@ -44,6 +58,14 @@ function file_text_write_atomic(_path, _text) {
 	if (!file_exists(_tmp)) return false;
 	if (file_exists(_path)) file_delete(_path);
 	file_rename(_tmp, _path);
+	if (file_exists(_tmp))
+	{
+		var _fh2 = file_text_open_write(_path);
+		if (_fh2 == -1) return false; // .tmp is kept: it is the only copy of the new text
+		file_text_write_string(_fh2, string(_text));
+		file_text_close(_fh2);
+		file_delete(_tmp);
+	}
 	return file_exists(_path);
 }
 

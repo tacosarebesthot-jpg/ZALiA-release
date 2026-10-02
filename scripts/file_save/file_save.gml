@@ -130,7 +130,7 @@ function file_save() {
 	// A chat !steal clears an item bit at RUNTIME only and gives it back when it expires.
 	// Save the bits the player really owns, or a checkpoint (or a death save) taken
 	// during the theft loses the item for good.
-	_dm_save_data[?f.SDNAME_items]                  = f.items | ((variable_global_exists("tw_stolen") && is_real(global.tw_stolen)) ? global.tw_stolen : 0);
+	_dm_save_data[?f.SDNAME_items]                  = f.items | ((variable_global_exists("tw_stolen") && is_numeric(global.tw_stolen)) ? global.tw_stolen : 0); // is_numeric, NOT is_real: "|=" makes tw_stolen an int64 and is_real(int64) is false
 	_dm_save_data[?f.SDNAME_skills]                 = f.skills;
 	_dm_save_data[?STR_Skill+STR_Cucco]             = f.Cucco_skills;
 	_dm_save_data[?STR_Cucco+STR_Spell+"02"+STR_Acquired] = g.CuccoSpell2_Acquired;
@@ -171,10 +171,14 @@ function file_save() {
 	    return; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
 
+	file_text_recover_tmp(working_directory+_FILE_NAME); // a slot left as a .tmp only must not make this save a silent no-op
 	if (file_exists(_FILE_NAME))
 	{
 	    var _SAVE_DATA = json_encode(_dm_save_data);
-	    file_text_write_atomic(working_directory+_FILE_NAME, _SAVE_DATA); // never leaves a half-written slot
+	    if (!file_text_write_atomic(working_directory+_FILE_NAME, _SAVE_DATA)) // never leaves a half-written slot
+	    {   // nothing could be written at all (the file is held open by something else): say so
+	        tw_toast_push("SAVE " + string(_FILE_NUM) + " NOT WRITTEN", "the save file is locked - save again", "warn", "system");
+	    }
 	    //
 	    global.dm_save_file_data[?STR_Save+STR_File+hex_str(_FILE_NUM)+STR_Encoded] = _SAVE_DATA;
 	    ds_map_copy(global.dm_save_file, _dm_save_data);

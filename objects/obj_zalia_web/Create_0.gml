@@ -21,6 +21,11 @@ web_root = working_directory + "web/";
 
 server = network_create_server_raw(network_socket_tcp, ZWEB_PORT, 8);
 
+// Sockets of the browsers THIS server accepted. The Async-Networking event fires for
+// every socket in the game, the Twitch chat link included, so the request path checks
+// this map before it answers anything (see Other_68).
+clients = ds_map_create();
+
 global.zweb_port   = ZWEB_PORT;
 global.zweb_up     = (server >= 0);
 global.zweb_status = global.zweb_up

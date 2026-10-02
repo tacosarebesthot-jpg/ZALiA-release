@@ -5,10 +5,20 @@
 // check anyone on the LAN could drive the game's music. A companion UI is not
 // worth handing strangers a remote control.
 
+//
+// OUR CLIENTS ONLY. This event fires for every socket in the game, not just this
+// server's. Until 2026-10-01 nothing here checked whose data it was, so each line Twitch
+// sent down the chat link was read as a request ("/001", "/JOIN", ...) and answered with
+// a 404 page ON THE CHAT SOCKET. Twitch replied "421 Unknown command" to every header
+// line, each reply was answered with another 404, and the two looped at ~8 lines a second
+// for as long as chat was connected. `clients` holds the sockets this listener accepted.
+
 var _type = async_load[? "type"];
 
 if (_type == network_type_connect)
 {
+    if (async_load[? "id"] != server) exit; // somebody else's listener
+
     // Windows hands us the IPv4-mapped IPv6 form "::ffff:127.0.0.1" as often as
     // a plain "127.0.0.1", so strip that prefix before comparing. Matching only
     // the bare form refuses every real local browser.
@@ -20,12 +30,21 @@ if (_type == network_type_connect)
         if (DEV) show_debug_message("[ZWEB] refused non-local client " + string(_ip));
         network_destroy(async_load[? "socket"]);
     }
+    else clients[? async_load[? "socket"]] = true;
+    exit;
+}
+
+if (_type == network_type_disconnect)
+{
+    if (async_load[? "id"] == server) ds_map_delete(clients, async_load[? "socket"]);
     exit;
 }
 
 if (_type != network_type_data) exit;
 
 var _sock = async_load[? "id"];
+if (!ds_map_exists(clients, _sock)) exit; // not a browser we accepted (e.g. the Twitch chat socket)
+
 var _buf  = async_load[? "buffer"];
 var _size = async_load[? "size"];
 if (_buf < 0 || _size <= 0) exit;
