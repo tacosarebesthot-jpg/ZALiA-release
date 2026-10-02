@@ -88,7 +88,7 @@ echo(
 echo   Next, in-game:
 echo     Options - TWITCH OPTIONS - TWITCH IRC   (turn ON)
 echo   Watch the top-left status line:  TWITCH: connecting -^> connected
-echo   Then type  !heal 4  in your Twitch chat to test.
+echo   Then type  ^^!heal 4  in your Twitch chat to test.
 echo(
 echo   ^(Changed something? Re-run this, then toggle TWITCH IRC OFF then ON.^)
 echo(

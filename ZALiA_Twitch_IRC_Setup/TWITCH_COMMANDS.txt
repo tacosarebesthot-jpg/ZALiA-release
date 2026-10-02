@@ -4,9 +4,13 @@ Type these in the streamer's Twitch chat once TWITCH IRC is connected.
 Syntax:  !verb [arg]      Aliases in (brackets). Typos get a "did you mean" hint.
 Timed effects last the streamer's EFFECT LENGTH setting (5-60 s, default 5) unless
 noted. Most timed verbs take a number of SECONDS:  !slow 20   (capped at 60).
+With no number, a few pick their own length: !speed 10 s, !root 7-12 s (random),
+!confuse and !disorient 10-30 s (random), !stasis 3 s, !challenge the whole palace.
 A shared cooldown throttles all of chat, and each chatter also has their own
 (30 s by default, user_cooldown= in twitch_config.txt). When the POINTS ECONOMY is
-on, every verb has a price and !points shows your balance; the broadcaster is free.
+on, most verbs have a price and !points shows your balance; the broadcaster is free.
+(Free for everyone: !help !points !top !kills !song !version !suggest !link !vote,
+the joke plates and the Rocket League plates.)
 The EFFECT TIMERS row on the TWITCH OPTIONS page shows what is running, top-right.
 !help in chat puts a one-screen cheat sheet on stream; !help hurt (or chaos,
 mobs, fun, rl, mods) shows one page with what each verb does. Points are ON
@@ -15,7 +19,7 @@ by default; the POINTS ECONOMY row turns them off.
 HELP THE RUNNER
   !heal [n]          full HP, or n quarter-boxes        !mp [n]     full MP, or n points
   !refill (!fairy)   full HP + MP                        !1up        +1 life
-  !invuln            brief invincibility                 !link (!unchicken)  end a chat chicken early
+  !invuln [s]        invincible for the effect length    !link (!unchicken)  end a chat chicken early
   !protect  !reflect !jump  !life  !fire  !thunder  !enigma  !summon
                      cast that spell for real (its visual plays)   -- also  !spell <name>
 
@@ -29,13 +33,15 @@ HURT THE RUNNER
   !dmgup (!doubledamage)  every hit on Link does double damage      [timed]
   !steal (!rob !thief !pickpocket)  borrow one of your items         [timed]
   !catslap [n]       three slaps that knock Link around, no damage  (Tangia "Cat Slap")
+                     n = frames to wait before the first slap (60 = 1 s, max 300); always 3 slaps
 
 CHAOS / SCREEN (all timed)
   !speed [s]  !slow        fast / marsh-slow legs
   !shrink (!tiny !small)   !grow (!huge)
   !flip                    mirror the screen           !confuse   swap LEFT/RIGHT
   !disorient               confuse + swap UP/DOWN      !party     disco + flip
-  !disco  !shake  !dark    color cycle / screen shake / darken (need a candle)
+  !disco  !shake  !dark    color cycle / screen shake / darken the room. !dark only works in
+                           rooms that have a dark version; anywhere else it waits for the next one
   !ice (!icefloor)         the floor is ice            !moon      quarter gravity
   !root                    can't walk or jump (can still swing)
   !stasis [s] (!hold !freezelink)  freeze Link in place, 3 s default, max 10
@@ -46,25 +52,28 @@ CHAOS / SCREEN (all timed)
 
 MOBS / DUNGEON MASTER
   !spawn <enemy> [n]  spawn n (max 6) of: daira moblin goriya zora stalfos bat(ache) atta myu
-  !swarm [1-6]        a pack of RANDOM enemies (default 3)
+  !swarm [1-6]        a pack of RANDOM enemies (default 3). Typed on the overworld or in a
+                      cutscene it is QUEUED (up to 3) and lands on the next battle screen
   !flame (!heckler)   a jumping flame with the chatter's name over it
   !freeze (!stun)     freeze on-screen non-boss mobs [timed]
   !smite (!clearscreen)  kill all on-screen non-boss mobs
-  !crush (!drop !block)  a palace block falls from above Link
+  !crush (!drop !block)  a palace block falls from above Link (palaces only)
   !arise (!chicken !cucco)  turn Link into a CHICKEN [timed]  (needs CUCCO mode on that save)
   !reshuffle (!reroll)   re-roll the seed's enemy randomizer mid-run (rando saves)
   !challenge (!nomercy)  flipped screen + 4 hearts max + no helpful verbs until you leave the palace
 
 FUN / META
-  !music <track>      play a jukebox track (part of the name is enough); !music alone shuffles
+  !music <track>      play a jukebox track (part of the name is enough); !music alone shuffles.
+                      Timed: the room's own music comes back when the effect length runs out
   !song (!np !nowplaying !track)   what's playing
   !meth               moon + jump + speed          !quantumentangle (!qe)   a joke, tiny side effect
   !fatality  !friendship  !flawless  !finisher     fire the MK2 splash (no gameplay effect)
   !suggest <idea>     log an idea for the dev      !points (!bal)   your balance
   !top (!leaderboard) richest chatters             !kills (!blame)  who has killed the runner most
   !vote <x> <y> [s]   (!poll) chat picks between two effects, 20 s default (10-60).
-                      While it runs, type  x  or  y  (or 1 / 2) in chat to vote. The winner
-                      fires as CHAT; a tie fires both.     e.g. !vote dark flip 30
+                      While it runs, type  x  or  y  (or 1 / 2) in chat to vote. Starting a vote
+                      and voting are both free, and so is the winner. It fires in the starter's
+                      name; a tie fires both.     e.g. !vote dark flip 30
   !help (!cmds)       cheat sheet on stream        !version         build info
   !donothing  !rip  !blip  !coincidence  !getfed   just toasts
 
@@ -72,9 +81,9 @@ MODS AND THE BROADCASTER
   !ignore <name>      (!mute) that chatter is muted for the whole system: no commands,
                       no votes, no points. Survives a restart (ignored.txt).
   !unignore <name>    (!unmute) let them play again
-  Mods skip both cooldowns (MOD BYPASS, mod_bypass= in twitch_config.txt).
+  Mods skip both cooldowns (the MODS SKIP COOLDOWN row, mod_bypass= in twitch_config.txt).
 
-ROCKET LEAGUE QUICK CHAT (plates only, always free; needs the RL row on)
+ROCKET LEAGUE QUICK CHAT (plates only, always free; needs the ROCKET LEAGUE row on)
   !niceshot  !whatasave  !calculated  !savage  !closeone  !okay  !faking
   !gg  !ez  !wow  !noproblem  !thanks
 
