@@ -1530,7 +1530,7 @@ function OptionsMenu_Create() {
 	_dk2 = _dk0+hex_str(_i);
 	dm_options[?_dk2+STR_Font]                         = FONT2;
 	dm_options[?_dk2+STR_Option+STR_Text]              = "RESET ALL SETTINGS";
-	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "AUDIO, DISPLAY, HUD, TWITCH AND THIS PAGE BACK TO DEFAULTS. CONTROLS AND YOUR TWITCH LOGIN ARE KEPT. PRESS TWICE.";
+	dm_options[?_dk2+STR_Description+hex_str(_k++)]    = "AUDIO, HUD, TWITCH AND THIS PAGE BACK TO DEFAULTS. CONTROLS, DISPLAY AND YOUR TWITCH LOGIN ARE KEPT. PRESS TWICE.";
 	//                                                                          //
 	_j=0; _k=0;
 	Other_GEE = ++_i; // GEE: Graphics Effects Editor

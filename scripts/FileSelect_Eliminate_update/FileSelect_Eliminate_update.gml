@@ -43,10 +43,14 @@ function FileSelect_Eliminate_update() {
 	        // here costs a lot more than it used to. FileSelect_Draw flashes "ERASE? START".
 	        if (get_saved_value(_FILE_NUM, f.SDNAME_saveCreated, 0) && Eliminate_confirm != _FILE_NUM)
 	        {
-	            Eliminate_confirm = _FILE_NUM;
+	            Eliminate_confirm   = _FILE_NUM;
+	            Eliminate_confirm_t = current_time; // only ever read while Eliminate_confirm is armed
 	            aud_play_sound(get_audio_theme_track(CURSOR_SOUND_THEME2));
 	            exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	        }
+	        // The second START has to be a second PRESS. A pad that bounces (the DS4 gives 2-3
+	        // edges ~4 frames apart on one press) would arm and erase in one go.
+	        if (Eliminate_confirm == _FILE_NUM && current_time - Eliminate_confirm_t < 400) exit; // !!!!!!!!!!!!!!!!!!!
 	        Eliminate_confirm = 0;
         
 	        // Erase rando data files

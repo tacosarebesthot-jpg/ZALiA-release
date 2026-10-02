@@ -25,16 +25,40 @@ function OptionsMenu_Draw_Other() {
 
 
 	var          _COUNT0 = val(dm_options[?_DK0+STR_Count]);
+
+	// SCROLL (2026-10-01). This page had no scrolling and its rows ran on to MenuWindow_yb,
+	// the window's bottom edge, straight through the description panel: once DEATH COUNTER
+	// and RESET ALL SETTINGS were added, BACK printed on top of the description text. Same
+	// windowing as the TWITCH page: only the rows that fit above the divider, centred on the
+	// cursor. With room to spare nothing moves and BACK keeps its extra gap.
+	var _ROW_H     = _font_h + _DIST1;
+	var _area_h    = Info_Divider_yt - _yt1;
+	var _area_rows = max(1, _area_h div _ROW_H);
+	var _vis_N = 0, _cursor_pos = 0;
+	for(_i=0; _i<_COUNT0; _i++)
+	{
+	    if(!OptionsMenu_option_is_avail(menu_state_OTHER,_i)) continue;//_i
+	    if (_i==Other_cursor) _cursor_pos = _vis_N;
+	    _vis_N++;
+	}
+	var _back_gap  = (_vis_N*_ROW_H + $6 <= _area_h) ? $6 : 0;
+	var _top_index = (_vis_N>_area_rows) ? clamp(_cursor_pos - (_area_rows>>1), 0, _vis_N-_area_rows) : 0;
+	var _vis_idx   = -1;
+
 	for(_i=0; _i<_COUNT0; _i++)
 	{
 	    if(!OptionsMenu_option_is_avail(menu_state_OTHER,_i))
 	    {
 	        continue;//_i
 	    }
-    
-    
+
+	    _vis_idx++;
+	    if (_vis_idx <  _top_index)            continue;//_i
+	    if (_vis_idx >= _top_index+_area_rows) break;//_i
+
+
 	    switch(_i){
-	    case Other_BACK:{_yt1+=$6; break;} // extra spacing
+	    case Other_BACK:{_yt1+=_back_gap; break;} // extra spacing
 	    }
     
     
