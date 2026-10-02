@@ -28,6 +28,7 @@ if (_type == network_type_non_blocking_connect)
 		global.tw_irc_status = "error: connect";
 		network_destroy(global.tw_irc_socket);
 		global.tw_irc_socket = -1;
+		twitch_irc_arm_retry();
 		exit;
 	}
 	twitch_irc_login();
@@ -39,6 +40,8 @@ else if (_type == network_type_data)
 
 	if (_buf >= 0 && _size > 0)
 	{
+		global.tw_irc_last_rx = variable_global_exists("tw_irc_frame") ? global.tw_irc_frame : 0; // the link is alive (watchdog, twitch_irc_step)
+
 		// Read the received bytes as a raw string (IRC is line-based ASCII/UTF-8).
 		buffer_seek(_buf, buffer_seek_start, 0);
 		var _text = buffer_read(_buf, buffer_text); // reads up to a NUL / end
@@ -72,28 +75,7 @@ else if (_type == network_type_data)
 }
 else if (_type == network_type_disconnect)
 {
-	global.tw_irc_socket = -1;
-	global.tw_irc_rx     = "";
-
-	// Twitch closes the socket right after "NOTICE * :Login authentication failed".
-	// twitch_irc_handle_line() flagged that; a retry cannot fix a dead token, so keep the
-	// readable status and do NOT arm the reconnect loop (it used to retry every 30 s forever,
-	// toasting each time, with nothing on screen saying the token was the problem).
-	if (variable_global_exists("tw_irc_auth_failed") && global.tw_irc_auth_failed)
-	{
-		global.tw_irc_status       = "error: bad token";
-		global.tw_irc_reconnect_at = -1;
-		exit;
-	}
-
-	// Twitch dropped us (network loss, server restart, etc). Mark it; leave tw_irc_enabled
-	// up so the user can re-select the toggle to reconnect.
-	global.tw_irc_status = "error: disconnected";
-	// 09-11 stream: the link was down ~8 min (1:53 -> 2:01) before anyone noticed --
-	// nothing on screen said so and the status dot is tiny. Shout, and let
-	// twitch_irc_step() retry on its own (5s, then backing off from 30s).
-	global.tw_irc_reconnect_at = (variable_global_exists("tw_irc_frame") ? global.tw_irc_frame : 0) + 300;
-	global.tw_irc_reconnect_n  = 0;
-	global.tw_toast       = "CHAT LINK LOST -- reconnecting";
-	global.tw_toast_timer = 300;
+	// Not relied on: this runtime does not raise it when the far end closes a client socket
+	// (see twitch_irc_dropped). The watchdog in twitch_irc_step is what actually notices a drop.
+	twitch_irc_dropped("error: disconnected");
 }

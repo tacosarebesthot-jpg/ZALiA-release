@@ -8,23 +8,26 @@
 // TODO: no send-failure handling; a real build should check the socket is still
 // connected and re-queue on failure.
 
+/// Returns what network_send_raw returned (bytes sent, < 0 when the send failed); -1 with no socket.
 function twitch_irc_send(_sock, _str) {
 
-	if (_sock < 0) return; // not connected -- nothing to send
+	if (_sock < 0) return -1; // not connected -- nothing to send
 
 	var _line = string(_str) + "\r\n";
 
 	// Exact-size fixed buffer: buffer_text writes the raw bytes with no null
 	// terminator, so the allocated size equals the payload size we send.
 	var _sz  = string_byte_length(_line);
-	if (_sz <= 0) return;
+	if (_sz <= 0) return 0;
 
 	var _buf = buffer_create(_sz, buffer_fixed, 1);
 	buffer_write(_buf, buffer_text, _line);
 
 	// Over the WebSocket transport (tls=1) Twitch wants TEXT frames; a raw TCP socket ignores the flag.
-	if (variable_global_exists("tw_irc_tls") && global.tw_irc_tls) network_send_raw(_sock, _buf, buffer_get_size(_buf), network_send_text);
-	else                                                            network_send_raw(_sock, _buf, buffer_get_size(_buf));
+	var _sent;
+	if (variable_global_exists("tw_irc_tls") && global.tw_irc_tls) _sent = network_send_raw(_sock, _buf, buffer_get_size(_buf), network_send_text);
+	else                                                            _sent = network_send_raw(_sock, _buf, buffer_get_size(_buf));
 
 	buffer_delete(_buf);
+	return _sent;
 }

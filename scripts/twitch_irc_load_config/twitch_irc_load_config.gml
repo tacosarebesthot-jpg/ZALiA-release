@@ -49,6 +49,7 @@ function twitch_irc_load_config() {
 	var _cooldown = global.tw_irc_cooldown_frames;
 	var _effect   = global.tw_effect_secs;
 	var _autoconnect = (variable_global_exists("tw_irc_autoconnect") && global.tw_irc_autoconnect) ? 1 : 0;
+	global.tw_irc_tls = false; // the file decides, every load: a removed tls= line used to leave TLS on until restart
 
 	while (!file_text_eof(_fh))
 	{
@@ -93,8 +94,9 @@ function twitch_irc_load_config() {
 			case "user_cooldown": global.tw_user_cooldown_frames = clamp(floor(tw_num(_val, 1800)), 0, 7200); break;
 			case "mod_bypass":    global.tw_mod_bypass  = (tw_num(_val, 1) != 0); break;
 			case "effects_hud":   global.tw_effects_hud = (tw_num(_val, 1) != 0); break;
-			// tls=1: the token crosses the wire inside TLS (wss://irc-ws.chat.twitch.tv:443). Opt-in
-			// because the WebSocket transport is untested on this runtime; plaintext 6667 is the default.
+			// tls=1: the token crosses the wire inside TLS (wss://irc-ws.chat.twitch.tv:443). Still
+			// opt-in; plaintext 6667 is the default. Checked 2026-10-01 on LTS 2026: the WebSocket
+			// connects and the 001 welcome arrives ("connected"). Chat commands over it not yet run live.
 			case "tls": case "ssl": case "wss": global.tw_irc_tls = (tw_num(_val, 0) != 0); break;
 		}
 	}

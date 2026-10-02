@@ -59,6 +59,33 @@ function twitch_irc_step() {
 		twitch_irc_connect();
 	}
 
+	// ---- liveness watchdog ------------------------------------------------------------
+	// The disconnect event cannot be trusted to arrive (twitch_irc_dropped), so silence is
+	// the only evidence of a dead link. Twitch itself only speaks every ~5 minutes on a quiet
+	// channel, so after 30 s with nothing received we ask: a client PING gets an immediate
+	// PONG, and any received data resets the clock. No answer 15 s later, or a send that
+	// fails outright = dropped. "connecting" for 20 s (no connect result, or connected but
+	// never welcomed) is the same thing.
+	if (variable_global_exists("tw_irc_socket") && global.tw_irc_socket >= 0
+	&&  variable_global_exists("tw_irc_last_rx") && variable_global_exists("tw_irc_frame"))
+	{
+		var _quiet = global.tw_irc_frame - global.tw_irc_last_rx;
+		if (global.tw_irc_status == "connecting")
+		{
+			if (_quiet > 1200) twitch_irc_dropped("error: timeout");
+		}
+		else if (global.tw_irc_status == "connected")
+		{
+			if (!variable_global_exists("tw_irc_ping_at")) global.tw_irc_ping_at = -1;
+			if (_quiet > 1800 && global.tw_irc_ping_at <= global.tw_irc_last_rx) // one ping per silence
+			{
+				global.tw_irc_ping_at = global.tw_irc_frame;
+				if (twitch_irc_send(global.tw_irc_socket, "PING :zalia") < 0) twitch_irc_dropped("error: disconnected");
+			}
+			else if (_quiet > 2700) twitch_irc_dropped("error: disconnected");
+		}
+	}
+
 	if (!variable_global_exists("tw_irc_frame")) global.tw_irc_frame = 0;
 	global.tw_irc_frame++;
 
