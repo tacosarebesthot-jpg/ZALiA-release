@@ -2,6 +2,72 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
+## 2.1.8 — 2026-10-05
+
+Rolls up 2.1.6 and 2.1.7, which only ever went out as source. The biggest round since 2.1.0: the Twitch side got a code review and a test harness that drives every chat verb through the real chat entry and grades the result, and everything the review turned up is fixed.
+
+**New for chat**
+
+- `!help <page>`: `!help hurt`, `chaos`, `mobs`, `fun`, `rl` or `mods` shows one page with what every verb on it does. Bare `!help` still shows the whole card and now ends with the page list.
+- `!vote <x> <y> [secs]`: chat picks between two effects. Type `x` or `y` (or `1` / `2`) to vote; one ballot per chatter, last one counts; the winner fires when the clock runs out, a tie fires both. Starting a vote, voting and the winner are all free.
+- `!catslap [n]`: three slaps from alternating sides, no damage. `!flashbang`: one white flash plus the smite hit on every non-boss enemy on screen. Both also run from the drop-file route, so a Tangia channel-point redeem can drive them through Streamer.bot.
+- Death blame: the death plate names the verb and the chatter (KILLED BY name / !SWARM, KILLS: 3) and `!kills` shows the top three. `!top` shows the richest chatters when the points economy is on.
+- `!undeny [what]` (or `!deny <what> off`) lifts a lock early. No FLAWLESS splash on a boss that killed you.
+- `!ignore <name>` / `!unignore <name>`, mods and the broadcaster only: a muted chatter is dropped before commands, votes, points or joke pools see them. Survives a restart.
+- `!kill` is gone (too strong, never used live). `!poison` stays.
+
+**Cooldowns, mods, points**
+
+- A per-chatter cooldown (30 seconds by default, CHATTER COOLDOWN row, `user_cooldown=`) on top of the shared one, with its own WAIT toast.
+- Mods and the broadcaster skip both cooldowns (MODS SKIP COOLDOWN row, `mod_bypass=`), and a bypassed command does not arm the shared timer for everyone else.
+- The points economy is **on by default** now; chat kept asking whether it was. An existing `points=0` in `twitch_config.txt` is still honoured.
+- A refused command costs nothing and earns no kill credit. A `!swarm` queued off a battle screen is charged when queued and refunded if a death empties the queue. The game-over GG / EZ callout gets its credit back.
+
+**On screen**
+
+- EFFECT TIMERS: a top-right strip of the running effects with seconds left, plus the live vote tally. Row on the TWITCH OPTIONS page, `effects_hud=`.
+- The MK2 FLAWLESS / FATALITY / FRIENDSHIP splash is arcade-sized and draws over the toasts and the help card; FRIENDSHIP's letters are no longer chopped at the bottom.
+- `!heckler` / `!flame` show the chatter's name over the flame.
+- A gamepad unplugged mid-run shows CONTROLLER LOST. An unreadable save slot says SAVE N UNREADABLE and points at the checkpoints folder. These system notices always show, whatever the toast settings.
+- Death plate: KILL #1 lost its # (not in the font); it reads KILLS: 1 now. Four notice lines longer than the plate were being cut off.
+
+**Options**
+
+- OTHER → DEATH COUNTER is a saved player toggle (it was dev-only and never saved).
+- OTHER → RESET ALL SETTINGS (press twice): audio, HUD, the OTHER page and the TWITCH OPTIONS page go back to defaults. Controls, the DISPLAY page, the audio set, randomizer options and the Twitch login are kept.
+- The OTHER page scrolls; BACK no longer prints over the description text.
+- Escape opens the quit menu in fullscreen too (it used to leave fullscreen first). Alt+Enter only toggles fullscreen.
+- TWITCH OPTIONS: CHATTER COOLDOWN, MODS SKIP COOLDOWN and EFFECT TIMERS rows.
+- ELIMINATION MODE on the file select wants START twice on a slot that holds a save; the armed slot flashes ERASE? START, and moving the cursor disarms.
+
+**Fixed**
+
+- Timed chat effects used to survive a death or a file load (the ice floor, the chicken). They end now. `!challenge` is the one that rides through a death; it ends on a game over or when you leave the palace.
+- `!arise` gave a tier-2 player the tier-1 chicken.
+- `!grow` / `!shrink` keep Link's feet on the floor. `!flip` / `!party` no longer crop the view in scrolled rooms.
+- A chat chicken that wore off left Link 8 px inside the floor.
+- `!invuln` lasted 105 seconds. `!deny jump 10` ignored the 10.
+- Cucco form obeys `!speed` / `!slow` (2.1.6). `!steal` only takes items that are live-gated, so a steal is never invisible (2.1.6).
+- A near-miss typo (`!stasus`, `!refil`) gets a did-you-mean toast; `!music` with no match and `!spell` with an unknown name say why (2.1.7).
+- `!hurt` is capped at 1 to 8 quarter boxes and stops at 1 HP (it was lethal via `!hurt 999`). `!drain` is capped at four bars.
+- Chat link: a dead connection is noticed and reconnected (this runtime never reports the far end closing); a bad token stops the reconnect loop instead of retrying forever; chat lines split across packets are reassembled (a split `!spawn moblin 6` used to run as `!spawn mob`); connecting no longer stalls a frame on a dead route; the game's own web server no longer answers the Twitch socket.
+- Saves: every good save decoded to an empty map on this runtime; save slots, checkpoints, prefs and `twitch_config.txt` are written to a `.tmp` and swapped in, and a leftover `.tmp` is recovered; a save that could not be written (another program holding the file) says SAVE N NOT WRITTEN instead of claiming success; a corrupt prefs file no longer crashes every boot.
+- `!steal` never bakes into a save or a checkpoint.
+- Playtest builds no longer fire the bare debug hotkeys (a stray L, 2 or X).
+- The tracker file is written at most twice a second during play (was 15 times).
+- `tls=1` in `twitch_config.txt` connects over wss on port 443 so the token never crosses the wire in the clear. Opt-in.
+
+## 2.1.5 — 2026-09-16
+
+From the owner's own playtest stream:
+
+- Toasts moved to the top-left, out of the way of the run timer and gameplay.
+- Toasts no longer announce sound-effect and jingle names, only the music track playing.
+- Removed the always-green pixel bottom-left (the old Twitch live dot).
+- `!party` / `!flip` no longer break the viewport in wide rooms.
+- Dropped a 2.5-second Wily boss loop from the random boss pool.
+- ZELDA 1 JINGLE plays the real Zelda 1 item fanfare.
+
 ## 2.1.4 — 2026-09-15 (hotfix)
 
 - **TWITCH page is back in the options menu.** Since 2.1.0 the in-game TWITCH page (CHAT JOKES, CHECKPOINTS, POINTS ECONOMY, ROCKET LEAGUE, cooldown, effect length) had no way in. Press O, pick **TWITCH OPTIONS**. The browser hub (jukebox, tracker, Twitch setup) is the COMPANION PAGES row on that page.

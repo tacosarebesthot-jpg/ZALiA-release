@@ -91,6 +91,9 @@ then connect. As a manual fallback you can instead grab a token from
 `chat:read`, add `chat:edit` only if you want the game to speak) and drop it into
 the `token=` line of `twitch_config.txt` yourself.
 
+Add `tls=1` to `twitch_config.txt` to connect over wss on port 443, so the token never
+crosses the wire in the clear. Opt-in; the default is the plain IRC port.
+
 ### If it will not connect
 
 | Symptom | Cause |
@@ -113,8 +116,11 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 |---|---|---|
 | CHAT JOKES | NORMAL / CLEAN / DIRTY town text | `jokes=0/1/2` |
 | CHECKPOINTS | rolling save copies | `autosave=1/0` |
-| POINTS ECONOMY | viewers pay points for commands | `points=1/0` |
+| POINTS ECONOMY | viewers pay points for commands (on by default) | `points=1/0` |
 | ROCKET LEAGUE | quick-chat plates and verbs | `rl=1/0` |
+| CHATTER COOLDOWN | each chatter's own cooldown, 0 to 120 s (default 30) | `user_cooldown=` (frames) |
+| MODS SKIP COOLDOWN | mods and the broadcaster skip both cooldowns | `mod_bypass=1/0` |
+| EFFECT TIMERS | top-right strip of running effects with seconds left, plus the live vote | `effects_hud=1/0` |
 | MUSIC TOASTS | NOW PLAYING plate: OFF (default) or 1-30 seconds on screen | `toast_music=0-30` |
 | CHAT TOASTS | plates for what chat did: OFF or 1-30 seconds (default 4) | `toast_chat=0-30` |
 | GAME TOASTS | killed by, crushed, level up, hints: OFF (default) or 1-30 seconds | `toast_game=0-30` |
@@ -134,6 +140,9 @@ On the Twitch setup page (**OPTIONS → TWITCH OPTIONS → COMPANION PAGES**, or
 - **Effect duration** — how long timed effects last
 - **Cooldown** — a shared throttle across all of chat, so five viewers cannot
   stack five effects instantly
+- **CHATTER COOLDOWN** (in-game, TWITCH OPTIONS) — a second throttle per chatter, on
+  top of the shared one. Mods and the broadcaster skip both unless you turn
+  **MODS SKIP COOLDOWN** off
 
 Start with a long cooldown. You can always loosen it once you know how your chat
 behaves.
@@ -169,10 +178,9 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 
 | Command | Effect |
 |---|---|
-| `!hurt <n>` | `<n>` quarter-heart boxes of damage (bare `!hurt` = half a box) |
-| `!drain <n>` | drain magic |
+| `!hurt <n>` | `<n>` quarter-heart boxes of damage, 1 to 8; stops at 1 HP, never kills |
+| `!drain <n>` | drain magic, up to four bars |
 | `!poison` | ticking damage that can kill |
-| `!kill` | exactly what it says |
 | `!curse` | slow health drip, stops at 1 HP |
 | `!steal` `!rob` | takes one of your traversal/combat items (candle, glove, raft, boots, flute, hammer, bracelet, sword, shield, ring) and gives it back later |
 | `!slow` | marsh-slow legs |
@@ -180,12 +188,13 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!spawn <enemy> <n>` | drop a named enemy next to you (daira, moblin, goriya, zora, stalfos, bat, atta, myu) |
 | `!swarm <n>` | a pack of random enemies around you |
 | `!flame` `!heckler` | a jumping flame tagged with the viewer's name |
-| `!deny <what>` | temporarily blocks spell / jump / upstab / downstab / upthrust / downthrust / all |
+| `!deny <what>` | temporarily blocks spell / jump / upstab / downstab / upthrust / downthrust / all. `!undeny [what]` or `!deny <what> off` lifts it early |
+| `!catslap <n>` | three slaps from alternating sides that knock Link around, no damage. `<n>` is frames to wait before the first slap (60 = 1 s), so it can land with an overlay |
 | `!tax <pct>` | takes a cut of your experience (bare `!tax` = 10%, up to 50) |
 | `!dmgup <secs>` | every hit does double damage for a while |
 | `!attrition <secs>` | life drips away slowly; stops short of killing |
 | `!stasis <secs>` | Link freezes in place, mid-air included (1–10s) |
-| `!challenge` | inside a palace only: screen stays flipped until you leave, life capped at 4 hearts, no helpful commands. Ends when you leave or die |
+| `!challenge` | inside a palace only: screen stays flipped until you leave, life capped at 4 hearts, no helpful commands. A death does not end it; leaving the palace or a game over does |
 | `!crush` | drops a palace block from above you. Falling blocks kill whatever they land on now, you included |
 
 ### Mess with your head
@@ -195,6 +204,7 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!confuse` | swaps left and right — bare `!confuse` rolls a random 10–30s, good luck |
 | `!disorient` | confuse, plus up and down |
 | `!ghost <secs>` | every non-boss enemy on screen turns nearly invisible |
+| `!flashbang` `!flash` | one white flash, plus the smite hit on every non-boss enemy on screen |
 | `!flip` | mirrors the screen |
 | `!dark` | kills the lights — you will need the candle (it actually works now) |
 | `!ice` | the floor is ice; momentum is a lifestyle |
@@ -209,11 +219,24 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!song` `!np` | shows the current track's name (it also pops up on every new track) |
 | `!meth` | moon + jump + speed at once |
 | `!quantumentangle` | something small and random happens. or doesn't |
-| `!help` `!cmds` | a one-screen card of all of this, in the game, for 8 seconds |
+| `!help` `!cmds` | a one-screen card of all of this on stream. `!help hurt`, `chaos`, `mobs`, `fun`, `rl` or `mods` shows one page with what each verb does |
 | `!niceshot` `!whatasave` `!calculated` `!savage` `!closeone` `!okay` `!faking` `!gg` `!ez` `!wow` `!noproblem` `!thanks` | Rocket League quick-chat plates, free. Three of the same inside six seconds: chat disabled for 4 seconds |
 | `!points` | your balance, when the points economy is on (see below) |
+| `!top` | the three richest chatters, when the points economy is on |
+| `!kills` `!blame` | who has killed the runner most |
+| `!vote <x> <y> [secs]` | chat picks between two effects (`!vote dark flip 30`). Type `x` or `y`, or `1` / `2`, to vote; one ballot each, last one counts; the winner fires when the clock runs out, a tie fires both. Free to start, free to vote, and the winner is free |
 | `!suggest <idea>` | your idea goes in a file gainey reads |
 | typos | a near-miss command (like `!stasus` or `!refil`) gets a "did you mean ?stasis" toast; pure nonsense stays silent |
+
+### Mods and the broadcaster
+
+| Command | Effect |
+|---|---|
+| `!ignore <name>` `!mute <name>` | mutes that chatter for the whole system: no commands, no votes, no points, no joke pools. Survives a restart (`ignored.txt` in `%LOCALAPPDATA%\ZALiA\`) |
+| `!unignore <name>` `!unmute <name>` | lets them play again |
+
+Mods and the broadcaster also skip both cooldowns while MODS SKIP COOLDOWN is on. The
+broadcaster can never be ignored.
 
 Clean out a boss fight without taking a hit and the game plays the real Mortal
 Kombat II **FLAWLESS VICTORY** and **FATALITY** / **FRIENDSHIP** splash, announcer and
@@ -240,9 +263,9 @@ so you can write your own.
 
 ### Points economy
 
-**POINTS ECONOMY** (same page, off by default) makes commands cost something. Viewers earn 1
+**POINTS ECONOMY** (same page, on by default since 2.1.8) makes commands cost something. Viewers earn 1
 point per chat message (up to 6 a minute) and 5 points every 5 minutes while they are
-talking; every command has a price (a heal 20, a swarm 25, a kill 100). Too poor and the
+talking; every command has a price (a heal 20, a swarm 25, a flashbang 60). A refused command costs nothing. Too poor and the
 game says so on screen. The broadcaster is always free. Balances persist between streams.
 
 ### Checkpoints
@@ -280,8 +303,10 @@ discover live.
 ## A note on trust
 
 Chat commands hand strangers a lever on your game. That is the point, and it is
-also the risk. The cooldown is your main defence — it throttles *everyone*
-together, not per-viewer, so a raid cannot chain effects faster than you set.
+also the risk. The cooldowns are your main defence: the shared one throttles
+*everyone* together, so a raid cannot chain effects faster than you set, and the
+per-chatter one stops any single viewer from hogging it. `!ignore <name>` mutes
+one chatter for good.
 
 If it gets out of hand, the master switch is one click on the setup page, and
 takes effect immediately.

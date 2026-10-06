@@ -39,7 +39,7 @@ If you enjoy ZALiA, that is HoverBat's game you are enjoying.
 `twitch_apply`, `twitch_irc_*`, `twitch_poll`, `twitch_tick`, `twitch_config_save`,
 `obj_twitch_irc`, `obj_twitch_fairy`, `OptionsMenu_Twitch_*`
 
-Around fifty chat commands, plus **VS CHAT mode** where chat's goal is to kill the
+Over a hundred chat commands, plus **VS CHAT mode** where chat's goal is to kill the
 runner and every helpful command is blocked, with a death scoreboard.
 See **[TWITCH_SETUP.md](TWITCH_SETUP.md)**.
 
