@@ -20,7 +20,8 @@ For the original game and its official builds, go to the upstream repository abo
 
 ## Download
 
-Grab the latest build from the [**Releases**](../../releases) page and unzip it
+Current build: **v2.1.8** (2026-10-05). Grab it from the [**Releases**](../../releases)
+page (the zips are hosted on Mega and linked from the release notes) and unzip it
 anywhere. Run `ZALiA.exe`. No installer, no dependencies.
 
 Windows only. Saves and settings are written to `%LOCALAPPDATA%\ZALiA\` — the
