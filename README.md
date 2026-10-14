@@ -177,7 +177,9 @@ are by **Akito Nakatsuka** and **Koji Kondo** for Nintendo.
 Item and HUD sprites used by the companion tracker are ripped from the original
 *Zelda II* by **Mister Mike**, via
 [The Spriters Resource](https://www.spriters-resource.com/nes/). ZALiA-specific
-item sprites were exported from the game's own palette shader.
+item sprites were exported from the game's own palette shader. The MK2 Toasty head
+is from **MICA**'s Portal stage sheet and the yell from **Rapidkirby3k**'s MK2 arcade
+sound set, both on The Spriters / Sounds Resource; the arcade splash art is our own rip.
 
 ### HoverBat's patrons
 

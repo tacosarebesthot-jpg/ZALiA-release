@@ -10,7 +10,7 @@ Everything Lane asked for on air in the 2026-10-09 stream, plus one cap. Source 
 - **First-use hint**: the first time each verb lands in a session, its `!help` line is toasted, so "I don't know what Cat Slap does" answers itself. `first_use_hint=0` turns it off.
 - **`!1up` reminder**: after five minutes on your last life a toast reminds chat that `!1up` exists. `oneup_nudge=` sets the minutes, 0 turns it off. Silent in VS CHAT and `!challenge`, where 1up is refused anyway.
 - **Swarm cap**: with mods skipping cooldowns, five `!swarm`s landed inside a minute. `!swarm` is now refused (no charge) once 14 enemies are on screen, and trimmed to fit below that. `swarm_cap=` changes the number.
-- **Toasty**: the MK2 bottom-right pop after a flawless finisher. The code is in; the head and the yell are not ripped yet, so it does nothing until they are. `toasty=` is the percent chance.
+- **Toasty**: after a flawless finisher, Dan Forden's head slides in bottom-right with the yell, timed like the MK2 cabinet. `toasty=` is the percent chance (100). Off with the rest of the MK2 splash (MK2 SPLASH row).
 
 ## 2.1.8 — 2026-10-05
 
