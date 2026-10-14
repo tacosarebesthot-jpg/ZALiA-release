@@ -1509,6 +1509,94 @@ function tws_feat(_name, _ok, _detail) {
 	tws_log((_ok ? "PASS" : "FAIL") + "  [feat]  " + _name + "  ->  " + string(_detail));
 }
 
+/// read one key back from twitch_config.txt the way twitch_irc_load_config does ("" = absent)
+function tws_cfg_read(_key) {
+	var _p = working_directory + "twitch_config.txt";
+	if (!file_exists(_p)) return "";
+	var _fh = file_text_open_read(_p); var _out = "";
+	while (!file_text_eof(_fh))
+	{
+		var _l = tw_trim(file_text_readln(_fh));
+		var _eq = string_pos("=", _l);
+		if (_eq > 1 && string_lower(tw_trim(string_copy(_l, 1, _eq - 1))) == _key) _out = tw_trim(string_copy(_l, _eq + 1, string_length(_l) - _eq));
+	}
+	file_text_close(_fh);
+	return _out;
+}
+
+/// press confirm (A) on the CHAT EXTRAS page through the real update function
+function tws_chatx_press_a(_om, _row) {
+	with (_om) { ChatX_cursor = _row; timer = 0; timer2 = 0; a_button_pressed = true; Backout_requested = false; OptionsMenu_ChatX_update(); a_button_pressed = false; }
+}
+/// hold right (+1) or left (-1) one tick on the CHAT EXTRAS page through the real update function
+function tws_chatx_press_h(_om, _row, _dir) {
+	Input.heldH = (_dir > 0) ? Input.R : Input.L; Input.heldPrev = 0; g.gui_timer2 = 0;
+	with (_om) { ChatX_cursor = _row; timer = 0; timer2 = 0; a_button_pressed = false; Backout_requested = false; OptionsMenu_ChatX_update(); }
+	Input.heldH = 0;
+}
+
+/// 10-14: every CHAT EXTRAS row flips its global AND lands in twitch_config.txt, then is put back
+function tws_chatx_tests(_om) {
+	tws_log("---- CHAT EXTRAS rows (real update function, file read-back)");
+	// the TWITCH page row opens the page, BACK returns to it
+	with (_om) { menu_state = menu_state_TWITCH; Twitch_cursor = Twitch.EXTRAS; timer = 0; timer2 = 0; a_button_pressed = true; OptionsMenu_Twitch_update(); a_button_pressed = false; }
+	tws_feat("CHAT EXTRAS row on TWITCH opens the page", _om.menu_state == _om.menu_state_CHAT_EXTRAS, "menu_state=" + string(_om.menu_state));
+	tws_chatx_press_a(_om, ChatX.BACK);
+	tws_feat("BACK on CHAT EXTRAS returns to TWITCH with the cursor on CHAT EXTRAS", _om.menu_state == _om.menu_state_TWITCH && _om.Twitch_cursor == Twitch.EXTRAS, "menu_state=" + string(_om.menu_state) + " cursor=" + string(_om.Twitch_cursor));
+	with (_om) menu_state = menu_state_CHAT_EXTRAS;
+
+	// on/off rows: [row, label, key, getter]
+	var _tog = [
+		[ChatX.HINT,      "FIRST-USE HINT", "first_use_hint", function() { return global.tw_first_use_hint; }],
+		[ChatX.ANNOUNCER, "MK2 ANNOUNCER",  "announcer",      function() { return global.tw_announcer; }],
+		[ChatX.BETS,      "CHAT BETS",      "bets",           function() { return global.tw_bets_on; }],
+		[ChatX.BOUNTY,    "BOUNTIES",       "bounty",         function() { return global.tw_bounty_on; }]
+	];
+	for (var _i = 0; _i < array_length(_tog); _i++)
+	{
+		var _t = _tog[_i]; var _get = _t[3];
+		var _v0 = _get();
+		tws_chatx_press_a(_om, _t[0]);
+		var _v1 = _get(); var _f1 = tws_cfg_read(_t[2]);
+		tws_chatx_press_a(_om, _t[0]);
+		var _v2 = _get(); var _f2 = tws_cfg_read(_t[2]);
+		tws_feat(_t[1] + ": A flips it, the file follows, A again puts it back",
+		         _v1 != _v0 && _v2 == _v0 && _f1 == (_v1 ? "1" : "0") && _f2 == (_v2 ? "1" : "0"),
+		         string(_v0) + " -> " + string(_v1) + " (file " + _f1 + ") -> " + string(_v2) + " (file " + _f2 + ")");
+	}
+
+	// value rows: [row, label, key, getter, step]
+	var _val = [
+		[ChatX.ONEUP,     "1UP REMINDER", "oneup_nudge", function() { return global.tw_oneup_nudge_min; }, 1],
+		[ChatX.SWARM_CAP, "SWARM CAP",    "swarm_cap",   function() { return global.tw_swarm_cap; },       2],
+		[ChatX.TOASTY,    "TOASTY",       "toasty",      function() { return global.tw_toasty_pct; },      10],
+		[ChatX.BABALITY,  "BABALITY",     "babality",    function() { return global.tw_babality_pct; },    5]
+	];
+	for (var _j = 0; _j < array_length(_val); _j++)
+	{
+		var _r = _val[_j]; var _g = _r[3];
+		var _w0 = _g();
+		// step away from a clamp edge first so one press in each direction is visible
+		var _dir = (_w0 >= 100 || (_r[0] == ChatX.SWARM_CAP && _w0 >= 40) || (_r[0] == ChatX.ONEUP && _w0 >= 30)) ? -1 : 1;
+		tws_chatx_press_h(_om, _r[0], _dir);
+		var _w1 = _g(); var _h1 = tws_cfg_read(_r[2]);
+		tws_chatx_press_h(_om, _r[0], -_dir);
+		var _w2 = _g(); var _h2 = tws_cfg_read(_r[2]);
+		tws_feat(_r[1] + ": one press moves it by " + string(_r[4]) + ", the file follows, the other way puts it back",
+		         _w1 == _w0 + _dir * _r[4] && _w2 == _w0 && _h1 == string(_w1) && _h2 == string(_w2),
+		         string(_w0) + " -> " + string(_w1) + " (file " + _h1 + ") -> " + string(_w2) + " (file " + _h2 + ")");
+	}
+	// clamps: TOASTY cannot pass 100 or drop below 0; SWARM CAP floor is 4
+	var _tp0 = global.tw_toasty_pct; global.tw_toasty_pct = 100; tws_chatx_press_h(_om, ChatX.TOASTY, 1);
+	var _tp_hi = global.tw_toasty_pct; global.tw_toasty_pct = 0; tws_chatx_press_h(_om, ChatX.TOASTY, -1);
+	var _tp_lo = global.tw_toasty_pct; global.tw_toasty_pct = _tp0;
+	var _sc0 = global.tw_swarm_cap; global.tw_swarm_cap = 4; tws_chatx_press_h(_om, ChatX.SWARM_CAP, -1);
+	var _sc_lo = global.tw_swarm_cap; global.tw_swarm_cap = _sc0;
+	tws_feat("value rows clamp (TOASTY 0..100, SWARM CAP floor 4)", _tp_hi == 100 && _tp_lo == 0 && _sc_lo == 4, "toasty hi=" + string(_tp_hi) + " lo=" + string(_tp_lo) + " swarm lo=" + string(_sc_lo));
+	twitch_config_save(); // leave the file matching the restored globals
+	with (_om) { ChatX_cursor = ChatX.BOUNTY; timer = 0; }
+}
+
 /// next stage of the "edge" / "erase" runs
 function tws_stage(_n) {
 	global.tws_es   = _n;
@@ -1746,7 +1834,7 @@ function Dev_TwSelftest_Step() {
 			tws_shot("menu_chatextras_toasty");
 			var _cx_ok = false; with (_om) _cx_ok = (menu_state == menu_state_CHAT_EXTRAS && ds_grid_width(ChatX_dg) == ChatX.COUNT);
 			tws_feat("CHAT EXTRAS page is open with every row", _cx_ok, "ChatX.COUNT=" + string(ChatX.COUNT));
-			with (_om) ChatX_cursor = ChatX.BOUNTY;
+			tws_chatx_tests(_om);
 		}
 		if (global.tws_t == 290) { tws_shot("menu_chatextras_bounty");      with (_om) { menu_state = menu_state_MAIN; timer = 0; sub_state = sub_state_CLOSING1; } }
 		if (global.tws_t == 380)
