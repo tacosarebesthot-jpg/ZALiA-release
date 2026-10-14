@@ -137,10 +137,10 @@ A few more keys have no menu row and live only in `twitch_config.txt` (one per l
 | Key | Default | What it does |
 |---|---|---|
 | `cmd_sound_name=` | `snd_Cursor_Move_2a` | which sound the COMMAND SOUND blip uses; any sound asset name in the game |
-| `first_use_hint=1/0` | 1 | the first time a verb lands in a session, its `!help` line is toasted so you know what just hit you |
-| `oneup_nudge=` | 5 | minutes on your last life before a toast reminds chat that `!1up` exists; 0 turns it off |
+| `first_use_hint=1/0` | 0 | the first time a verb lands in a session, its `!help` line is toasted so you know what just hit you |
+| `oneup_nudge=` | 0 | minutes on your last life before a toast reminds chat that `!1up` exists; 0 turns it off |
 | `swarm_cap=` | 14 | live enemies on screen at which `!swarm` is refused (mods skip cooldowns, so this is the real limit) |
-| `toasty=` | 100 | percent chance the MK2 Toasty pops after a flawless finisher |
+| `toasty=` | 50 | percent chance the MK2 Toasty pops after a flawless finisher |
 | `announcer=1/0` | 1 | the MK2 announcer: FIGHT! on a boss, FINISH HIM at a quarter bar, EXCELLENT for a clean `!swarm` wipe |
 | `babality=` | 15 | percent chance a flawless ends in a Babality when Link is not shrunk; shrunk is always |
 | `bets=1/0` | 1 | `!bet win / flawless / death N` on the boss on screen (2x / 5x / 3x) |
