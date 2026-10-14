@@ -48,7 +48,7 @@ in-game hints) is **HoverBat's**, and so is everything else in the game itself. 
 | **Stream tracker** | a browser page sized for OBS — every item, spell, container and key, in five themes |
 | **Twitch integration** | chat can trigger in-game effects, including stealing your items |
 | **Jukebox** | browse and play every track in the game; order, shuffle or repeat |
-| **2-player co-op** | a second player joins as a fairy helper |
+| **2-player co-op (experimental)** | a second controller drives a fairy helper with Link's sword; unfinished, off by default, not in active development |
 | **Display options** | smooth / sharp / pixel-perfect / crisp-fill / CRT / scanlines, fullscreen, window scale |
 | **Controllers** | full gamepad support, calibration wizard, rebindable controls |
 | **Quality of life** | low-HP beep, death counter, hint-NPC map markers, boulder compass labels |
@@ -126,10 +126,16 @@ debugging, and it is entirely possible to break your own save with it.
 [**Discord**](https://discord.gg/FSphHEsu8D) — where releases get announced, playtest builds
 go out, and bugs get reported.
 
+The Zelda II channels are hidden until you opt in: open `#get-zelda-access` and
+press the **Zelda II** button. Then:
+
 | Channel | For |
 |---|---|
-| `#zalia-gm2026-port` | releases and general talk about the port |
-| `#zalia-playtest` | test builds and bug reports (supporters) |
+| `#z2-announcements` | release notes |
+| `#zalia-gm2026-port` | download links for the current build |
+| `#z2-general` | talk about the port, ideas, questions |
+| `#z2-bug-reports` | bugs, with your `GRAB_LOGS` zip and screenshots |
+| `#zalia-playtest` | test builds before they go public |
 | `#donations` | if you want to support the work |
 
 ---
