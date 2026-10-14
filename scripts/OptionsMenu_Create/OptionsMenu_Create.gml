@@ -151,6 +151,7 @@ function OptionsMenu_Create() {
 	menu_state_RANDO         = _a++;
 	menu_state_OTHER         = _a++;
 	menu_state_TWITCH        = _a++; // player-facing; the Twitch toggles used to be buried in DEV TOOLS -> TEST/CAPTURE
+	menu_state_CHAT_EXTRAS   = _a++; // TWITCH sub-page: the file-only chat keys, in-game (owner 10-14)
 	menu_state_DISPLAY       = _a++;
 	menu_state_OVERLAYS      = _a++; // DEV TOOLS sub-folder
 	menu_state_CHEATS        = _a++; // DEV TOOLS sub-folder
@@ -873,6 +874,7 @@ function OptionsMenu_Create() {
 	    TOAST_NP, TOAST_CHAT, TOAST_GAME, SPLASH, JINGLE, BIGTIMER, // v2.1.4 player options
 	    EFFECTS_HUD, USER_COOLDOWN, MOD_BYPASS, // 09-30: effect strip, per-chatter cooldown, mods skip cooldowns
 	    CMD_SOUND, // 10-09 VOD: a cue when a chat command lands (Lane asked; the owner bets he turns it off)
+	    EXTRAS, // 10-14: opens CHAT EXTRAS (hint, 1up reminder, swarm cap, toasty, announcer, babality, bets, bounty)
 	    COMMANDS, SETUP,
 	    PAGES, BACK,
 	    COUNT
@@ -918,6 +920,8 @@ function OptionsMenu_Create() {
 	Twitch_dg[#_i,0]="EFFECT TIMERS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="TOP-RIGHT LIST OF THE CHAT EFFECTS RUNNING RIGHT NOW AND HOW MANY SECONDS ARE LEFT, PLUS THE LIVE !VOTE COUNT.";
 	             _i=Twitch.CMD_SOUND;
 	Twitch_dg[#_i,0]="COMMAND SOUND";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="A SHORT BLIP EACH TIME A CHAT COMMAND LANDS. OFF IF A BUSY CHAT GETS ANNOYING. AT MOST ONE BLIP EVERY TWO SECONDS.";
+	             _i=Twitch.EXTRAS;
+	Twitch_dg[#_i,0]="CHAT EXTRAS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="MORE CHAT SWITCHES: FIRST-USE HINTS, 1UP REMINDER, SWARM CAP, TOASTY, MK2 ANNOUNCER, BABALITY, BETS AND BOUNTIES.";
 	             _i=Twitch.COMMANDS;
 	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP !TAX !DMGUP !VOTE !KILLS !SONG - !HELP IN CHAT FOR ALL";
 	             _i=Twitch.SETUP;
@@ -928,6 +932,38 @@ function OptionsMenu_Create() {
 	Twitch_dg[#_i,0]="COMPANION PAGES";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="OPENS JUKEBOX, TRACKER AND TWITCH SETUP IN YOUR BROWSER.";
 	             _i=Twitch.BACK;
 	Twitch_dg[#_i,0]="BACK";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="RETURN TO THE MAIN OPTIONS MENU.";
+
+	// ── CHAT EXTRAS (TWITCH sub-page, owner 10-14: "give us an in-game toggle") ──────
+	// Everything here used to be a twitch_config.txt-only key. Same globals, same keys,
+	// twitch_config_save() writes them, so the file and the menu never disagree.
+	enum ChatX
+	{
+	    HINT, ONEUP, SWARM_CAP, TOASTY, ANNOUNCER, BABALITY, BETS, BOUNTY,
+	    BACK,
+	    COUNT
+	}
+	ChatX_cursor = 0;
+
+	ChatX_dg = ds_grid_create(ChatX.COUNT,8);
+	_font = FONT2;
+	             _i=ChatX.HINT;
+	ChatX_dg[#_i,0]="FIRST-USE HINT";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="THE FIRST TIME A CHAT VERB HITS YOU IN A SESSION, A TOAST SAYS WHAT IT DOES. OFF = NO HINT TOASTS.";
+	             _i=ChatX.ONEUP;
+	ChatX_dg[#_i,0]="1UP REMINDER";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="MINUTES ON YOUR LAST LIFE BEFORE A TOAST REMINDS CHAT THAT !1UP EXISTS. LEFT/RIGHT: OFF, OR 1-30 MINUTES.";
+	             _i=ChatX.SWARM_CAP;
+	ChatX_dg[#_i,0]="SWARM CAP";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="!SWARM IS REFUSED ONCE THIS MANY ENEMIES ARE ON SCREEN, AND TRIMMED TO FIT BELOW IT. LEFT/RIGHT: 4 TO 40.";
+	             _i=ChatX.TOASTY;
+	ChatX_dg[#_i,0]="TOASTY";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="CHANCE THE MK2 TOASTY HEAD POPS AFTER A FLAWLESS FINISHER. LEFT/RIGHT: OFF, OR 10-100 PERCENT. NEEDS MK2 SPLASH ON.";
+	             _i=ChatX.ANNOUNCER;
+	ChatX_dg[#_i,0]="MK2 ANNOUNCER";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="FIGHT WHEN A BOSS STARTS, FINISH HIM AT A QUARTER BAR, EXCELLENT WHEN A CHAT SWARM IS WIPED CLEAN. NEEDS MK2 SPLASH ON.";
+	             _i=ChatX.BABALITY;
+	ChatX_dg[#_i,0]="BABALITY";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="CHANCE A FLAWLESS FINISHER IS A BABALITY INSTEAD OF A FATALITY. A SHRUNK LINK ALWAYS GETS ONE. LEFT/RIGHT: OFF, OR 5-100 PERCENT.";
+	             _i=ChatX.BETS;
+	ChatX_dg[#_i,0]="CHAT BETS";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="!BET WIN / FLAWLESS / DEATH WHILE A BOSS IS UP. CHAT STAKES POINTS, PAID WHEN THE FIGHT ENDS. NEEDS THE POINTS ECONOMY ON.";
+	             _i=ChatX.BOUNTY;
+	ChatX_dg[#_i,0]="BOUNTIES";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="!BOUNTY MOBLIN 30 - POINTS ON YOUR NEXT KILL OF THAT ENEMY, PAID 2X TO WHOEVER POSTED IT. NEEDS THE POINTS ECONOMY ON.";
+	             _i=ChatX.BACK;
+	ChatX_dg[#_i,0]="BACK";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="RETURN TO TWITCH OPTIONS.";
 
 
 	enum TestCap

@@ -133,6 +133,7 @@ function update_OptionsMenu() {
 	            case   menu_state_OVERLAYS:     {OptionsMenu_Overlays_update();    break;} // DEV TOOLS sub-folder
 	            case   menu_state_CHEATS:       {OptionsMenu_Cheats_update();      break;} // DEV TOOLS sub-folder
 	            case   menu_state_TWITCH:       {OptionsMenu_Twitch_update();      break;} // player-facing
+	            case   menu_state_CHAT_EXTRAS:  {OptionsMenu_ChatX_update();       break;} // TWITCH sub-page
 	            case   menu_state_COLOR:        {OptionsMenu_Color_update();       break;} // DEV TOOLS sub-folder
 	            case   menu_state_TEST_CAP:     {OptionsMenu_TestCap_update();     break;} // DEV TOOLS sub-folder
 	            case   menu_state_SWEEPS:       {OptionsMenu_Sweeps_update();      break;} // DEV TOOLS sub-folder

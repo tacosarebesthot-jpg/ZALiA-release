@@ -45,6 +45,15 @@ function options_reset_to_defaults() {
 	global.tw_mod_bypass           = true;
 	global.tw_effects_hud          = true;
 	global.tw_cmd_sound            = true; // COMMAND SOUND (10-09 VOD round)
+	// CHAT EXTRAS page (10-14, defaults per Lane)
+	global.tw_first_use_hint       = false;
+	global.tw_oneup_nudge_min      = 0;
+	global.tw_swarm_cap            = 14;
+	global.tw_toasty_pct           = 50;
+	global.tw_announcer            = true;
+	global.tw_babality_pct         = 15;
+	global.tw_bets_on              = true;
+	global.tw_bounty_on            = false;
 	global.tw_points_on            = true; // POINTS ECONOMY (written by twitch_config_save below)
 	global.tw_autosave             = true;
 	global.tw_rl                   = true;

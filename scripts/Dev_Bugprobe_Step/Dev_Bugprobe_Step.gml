@@ -1737,9 +1737,18 @@ function Dev_TwSelftest_Step() {
 		if (global.tws_t == 140) { tws_shot("menu_other_deathcounter"); with (_om) Other_cursor = Other_RESET; }
 		if (global.tws_t == 170) { tws_shot("menu_other_reset");        with (_om) Other_cursor = Other_BACK; }
 		if (global.tws_t == 200) { tws_shot("menu_other_back");         with (_om) { menu_state = menu_state_TWITCH; Twitch_cursor = Twitch.EFFECTS_HUD; } }
-		if (global.tws_t == 230) { tws_shot("menu_twitch_effecttimers");    with (_om) Twitch_cursor = Twitch.USER_COOLDOWN; }
-		if (global.tws_t == 260) { tws_shot("menu_twitch_chattercooldown"); with (_om) Twitch_cursor = Twitch.MOD_BYPASS; }
-		if (global.tws_t == 290) { tws_shot("menu_twitch_modsskip");        with (_om) { menu_state = menu_state_MAIN; timer = 0; sub_state = sub_state_CLOSING1; } }
+		if (global.tws_t == 220) { tws_shot("menu_twitch_effecttimers");    with (_om) Twitch_cursor = Twitch.USER_COOLDOWN; }
+		if (global.tws_t == 240) { tws_shot("menu_twitch_chattercooldown"); with (_om) Twitch_cursor = Twitch.MOD_BYPASS; }
+		// 10-14: CHAT EXTRAS sub-page (the keys that used to be twitch_config.txt-only)
+		if (global.tws_t == 260) { tws_shot("menu_twitch_modsskip");        with (_om) { menu_state = menu_state_CHAT_EXTRAS; ChatX_cursor = ChatX.TOASTY; } }
+		if (global.tws_t == 275)
+		{
+			tws_shot("menu_chatextras_toasty");
+			var _cx_ok = false; with (_om) _cx_ok = (menu_state == menu_state_CHAT_EXTRAS && ds_grid_width(ChatX_dg) == ChatX.COUNT);
+			tws_feat("CHAT EXTRAS page is open with every row", _cx_ok, "ChatX.COUNT=" + string(ChatX.COUNT));
+			with (_om) ChatX_cursor = ChatX.BOUNTY;
+		}
+		if (global.tws_t == 290) { tws_shot("menu_chatextras_bounty");      with (_om) { menu_state = menu_state_MAIN; timer = 0; sub_state = sub_state_CLOSING1; } }
 		if (global.tws_t == 380)
 		{
 			tws_feat("the options menu closed again", g.gui_state == g.gui_state_NONE, "gui_state=" + string(g.gui_state));

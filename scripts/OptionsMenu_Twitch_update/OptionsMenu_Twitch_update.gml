@@ -301,6 +301,17 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // CHAT EXTRAS: the sub-page with the keys that used to be twitch_config.txt-only.
+	    case Twitch.EXTRAS:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        ChatX_cursor = 0;
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	        menu_state = menu_state_CHAT_EXTRAS;
+	        exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    }
+	    break;}
 	    // BIG TIMER: the 1.25x run timer in the top bar. OFF = the original small sprite-font timer.
 	    case Twitch.BIGTIMER:{ if (timer) break;
 	    if (_InputConfirm_pressed2)

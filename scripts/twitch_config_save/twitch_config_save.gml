@@ -68,9 +68,17 @@ function twitch_config_save() {
         ["user_cooldown", string(variable_global_exists("tw_user_cooldown_frames") ? global.tw_user_cooldown_frames : 1800)],
         ["mod_bypass",    (!variable_global_exists("tw_mod_bypass")  || global.tw_mod_bypass)  ? "1" : "0"],
         ["effects_hud",   (!variable_global_exists("tw_effects_hud") || global.tw_effects_hud) ? "1" : "0"],
-        // 10-09 VOD round: the command blip (COMMAND SOUND row). The other new keys (cmd_sound_name,
-        // first_use_hint, oneup_nudge, swarm_cap, toasty) are file-only and left as the user wrote them.
-        ["cmd_sound",     (!variable_global_exists("tw_cmd_sound")   || global.tw_cmd_sound)   ? "1" : "0"]
+        // 10-09 VOD round: the command blip (COMMAND SOUND row). cmd_sound_name= stays file-only.
+        ["cmd_sound",     (!variable_global_exists("tw_cmd_sound")   || global.tw_cmd_sound)   ? "1" : "0"],
+        // 10-14: the CHAT EXTRAS page owns these, so the menu and the file never disagree.
+        ["first_use_hint", (variable_global_exists("tw_first_use_hint") && global.tw_first_use_hint) ? "1" : "0"],
+        ["oneup_nudge",    string(variable_global_exists("tw_oneup_nudge_min") ? global.tw_oneup_nudge_min : 0)],
+        ["swarm_cap",      string(variable_global_exists("tw_swarm_cap")      ? global.tw_swarm_cap      : 14)],
+        ["toasty",         string(variable_global_exists("tw_toasty_pct")     ? global.tw_toasty_pct     : 50)],
+        ["announcer",      (!variable_global_exists("tw_announcer") || global.tw_announcer) ? "1" : "0"],
+        ["babality",       string(variable_global_exists("tw_babality_pct")   ? global.tw_babality_pct   : 15)],
+        ["bets",           (!variable_global_exists("tw_bets_on")   || global.tw_bets_on)   ? "1" : "0"],
+        ["bounty",         (variable_global_exists("tw_bounty_on") && global.tw_bounty_on)   ? "1" : "0"]
     ];
     var _own_wrote = array_create(array_length(_own), false);
 

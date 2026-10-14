@@ -130,6 +130,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        default:                    {return false; break;}
 	        case Twitch.REWARDS:        {return true; break;}
 	        case Twitch.CMD_SOUND:      {return true; break;} // 10-09 VOD round
+	        case Twitch.EXTRAS:         {return true; break;} // 10-14 CHAT EXTRAS sub-page
 	        case Twitch.CHAT:           {return true; break;}
 	        case Twitch.COOLDOWN:       {return true; break;}
 	        case Twitch.DURATION:       {return true; break;}
@@ -154,6 +155,11 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	        case Twitch.BACK:           {return true; break;}
 	    }//switch(argument1)
 	    break;}//case menu_state_TWITCH
+
+	    // TWITCH sub-page CHAT EXTRAS: player-facing, every row always selectable.
+	    case menu_state_CHAT_EXTRAS:{
+	    return (argument1 >= 0 && argument1 < ChatX.COUNT);
+	    break;}//case menu_state_CHAT_EXTRAS
 
 
 	    case menu_state_TEST_CAP:{

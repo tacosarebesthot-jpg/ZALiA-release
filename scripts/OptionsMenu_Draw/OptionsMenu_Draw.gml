@@ -111,6 +111,7 @@ function OptionsMenu_Draw() {
 	    case   menu_state_OVERLAYS:     {_text="OVERLAYS"; break;}
 	    case   menu_state_CHEATS:       {_text="CHEATS"; break;}
 	    case   menu_state_TWITCH:       {_text="TWITCH"; break;}
+	    case   menu_state_CHAT_EXTRAS:  {_text="CHAT EXTRAS"; break;}
 	    case   menu_state_COLOR:        {_text="COLOR"; break;}
 	    case   menu_state_TEST_CAP:     {_text="TEST / CAPTURE"; break;}
 	    case   menu_state_SWEEPS:       {_text="SWEEPS"; break;}
@@ -144,6 +145,7 @@ function OptionsMenu_Draw() {
 	case   menu_state_OVERLAYS:     {OptionsMenu_Draw_Overlays(_y+4);     break;}//DEV TOOLS sub-folder
 	case   menu_state_CHEATS:       {OptionsMenu_Draw_Cheats(_y+4);       break;}//DEV TOOLS sub-folder
 	case   menu_state_TWITCH:       {OptionsMenu_Draw_Twitch(_y+4);       break;}//player-facing
+	case   menu_state_CHAT_EXTRAS:  {OptionsMenu_Draw_ChatX(_y+4);        break;}//TWITCH sub-page
 	case   menu_state_COLOR:        {OptionsMenu_Draw_Color(_y+4);        break;}//DEV TOOLS sub-folder
 	case   menu_state_TEST_CAP:     {OptionsMenu_Draw_TestCap(_y+4);      break;}//DEV TOOLS sub-folder
 	case   menu_state_SWEEPS:       {OptionsMenu_Draw_Sweeps(_y+4);       break;}//DEV TOOLS sub-folder
