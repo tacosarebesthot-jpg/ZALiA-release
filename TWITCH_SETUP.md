@@ -122,6 +122,15 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | MODS SKIP COOLDOWN | mods and the broadcaster skip both cooldowns | `mod_bypass=1/0` |
 | EFFECT TIMERS | top-right strip of running effects with seconds left, plus the live vote | `effects_hud=1/0` |
 | COMMAND SOUND | a short blip each time a chat command lands, at most one every 2 s. **Turn it OFF here if a busy chat gets annoying.** | `cmd_sound=1/0` |
+| CHAT EXTRAS | opens a second page with the rest of the chat switches (below) | |
+| CHAT EXTRAS > FIRST-USE HINT | first time a verb hits you in a session, a toast says what it does (off by default) | `first_use_hint=1/0` |
+| CHAT EXTRAS > 1UP REMINDER | minutes on your last life before a toast reminds chat that `!1up` exists: OFF (default) or 1-30 | `oneup_nudge=0-30` |
+| CHAT EXTRAS > SWARM CAP | `!swarm` is refused once this many enemies are on screen, 4-40 (default 14) | `swarm_cap=4-40` |
+| CHAT EXTRAS > TOASTY | chance the MK2 Toasty pops after a flawless: OFF or 10-100% (default 50) | `toasty=0-100` |
+| CHAT EXTRAS > MK2 ANNOUNCER | FIGHT / FINISH HIM / EXCELLENT voice samples | `announcer=1/0` |
+| CHAT EXTRAS > BABALITY | chance a flawless is a Babality when Link is not shrunk: OFF or 5-100% (default 15) | `babality=0-100` |
+| CHAT EXTRAS > CHAT BETS | `!bet` on the boss fight (needs points on) | `bets=1/0` |
+| CHAT EXTRAS > BOUNTIES | `!bounty <enemy> <points>` (needs points on, off by default) | `bounty=1/0` |
 | MUSIC TOASTS | NOW PLAYING plate: OFF (default) or 1-30 seconds on screen | `toast_music=0-30` |
 | CHAT TOASTS | plates for what chat did: OFF or 1-30 seconds (default 4) | `toast_chat=0-30` |
 | GAME TOASTS | killed by, crushed, level up, hints: OFF (default) or 1-30 seconds | `toast_game=0-30` |
