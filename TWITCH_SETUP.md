@@ -121,6 +121,7 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | CHATTER COOLDOWN | each chatter's own cooldown, 0 to 120 s (default 30) | `user_cooldown=` (frames) |
 | MODS SKIP COOLDOWN | mods and the broadcaster skip both cooldowns | `mod_bypass=1/0` |
 | EFFECT TIMERS | top-right strip of running effects with seconds left, plus the live vote | `effects_hud=1/0` |
+| COMMAND SOUND | a short blip each time a chat command lands, at most one every 2 s. **Turn it OFF here if a busy chat gets annoying.** | `cmd_sound=1/0` |
 | MUSIC TOASTS | NOW PLAYING plate: OFF (default) or 1-30 seconds on screen | `toast_music=0-30` |
 | CHAT TOASTS | plates for what chat did: OFF or 1-30 seconds (default 4) | `toast_chat=0-30` |
 | GAME TOASTS | killed by, crushed, level up, hints: OFF (default) or 1-30 seconds | `toast_game=0-30` |
@@ -130,6 +131,16 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | COMPANION PAGES | opens the jukebox, tracker and Twitch setup pages | |
 
 The MK2 FLAWLESS / FATALITY lines and the easter eggs always show, whatever the toast settings.
+
+A few more keys have no menu row and live only in `twitch_config.txt` (one per line, `key=value`):
+
+| Key | Default | What it does |
+|---|---|---|
+| `cmd_sound_name=` | `snd_Cursor_Move_2a` | which sound the COMMAND SOUND blip uses; any sound asset name in the game |
+| `first_use_hint=1/0` | 1 | the first time a verb lands in a session, its `!help` line is toasted so you know what just hit you |
+| `oneup_nudge=` | 5 | minutes on your last life before a toast reminds chat that `!1up` exists; 0 turns it off |
+| `swarm_cap=` | 14 | live enemies on screen at which `!swarm` is refused (mods skip cooldowns, so this is the real limit) |
+| `toasty=` | 100 | percent chance the MK2 Toasty pops after a flawless finisher |
 
 ## Tuning it
 

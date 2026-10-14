@@ -2,6 +2,16 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
+## 2.1.9 — not shipped yet
+
+Everything Lane asked for on air in the 2026-10-09 stream, plus one cap. Source only until the next build goes out.
+
+- **COMMAND SOUND**: a short blip each time a chat command lands, at most one every two seconds. **If a busy chat makes it annoying, turn it OFF: OPTIONS → TWITCH OPTIONS → COMMAND SOUND**, or `cmd_sound=0` in `twitch_config.txt`. `cmd_sound_name=` picks a different sound.
+- **First-use hint**: the first time each verb lands in a session, its `!help` line is toasted, so "I don't know what Cat Slap does" answers itself. `first_use_hint=0` turns it off.
+- **`!1up` reminder**: after five minutes on your last life a toast reminds chat that `!1up` exists. `oneup_nudge=` sets the minutes, 0 turns it off. Silent in VS CHAT and `!challenge`, where 1up is refused anyway.
+- **Swarm cap**: with mods skipping cooldowns, five `!swarm`s landed inside a minute. `!swarm` is now refused (no charge) once 14 enemies are on screen, and trimmed to fit below that. `swarm_cap=` changes the number.
+- **Toasty**: the MK2 bottom-right pop after a flawless finisher. The code is in; the head and the yell are not ripped yet, so it does nothing until they are. `toasty=` is the percent chance.
+
 ## 2.1.8 — 2026-10-05
 
 Rolls up 2.1.6 and 2.1.7, which only ever went out as source. The biggest round since 2.1.0: the Twitch side got a code review and a test harness that drives every chat verb through the real chat entry and grades the result, and everything the review turned up is fixed.
