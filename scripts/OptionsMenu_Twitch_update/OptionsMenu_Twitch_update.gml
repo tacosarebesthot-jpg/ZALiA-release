@@ -289,6 +289,18 @@ function OptionsMenu_Twitch_update() {
 	    }
 	    break;}
 
+	    // COMMAND SOUND: the blip when a chat command lands (twitch_apply tail). cmd_sound= in twitch_config.txt.
+	    case Twitch.CMD_SOUND:{ if (timer) break;
+	    if (_InputConfirm_pressed2)
+	    {
+	        if (!variable_global_exists("tw_cmd_sound")) global.tw_cmd_sound = true;
+	        global.tw_cmd_sound = !global.tw_cmd_sound;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // BIG TIMER: the 1.25x run timer in the top bar. OFF = the original small sprite-font timer.
 	    case Twitch.BIGTIMER:{ if (timer) break;
 	    if (_InputConfirm_pressed2)

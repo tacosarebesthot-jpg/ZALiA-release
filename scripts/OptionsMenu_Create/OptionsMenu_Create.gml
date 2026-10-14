@@ -872,6 +872,7 @@ function OptionsMenu_Create() {
 	    REWARDS, CHAT, COOLDOWN, DURATION, JOKES, AUTOSAVE, POINTS, RL,
 	    TOAST_NP, TOAST_CHAT, TOAST_GAME, SPLASH, JINGLE, BIGTIMER, // v2.1.4 player options
 	    EFFECTS_HUD, USER_COOLDOWN, MOD_BYPASS, // 09-30: effect strip, per-chatter cooldown, mods skip cooldowns
+	    CMD_SOUND, // 10-09 VOD: a cue when a chat command lands (Lane asked; the owner bets he turns it off)
 	    COMMANDS, SETUP,
 	    PAGES, BACK,
 	    COUNT
@@ -915,6 +916,8 @@ function OptionsMenu_Create() {
 	Twitch_dg[#_i,0]="MODS SKIP COOLDOWN";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="YOUR MODS AND YOU IGNORE BOTH COOLDOWNS. MODS CAN ALSO !IGNORE A CHATTER.";
 	             _i=Twitch.EFFECTS_HUD;
 	Twitch_dg[#_i,0]="EFFECT TIMERS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="TOP-RIGHT LIST OF THE CHAT EFFECTS RUNNING RIGHT NOW AND HOW MANY SECONDS ARE LEFT, PLUS THE LIVE !VOTE COUNT.";
+	             _i=Twitch.CMD_SOUND;
+	Twitch_dg[#_i,0]="COMMAND SOUND";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="A SHORT BLIP EACH TIME A CHAT COMMAND LANDS. OFF IF A BUSY CHAT GETS ANNOYING. AT MOST ONE BLIP EVERY TWO SECONDS.";
 	             _i=Twitch.COMMANDS;
 	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP !TAX !DMGUP !VOTE !KILLS !SONG - !HELP IN CHAT FOR ALL";
 	             _i=Twitch.SETUP;

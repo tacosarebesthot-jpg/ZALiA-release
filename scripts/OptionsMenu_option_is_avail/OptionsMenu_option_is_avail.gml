@@ -129,6 +129,7 @@ function OptionsMenu_option_is_avail(argument0, argument1) {
 	    {
 	        default:                    {return false; break;}
 	        case Twitch.REWARDS:        {return true; break;}
+	        case Twitch.CMD_SOUND:      {return true; break;} // 10-09 VOD round
 	        case Twitch.CHAT:           {return true; break;}
 	        case Twitch.COOLDOWN:       {return true; break;}
 	        case Twitch.DURATION:       {return true; break;}

@@ -67,7 +67,10 @@ function twitch_config_save() {
         // 09-30 review: per-user cooldown (frames), mod cooldown bypass, effect timers HUD
         ["user_cooldown", string(variable_global_exists("tw_user_cooldown_frames") ? global.tw_user_cooldown_frames : 1800)],
         ["mod_bypass",    (!variable_global_exists("tw_mod_bypass")  || global.tw_mod_bypass)  ? "1" : "0"],
-        ["effects_hud",   (!variable_global_exists("tw_effects_hud") || global.tw_effects_hud) ? "1" : "0"]
+        ["effects_hud",   (!variable_global_exists("tw_effects_hud") || global.tw_effects_hud) ? "1" : "0"],
+        // 10-09 VOD round: the command blip (COMMAND SOUND row). The other new keys (cmd_sound_name,
+        // first_use_hint, oneup_nudge, swarm_cap, toasty) are file-only and left as the user wrote them.
+        ["cmd_sound",     (!variable_global_exists("tw_cmd_sound")   || global.tw_cmd_sound)   ? "1" : "0"]
     ];
     var _own_wrote = array_create(array_length(_own), false);
 

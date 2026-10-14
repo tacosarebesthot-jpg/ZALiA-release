@@ -704,13 +704,30 @@ function Surface_Draw_GUI_End() {
 		var _sp_gw = display_get_gui_width();  if (_sp_gw <= 0) _sp_gw = 320;
 		var _sp_gh = display_get_gui_height(); if (_sp_gh <= 0) _sp_gh = 240;
 		var _sp_pa = draw_get_alpha(); var _sp_pc = draw_get_colour();
-		if (global.tw_splash_dim > 0)
+		var _sp_corner = variable_global_exists("tw_splash_corner") && global.tw_splash_corner;
+		if (global.tw_splash_dim > 0 && !_sp_corner)
 		{
 			draw_set_alpha(global.tw_splash_dim); draw_set_colour(c_black);
 			draw_rectangle(0, 0, _sp_gw, _sp_gh, false);
 		}
 		draw_set_alpha(1); draw_set_colour(c_white);
 		var _sp_f = floor(global.tw_splash_frame);
+		if (_sp_corner)
+		{
+			// TOASTY (10-09 VOD): bottom-right pop like MK2. Slides in from the right edge over the
+			// first 10 frames, holds, slides back out over the last 10. Sprite origin is TOP-LEFT in
+			// arcade pixels; the same gh/254 factor as the banners keeps it arcade-sized.
+			var _tk  = _sp_gh / 254;
+			var _tw  = sprite_get_width(global.tw_splash_spr)  * _tk;
+			var _th  = sprite_get_height(global.tw_splash_spr) * _tk;
+			var _tot = max(1, global.tw_splash_dur_total);
+			var _el  = _tot - global.tw_splash_dur;                 // frames elapsed
+			var _k   = min(1, _el / 10, global.tw_splash_dur / 10); // 0..1 in, 1 hold, 1..0 out
+			draw_sprite_ext(global.tw_splash_spr, _sp_f, _sp_gw - _tw * _k, _sp_gh - _th, _tk, _tk, 0, c_white, 1);
+			draw_set_alpha(_sp_pa); draw_set_colour(_sp_pc);
+		}
+		else
+		{
 		// SIZE FIX (owner 09-27: "tiny itty bitty ... doesn't match the MK2 arcade"; Lane 09-18
 		// 3:25: "much bigger"). tw_splash_scale 0.8 and the y values were tuned for a 320x203 GUI
 		// (arcade 400x254 * 0.8), but the GUI is 480x270 -- or the whole WINDOW in the SHARP/PIXEL
@@ -721,6 +738,7 @@ function Surface_Draw_GUI_End() {
 		var _sp_y  = global.tw_splash_cur_y * _sp_k;
 		draw_sprite_ext(global.tw_splash_spr, _sp_f, _sp_gw * 0.5, _sp_y, _sp_sc, _sp_sc, 0, c_white, 1);
 		draw_set_alpha(_sp_pa); draw_set_colour(_sp_pc);
+		}
 	}
 
 	// TOASTS (2026-09-12): every text toast goes through the achievement-plate drawer

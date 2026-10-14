@@ -4353,6 +4353,19 @@ function g_Create() {
 	// 09-30 review: per-user cooldown, mod bypass, effect timers HUD, !vote
 	global.tw_user_cooldown_frames = 1800;             // one chatter: 30 s between accepted commands (user_cooldown= in twitch_config.txt)
 	global.tw_mod_bypass          = true;              // mods + broadcaster skip both cooldowns (mod_bypass=)
+	// 10-09 VOD round (Lane's on-air asks, see vod_transcripts/lane_2026-10-09_feedback.md).
+	// All read from twitch_config.txt by twitch_irc_load_config; every one is a no-op at its default
+	// except the sound cue and the first-use hint, which are ON because that is what he asked for.
+	global.tw_cmd_sound           = true;              // one short cue when a chat command lands (cmd_sound=)
+	global.tw_cmd_sound_name      = "snd_Cursor_Move_2a"; // which sound asset (cmd_sound_name=); missing name = silent
+	global.tw_first_use_hint      = true;              // first time a verb lands this session: toast its !help line (first_use_hint=)
+	global.tw_seen_verbs          = {};                // verbs already hinted this session
+	global.tw_oneup_nudge_min     = 5;                 // minutes on the last life before a "!1up" reminder toast; 0 = off (oneup_nudge=)
+	global.tw_oneup_nudge_frames  = 0;                 // frames spent on the last life since the last reminder
+	global.tw_swarm_cap           = 14;                // live enemies on screen at which !swarm refuses (swarm_cap=)
+	global.tw_toasty_pct          = 100;               // chance the MK2 Toasty pops after a flawless finisher (toasty=)
+	global.tw_splash_corner       = false;             // the current splash is the bottom-right Toasty pop, not a centre banner
+	global.tw_splash_dur_total    = 0;                 // length of the current looping splash, for the corner slide
 	global.tw_irc_user_last       = ds_map_create();   // lowercase name -> frame of their last accepted command
 	global.tw_effects_hud         = true;              // top-right strip of running chat effects with seconds left (effects_hud=)
 	global.tw_vote                = undefined;         // running !vote struct (twitch_vote.gml), undefined = none

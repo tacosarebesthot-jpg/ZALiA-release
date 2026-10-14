@@ -22,6 +22,7 @@ function twitch_tick() {
 	tw_checkpoint_tick();   // rolling checkpoints (round 10d) -- independent of the twitch mod
 	tw_points_tick();       // points stipend + throttled save (round 10h)
 	tw_vote_tick();         // !vote clock; fires the winner through twitch_apply (twitch_vote.gml)
+	tw_oneup_nudge_tick();  // "!1up" reminder after N minutes on the last life (10-09 VOD round)
 
 	if (!variable_global_exists("tw_active")) return;
 
@@ -197,9 +198,28 @@ function tw_nowplaying_set(_snd, _is_intro) {
 /// @description  tw_splash_enqueue(sprite, sound, wait_frames, toast) -- queue one splash step.
 /// sprite/sound may be -1 (sound-only step, or silent sprite). wait = frames to hold before
 /// this step starts (after the previous one ends). toast = "" or a line for the small toast.
-function tw_splash_enqueue(_spr, _snd, _wait, _toast, _dur = 0, _y = -1) {
+function tw_splash_enqueue(_spr, _snd, _wait, _toast, _dur = 0, _y = -1, _corner = false) {
 	if (!variable_global_exists("tw_splash_queue") || !is_array(global.tw_splash_queue)) global.tw_splash_queue = [];
-	array_push(global.tw_splash_queue, { spr : _spr, snd : _snd, wait : _wait, toast : _toast, dur : _dur, y : _y });
+	array_push(global.tw_splash_queue, { spr : _spr, snd : _snd, wait : _wait, toast : _toast, dur : _dur, y : _y, corner : _corner });
+}
+
+/// @description  tw_oneup_nudge_tick() -- 10-09 VOD 2:22:55, Lane: "I want my lives back, I've been
+/// playing with one life for like an hour." !1up exists; nobody in chat used it. After
+/// tw_oneup_nudge_min minutes on the last life a toast reminds chat, then the clock restarts.
+/// Off when the mod is off, in VS / !challenge mode (1up is refused there anyway), on the
+/// overworld / menus (no PC instance), or with oneup_nudge=0.
+function tw_oneup_nudge_tick() {
+	if (!variable_global_exists("tw_oneup_nudge_min") || global.tw_oneup_nudge_min <= 0) return;
+	if (!variable_global_exists("tw_enabled") || !global.tw_enabled) return;
+	if (!variable_global_exists("pc_lives")) return;
+	var _blocked = (variable_global_exists("tw_vs_mode") && global.tw_vs_mode)
+	            || (variable_global_exists("tw_challenge") && global.tw_challenge);
+	if (_blocked || global.pc_lives > 1 || !instance_exists(global.pc)) { global.tw_oneup_nudge_frames = 0; return; }
+	global.tw_oneup_nudge_frames++;
+	var _fps = game_get_speed(gamespeed_fps); if (_fps <= 0) _fps = 60;
+	if (global.tw_oneup_nudge_frames < global.tw_oneup_nudge_min * 60 * _fps) return;
+	global.tw_oneup_nudge_frames = 0;
+	tw_toast_push("LAST LIFE FOR " + string(global.tw_oneup_nudge_min) + " MIN", "CHAT: !1UP GIVES LINK A LIFE", "info", "chat");
 }
 
 /// @description  tw_splash_step() -- per-frame driver: advances the playing splash at the
@@ -232,7 +252,8 @@ function tw_splash_step() {
 	{
 		// hold first, then start: re-queue at the front with wait cleared
 		global.tw_splash_wait = _e.wait;
-		array_insert(global.tw_splash_queue, 0, { spr : _e.spr, snd : _e.snd, wait : 0, toast : _e.toast, dur : _e.dur, y : _e.y });
+		array_insert(global.tw_splash_queue, 0, { spr : _e.spr, snd : _e.snd, wait : 0, toast : _e.toast, dur : _e.dur, y : _e.y,
+		                                          corner : (variable_struct_exists(_e, "corner") && _e.corner) });
 		return;
 	}
 	if (is_string(_e.toast) && _e.toast != "")
@@ -240,6 +261,10 @@ function tw_splash_step() {
 		global.tw_toast       = _e.toast;
 		global.tw_toast_timer = 240;
 	}
+	// Toasty (10-09 VOD): a corner pop instead of a centre banner. The draw block slides it in
+	// from the right edge and back out, no screen dim; dur_total is what the slide is timed from.
+	global.tw_splash_corner    = (variable_struct_exists(_e, "corner") && _e.corner);
+	global.tw_splash_dur_total = _e.dur;
 	if (_e.snd >= 0 && audio_exists(_e.snd)) aud_play_sound(_e.snd);
 	if (_e.spr >= 0 && sprite_exists(_e.spr))
 	{
@@ -277,4 +302,22 @@ function tw_flawless_event(_which) {
 	if (_which == "friendship" && _p_frd >= 0) tw_splash_enqueue(_p_frd, _s_frd, 20, "");
 	else if (_p_fat >= 0)                       tw_splash_enqueue(_p_fat, _s_fat, 20, "");
 	else { global.tw_toast = "FATALITY."; global.tw_toast_timer = 240; }
+	tw_toasty_enqueue();
+}
+
+/// @description  tw_toasty_enqueue() -- 10-09 VOD 2:53:59, Lane: "We need to get Claude to put Toasty
+/// in there for us, popping out of the corner of the screen." MK2's Dan Forden head pops in at the
+/// bottom-right with the "Toasty!" yell. Rides the splash queue after the finisher, as a corner
+/// pop (no dim, slides in from the right edge and back out over ~1.3 s). Assets by name, like the
+/// rest of the MK2 set: spr_mk2_toasty (origin TOP-LEFT, arcade pixels) + snd_mk2_toasty. Until
+/// they are imported this is a no-op. toasty= in twitch_config.txt is the percent chance (100).
+function tw_toasty_enqueue() {
+	if (variable_global_exists("tw_splash_enabled") && !global.tw_splash_enabled) return;
+	var _p = asset_get_index("spr_mk2_toasty");
+	if (_p < 0 || !sprite_exists(_p)) return;
+	var _pct = variable_global_exists("tw_toasty_pct") ? global.tw_toasty_pct : 100;
+	if (irandom(99) >= _pct) return;
+	var _s = asset_get_index("snd_mk2_toasty");
+	// wait 30 frames after the finisher starts, show for 70 frames (looping mode on a 1-frame sprite)
+	tw_splash_enqueue(_p, _s, 30, "", 70, -1, true);
 }

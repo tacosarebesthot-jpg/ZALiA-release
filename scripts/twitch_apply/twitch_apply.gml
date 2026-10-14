@@ -691,9 +691,23 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			if (instance_exists(global.pc))
 			{
+				// 10-09 VOD 2:21: mods skip the cooldown, so five swarms landed in under a minute
+				// ("you might crash the game with all the sprites"). Cap on what is ALREADY on screen:
+				// at or above tw_swarm_cap live enemies the swarm is refused (no charge), below it the
+				// pack is trimmed to fit. swarm_cap= in twitch_config.txt, default 14.
+				var _live = instance_number(Enemy);
+				var _cap  = variable_global_exists("tw_swarm_cap") ? global.tw_swarm_cap : 14;
+				if (_live >= _cap)
+				{
+					global.tw_toast         = _who_s + " -> swarm refused: " + string(_live) + " mobs on screen already";
+					global.tw_toast_timer   = 180;
+					global.tw_apply_refused = true;
+					break;
+				}
 				var _n = floor(tw_num(_arg, 3));
 				if (_n < 1) _n = 3;
 				if (_n > 6) _n = 6;
+				if (_n > _cap - _live) _n = _cap - _live;
 				// land-safe mix (skip Zora, which wants shoreline). all exist w/ ver-1 data.
 				var _pool = [DairA, MoblA, GoriA, StalA, Myu_A, Ache01, Atta01];
 				for (var _si = 0; _si < _n; _si++)
@@ -1534,6 +1548,34 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 	{
 		// 69/420 nod -- appended after whatever the verb's own toast says.
 		if (_nice && global.tw_toast_timer > 0) global.tw_toast += "  (NICE)";
+
+		if (global.tw_apply_ok)
+		{
+			// 10-09 VOD 1:25:35, Lane: "please add in a sound". One short cue the moment a command
+			// actually lands (not on a refusal), so he hears chat touch the game without reading the
+			// toast. cmd_sound=0 turns it off, cmd_sound_name= picks another asset; a bad name is silent.
+			// Rate-limited: at most one blip every 2 s, so a chat spamming commands cannot
+			// machine-gun it (owner: the low-HP beep already taught us how fast that gets old).
+			if (variable_global_exists("tw_cmd_sound") && global.tw_cmd_sound)
+			{
+				if (!variable_global_exists("tw_cmd_sound_last")) global.tw_cmd_sound_last = -100000;
+				if (current_time - global.tw_cmd_sound_last >= 2000)
+				{
+					var _cs = asset_get_index(string(global.tw_cmd_sound_name));
+					if (_cs != -1 && audio_exists(_cs)) { aud_play_sound(_cs); global.tw_cmd_sound_last = current_time; }
+				}
+			}
+			// 10-09 VOD 1:14:50, Lane: "I don't know what Cat Slap does." He never opens the help
+			// card, so the first time each verb lands in a session its own !help line is toasted.
+			// Once per verb per session; first_use_hint=0 turns it off.
+			if (variable_global_exists("tw_first_use_hint") && global.tw_first_use_hint
+			&&  variable_global_exists("tw_seen_verbs") && !variable_struct_exists(global.tw_seen_verbs, _v))
+			{
+				global.tw_seen_verbs[$ _v] = true;
+				var _hl = tw_help_line(_v);
+				if (_hl != "") tw_toast_push(_hl, "", "info", "chat");
+			}
+		}
 		if (!instance_exists(obj_twitch_fairy))
 		{
 			// spawn coords are cosmetic -- Create repositions to just off the screen edge.

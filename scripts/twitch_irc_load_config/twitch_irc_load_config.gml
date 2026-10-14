@@ -94,6 +94,13 @@ function twitch_irc_load_config() {
 			case "user_cooldown": global.tw_user_cooldown_frames = clamp(floor(tw_num(_val, 1800)), 0, 7200); break;
 			case "mod_bypass":    global.tw_mod_bypass  = (tw_num(_val, 1) != 0); break;
 			case "effects_hud":   global.tw_effects_hud = (tw_num(_val, 1) != 0); break;
+			// 10-09 VOD round: Lane's on-air asks (sound cue, first-use hint, 1up reminder), the swarm cap, Toasty
+			case "cmd_sound":      global.tw_cmd_sound       = (tw_num(_val, 1) != 0); break;
+			case "cmd_sound_name": if (string(_val) != "") global.tw_cmd_sound_name = string(_val); break;
+			case "first_use_hint": global.tw_first_use_hint  = (tw_num(_val, 1) != 0); break;
+			case "oneup_nudge":    global.tw_oneup_nudge_min = clamp(floor(tw_num(_val, 5)), 0, 60); break;
+			case "swarm_cap":      global.tw_swarm_cap       = clamp(floor(tw_num(_val, 14)), 4, 40); break;
+			case "toasty":         global.tw_toasty_pct      = clamp(floor(tw_num(_val, 100)), 0, 100); break;
 			// tls=1: the token crosses the wire inside TLS (wss://irc-ws.chat.twitch.tv:443). Still
 			// opt-in; plaintext 6667 is the default. Checked 2026-10-01 on LTS 2026: the WebSocket
 			// connects and the 001 welcome arrives ("connected"). Chat commands over it not yet run live.

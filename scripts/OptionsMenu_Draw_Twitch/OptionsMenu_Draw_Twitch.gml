@@ -139,6 +139,10 @@ function OptionsMenu_Draw_Twitch() {
 	        _text = _dg_state_text[#0, sign(!variable_global_exists("tw_effects_hud") || global.tw_effects_hud)];
 	    break;
 
+	    case Twitch.CMD_SOUND:
+	        _text = _dg_state_text[#0, sign(!variable_global_exists("tw_cmd_sound") || global.tw_cmd_sound)];
+	    break;
+
 	    case Twitch.USER_COOLDOWN:
 	        var _ucd_f = variable_global_exists("tw_user_cooldown_frames") ? global.tw_user_cooldown_frames : 1800;
 	        var _ucd_s = round(_ucd_f / _fps);

@@ -44,6 +44,7 @@ function options_reset_to_defaults() {
 	global.tw_user_cooldown_frames = 1800;
 	global.tw_mod_bypass           = true;
 	global.tw_effects_hud          = true;
+	global.tw_cmd_sound            = true; // COMMAND SOUND (10-09 VOD round)
 	global.tw_points_on            = true; // POINTS ECONOMY (written by twitch_config_save below)
 	global.tw_autosave             = true;
 	global.tw_rl                   = true;

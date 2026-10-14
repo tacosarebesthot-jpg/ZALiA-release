@@ -693,6 +693,26 @@ function tw_help_cat_canon(_w) {
 	return "";
 }
 
+/// @description  tw_help_line(verb) -- the one !help row that documents a verb ("" if none).
+/// Scans every category page for a row that carries "!VERB" as a whole token, so a shared
+/// row ("!PROTECT !REFLECT !JUMP !LIFE !FIRE") answers for any verb on it. Used by the
+/// first-use hint in twitch_apply (10-09 VOD: "I don't know what Cat Slap does").
+function tw_help_line(_verb) {
+	var _cats = ["help", "hurt", "chaos", "mobs", "fun", "rl", "mods"];
+	var _key  = " !" + string_upper(string(_verb)) + " ";
+	for (var _c = 0; _c < array_length(_cats); _c++)
+	{
+		var _rows = tw_help_rows(_cats[_c]);
+		if (!is_array(_rows)) continue;
+		for (var _r = 1; _r < array_length(_rows); _r++)   // row 0 is the page title
+		{
+			var _row = string(_rows[_r]);
+			if (string_pos(_key, " " + _row + " ") > 0) return _row;
+		}
+	}
+	return "";
+}
+
 /// @description  tw_help_rows(cat) -- the rows of one category page (verb + what it does), or the full card.
 /// Rows are at most 40 chars (8 px sprite font on a 320 px GUI) and use only FONT_LAYOUT glyphs
 /// (no < > [ ] =): "N" or "S" after a verb means an optional number / seconds.
