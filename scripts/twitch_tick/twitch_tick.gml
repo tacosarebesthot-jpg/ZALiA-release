@@ -234,6 +234,10 @@ function tw_splash_step() {
 		{
 			// looping mode (the flashing FLAWLESS VICTORY line): cycle for dur frames
 			global.tw_splash_dur--;
+			// selftest "splash" mode: one screenshot of the Toasty pop mid-hold (see Dev_Bugprobe_Step)
+			if (variable_global_exists("tw_splash_corner") && global.tw_splash_corner
+			&&  global.tw_splash_dur == global.tw_splash_dur_total - 20
+			&&  variable_global_exists("tw_selftest_mode") && global.tw_selftest_mode == "splash") tws_shot("toasty");
 			if (global.tw_splash_frame >= sprite_get_number(global.tw_splash_spr)) global.tw_splash_frame -= sprite_get_number(global.tw_splash_spr);
 			if (global.tw_splash_dur <= 0) { global.tw_splash_spr = -1; global.tw_splash_frame = 0; }
 		}
@@ -318,6 +322,7 @@ function tw_toasty_enqueue() {
 	var _pct = variable_global_exists("tw_toasty_pct") ? global.tw_toasty_pct : 100;
 	if (irandom(99) >= _pct) return;
 	var _s = asset_get_index("snd_mk2_toasty");
-	// wait 30 frames after the finisher starts, show for 70 frames (looping mode on a 1-frame sprite)
-	tw_splash_enqueue(_p, _s, 30, "", 70, -1, true);
+	// wait 30 frames after the finisher ends, show for 60 frames (7 in / 35 hold / 18 out, see the
+	// draw block); looping mode on a 1-frame sprite. The sound plays as the head starts sliding in.
+	tw_splash_enqueue(_p, _s, 30, "", 60, -1, true);
 }

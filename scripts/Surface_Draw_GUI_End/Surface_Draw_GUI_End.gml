@@ -722,7 +722,8 @@ function Surface_Draw_GUI_End() {
 			var _th  = sprite_get_height(global.tw_splash_spr) * _tk;
 			var _tot = max(1, global.tw_splash_dur_total);
 			var _el  = _tot - global.tw_splash_dur;                 // frames elapsed
-			var _k   = min(1, _el / 10, global.tw_splash_dur / 10); // 0..1 in, 1 hold, 1..0 out
+			// arcade forden_peek: 6 frames in at 8 px, 32 hold, 16 out (54.7 Hz) -> 7 / 35 / 18 at 60
+			var _k   = min(1, _el / 7, global.tw_splash_dur / 18);  // 0..1 in, 1 hold, 1..0 out
 			draw_sprite_ext(global.tw_splash_spr, _sp_f, _sp_gw - _tw * _k, _sp_gh - _th, _tk, _tk, 0, c_white, 1);
 			draw_set_alpha(_sp_pa); draw_set_colour(_sp_pc);
 		}
