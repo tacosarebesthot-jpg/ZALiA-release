@@ -4366,6 +4366,20 @@ function g_Create() {
 	global.tw_toasty_pct          = 100;               // chance the MK2 Toasty pops after a flawless finisher (toasty=)
 	global.tw_splash_corner       = false;             // the current splash is the bottom-right Toasty pop, not a centre banner
 	global.tw_splash_dur_total    = 0;                 // length of the current looping splash, for the corner slide
+	// 10-14 fun round (owner-approved): MK2 announcer pack, Babality, !bet on the boss, !bounty (off)
+	global.tw_announcer           = true;              // FIGHT / FINISH HIM / EXCELLENT samples (announcer=), also off with MK2 SPLASH
+	global.tw_boss_fight_said     = false;             // FIGHT already called for this boss
+	global.tw_boss_finishhim_said = false;             // FINISH HIM already called for this boss
+	global.tw_swarm_armed         = false;             // a chat swarm is on screen and nobody has hit Link since
+	global.tw_swarm_room          = -1;                // room the swarm landed in
+	global.tw_swarm_hit           = false;             // Link took a hit while the swarm was up
+	global.tw_bets_on             = true;              // !bet flawless/win/death N while a boss is up (bets=)
+	global.tw_bets                = -1;                // ds_map chatter -> "outcome,amount", made on first bet
+	global.tw_bounty_on           = false;             // !bounty <enemy> N, OFF by default (bounty=)
+	global.tw_bounties            = -1;                // ds_map enemy name -> "chatter,amount"
+	global.tw_bounty_prev         = -1;                // ds_map enemy name -> live count last frame
+	global.tw_bounty_room         = -1;                // room those counts belong to
+	global.tw_babality_pct        = 15;                // chance a flawless finisher is a Babality when Link is not shrunk (babality=); shrunk = always
 	global.tw_irc_user_last       = ds_map_create();   // lowercase name -> frame of their last accepted command
 	global.tw_effects_hud         = true;              // top-right strip of running chat effects with seconds left (effects_hud=)
 	global.tw_vote                = undefined;         // running !vote struct (twitch_vote.gml), undefined = none

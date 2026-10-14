@@ -101,6 +101,11 @@ function twitch_irc_load_config() {
 			case "oneup_nudge":    global.tw_oneup_nudge_min = clamp(floor(tw_num(_val, 5)), 0, 60); break;
 			case "swarm_cap":      global.tw_swarm_cap       = clamp(floor(tw_num(_val, 14)), 4, 40); break;
 			case "toasty":         global.tw_toasty_pct      = clamp(floor(tw_num(_val, 100)), 0, 100); break;
+			// 10-14 fun round
+			case "announcer":      global.tw_announcer       = (tw_num(_val, 1) != 0); break;
+			case "bets": case "bet": global.tw_bets_on       = (tw_num(_val, 1) != 0); break;
+			case "bounty":         global.tw_bounty_on       = (tw_num(_val, 0) != 0); break;
+			case "babality":       global.tw_babality_pct    = clamp(floor(tw_num(_val, 15)), 0, 100); break;
 			// tls=1: the token crosses the wire inside TLS (wss://irc-ws.chat.twitch.tv:443). Still
 			// opt-in; plaintext 6667 is the default. Checked 2026-10-01 on LTS 2026: the WebSocket
 			// connects and the 001 welcome arrives ("connected"). Chat commands over it not yet run live.
@@ -245,12 +250,12 @@ function tw_verb_all() {
 		"fire","thunder","thun","enigma","spel","jump","life","summon","summ",
 		"ice","icefloor","moon","root","deny","undeny",
 		"poison","catslap","flashbang","suggest","steal","rob","thief","pickpocket",
-		"fatality","friendship","flawless","finisher","song","np","nowplaying","track",
+		"fatality","friendship","flawless","finisher","babality","song","np","nowplaying","track",
 		"link","unchicken","donothing","rip","blip","coincidence","getfed",
 		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
 		"stasis","points","pts","bal","ghost","crush",
 		"version","ver","build","reshuffle","gorilla",
-		"vote","top","kills",
+		"vote","top","kills","bet","bounty",
 		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",
 		"ez","wow","noproblem","thanks"
 	];

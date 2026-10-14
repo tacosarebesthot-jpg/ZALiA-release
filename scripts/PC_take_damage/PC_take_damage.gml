@@ -23,6 +23,9 @@ function PC_take_damage() {
 	// fight -- twitch_tick only throws the finisher toast if this never got set.
 	if (variable_global_exists("tw_boss_seen") && global.tw_boss_seen)
 	{   global.tw_boss_damaged = true;  }
+	// announcer pack (10-14): a hit while a chat swarm is up forfeits the EXCELLENT call
+	if (variable_global_exists("tw_swarm_armed") && global.tw_swarm_armed)
+	{   global.tw_swarm_hit = true;  }
 
 
 	var _INST = argument[0];

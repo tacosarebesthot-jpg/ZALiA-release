@@ -77,6 +77,7 @@ function tw_points_cost(_v) {
 		case "points": case "pts": case "bal": case "help": case "song": case "np": case "nowplaying": case "track":
 		case "suggest": case "donothing": case "rip": case "blip": case "coincidence": case "getfed": case "link": case "unchicken":
 		case "version": case "ver": case "build": case "vote": case "kills": case "top":
+		case "bet": case "bounty": // the stake is taken inside the verb, not as a fee
 		// round 11 RL quick chat: free on purpose. They change nothing in the game, and a
 		// paywall on the spam gag would just stop the gag from ever happening.
 		case "niceshot": case "whatasave": case "calculated": case "savage":
@@ -99,7 +100,7 @@ function tw_points_cost(_v) {
 		case "shrink": case "grow": return 10;  case "speed": return 15; case "shake": return 5;  case "music": return 5;
 		case "meth": return 40;   case "quantumentangle": return 10;  case "ghost": return 25;  case "crush": return 25;
 		case "reshuffle": return 50;
-		case "fatality": case "friendship": case "flawless": case "finisher": return 20;
+		case "fatality": case "friendship": case "flawless": case "finisher": case "babality": return 20;
 	}
 	return 10;
 }

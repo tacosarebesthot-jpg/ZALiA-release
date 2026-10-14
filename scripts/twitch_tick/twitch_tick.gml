@@ -23,6 +23,8 @@ function twitch_tick() {
 	tw_points_tick();       // points stipend + throttled save (round 10h)
 	tw_vote_tick();         // !vote clock; fires the winner through twitch_apply (twitch_vote.gml)
 	tw_oneup_nudge_tick();  // "!1up" reminder after N minutes on the last life (10-09 VOD round)
+	tw_swarm_tick();        // announcer: EXCELLENT when a chat pack is wiped clean (10-14 fun round)
+	tw_bounty_tick();       // !bounty payouts (twitch_vote.gml), off unless bounty=1
 
 	if (!variable_global_exists("tw_active")) return;
 
@@ -73,6 +75,7 @@ function twitch_tick() {
 		{   global.tw_boss_room_loading = true;  }
 		else if (global.tw_boss_room_loading)
 		{   // new room is live -- fresh fight
+			tw_bets_refund();           // a bet on a boss Link walked away from goes back (no-op when the book is empty)
 			global.tw_boss_room_loading = false;
 			global.tw_boss_seen         = false;
 			global.tw_boss_damaged      = false;
@@ -90,15 +93,28 @@ function twitch_tick() {
 
 		if (instance_exists(Boss))
 		{
+			if (!global.tw_boss_seen) { global.tw_boss_fight_said = false; global.tw_boss_finishhim_said = false; }
 			global.tw_boss_seen = true;
 			global.tw_boss_frames++;
 			if (global.tw_boss_frames == 1 || (global.tw_boss_frames mod 30) == 0) // CHAT JOKES {boss}: remember who this was
 			{   with (Boss) { global.tw_last_boss = object_get_name(object_index); break; }  }
+			// announcer pack (10-14): FIGHT! once the boss has been up a second, FINISH HIM at a quarter bar
+			if (!global.tw_boss_fight_said && global.tw_boss_frames == 60) { global.tw_boss_fight_said = true; tw_announce("snd_mk2_fight"); }
+			if (!global.tw_boss_finishhim_said && global.tw_boss_frames > 120)
+			{
+				var _low = false;
+				with (Boss) { if (variable_instance_exists(id, "HPBar_units_full") && variable_instance_exists(id, "HPBar_unit_COUNT")
+				              && HPBar_units_full <= max(1, HPBar_unit_COUNT div 4)) _low = true; }
+				if (_low) { global.tw_boss_finishhim_said = true; tw_announce("snd_mk2_finishhim"); }
+			}
 		}
 		else if (global.tw_boss_seen && !global.tw_boss_room_loading)
 		{
 			global.tw_boss_seen = false;
-			if (!global.tw_boss_damaged && global.tw_boss_frames > 300)
+			var _flaw = (!global.tw_boss_damaged && global.tw_boss_frames > 300);
+			// !bet book (10-14): the fight is over, pay the right side
+			tw_bets_resolve(global.tw_boss_pc_died ? "death" : (_flaw ? "flawless" : "win"));
+			if (_flaw)
 			{
 				// Lane 09-11 (3:45:24): "all I did was get some green text at the bottom there ...
 				// we want a little cutscene where the screen goes dark." Owner: the real MK2 splash.
@@ -302,6 +318,15 @@ function tw_flawless_event(_which) {
 	if (_p_fvt >= 0) tw_splash_enqueue(_p_fvt, _s_flaw, 0, "", 100, 106);
 	else             tw_splash_enqueue(-1,     _s_flaw, 0, "FLAWLESS VICTORY!");
 	if (_which == "flawless") return;
+	// BABALITY (10-14 fun round): a flawless while Link is !shrink-ed is always one; otherwise a
+	// babality= percent roll. The arcade jingle plus a baby-sized Link for three seconds, no fatality.
+	if (_which == "")
+	{
+		var _small = instance_exists(global.pc) && variable_instance_exists(global.pc, "tw_scale_mul") && global.pc.tw_scale_mul < 1;
+		var _pct   = variable_global_exists("tw_babality_pct") ? global.tw_babality_pct : 15;
+		if (asset_get_index("snd_mk2_babality") >= 0 && (_small || irandom(99) < _pct)) _which = "babality";
+	}
+	if (_which == "babality") { tw_babality(); return; }
 	if (_which == "") _which = (irandom(1) == 0) ? "fatality" : "friendship";
 	if (_which == "friendship" && _p_frd >= 0) tw_splash_enqueue(_p_frd, _s_frd, 20, "");
 	else if (_p_fat >= 0)                       tw_splash_enqueue(_p_fat, _s_fat, 20, "");
@@ -325,4 +350,43 @@ function tw_toasty_enqueue() {
 	// wait 30 frames after the finisher ends, show for 60 frames (7 in / 35 hold / 18 out, see the
 	// draw block); looping mode on a 1-frame sprite. The sound plays as the head starts sliding in.
 	tw_splash_enqueue(_p, _s, 30, "", 60, -1, true);
+}
+
+/// @description  tw_announce(asset_name) -- one MK2 announcer line (10-14 fun round). Silent when the
+/// announcer is off (announcer=0), when the MK2 SPLASH row is off, or when the sample is not imported.
+function tw_announce(_name) {
+	if (variable_global_exists("tw_announcer") && !global.tw_announcer) return;
+	if (variable_global_exists("tw_splash_enabled") && !global.tw_splash_enabled) return;
+	var _s = asset_get_index(string(_name));
+	if (_s >= 0 && audio_exists(_s)) aud_play_sound(_s);
+}
+
+/// @description  tw_babality() -- the finisher variant: FLAWLESS text has already been queued by
+/// tw_flawless_event; this adds the BABALITY jingle, the plate, and shrinks Link to 0.45 for 180
+/// frames through a tw_active entry (same levers as !shrink, so it reverts and clears on death).
+function tw_babality() {
+	tw_announce("snd_mk2_babality");
+	tw_toast_push("BABALITY", "", "win");
+	if (!instance_exists(global.pc)) return;
+	global.pc.tw_scale_mul = 0.45;
+	array_push(global.tw_active, {
+		frames  : 180, sc : 0.45, verb : "babality", who : "mk2",
+		reapply : function() { if (instance_exists(global.pc)) global.pc.tw_scale_mul = self.sc; },
+		restore : function() { if (instance_exists(global.pc)) global.pc.tw_scale_mul = 1; }
+	});
+}
+
+/// @description  tw_swarm_tick() -- announcer EXCELLENT: every mob of the last chat !swarm is gone,
+/// same room as it landed in, no room transition, and Link was never hit while it was up.
+/// Leaving the room (or dying) just disarms it; nothing is said.
+function tw_swarm_tick() {
+	if (!variable_global_exists("tw_swarm_armed") || !global.tw_swarm_armed) return;
+	var _loading = instance_exists(g) && g.ChangeRoom_timer > 0;
+	if (room != global.tw_swarm_room || _loading || !instance_exists(global.pc) || global.pc.is_dead)
+	{   global.tw_swarm_armed = false; return;  }
+	var _left = 0;
+	with (Enemy) { if (variable_instance_exists(id, "tw_spawned") && tw_spawned) _left++; }
+	if (_left > 0) return;
+	global.tw_swarm_armed = false;
+	if (!global.tw_swarm_hit) tw_announce("snd_mk2_excellent");
 }

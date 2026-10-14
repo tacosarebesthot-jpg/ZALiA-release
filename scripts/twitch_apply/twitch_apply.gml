@@ -715,8 +715,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					// alternate L/R of the PC, widening slightly each step
 					var _ox   = (((_si & 1) == 0) ? -1 : 1) * (16 + 8 * _si);
 					var _sobj = _pool[irandom(array_length(_pool) - 1)];
-					GameObject_create(global.pc.xl + _ox, global.pc.yt, _sobj, 1);
+					var _sid  = GameObject_create(global.pc.xl + _ox, global.pc.yt, _sobj, 1);
+					if (_sid != noone && instance_exists(_sid)) _sid.tw_spawned = true; // announcer: part of a chat pack
 				}
+				// announcer pack (10-14): wipe the whole pack in this room without a hit -> EXCELLENT (tw_swarm_tick)
+				global.tw_swarm_armed = true; global.tw_swarm_room = room; global.tw_swarm_hit = false;
 				// MOD: brief i-frames so the pack can't gang-hit the PC the instant it spawns on him.
 				// Same timer_b units as the spawn case above -- 4 ticks ~= 1.4s, not 48 (~16s).
 				global.pc.iframes_timer = max(global.pc.iframes_timer, 4);
@@ -1019,6 +1022,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		case "friendship":
 		case "flawless":
 		case "finisher":
+		case "babality": // 10-14: the jingle + baby Link, see tw_babality
 			// FUN: fire the MK2 splash on demand (no gameplay effect). "finisher" = random.
 			tw_flawless_event((_v == "finisher") ? "" : _v);
 			global.tw_toast       = _who_s + " -> " + string_upper(_v);
@@ -1265,6 +1269,14 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		}
 
 		// top: the points leaderboard (twitch_points)
+		// ---- 10-14 fun round: gambling (owner: "they gamble crazy") ----------------
+		case "bet":     // !bet flawless|win|death N  while a boss is on screen (twitch_vote.gml)
+			if (!tw_bet_place(_arg, _who_s)) global.tw_apply_refused = true;
+			break;
+		case "bounty":  // !bounty <enemy> N  -- 2x on its next kill. OFF by default (bounty=1)
+			if (!tw_bounty_place(_arg, _who_s)) global.tw_apply_refused = true;
+			break;
+
 		case "top":
 			if (variable_global_exists("tw_points_on") && global.tw_points_on)
 			{

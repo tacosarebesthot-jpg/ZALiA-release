@@ -775,6 +775,9 @@ function tw_help_rows(_cat) {
 			"!POINTS  BALANCE   !TOP  RICHEST CHAT",
 			"!KILLS  WHO KILLED THE RUNNER MOST",
 			"!VOTE X Y S  CHAT PICKS ONE OF TWO",
+			"!BET WIN N  ON THE BOSS: WIN 2X",
+			"  FLAWLESS 5X  DEATH 3X  (BOSS ON SCREEN)",
+			"!BOUNTY MOB N  2X ON ITS NEXT KILL",
 			"!VERSION  BUILD   !HELP PAGE  THIS CARD"
 		];
 		case "rl": return [

@@ -1882,13 +1882,57 @@ function Dev_TwSelftest_Step() {
 		if (global.tws_t == 150) tws_line("tstchatter", "!help mods");
 		if (global.tws_t == 190) tws_shot("help_mods");
 		if (global.tws_t == 200) global.tw_help_timer = 0;
+		// 10-14 fun round: !bet / !bounty / !babality through the real chat entry (no boss on a town screen)
+		if (global.tws_t == 300)
+		{
+			tw_points_add("tstgamb", 100); // its own chatter: the vote check at 720 reads the other balances
+			var _b0 = tw_points_get("tstgamb");
+			var _t = tws_line("tstgamb", "!bet win 20");
+			tws_feat("!bet with no boss on screen is refused and costs nothing", string_pos("no boss", string(global.tw_toast)) > 0 && tw_points_get("tstgamb") == _b0 + 1,
+			         "toast='" + string(global.tw_toast) + "'  balance " + string(_b0) + " -> " + string(tw_points_get("tstgamb")) + "   " + _t);
+		}
+		if (global.tws_t == 330)
+		{
+			var _t = tws_line("tstgamb", "!bounty moblin 20");
+			tws_feat("!bounty is off by default", string_pos("bounties are off", string(global.tw_toast)) > 0, "toast='" + string(global.tw_toast) + "'   " + _t);
+		}
+		if (global.tws_t == 360)
+		{
+			global.tw_bounty_on = true;
+			var _b0 = tw_points_get("tstgamb");
+			var _t = tws_line("tstgamb", "!bounty moblin 20");
+			var _nb = (ds_exists(global.tw_bounties, ds_type_map)) ? ds_map_size(global.tw_bounties) : -1;
+			tws_feat("!bounty moblin 20 (bounty=1) opens one bounty and takes the 20", _nb == 1 && tw_points_get("tstgamb") == _b0 + 1 - 20,
+			         "open=" + string(_nb) + "  balance " + string(_b0) + " -> " + string(tw_points_get("tstgamb")) + "   " + _t);
+			if (ds_exists(global.tw_bounties, ds_type_map)) ds_map_clear(global.tw_bounties);
+			global.tw_bounty_on = false;
+		}
+		if (global.tws_t == 390)
+		{
+			var _t = tws_line("tstgamb", "!babality");
+			var _hit = false;
+			for (var _bi = 0; _bi < array_length(global.tw_active); _bi++)
+			{   var _be = global.tw_active[_bi]; if (is_struct(_be) && variable_struct_exists(_be, "verb") && _be.verb == "babality") _hit = true;  }
+			var _sc = instance_exists(global.pc) && variable_instance_exists(global.pc, "tw_scale_mul") ? global.pc.tw_scale_mul : -1;
+			tws_feat("!babality shrinks Link to 0.45 on a timer", _hit && _sc == 0.45, "entry=" + string(_hit) + "  scale=" + string(_sc) + "   " + _t);
+		}
+		if (global.tws_t == 420)
+		{
+			if (!ds_exists(global.tw_bets, ds_type_map)) global.tw_bets = ds_map_create();
+			var _b0 = tw_points_get("tstgamb");
+			global.tw_bets[? "tstgamb"] = "win,20";
+			global.tw_bets[? "tstpoor"] = "death,10";
+			tw_bets_resolve("flawless");
+			tws_feat("a flawless pays the win bettor 2x and clears the book", tw_points_get("tstgamb") == _b0 + 40 && ds_map_size(global.tw_bets) == 0,
+			         "balance " + string(_b0) + " -> " + string(tw_points_get("tstgamb")) + "  book=" + string(ds_map_size(global.tw_bets)));
+		}
 		if (global.tws_t >= 720)
 		{
 			var _lh = variable_global_exists("tw_last_hurter") ? string(global.tw_last_hurter) : "";
 			tws_feat("the vote ended and FLIP fired in the starter's name, at no charge", !tw_vote_active() && _lh == "tstrich" && tw_points_get("tstrich") == global.tws_feat0.bal_after_swarm,
 			         "vote running=" + string(tw_vote_active()) + "  last hurter='" + _lh + "'  balance " + string(tw_points_get("tstrich")));
 			// leave nothing behind: test chatters out of the points maps, effects off, flags restored
-			var _names = ["tstchatter", "tstcd", "tstmod", "tstvic", "tstpoor", "tstrich"];
+			var _names = ["tstchatter", "tstcd", "tstmod", "tstvic", "tstpoor", "tstrich", "tstgamb"];
 			for (var _ni = 0; _ni < array_length(_names); _ni++)
 			{
 				if (variable_global_exists("tw_points")      && ds_exists(global.tw_points,      ds_type_map)) ds_map_delete(global.tw_points,      _names[_ni]);
