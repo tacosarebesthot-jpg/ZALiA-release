@@ -141,6 +141,10 @@ A few more keys have no menu row and live only in `twitch_config.txt` (one per l
 | `oneup_nudge=` | 5 | minutes on your last life before a toast reminds chat that `!1up` exists; 0 turns it off |
 | `swarm_cap=` | 14 | live enemies on screen at which `!swarm` is refused (mods skip cooldowns, so this is the real limit) |
 | `toasty=` | 100 | percent chance the MK2 Toasty pops after a flawless finisher |
+| `announcer=1/0` | 1 | the MK2 announcer: FIGHT! on a boss, FINISH HIM at a quarter bar, EXCELLENT for a clean `!swarm` wipe |
+| `babality=` | 15 | percent chance a flawless ends in a Babality when Link is not shrunk; shrunk is always |
+| `bets=1/0` | 1 | `!bet win / flawless / death N` on the boss on screen (2x / 5x / 3x) |
+| `bounty=1/0` | 0 | `!bounty <enemy> N`, 2x on that enemy's next kill. Off until you turn it on |
 
 ## Tuning it
 

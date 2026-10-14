@@ -11,6 +11,10 @@ Everything Lane asked for on air in the 2026-10-09 stream, plus one cap. Source 
 - **`!1up` reminder**: after five minutes on your last life a toast reminds chat that `!1up` exists. `oneup_nudge=` sets the minutes, 0 turns it off. Silent in VS CHAT and `!challenge`, where 1up is refused anyway.
 - **Swarm cap**: with mods skipping cooldowns, five `!swarm`s landed inside a minute. `!swarm` is now refused (no charge) once 14 enemies are on screen, and trimmed to fit below that. `swarm_cap=` changes the number.
 - **Toasty**: after a flawless finisher, Dan Forden's head slides in bottom-right with the yell, timed like the MK2 cabinet. `toasty=` is the percent chance (100). Off with the rest of the MK2 splash (MK2 SPLASH row).
+- **MK2 announcer pack**: FIGHT! when a boss has been up for a second, FINISH HIM when its bar hits a quarter, EXCELLENT when a chat `!swarm` is wiped out in one room without Link taking a hit. `announcer=0` turns the voice off; the MK2 SPLASH row off silences it too.
+- **Babality**: a flawless boss kill while Link is `!shrink`-ed (or 15% of the time otherwise, `babality=`) ends with the Babality jingle and a baby-sized Link for three seconds instead of a fatality.
+- **`!bet win 20`**: while a boss is on screen, stake points on `win` (2x), `flawless` (5x, also pays the win bettors) or `death` (3x). One bet per chatter per boss, 5 to 200 points, paid when the fight ends; a boss Link walks away from refunds everyone. Needs the points economy on. `bets=0` turns it off.
+- **`!bounty moblin 30`**: points on the next Link kill of an enemy type (the `!spawn` names), pays 2x to whoever posted it. **Off by default**: `bounty=1` in `twitch_config.txt`.
 
 ## 2.1.8 — 2026-10-05
 
