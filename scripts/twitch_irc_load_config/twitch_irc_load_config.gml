@@ -97,10 +97,10 @@ function twitch_irc_load_config() {
 			// 10-09 VOD round: Lane's on-air asks (sound cue, first-use hint, 1up reminder), the swarm cap, Toasty
 			case "cmd_sound":      global.tw_cmd_sound       = (tw_num(_val, 1) != 0); break;
 			case "cmd_sound_name": if (string(_val) != "") global.tw_cmd_sound_name = string(_val); break;
-			case "first_use_hint": global.tw_first_use_hint  = (tw_num(_val, 1) != 0); break;
-			case "oneup_nudge":    global.tw_oneup_nudge_min = clamp(floor(tw_num(_val, 5)), 0, 60); break;
+			case "first_use_hint": global.tw_first_use_hint  = (tw_num(_val, 0) != 0); break;
+			case "oneup_nudge":    global.tw_oneup_nudge_min = clamp(floor(tw_num(_val, 0)), 0, 60); break;
 			case "swarm_cap":      global.tw_swarm_cap       = clamp(floor(tw_num(_val, 14)), 4, 40); break;
-			case "toasty":         global.tw_toasty_pct      = clamp(floor(tw_num(_val, 100)), 0, 100); break;
+			case "toasty":         global.tw_toasty_pct      = clamp(floor(tw_num(_val, 50)), 0, 100); break;
 			// 10-14 fun round
 			case "announcer":      global.tw_announcer       = (tw_num(_val, 1) != 0); break;
 			case "bets": case "bet": global.tw_bets_on       = (tw_num(_val, 1) != 0); break;

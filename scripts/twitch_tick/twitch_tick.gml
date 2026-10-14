@@ -339,12 +339,12 @@ function tw_flawless_event(_which) {
 /// bottom-right with the "Toasty!" yell. Rides the splash queue after the finisher, as a corner
 /// pop (no dim, slides in from the right edge and back out over ~1.3 s). Assets by name, like the
 /// rest of the MK2 set: spr_mk2_toasty (origin TOP-LEFT, arcade pixels) + snd_mk2_toasty. Until
-/// they are imported this is a no-op. toasty= in twitch_config.txt is the percent chance (100).
+/// they are imported this is a no-op. toasty= in twitch_config.txt is the percent chance (50, Lane 10-14).
 function tw_toasty_enqueue() {
 	if (variable_global_exists("tw_splash_enabled") && !global.tw_splash_enabled) return;
 	var _p = asset_get_index("spr_mk2_toasty");
 	if (_p < 0 || !sprite_exists(_p)) return;
-	var _pct = variable_global_exists("tw_toasty_pct") ? global.tw_toasty_pct : 100;
+	var _pct = variable_global_exists("tw_toasty_pct") ? global.tw_toasty_pct : 50;
 	if (irandom(99) >= _pct) return;
 	var _s = asset_get_index("snd_mk2_toasty");
 	// wait 30 frames after the finisher ends, show for 60 frames (7 in / 35 hold / 18 out, see the
