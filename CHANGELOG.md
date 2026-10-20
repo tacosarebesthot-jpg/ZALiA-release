@@ -2,9 +2,9 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
-## 2.1.9 — not shipped yet
+## 2.1.9 — 2026-10-19
 
-Built from the 2026-10-09 stream, then trimmed to what Lane confirmed on 2026-10-14. Source only until the next build goes out.
+Built from the 2026-10-09 stream, then trimmed to what Lane confirmed on 2026-10-14.
 
 - **COMMAND SOUND**: a short blip each time a chat command lands, at most one every two seconds. **If a busy chat makes it annoying, turn it OFF: OPTIONS → TWITCH OPTIONS → COMMAND SOUND**, or `cmd_sound=0` in `twitch_config.txt`. `cmd_sound_name=` picks a different sound.
 - **First-use hint** (off by default, Lane passed on it): `first_use_hint=1` toasts each verb's `!help` line the first time it lands in a session.
