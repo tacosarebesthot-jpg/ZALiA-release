@@ -153,6 +153,7 @@ A few more keys have no menu row and live only in `twitch_config.txt` (one per l
 | `swarm_cap=` | 14 | live enemies on screen at which `!swarm` is refused (mods skip cooldowns, so this is the real limit) |
 | `toasty=` | 50 | percent chance the MK2 Toasty pops after a flawless finisher |
 | `announcer=1/0` | 1 | the MK2 announcer: FIGHT! on a boss, FINISH HIM when a hitless boss is on its last bar, EXCELLENT for a clean `!swarm` wipe |
+| `halloween=` | (calendar) | `1` forces Halloween week on (title line, Vampire Killer, purple Link, dimmer dark rooms, `!trickortreat`, free `!haunt`, Castlevania shuffle), `0` forces it off; anything else = Oct 24 to Nov 1 |
 | `babality=` | 15 | percent chance a flawless ends in a Babality when Link is not shrunk; shrunk is always |
 | `bets=1/0` | 1 | `!bet win / flawless / death N` on the boss on screen (2x / 5x / 3x) |
 | `bounty=1/0` | 0 | `!bounty <enemy> N`, 2x on that enemy's next kill. Off until you turn it on |
@@ -216,6 +217,8 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!slimed <rank> <secs>` | slime rain (asm0deus's idea, 10-24): Bots drop from the top of the screen for `<secs>` seconds, rank 1-3 sets how fast (bare `!slimed` = rank 1 for the effect length). Respects the SWARM CAP |
 | `!rust` | your sword hits two attack levels lower for the effect length (the HUD level does not change) |
 | `!adhd <secs>` | can't stop moving: Link keeps walking the last direction you walked whenever you let go |
+| `!trickortreat` | Halloween week only (Oct 24 to Nov 1): 50/50 a full heal and magic, or two hearts gone plus three Bubble skulls. 20 points, one knock per chatter per 5 minutes |
+| `!haunt` | 20 s of dark + ghosts, three skulls, and the Castlevania boss track. Any day; free during Halloween week |
 | `!flame` `!heckler` | a jumping flame tagged with the viewer's name |
 | `!deny <what>` | temporarily blocks spell / jump / upstab / downstab / upthrust / downthrust / all. `!undeny [what]` or `!deny <what> off` lifts it early |
 | `!catslap <n>` | three slaps from alternating sides that knock Link around, no damage. `<n>` is frames to wait before the first slap (60 = 1 s), so it can land with an overlay |

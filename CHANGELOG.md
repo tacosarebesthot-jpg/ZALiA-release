@@ -16,11 +16,20 @@ Everything Lane's first 2.1.9 stream (2026-10-24) turned up.
 - **COMMAND SOUND is now off by default** (Lane turned it off in the first 15 minutes). The row is still there.
 - `!music mario2` / `smb2` / `mm2` find the Super Mario Bros 2 and Mega Man 2 tracks. `!beef` is an alias for `!dmgup` for now; what Lane meant by "beef up" is still to be confirmed with him.
 - **`!song` is gone.** It collided with the Streamlabs song-request `!song` on Lane's channel (Streamlabs answered every time). `!np`, `!nowplaying` and `!track` still show the current track.
-- **`!music <name>` plays the whole track.** It used to run for the EFFECT LENGTH setting (5 to 60 s) and then hand the room music back ("still did not play the whole song").
+- **`!music <name>` plays the whole track.** Two things cut it short before: the request only ran for the EFFECT LENGTH setting (5 to 60 s), and walking onto a screen with a different theme (or an item jingle) stopped all music with nothing restarting it, so the song died and silence followed. Now the request lasts the track's length, pauses for the room change or jingle, and picks up where it left off.
 - **`!ghost` fades every enemy.** Enemies with their own draw code (Daira, Bot, Eyenocc, Fokka and others) stayed solid, worst when they attacked. Bosses are still exempt.
 - **`!vote smite or 1up`** works: "or", "vs" and "/" between the two options are ignored instead of counting as a third.
 - **No more accidental palette editor.** The trigger+bumper+Y pad chords that opened it on the playtest build are gone. CTRL+P and OPTIONS > DEV TOOLS > COLOR still open it.
 - Navi's "hey listen" went from 1 in 10,000 commands to 1 in 150. It is still silent until a clip named `snd_navi_heylisten` is added to the project.
+
+**106 more NES tracks** (Gainey: "we're getting bored with the tunes, keep what we got, add more from NES, good game music only"). Rendered from the NSF rips at their tagged loop lengths and wired into the zone pools, so they play in the game as well as in `!music`: Ninja Gaiden, Shadow of the Ninja, Power Blade, Vice: Project Doom, Kabuki Quantum Fighter, Batman: Return of the Joker, Castlevania 1 and 3, Blaster Master, Metroid, Journey to Silius, Mega Man 4 to 6, Gargoyle's Quest II, Battletoads, Rygar, Astyanax, Zanac, Gradius, Life Force. By zone: 64 stage/dungeon, 20 boss, 11 title, 6 overworld/town, 5 tunnel. Nothing was removed.
+
+**Halloween week (Oct 24 to Nov 1, automatic; `halloween=1/0` in `twitch_config.txt` forces it on or off)**
+
+- The title screen says HAPPY HALLOWEEN and plays Vampire Killer. Link wears the purple Shadow Link palette for the week (the ring and PROTECT tints are hidden; the HUD still shows both). Rooms that have a dark palette never reach full brightness, candle or not.
+- **`!trickortreat`** (20 points): heads, full hearts and magic; tails, two hearts gone and three Bubble skulls. One knock per chatter per 5 minutes. Outside the week it answers "come back then".
+- **`!haunt`**: 20 s of `!dark` + `!ghost`, three skulls, and the Castlevania boss track. Works all year, free during the week.
+- A bare `!music` or `!music random` shuffles only the Castlevania tracks during the week. `!music spooky` does that any day.
 
 **New for chat (the 10-24 `!suggest` round, approved by Gainey)**
 
