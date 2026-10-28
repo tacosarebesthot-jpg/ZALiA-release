@@ -311,7 +311,7 @@ enemies around you
 lights · `!disco` colour-cycling overlay · `!party` disco and flip together ·
 `!shrink` `!grow` resize Link · `!speed` make him too fast to control ·
 `!flame` `!heckler` spawns a jumping flame tagged with the viewer's name ·
-`!music` reshuffle the soundtrack mid-run · `!song` what is playing · `!stasis`
+`!music` reshuffle the soundtrack mid-run · `!np` what is playing · `!stasis`
 freeze Link in place · `!disorient` confuse, plus up and down · `!tax` `!dmgup`
 `!attrition` `!challenge` `!meth` and more — `!help` in chat shows the full card,
 and [TWITCH_SETUP.md](TWITCH_SETUP.md) lists every command.

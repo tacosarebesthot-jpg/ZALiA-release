@@ -20,7 +20,7 @@ For the original game and its official builds, go to the upstream repository abo
 
 ## Download
 
-Current build: **v2.1.9** (2026-10-19). Grab it from the [**Releases**](../../releases)
+Current build: **v2.1.10** (2026-10-28). Grab it from the [**Releases**](../../releases)
 page (the zips are hosted on Mega and linked from the release notes) and unzip it
 anywhere. Run `ZALiA.exe`. No installer, no dependencies.
 

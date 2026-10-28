@@ -2,6 +2,26 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
+## 2.1.10 — 2026-10-28
+
+Everything Lane's first 2.1.9 stream (2026-10-24) turned up.
+
+- **FINISH HIM** fired right after FIGHT! at every boss entry (the boss bar reads empty until the boss's own update fills it). Now it only speaks when a boss you have not been hit by is down to its last bar, per Gainey's call.
+- **Babality** played its jingle over FLAWLESS VICTORY. It now waits its turn like the other finishers.
+- **Dying during the crystal cutscene lost the level-up.** The crystal counted, the XP never came, and chat's `!swarm` mobs could still hit Link while he stood there. Link cannot be hurt from the moment the crystal is accepted until the refill ends.
+- **`!help` / `!commands` card** covered the whole screen for 8 seconds. New CHAT EXTRAS row **HELP CARD**, off by default: off, chat gets a one-line toast pointing at the pinned list; `!help <verb>` still answers.
+- **`!steal` landed on paper only** for the boots: the overworld converts the boots water tiles once when it loads, so clearing the item changed nothing. Stolen boots now put the water back (and the restore puts the path back). `!steal boots` / `!steal candle` steal the named item when Link holds it instead of a random one.
+- **Chat `!spell` moved your spell cursor.** It no longer does.
+- **COMMAND PRICES** row (CHAT EXTRAS, on by default): off, every command is free while chat still earns points for `!bet` and `!bounty`. The POINTS ECONOMY text no longer claims commands must cost points.
+- **COMMAND SOUND is now off by default** (Lane turned it off in the first 15 minutes). The row is still there.
+- `!music mario2` / `smb2` / `mm2` find the Super Mario Bros 2 and Mega Man 2 tracks. `!beef` is an alias for `!dmgup` for now; what Lane meant by "beef up" is still to be confirmed with him.
+- **`!song` is gone.** It collided with the Streamlabs song-request `!song` on Lane's channel (Streamlabs answered every time). `!np`, `!nowplaying` and `!track` still show the current track.
+- **`!music <name>` plays the whole track.** It used to run for the EFFECT LENGTH setting (5 to 60 s) and then hand the room music back ("still did not play the whole song").
+- **`!ghost` fades every enemy.** Enemies with their own draw code (Daira, Bot, Eyenocc, Fokka and others) stayed solid, worst when they attacked. Bosses are still exempt.
+- **`!vote smite or 1up`** works: "or", "vs" and "/" between the two options are ignored instead of counting as a third.
+- **No more accidental palette editor.** The trigger+bumper+Y pad chords that opened it on the playtest build are gone. CTRL+P and OPTIONS > DEV TOOLS > COLOR still open it.
+- Navi's "hey listen" went from 1 in 10,000 commands to 1 in 150. It is still silent until a clip named `snd_navi_heylisten` is added to the project.
+
 ## 2.1.9 — 2026-10-19
 
 Built from the 2026-10-09 stream, then trimmed to what Lane confirmed on 2026-10-14.

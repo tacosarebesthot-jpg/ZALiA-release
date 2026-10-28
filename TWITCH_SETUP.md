@@ -121,7 +121,7 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | CHATTER COOLDOWN | each chatter's own cooldown, 0 to 120 s (default 30) | `user_cooldown=` (frames) |
 | MODS SKIP COOLDOWN | mods and the broadcaster skip both cooldowns | `mod_bypass=1/0` |
 | EFFECT TIMERS | top-right strip of running effects with seconds left, plus the live vote | `effects_hud=1/0` |
-| COMMAND SOUND | a short blip each time a chat command lands, at most one every 2 s. **Turn it OFF here if a busy chat gets annoying.** | `cmd_sound=1/0` |
+| COMMAND SOUND | a short blip each time a chat command lands, at most one every 2 s. Off by default since 2.1.10; turn it on here. | `cmd_sound=1/0` |
 | CHAT EXTRAS | opens a second page with the rest of the chat switches (below) | |
 | CHAT EXTRAS > FIRST-USE HINT | first time a verb hits you in a session, a toast says what it does (off by default) | `first_use_hint=1/0` |
 | CHAT EXTRAS > 1UP REMINDER | minutes on your last life before a toast reminds chat that `!1up` exists: OFF (default) or 1-30 | `oneup_nudge=0-30` |
@@ -131,6 +131,8 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | CHAT EXTRAS > BABALITY | chance a flawless is a Babality when Link is not shrunk: OFF or 5-100% (default 15) | `babality=0-100` |
 | CHAT EXTRAS > CHAT BETS | `!bet` on the boss fight (needs points on) | `bets=1/0` |
 | CHAT EXTRAS > BOUNTIES | `!bounty <enemy> <points>` (needs points on, off by default) | `bounty=1/0` |
+| CHAT EXTRAS > HELP CARD | `!help` / `!commands` draw the full command card over the game for 8 s. Off (default) = chat gets a one-line toast instead; `!help <verb>` still answers | `help_card=1/0` |
+| CHAT EXTRAS > COMMAND PRICES | with the points economy on, each command costs points. Off = every command is free, chat still earns points for `!bet` / `!bounty` | `cmd_prices=1/0` |
 | MUSIC TOASTS | NOW PLAYING plate: OFF (default) or 1-30 seconds on screen | `toast_music=0-30` |
 | CHAT TOASTS | plates for what chat did: OFF or 1-30 seconds (default 4) | `toast_chat=0-30` |
 | GAME TOASTS | killed by, crushed, level up, hints: OFF (default) or 1-30 seconds | `toast_game=0-30` |
@@ -150,7 +152,7 @@ A few more keys have no menu row and live only in `twitch_config.txt` (one per l
 | `oneup_nudge=` | 0 | minutes on your last life before a toast reminds chat that `!1up` exists; 0 turns it off |
 | `swarm_cap=` | 14 | live enemies on screen at which `!swarm` is refused (mods skip cooldowns, so this is the real limit) |
 | `toasty=` | 50 | percent chance the MK2 Toasty pops after a flawless finisher |
-| `announcer=1/0` | 1 | the MK2 announcer: FIGHT! on a boss, FINISH HIM at a quarter bar, EXCELLENT for a clean `!swarm` wipe |
+| `announcer=1/0` | 1 | the MK2 announcer: FIGHT! on a boss, FINISH HIM when a hitless boss is on its last bar, EXCELLENT for a clean `!swarm` wipe |
 | `babality=` | 15 | percent chance a flawless ends in a Babality when Link is not shrunk; shrunk is always |
 | `bets=1/0` | 1 | `!bet win / flawless / death N` on the boss on screen (2x / 5x / 3x) |
 | `bounty=1/0` | 0 | `!bounty <enemy> N`, 2x on that enemy's next kill. Off until you turn it on |
@@ -240,7 +242,7 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!shake` | screen shake |
 | `!spell <name>` | cast a named spell (`!fire` `!thunder` `!enigma` work too) |
 | `!music` | reshuffle the soundtrack mid-run |
-| `!song` `!np` | shows the current track's name (it also pops up on every new track) |
+| `!np` `!nowplaying` `!track` | shows the current track's name (it also pops up on every new track). `!song` was dropped in 2.1.10: Streamlabs song requests own that word on Lane's channel |
 | `!meth` | moon + jump + speed at once |
 | `!quantumentangle` | something small and random happens. or doesn't |
 | `!help` `!cmds` | a one-screen card of all of this on stream. `!help hurt`, `chaos`, `mobs`, `fun`, `rl` or `mods` shows one page with what each verb does |
