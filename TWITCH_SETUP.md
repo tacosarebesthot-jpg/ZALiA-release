@@ -211,8 +211,11 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!steal` `!rob` | takes one of your traversal/combat items (candle, glove, raft, boots, flute, hammer, bracelet, sword, shield, ring) and gives it back later |
 | `!slow` | marsh-slow legs |
 | `!root` | no walking, no jumping — swinging still works |
-| `!spawn <enemy> <n>` | drop a named enemy next to you (daira, moblin, goriya, zora, stalfos, bat, atta, myu) |
+| `!spawn <enemy> <n>` | drop a named enemy next to you, up to 6. Since 2.1.10 the whole roster: daira, moblin, grunt, goriya, zora, stalfos, stalfoon, bat, atta, myu, bot, aneru, aruroda, bagin, blooby, boon, bubble, capper, deeler, doomknocker, fokka, fokkeru, gellzem, geru, rockgeru, girubokku, guma, ironknuckle, lowder, magnot, mago, mau, megmat, moby, octorok, ra, tektite, wizard, wosu, eyenocc. Add a colour word for the version: `!spawn blue goriya 2` (blue/strong = the hard one, red/orange = the weak one, `v2` = version 2). `!spawn random` rolls enemy and version |
 | `!swarm <n>` | a pack of random enemies around you |
+| `!slimed <rank> <secs>` | slime rain (asm0deus's idea, 10-24): Bots drop from the top of the screen for `<secs>` seconds, rank 1-3 sets how fast (bare `!slimed` = rank 1 for the effect length). Respects the SWARM CAP |
+| `!rust` | your sword hits two attack levels lower for the effect length (the HUD level does not change) |
+| `!adhd <secs>` | can't stop moving: Link keeps walking the last direction you walked whenever you let go |
 | `!flame` `!heckler` | a jumping flame tagged with the viewer's name |
 | `!deny <what>` | temporarily blocks spell / jump / upstab / downstab / upthrust / downthrust / all. `!undeny [what]` or `!deny <what> off` lifts it early |
 | `!catslap <n>` | three slaps from alternating sides that knock Link around, no damage. `<n>` is frames to wait before the first slap (60 = 1 s), so it can land with an overlay |

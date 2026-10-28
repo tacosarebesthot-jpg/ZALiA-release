@@ -22,6 +22,13 @@ Everything Lane's first 2.1.9 stream (2026-10-24) turned up.
 - **No more accidental palette editor.** The trigger+bumper+Y pad chords that opened it on the playtest build are gone. CTRL+P and OPTIONS > DEV TOOLS > COLOR still open it.
 - Navi's "hey listen" went from 1 in 10,000 commands to 1 in 150. It is still silent until a clip named `snd_navi_heylisten` is added to the project.
 
+**New for chat (the 10-24 `!suggest` round, approved by Gainey)**
+
+- **`!spawn` knows the whole roster** (Gainey: "we need to expand the mob spawn list, lots missing, aka color variants"): 40 enemies by name, colour/strength versions (`!spawn blue goriya 2`, `v2`), and `!spawn random`. `!help mobs` lists them.
+- **`!slimed <rank> <secs>`** (asm0deus): slime rain. Bots fall from the top of the screen for the duration, rank 1-3 sets the pace. Lane on air: "like a speedrun with tower defense in it ... good idea." Respects the SWARM CAP.
+- **`!rust`** (asm0deus): the sword hits two levels lower for the effect length. Nothing else changes, so no level-up can misfire.
+- **`!adhd <secs>`** (asm0deus): Link keeps walking the last direction he walked whenever you let go of the stick.
+
 ## 2.1.9 — 2026-10-19
 
 Built from the 2026-10-09 stream, then trimmed to what Lane confirmed on 2026-10-14.
