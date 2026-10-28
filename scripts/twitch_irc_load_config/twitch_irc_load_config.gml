@@ -99,6 +99,7 @@ function twitch_irc_load_config() {
 			// 10-24: the two new CHAT EXTRAS rows
 			case "help_card":      global.tw_help_card       = (tw_num(_val, 0) != 0); break;
 			case "cmd_prices":     global.tw_cmd_prices      = (tw_num(_val, 1) != 0); break;
+			case "halloween":      global.tw_halloween_force = tw_num(_val, -1); break; // 1 = on, 0 = off, else the calendar (Oct 24-31)
 			case "cmd_sound_name": if (string(_val) != "") global.tw_cmd_sound_name = string(_val); break;
 			case "first_use_hint": global.tw_first_use_hint  = (tw_num(_val, 0) != 0); break;
 			case "oneup_nudge":    global.tw_oneup_nudge_min = clamp(floor(tw_num(_val, 0)), 0, 60); break;
@@ -215,6 +216,8 @@ function tw_alias_verb(_v) {
 		case "slime": case "slimes": case "slimerain": case "apocalypse": return "slimed"; // asm0deus 10-24 2:43:13 / 2:45:45
 		case "rusty": case "rusted":      return "rust";     // asm0deus 10-24 2:49:19
 		case "cantstop": case "fidget":   return "adhd";     // asm0deus 10-24 2:52:50
+		case "tot": case "trick": case "treat": case "knock": case "trickortreet": return "trickortreat"; // Halloween week
+		case "boo": case "spook": case "spooky": case "haunted":                   return "haunt";
 		case "bleed":  case "hunger":     return "attrition";
 		case "cmds": case "commands": case "howto": case "howtoplay": return "help";
 		case "entangle": case "quantum": case "qe": return "quantumentangle";
@@ -262,6 +265,7 @@ function tw_verb_all() {
 		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
 		"stasis","points","pts","bal","ghost","crush",
 		"slimed","rust","adhd", // 10-24 chat !suggest round (asm0deus), approved by the owner 10-28
+		"trickortreat","haunt", // Halloween week 2026
 		"version","ver","build","reshuffle","gorilla",
 		"vote","top","kills","bet","bounty",
 		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",

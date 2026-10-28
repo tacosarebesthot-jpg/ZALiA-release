@@ -40,6 +40,10 @@ function update_Pallete_1a() {
 	    if (pc_is_cucco()) _pi = global.PI_CUCCO1;
 	    else               _pi = global.PI_PC1;
 	    _pi += sign(f.items&ITM_RING) + sign(g.spells_active&SPL_PRTC);
+	    // Halloween week 2026 (owner 10-28, "spooky week look"): Link wears the purple mob palette --
+	    // the one Shadow Link's data row uses -- Oct 24-31. The ring / PROTECT tint is hidden for the
+	    // week; the HUD still shows both. Cucco form and the end-game / disguise branches are untouched.
+	    if (!pc_is_cucco() && tw_halloween()) _pi = global.PI_MOB_PUR;
 	}
 
 	dg_PI_SEQ[#$0,$0] = _pi;

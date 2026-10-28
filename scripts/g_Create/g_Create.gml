@@ -4392,6 +4392,8 @@ function g_Create() {
 	global.tw_rust_lvls           = 0;         // !rust: sword damage looked up this many attack levels lower (get_pc_attack_damage)
 	global.tw_adhd                = false;     // !adhd: Link keeps walking the last direction he walked (Input_update2a)
 	global.tw_adhd_dir            = 1;
+	global.tw_halloween_force     = -1;        // halloween= : 1 on, 0 off, -1 = the calendar (tw_halloween)
+	global.tw_tot_last            = {};        // !trickortreat: last knock per chatter (one per 5 min)
 	global.tw_crush_count         = 0;         // enemies crushed by falling blocks this session
 	global.tw_loz_jingle          = true;      // main items play the Zelda 1 treasure fanfare (item_get_jingle)
 	// ROCKET LEAGUE QUICK-CHAT (round 11): game events throw RL plates through the toast

@@ -2058,6 +2058,33 @@ function Dev_TwSelftest_Step() {
 			tws_feat("spawn table batch " + string(_b) + " (rows " + string(_lo) + "-" + string(_hi - 1) + "): first and last version create", _made == _want, string(_made) + "/" + string(_want));
 			tws_line("tstchatter", "!smite");
 		}
+		if (global.tws_t == 685)
+		{
+			// Halloween week 2026: forced on, the two verbs and the spooky shuffle answer; forced off, the gamble refuses
+			global.tw_points_on = false;
+			var _hf = global.tw_halloween_force;
+			global.tw_halloween_force = 1;
+			var _lh0 = global.tw_last_hurter, _lht0 = global.tw_last_hurter_t, _lhv0 = global.tw_last_hurt_verb;
+			var _tt = tws_line("tstchatter", "!trickortreat");
+			tws_feat("!trickortreat in Halloween week pays out a TREAT or a TRICK", tw_halloween() && (string_pos("TREAT", _tt) > 0 || string_pos("TRICK", _tt) > 0), _tt);
+			var _tt2 = tws_line("tstchatter", "!trickortreat");
+			tws_feat("a second knock inside 5 minutes is refused", string_pos("one knock", _tt2) > 0, _tt2);
+			var _th = tws_line("tstchatter", "!haunt");
+			tws_feat("!haunt arms dark + ghost and is free in Halloween week", global.tw_dark && global.tw_ghost && tw_points_cost("haunt") == 0 && string_pos("HAUNTED", _th) > 0, _th);
+			var _tm = tws_line("tstchatter", "!music spooky");
+			var _tmn = (variable_global_exists("jukebox_names") && is_array(global.jukebox_names) && global.jukebox_idx >= 0 && global.jukebox_idx < array_length(global.jukebox_names))
+			         ? string(global.jukebox_names[global.jukebox_idx]) : "";
+			tws_feat("!music spooky picks a Castlevania track", global.jukebox_on && string_pos("castlevania", string_lower(_tmn)) > 0, "now playing=" + _tmn + "   " + _tm);
+			tws_line("tstchatter", "!smite");
+			global.tw_halloween_force = 0;
+			var _tt3 = tws_line("tstchatter", "!trickortreat");
+			tws_feat("!trickortreat outside Halloween week is refused", !tw_halloween() && string_pos("Halloween week", _tt3) > 0 && tw_points_cost("haunt") == 30, _tt3);
+			global.tw_halloween_force = _hf;
+			// end the 20 s haunt + the song so the next block starts clean
+			for (var _ki = array_length(global.tw_active) - 1; _ki >= 0; _ki--)
+			{   var _ke = global.tw_active[_ki]; if (is_struct(_ke) && variable_struct_exists(_ke, "restore")) { _ke.restore(); } array_delete(global.tw_active, _ki, 1);  }
+			global.tw_last_hurter = _lh0; global.tw_last_hurter_t = _lht0; global.tw_last_hurt_verb = _lhv0;
+		}
 		if (global.tws_t == 700)
 		{
 			global.tw_points_on = false; // free commands for the harness chatter
@@ -2926,6 +2953,8 @@ function tw_selftest_cases() {
 		["adhd 3",     "toast", "10-24 suggest: forced walk 3 s"],
 		["spawn blue goriya 2", "toast", "10-24: colour versions"],
 		["spawn random",        "toast", "10-24: random enemy from the whole table"],
+		["haunt",      "toast", "Halloween combo: dark + ghost + skulls + 20 s of Castlevania"],
+		["trickortreat", "toast", "Halloween gamble; refused with a toast outside Oct 24-31"],
 		["reshuffle",  "toast", "ok or refused-with-reason"],
 		["suggest test idea from selftest", "toast", "writes _tw_selftest_suggestions.txt (never the real inbox)"],
 		// -- rocket league quick chat (plates OFF in the harness) -----------------

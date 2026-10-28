@@ -29,7 +29,14 @@ function Audio_update() {
 	        // GMS2: audio_get_name on a non-playing instance throws — guard with audio_is_playing
 	        var _ts_playing = audio_is_playing(timing_sound_inst);
 	        var _ts_name    = _ts_playing ? audio_get_name(timing_sound_inst) : "";
-	        if (_ts_name!=audio_get_name(snd_Default_Title_Intro_no_volume)
+	        // Halloween week 2026 (owner 10-28): the title plays Vampire Killer, looped, Oct 24-31. It
+	        // is still the timing sound, so the title scroll resets on ITS loop (update_TitleScreen).
+	        if (tw_halloween())
+	        {
+	            if (_ts_name!=audio_get_name(mus_Castlevania_Stage_01_Vampire_Killer))
+	            {   timing_sound_inst = aud_play_sound(mus_Castlevania_Stage_01_Vampire_Killer, 1,true);  }
+	        }
+	        else if (_ts_name!=audio_get_name(snd_Default_Title_Intro_no_volume)
 	        &&  _ts_name!=audio_get_name(snd_Default_Title_no_volume) )
 	        {
 	            timing_sound_inst = aud_play_sound(snd_Default_Title_Intro_no_volume, 1,false);

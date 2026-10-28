@@ -432,6 +432,18 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 
 				// no arg / "random" / "shuffle" -> pick a random REAL track so Smoken's
 				// dead-chat "change the music" actually shuffles SONGS (not a fixed jingle/FX).
+				// Halloween week (owner 10-28): a bare / random !music shuffles only the Castlevania tracks,
+				// and "!music spooky" (or halloween / cv) does that any day of the year.
+				var _spooky = (_q == "spooky" || _q == "halloween" || _q == "cv" || _q == "castlevania" || _q == "scary");
+				if (_hit < 0 && array_length(_names) > 0
+				&& (_spooky || ((_q == "" || _q == "random" || _q == "shuffle") && tw_halloween())))
+				{
+					var _cv = [];
+					for (var _ci = 0; _ci < array_length(_names); _ci++)
+					{   if (string_pos("castlevania", tw_slug(_names[_ci])) > 0) array_push(_cv, _ci);  }
+					if (array_length(_cv) > 0) _hit = _cv[irandom(array_length(_cv) - 1)];
+					else if (_spooky) _q = ""; // no Castlevania tracks in this build: fall through to a plain shuffle
+				}
 				if (_hit < 0 && array_length(_names) > 0
 				&& (_q == "" || _q == "random" || _q == "shuffle"))
 				{   _hit = irandom(array_length(_names) - 1);  }
@@ -448,8 +460,40 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					var _ta   = (is_array(global.jukebox_assets) && _hit < array_length(global.jukebox_assets)) ? global.jukebox_assets[_hit] : -1;
 					var _tsec = (_ta != -1 && audio_exists(_ta)) ? audio_sound_length(_ta) : 0;
 					if (_tsec > 0) _frames = ceil(_tsec * 60) + 30;
+					// SECOND cut-off cause (owner 10-28: "it has been cutting off the last 3 weeks"):
+					// Audio_Room_Start stops the whole music group when a screen with a different theme
+					// loads, and any other music-group play (item jingle, fanfare) does the same through
+					// aud_play_sound. Nothing restarted the jukebox track, and jukebox mode blocks the
+					// room music, so the song died and silence followed until the timer ran out. The
+					// reapply below remembers the track position every frame and, once the room change
+					// or jingle is over, starts the same track again from that spot.
 					array_push(global.tw_active, {
 						frames  : _frames,
+						idx     : _hit,
+						len     : _tsec,
+						pos     : 0,
+						hold    : 0,
+						reapply : function() {
+							if (!variable_global_exists("jukebox_on") || !global.jukebox_on) { self.frames = 0; return; } // the player toggled the jukebox off: let go
+							var _ji = variable_global_exists("jukebox_inst") ? global.jukebox_inst : 0;
+							if (_ji && audio_exists(_ji) && audio_is_playing(_ji))
+							{
+								self.pos  = audio_sound_get_track_position(_ji);
+								self.hold = 0;
+								// the clock only runs while the song does: a pause for a room change does not eat the song
+								if (self.len > 0) self.frames = max(self.frames, ceil((self.len - self.pos) * 60) + 30);
+								return;
+							}
+							// stopped under us: wait for the room change / the other music to finish, then resume
+							if (!instance_exists(g) || g.ChangeRoom_timer > 0 || g.cutscene) return;
+							if (instance_exists(Audio) && Audio.mus_rm_inst && audio_exists(Audio.mus_rm_inst) && audio_is_playing(Audio.mus_rm_inst)) return;
+							if (self.hold > 0) { self.hold--; return; }
+							self.hold = 30; // one attempt per half second, so a jingle that starts late is not fought
+							global.jukebox_idx = self.idx;
+							jukebox_play();
+							var _nj = variable_global_exists("jukebox_inst") ? global.jukebox_inst : 0;
+							if (_nj && audio_exists(_nj) && self.pos > 0 && self.pos < self.len) audio_sound_set_track_position(_nj, self.pos);
+						},
 						restore : function() {
 							// mirror the jukebox toggle-OFF path: stop our track so
 							// Audio_update_2 re-plays the normal room music next frame.
@@ -1423,9 +1467,15 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 						if (g.room_type != "A" || g.cutscene || g.gui_state != g.gui_state_NONE || g.ChangeRoom_timer > 0 || g.FallScene_timer) return;
 						var _cap = variable_global_exists("tw_swarm_cap") ? global.tw_swarm_cap : 14;
 						if (instance_number(Enemy) >= _cap) return;
+						// owner 10-28, watching the selftest: "the slimes are getting hung on the roof and never
+						// falling down to where Link is" -- 4 px under the view top is inside the ceiling tiles.
+						// Drop in just below the first open tile of the column instead (tw_rain_spawn_y); a
+						// column that is solid all the way down is skipped this tick.
 						var _span = max(16, viewXR() - viewXL() - 32);
 						var _sx   = viewXL() + 16 + irandom(_span);
-						var _sid  = GameObject_create(_sx, viewYT() + 4, Bot_A, 1);
+						var _sy   = tw_rain_spawn_y(_sx);
+						if (_sy < 0) return;
+						var _sid  = GameObject_create(_sx, _sy, Bot_A, 1);
 						if (_sid != noone && instance_exists(_sid)) _sid.tw_spawned = true;
 					},
 					restore : function() { }
@@ -1458,6 +1508,78 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				restore : function() { global.tw_adhd = false; }
 			});
 			global.tw_toast       = _who_s + " -> ADHD: can't stop walking for " + string(round(_frames / 60)) + "s";
+			global.tw_toast_timer = 240;
+			break;
+		// ---- HALLOWEEN WEEK 2026 (owner 10-28: "add some of our own dark Halloween easter eggs") ----
+		// trickortreat: chat's gamble. Heads = full heal and magic; tails = two hearts gone and three
+		// Bubble skulls at the door. Halloween week only (tw_halloween), one knock per chatter per 5 min.
+		case "trickortreat":
+			if (!tw_halloween())
+			{
+				global.tw_toast       = _who_s + " -> trick or treat is Halloween week only (Oct 24-31). come back then.";
+				global.tw_toast_timer = 240;
+				global.tw_apply_refused = true;
+				break;
+			}
+			if (!instance_exists(f) || !instance_exists(global.pc)) { global.tw_apply_refused = true; break; }
+			{
+				if (!variable_global_exists("tw_tot_last") || !is_struct(global.tw_tot_last)) global.tw_tot_last = {};
+				var _tk = string_lower(_who_s);
+				if (variable_struct_exists(global.tw_tot_last, _tk) && (current_time - global.tw_tot_last[$ _tk]) < 300000 && !tw_points_is_free(_who_s))
+				{
+					global.tw_toast       = _who_s + " -> one knock per 5 minutes";
+					global.tw_toast_timer = 180;
+					global.tw_apply_refused = true;
+					break;
+				}
+				global.tw_tot_last[$ _tk] = current_time;
+				if (irandom(1) == 0)
+				{
+					adjust_stat(9999, 9999);
+					global.tw_toast       = _who_s + " -> TREAT! full hearts and magic";
+					global.tw_toast_timer = 240;
+				}
+				else
+				{
+					var _chip = min(16, max(0, f.hp - 1)); // two hearts, never a kill (same floor as !hurt)
+					if (_chip > 0) adjust_stat(-_chip, 0);
+					var _skulls = 0;
+					if (instance_exists(g) && g.room_type == "A" && g.gui_state == g.gui_state_NONE && !g.cutscene && g.ChangeRoom_timer <= 0 && !g.FallScene_timer)
+					{
+						for (var _sk = 0; _sk < 3; _sk++)
+						{
+							var _sid = GameObject_create(global.pc.xl - 32 + 32 * _sk, global.pc.yt - 24, BubbA, 1);
+							if (_sid != noone && instance_exists(_sid)) { _sid.tw_spawned = true; _skulls++; }
+						}
+						global.pc.iframes_timer = max(global.pc.iframes_timer, 4);
+					}
+					global.tw_toast       = _who_s + " -> TRICK! two hearts gone" + (_skulls > 0 ? " and " + string(_skulls) + " skulls" : "");
+					global.tw_toast_timer = 240;
+				}
+			}
+			break;
+		// haunt: the combo. 20 s of !dark + !ghost, three skulls, and the Castlevania boss track.
+		// Any day; free during Halloween week (tw_points_cost).
+		case "haunt":
+			twitch_apply("dark",  "20", _who_s, "");
+			twitch_apply("ghost", "20", _who_s, "");
+			if (instance_exists(global.pc) && instance_exists(g) && g.room_type == "A" && g.gui_state == g.gui_state_NONE && !g.cutscene && g.ChangeRoom_timer <= 0 && !g.FallScene_timer)
+			{
+				for (var _hk = 0; _hk < 3; _hk++)
+				{
+					var _hid = GameObject_create(global.pc.xl - 48 + 48 * _hk, global.pc.yt - 32, BubbA, 1);
+					if (_hid != noone && instance_exists(_hid)) _hid.tw_spawned = true;
+				}
+				global.pc.iframes_timer = max(global.pc.iframes_timer, 4);
+			}
+			twitch_apply("music", "poison mind", _who_s, "");
+			// the song request would run the whole track; the haunt is 20 s
+			for (var _hi = array_length(global.tw_active) - 1; _hi >= 0; _hi--)
+			{
+				var _he = global.tw_active[_hi];
+				if (is_struct(_he) && variable_struct_exists(_he, "idx") && variable_struct_exists(_he, "len")) { _he.frames = min(_he.frames, 1200); _he.len = 20; break; }
+			}
+			global.tw_toast       = _who_s + " -> HAUNTED: dark, ghosts, skulls, 20s";
 			global.tw_toast_timer = 240;
 			break;
 		case "ghost":
@@ -1700,6 +1822,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
 			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush": case "reshuffle":
 			case "slimed": case "rust": case "adhd": // 10-24 !suggest round
+			case "haunt": // Halloween week
 				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; global.tw_last_hurt_verb = _v; break;
 		}
 
@@ -2003,6 +2126,24 @@ function tw_spawn_row(_name) {
 function tw_spawn_obj(_name) {
 	var _r = tw_spawn_row(string_lower(string(_name)));
 	return is_undefined(_r) ? undefined : _r[0];
+}
+
+/// @description  tw_rain_spawn_y(x) -- the y to drop a rained-in mob at for column x: just under the first
+/// NON-solid tile scanning down from the top of the view (the ceiling is usually 1-2 rows of solid tiles).
+/// -1 when the column has no open tile in the top half of the view (a wall), so the caller skips it.
+function tw_rain_spawn_y(_x) {
+	if (!variable_global_exists("dg_solid") || !ds_exists(global.dg_solid, ds_type_grid)) return -1;
+	var _col = _x >> 3;
+	if (_col < 0 || _col >= ds_grid_width(global.dg_solid)) return -1;
+	var _row  = max(0, viewYT() >> 3);
+	var _stop = min(ds_grid_height(global.dg_solid) - 1, _row + ((VIEW_H_OG >> 3) >> 1));
+	while (_row <= _stop)
+	{
+		var _t = global.dg_solid[#_col,_row];
+		if (is_undefined(_t) || (_t & $FF) != TID_SOLID1) return (_row << 3) + 2;
+		_row++;
+	}
+	return -1;
 }
 
 /// @description  tw_pc_atk_level() -- the attack level the sword damage is looked up at: f.level_atk,

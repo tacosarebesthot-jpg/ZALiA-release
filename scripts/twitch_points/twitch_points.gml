@@ -75,8 +75,10 @@ function tw_points_cost(_v) {
 	// COMMAND PRICES row (10-24): off = every verb is free while chat still earns points for
 	// !bet / !bounty (their stakes are taken inside the verb, not here).
 	if (variable_global_exists("tw_cmd_prices") && !global.tw_cmd_prices) return 0;
+	if (string(_v) == "haunt") return tw_halloween() ? 0 : 30; // free during Halloween week
 	switch (string(_v))
 	{
+		case "trickortreat": return 20; // the gamble's stake
 		case "points": case "pts": case "bal": case "help": case "np": case "nowplaying": case "track":
 		case "suggest": case "donothing": case "rip": case "blip": case "coincidence": case "getfed": case "link": case "unchicken":
 		case "version": case "ver": case "build": case "vote": case "kills": case "top":

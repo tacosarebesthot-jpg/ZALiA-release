@@ -38,6 +38,11 @@ function update_rm_brightness() {
 	                if (g.rm_brightness>=g.RM_BRIGHTNESS_MAX) break;//with(GameObject)
 	            }
 	        }
+	        // Halloween week 2026 (owner 10-28): a room that HAS a dark palette never reaches full
+	        // brightness Oct 24-31 -- one shade under, candle and torches included. Rooms with no dark
+	        // palette (the branch above) are untouched, so nothing that was never dark goes dim.
+	        if (g.RM_BRIGHTNESS_MAX > 1 && g.rm_brightness >= g.RM_BRIGHTNESS_MAX && tw_halloween())
+	        {   set_rm_brightness(g.RM_BRIGHTNESS_MAX - 1);  }
 	    }
 	}
 

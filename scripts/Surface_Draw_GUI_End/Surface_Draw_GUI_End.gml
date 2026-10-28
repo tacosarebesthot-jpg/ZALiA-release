@@ -38,6 +38,12 @@ function Surface_Draw_GUI_End() {
 	    draw_set_font(-1); draw_set_halign(fa_right);
 	    draw_set_colour(c_black); draw_text(_vt_gw - 7, _vt_gh - 17, _vt);
 	    draw_set_colour(c_white); draw_text(_vt_gw - 8, _vt_gh - 18, _vt);
+	    // Halloween week 2026 (owner 10-28): one orange line above the version tag, Oct 24-31 (tw_halloween)
+	    if (tw_halloween())
+	    {
+	        draw_set_colour(c_black);  draw_text(_vt_gw - 7, _vt_gh - 31, "HAPPY HALLOWEEN");
+	        draw_set_colour(c_orange); draw_text(_vt_gw - 8, _vt_gh - 32, "HAPPY HALLOWEEN");
+	    }
 	    draw_set_font(_vt_pf); draw_set_halign(_vt_ph); draw_set_colour(_vt_pc);
 	}
 

@@ -672,6 +672,20 @@ function tw_toast_draw() {
 // !commands / !howto arm global.tw_help_timer; tw_help_draw() paints a panel top-centre
 // for 8 s in the sprite font. Content is a fixed list, grouped, so it stays readable.
 
+/// @description  tw_halloween() -- Halloween week (owner 10-28: "it's October, we need to add some of our
+/// own dark Halloween easter eggs"). True Oct 24-31 and Nov 1 (a Friday stream runs past midnight), or
+/// whatever twitch_config.txt says: halloween=1 forces it on (testing / a late party), halloween=0 off,
+/// anything else = the calendar.
+function tw_halloween() {
+	if (variable_global_exists("tw_halloween_force"))
+	{
+		if (global.tw_halloween_force == 1) return true;
+		if (global.tw_halloween_force == 0) return false;
+	}
+	var _m = current_month, _d = current_day;
+	return (_m == 10 && _d >= 24) || (_m == 11 && _d == 1);
+}
+
 function tw_help_show(_cat = "") {
 	global.tw_help_timer = 480;
 	global.tw_help_cat   = tw_help_cat_canon(_cat);
@@ -784,6 +798,7 @@ function tw_help_rows(_cat) {
 			"!BET WIN N  ON THE BOSS: WIN 2X",
 			"  FLAWLESS 5X  DEATH 3X  (BOSS ON SCREEN)",
 			"!BOUNTY MOB N  2X ON ITS NEXT KILL",
+			"!TRICKORTREAT  GAMBLE  !HAUNT  (OCT 24-31)",
 			"!VERSION  BUILD   !HELP PAGE  THIS CARD"
 		];
 		case "rl": return [
@@ -819,6 +834,7 @@ function tw_help_rows(_cat) {
 		"FUN   !NP !SUGGEST !METH !FATALITY",
 		"      !QUANTUMENTANGLE !HELP !POINTS",
 		"      !GHOST !CRUSH !RESHUFFLE",
+		"      !TRICKORTREAT !HAUNT  (HALLOWEEN)",
 		"      !VOTE A B !KILLS !TOP !IGNORE (MODS)",
 		// round 11 quick chat. Two rows, not one: the card is a fixed 8 px sprite font and the
 		// widest row it can hold is ~41 characters before it runs off a 320 px GUI.
