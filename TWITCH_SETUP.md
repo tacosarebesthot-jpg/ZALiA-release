@@ -133,6 +133,7 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | CHAT EXTRAS > BOUNTIES | `!bounty <enemy> <points>` (needs points on, off by default) | `bounty=1/0` |
 | CHAT EXTRAS > HELP CARD | `!help` / `!commands` draw the full command card over the game for 8 s. Off (default) = chat gets a one-line toast instead; `!help <verb>` still answers | `help_card=1/0` |
 | CHAT EXTRAS > COMMAND PRICES | with the points economy on, each command costs points. Off = every command is free, chat still earns points for `!bet` / `!bounty` | `cmd_prices=1/0` |
+| CHAT EXTRAS > INFINITE LIVES | Link still dies and restarts the area, but the life count never drops: no game over, no XP penalty. For chat-vs-Link streams (Lane's ask). Off by default | `inf_lives=1/0` |
 | MUSIC TOASTS | NOW PLAYING plate: OFF (default) or 1-30 seconds on screen | `toast_music=0-30` |
 | CHAT TOASTS | plates for what chat did: OFF or 1-30 seconds (default 4) | `toast_chat=0-30` |
 | GAME TOASTS | killed by, crushed, level up, hints: OFF (default) or 1-30 seconds | `toast_game=0-30` |
@@ -214,6 +215,7 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!root` | no walking, no jumping — swinging still works |
 | `!spawn <enemy> <n>` | drop a named enemy next to you, up to 6. Since 2.1.10 the whole roster: daira, moblin, grunt, goriya, zora, stalfos, stalfoon, bat, atta, myu, bot, aneru, aruroda, bagin, blooby, boon, bubble, capper, deeler, doomknocker, fokka, fokkeru, gellzem, geru, rockgeru, girubokku, guma, ironknuckle, lowder, magnot, mago, mau, megmat, moby, octorok, ra, tektite, wizard, wosu, eyenocc. Add a colour word for the version: `!spawn blue goriya 2` (blue/strong = the hard one, red/orange = the weak one, `v2` = version 2). `!spawn random` rolls enemy and version |
 | `!swarm <n>` | a pack of random enemies around you |
+| `!beef <secs>` | beefed-up mobs: every non-boss enemy on screen (and any new one) gets double HP, double damage and a 1.5x sprite for the effect length. 40 points |
 | `!slimed <rank> <secs>` | slime rain (asm0deus's idea, 10-24): Bots drop from the top of the screen for `<secs>` seconds, rank 1-3 sets how fast (bare `!slimed` = rank 1 for the effect length). Respects the SWARM CAP |
 | `!rust` | your sword hits two attack levels lower for the effect length (the HUD level does not change) |
 | `!adhd <secs>` | can't stop moving: Link keeps walking the last direction you walked whenever you let go |
