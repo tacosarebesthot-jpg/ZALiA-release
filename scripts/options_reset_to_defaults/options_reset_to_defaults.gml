@@ -49,6 +49,7 @@ function options_reset_to_defaults() {
 	global.tw_first_use_hint       = false;
 	global.tw_help_card            = false; // 10-24: the !help card over the game
 	global.tw_cmd_prices           = true;  // 10-24: commands cost points
+	global.tw_inf_lives            = false; // Lane 10-28: INFINITE LIVES off
 	global.tw_oneup_nudge_min      = 0;
 	global.tw_swarm_cap            = 14;
 	global.tw_toasty_pct           = 50;

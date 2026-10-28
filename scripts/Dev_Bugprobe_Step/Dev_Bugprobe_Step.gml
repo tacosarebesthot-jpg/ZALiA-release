@@ -1552,7 +1552,8 @@ function tws_chatx_tests(_om) {
 		[ChatX.BETS,      "CHAT BETS",      "bets",           function() { return global.tw_bets_on; }],
 		[ChatX.BOUNTY,    "BOUNTIES",       "bounty",         function() { return global.tw_bounty_on; }],
 		[ChatX.HELPCARD,  "HELP CARD",      "help_card",      function() { return global.tw_help_card; }],
-		[ChatX.PRICES,    "COMMAND PRICES", "cmd_prices",     function() { return global.tw_cmd_prices; }]
+		[ChatX.PRICES,    "COMMAND PRICES", "cmd_prices",     function() { return global.tw_cmd_prices; }],
+		[ChatX.INFLIVES,  "INFINITE LIVES", "inf_lives",      function() { return global.tw_inf_lives; }]
 	];
 	for (var _i = 0; _i < array_length(_tog); _i++)
 	{
@@ -2105,6 +2106,28 @@ function Dev_TwSelftest_Step() {
 			tws_feat("!spawn blue goriya 2 picks the top Goriya version", string_pos("goriya v3", _t4) > 0, _t4);
 			var _t5 = tws_line("tstchatter", "!spawn random");
 			tws_feat("!spawn random spawns something", string_pos("spawn 1", _t5) > 0 && string_pos("unknown", _t5) == 0, _t5);
+			tws_line("tstchatter", "!smite");
+			// Lane 10-28: !beef -- the Goriya is spawned here and read at 712, after its init has set hp
+			// (on the spawn frame hp is still the uninitialised sentinel, -9981 in the 16:28 run)
+			tws_line("tstchatter", "!spawn goriya");
+			global.tw_last_hurter = _lh; global.tw_last_hurter_t = _lht; global.tw_last_hurt_verb = _lhv;
+		}
+		if (global.tws_t == 712)
+		{
+			global.tw_points_on = false;
+			var _lh = global.tw_last_hurter, _lht = global.tw_last_hurter_t, _lhv = global.tw_last_hurt_verb;
+			// the LIVE Goriya, not the smited one still in its death frames (hp -9981 = 18 - 9999 from !smite)
+			var _bg = noone;
+			with (GoriA) { if (hp > 0) { _bg = id; break; } }
+			var _bh0 = (_bg != noone && instance_exists(_bg)) ? _bg.hp : -1;
+			var _t6 = tws_line("tstchatter", "!beef 3");
+			var _bh1 = (_bg != noone && instance_exists(_bg)) ? _bg.hp : -1;
+			tws_feat("!beef doubles a live mob's HP, sets double damage and the big-sprite flag",
+			         _bh0 > 0 && _bh1 == _bh0 * 2 && global.tw_beef && global.tw_dmg_mult == 2, "hp " + string(_bh0) + " -> " + string(_bh1) + "   " + _t6);
+			for (var _bi2 = array_length(global.tw_active) - 1; _bi2 >= 0; _bi2--)
+			{   var _be2 = global.tw_active[_bi2]; if (is_struct(_be2) && variable_struct_exists(_be2, "verb") && _be2.verb == "beef") { _be2.restore(); array_delete(global.tw_active, _bi2, 1); }  }
+			var _bh2 = (_bg != noone && instance_exists(_bg)) ? _bg.hp : -1;
+			tws_feat("!beef restore halves the HP back and clears the flags", _bh2 == _bh0 && !global.tw_beef && global.tw_dmg_mult == 1, "hp " + string(_bh1) + " -> " + string(_bh2));
 			tws_line("tstchatter", "!smite");
 			global.tw_last_hurter = _lh; global.tw_last_hurter_t = _lht; global.tw_last_hurt_verb = _lhv;
 		}
@@ -2954,6 +2977,7 @@ function tw_selftest_cases() {
 		["spawn blue goriya 2", "toast", "10-24: colour versions"],
 		["spawn random",        "toast", "10-24: random enemy from the whole table"],
 		["haunt",      "toast", "Halloween combo: dark + ghost + skulls + 20 s of Castlevania"],
+		["beef",       "toast", "Lane 10-28: double HP, double damage, 1.5x sprites"],
 		["trickortreat", "toast", "Halloween gamble; refused with a toast outside Oct 24-31"],
 		["reshuffle",  "toast", "ok or refused-with-reason"],
 		["suggest test idea from selftest", "toast", "writes _tw_selftest_suggestions.txt (never the real inbox)"],

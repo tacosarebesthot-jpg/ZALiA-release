@@ -1631,6 +1631,42 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 
 		// dmgup: Z3's !dmgup -- every hit on the PC does double damage for the duration.
 		// PC_take_damage multiplies by global.tw_dmg_mult after its own ring/shield maths.
+		// beef (Lane 10-24 0:37:58 "beefs up the monsters on the screen, health-wise, damage-wise";
+		// Discord 10-28: "hell yeah double hp and bigger sprites, let's do it"): every non-boss enemy
+		// on screen, and any that shows up while it runs, gets double HP once (tw_beef tag), hits for
+		// double (tw_dmg_mult, same lever as !dmgup) and is drawn 1.5x (draw_sprite_). The HP halves
+		// back on restore; the size and damage simply stop.
+		case "beef":
+			global.tw_beef     = true;
+			global.tw_dmg_mult = 2;
+			with (Enemy)
+			{
+				if (is_ancestor(object_index, Boss)) continue;
+				if (variable_instance_exists(id, "tw_beef") && tw_beef) continue;
+				if (variable_instance_exists(id, "hp") && hp > 0) { hp *= 2; tw_beef = true; }
+			}
+			array_push(global.tw_active, {
+				frames  : _frames,
+				reapply : function() {
+					global.tw_beef = true; global.tw_dmg_mult = 2;
+					with (Enemy)
+					{
+						if (is_ancestor(object_index, Boss)) continue;
+						if (variable_instance_exists(id, "tw_beef") && tw_beef) continue;
+						if (variable_instance_exists(id, "hp") && hp > 0) { hp *= 2; tw_beef = true; }
+					}
+				},
+				restore : function() {
+					global.tw_beef = false; global.tw_dmg_mult = 1;
+					with (Enemy)
+					{
+						if (variable_instance_exists(id, "tw_beef") && tw_beef) { if (hp > 0) hp = max(1, hp div 2); tw_beef = false; }
+					}
+				}
+			});
+			global.tw_toast       = _who_s + " -> BEEF: double HP, double damage, big mobs " + string(round(_frames / 60)) + "s";
+			global.tw_toast_timer = 240;
+			break;
 		case "dmgup":
 			global.tw_dmg_mult = 2;
 			array_push(global.tw_active, {
@@ -1823,6 +1859,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush": case "reshuffle":
 			case "slimed": case "rust": case "adhd": // 10-24 !suggest round
 			case "haunt": // Halloween week
+			case "beef": // Lane 10-28
 				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; global.tw_last_hurt_verb = _v; break;
 		}
 

@@ -100,6 +100,7 @@ function twitch_irc_load_config() {
 			case "help_card":      global.tw_help_card       = (tw_num(_val, 0) != 0); break;
 			case "cmd_prices":     global.tw_cmd_prices      = (tw_num(_val, 1) != 0); break;
 			case "halloween":      global.tw_halloween_force = tw_num(_val, -1); break; // 1 = on, 0 = off, else the calendar (Oct 24-31)
+			case "inf_lives":      global.tw_inf_lives       = (tw_num(_val, 0) != 0); break; // Lane 10-28: the life count never drops
 			case "cmd_sound_name": if (string(_val) != "") global.tw_cmd_sound_name = string(_val); break;
 			case "first_use_hint": global.tw_first_use_hint  = (tw_num(_val, 0) != 0); break;
 			case "oneup_nudge":    global.tw_oneup_nudge_min = clamp(floor(tw_num(_val, 0)), 0, 60); break;
@@ -212,7 +213,7 @@ function tw_alias_verb(_v) {
 		case "up":                        return "1up";      // Gainey 09-11 1:15:24
 		case "rupees": case "rupeesteal": case "xpsteal": case "xp": case "taxes": return "tax"; // Z3 names, Z2 taxes XP
 		case "doubledamage": case "dmg2": case "damageup": return "dmgup";
-		case "beef": case "beefup":       return "dmgup";    // Lane 10-24 0:37:58 "!beef ... beefs up the monsters. Just change it to beef, that's funnier"
+		case "beefup": case "beefy": case "roid": case "roids": return "beef"; // Lane 10-24 0:37:58; his 10-28 Discord ruling: double HP + bigger sprites too
 		case "slime": case "slimes": case "slimerain": case "apocalypse": return "slimed"; // asm0deus 10-24 2:43:13 / 2:45:45
 		case "rusty": case "rusted":      return "rust";     // asm0deus 10-24 2:49:19
 		case "cantstop": case "fidget":   return "adhd";     // asm0deus 10-24 2:52:50
@@ -266,6 +267,7 @@ function tw_verb_all() {
 		"stasis","points","pts","bal","ghost","crush",
 		"slimed","rust","adhd", // 10-24 chat !suggest round (asm0deus), approved by the owner 10-28
 		"trickortreat","haunt", // Halloween week 2026
+		"beef", // Lane 10-24 / 10-28: beefed-up mobs
 		"version","ver","build","reshuffle","gorilla",
 		"vote","top","kills","bet","bounty",
 		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",

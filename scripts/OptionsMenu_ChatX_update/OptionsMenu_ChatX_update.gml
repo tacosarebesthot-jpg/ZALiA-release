@@ -174,6 +174,19 @@ function OptionsMenu_ChatX_update() {
 	    }
 	    break;}
 
+	    // INFINITE LIVES: the life count never drops (inf_lives=), off by default
+	    // (Lane 10-28 Discord: "an infinite life mode that I can toggle, so that people don't feel so bad killing link")
+	    case ChatX.INFLIVES:{ if (timer) break;
+	    if (_InputConfirm_pressed)
+	    {
+	        if (!variable_global_exists("tw_inf_lives")) global.tw_inf_lives = false;
+	        global.tw_inf_lives = !global.tw_inf_lives;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    case ChatX.BACK:{ break;} // handled above with Backout_requested
 	}
 

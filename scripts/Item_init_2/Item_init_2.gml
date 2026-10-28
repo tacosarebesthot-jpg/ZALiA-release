@@ -48,10 +48,18 @@ function Item_init_2() {
 	//if (g.pc.use_disguise)
 
 
-	if(!audio_is_playing(get_audio_theme_track(dk_ItemDrop)) 
-	&&  isVal(ITEM_TYPE,STR_KEY,STR_JAR,STR_PBAG,STR_1UP)  
-	&&  rectInView(xl,yt,ww,hh) 
-	&& !(global.dg_solid[#x>>3,(yb+1)>>3] &$FF) ) // If not on ground
+	// PORT (selftest 2026-10-28, full matrix, same class as GameObjectB_step): a drop from a mob
+	// killed past the room grid (x>>3 = 128 in a 128-wide grid) read dg_solid out of bounds. GM1.4
+	// returned 0 there; GMS2 returns undefined and the `&` throws. Bounds-checked: off-grid counts as
+	// "not on ground", which is what an off-screen drop is.
+	var _dc = x >> 3, _dr = (yb + 1) >> 3;
+	var _on_ground = (_dc >= 0 && _dr >= 0
+	               && _dc < ds_grid_width(global.dg_solid) && _dr < ds_grid_height(global.dg_solid)
+	               && (global.dg_solid[#_dc,_dr] & $FF) != 0);
+	if(!audio_is_playing(get_audio_theme_track(dk_ItemDrop))
+	&&  isVal(ITEM_TYPE,STR_KEY,STR_JAR,STR_PBAG,STR_1UP)
+	&&  rectInView(xl,yt,ww,hh)
+	&& !_on_ground ) // If not on ground
 	{
 	    aud_play_sound(get_audio_theme_track(dk_ItemDrop));
 	}

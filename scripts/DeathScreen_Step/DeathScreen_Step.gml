@@ -8,7 +8,16 @@ function DeathScreen_Step() {
 	    if(!deathScreenEndTimer)
 	    {
 	        f.death_count++;
-	            global.pc_lives--;
+	        // INFINITE LIVES (Lane 10-28 Discord: "an infinite life mode that I can toggle, so that people
+	        // don't feel so bad killing link all the time and making me game over"): the death still
+	        // happens and the area restarts, but the count never drops, so no game over and no XP penalty.
+	        if (variable_global_exists("tw_inf_lives") && global.tw_inf_lives)
+	        {
+	            global.tw_toast       = "INFINITE LIVES: no life lost";
+	            global.tw_toast_timer = 180;
+	        }
+	        else
+	        {   global.pc_lives--;  }
 
 	        // VS CHAT MODE scoreboard: a death while chat is hostile is a point
 	        // for chat. Counted here rather than derived from death_count so a

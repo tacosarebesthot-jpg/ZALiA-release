@@ -19,15 +19,20 @@ function draw_sprite_() {
 	// fade enemies, but Daira, Bot, Eyenocc, Fokka and the rest draw through THIS wrapper from their
 	// own _draw scripts and stayed solid. The fade lives here now, once, for any non-boss Enemy
 	// instance that calls in (min(), so a caller that already faded is not faded twice).
-	if (variable_global_exists("tw_ghost") && global.tw_ghost && argument_count >= 4 && !is_struct(self)
+	// !beef (Lane 10-28 "bigger sprites") rides the same hook: non-boss enemies draw at 1.5x while it runs.
+	var _gh = variable_global_exists("tw_ghost") && global.tw_ghost;
+	var _bf = variable_global_exists("tw_beef")  && global.tw_beef;
+	if ((_gh || _bf) && argument_count >= 4 && !is_struct(self)
 	&&  is_ancestor(object_index, Enemy) && !is_ancestor(object_index, Boss))
 	{
 		var _gp = (argument_count > 4) ? argument[4] : 0;
 		if (_gp && _gp < global.palette_image_w) pal_swap_set(global.palette_image, _gp);
-		var _gxs = (argument_count > 5) ? argument[5] : 1;
-		var _gys = (argument_count > 6) ? argument[6] : 1;
+		var _gsc = _bf ? 1.5 : 1;
+		var _gxs = ((argument_count > 5) ? argument[5] : 1) * _gsc;
+		var _gys = ((argument_count > 6) ? argument[6] : 1) * _gsc;
 		var _gco = (argument_count > 7) ? argument[7] : c_white;
-		var _gal = min((argument_count > 8) ? argument[8] : 1, 0.12);
+		var _gal = (argument_count > 8) ? argument[8] : 1;
+		if (_gh) _gal = min(_gal, 0.12);
 		var _gro = (argument_count > 9) ? argument[9] : 0;
 		draw_sprite_ext(argument[0], argument[1], argument[2], argument[3], _gxs, _gys, _gro, _gco, _gal);
 		if (_gp && _gp < global.palette_image_w) pal_swap_reset();
