@@ -183,6 +183,22 @@ function Input_update2a() {
 	    }
 	}
 
+	// TWITCH "adhd" (asm0deus 10-24 2:52:50 "unable to stop moving for X seconds"; Gainey: "forced
+	// walk the last direction you walked"): remember the last horizontal direction the player held,
+	// and whenever neither is held, hold it for him. Runs after confuse so the swap applies to the
+	// forced walk too. Timed flag set by twitch_apply, cleared on revert; single-bool no-op when off.
+	if (variable_global_exists("tw_adhd") && global.tw_adhd)
+	{
+	    if (!variable_global_exists("tw_adhd_dir")) global.tw_adhd_dir = 1;
+	    if      (Right_held && !Left_held) global.tw_adhd_dir =  1;
+	    else if (Left_held  && !Right_held) global.tw_adhd_dir = -1;
+	    if (!Right_held && !Left_held)
+	    {
+	        if (global.tw_adhd_dir >= 0) Right_held = true;
+	        else                         Left_held  = true;
+	    }
+	}
+
 	// Pack the FINAL resolved input (post dev-inject + twitch-confuse) into the 10-bit
 	// frame word ONCE -- this is exactly what the sim consumed this frame. Consumed by
 	// BOTH the TAS recorder (only while recording) and the always-on MARK ring below.

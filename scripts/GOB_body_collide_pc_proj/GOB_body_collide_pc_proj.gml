@@ -73,7 +73,7 @@ function GOB_body_collide_pc_proj() {
 	    if!(cs & (CS_PR1|CS_SW1))
 	    {   // E70E
 	        cs |= CS_PR1;
-	        damage_gob(id, global.pc.dl_ATTACK_DAMAGE[|f.level_atk], true);
+	        damage_gob(id, global.pc.dl_ATTACK_DAMAGE[|tw_pc_atk_level()], true); // !rust lowers the lookup level
 	    }
 	}
 

@@ -212,6 +212,9 @@ function tw_alias_verb(_v) {
 		case "rupees": case "rupeesteal": case "xpsteal": case "xp": case "taxes": return "tax"; // Z3 names, Z2 taxes XP
 		case "doubledamage": case "dmg2": case "damageup": return "dmgup";
 		case "beef": case "beefup":       return "dmgup";    // Lane 10-24 0:37:58 "!beef ... beefs up the monsters. Just change it to beef, that's funnier"
+		case "slime": case "slimes": case "slimerain": case "apocalypse": return "slimed"; // asm0deus 10-24 2:43:13 / 2:45:45
+		case "rusty": case "rusted":      return "rust";     // asm0deus 10-24 2:49:19
+		case "cantstop": case "fidget":   return "adhd";     // asm0deus 10-24 2:52:50
 		case "bleed":  case "hunger":     return "attrition";
 		case "cmds": case "commands": case "howto": case "howtoplay": return "help";
 		case "entangle": case "quantum": case "qe": return "quantumentangle";
@@ -258,6 +261,7 @@ function tw_verb_all() {
 		"link","unchicken","donothing","rip","blip","coincidence","getfed",
 		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
 		"stasis","points","pts","bal","ghost","crush",
+		"slimed","rust","adhd", // 10-24 chat !suggest round (asm0deus), approved by the owner 10-28
 		"version","ver","build","reshuffle","gorilla",
 		"vote","top","kills","bet","bounty",
 		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",

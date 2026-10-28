@@ -687,17 +687,56 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				if (_sp_cnt < 1) _sp_cnt = 1;
 				if (_sp_cnt > 6) _sp_cnt = 6;
 
-				var _obj = tw_spawn_obj(string_lower(_sp_name));
-				if (is_undefined(_obj))
+				// 10-24 (Gainey 2:36:10 "we need to expand the mob spawn list ... lots missing, aka color
+				// variants"): the whole free-standing enemy table (tw_spawn_table), colour versions, and
+				// "!spawn random". Words: a colour/strength word picks the version ("blue goriya" = the
+				// strong one, "red"/"orange" = the weak one, "v2" = version 2); "random" rolls both.
+				var _sp_ver   = 0;      // 0 = default (version 1)
+				var _sp_words = string_split(string_lower(string(_arg)), " ", true);
+				for (var _pw = 0; _pw < array_length(_sp_words); _pw++)
 				{
-					global.tw_toast       = _who_s + " -> unknown enemy. try: daira moblin goriya zora stalfos bat atta myu";
+					var _w = tw_trim(_sp_words[_pw]);
+					if (_w == "blue" || _w == "strong" || _w == "hard" || _w == "big")   _sp_ver = 99; // = highest version
+					if (_w == "red"  || _w == "orange" || _w == "weak" || _w == "easy") _sp_ver = 1;
+					if (string_length(_w) == 2 && string_char_at(_w, 1) == "v" && string_digits(_w) != "") _sp_ver = tw_num(string_digits(_w), 1);
+					// the name is the first word that is not a number and not one of the words above
+					if (_sp_name == _w && (_w == "blue" || _w == "strong" || _w == "hard" || _w == "big" || _w == "red" || _w == "orange" || _w == "weak" || _w == "easy"
+					||  (string_length(_w) == 2 && string_char_at(_w, 1) == "v" && string_digits(_w) != "")))
+					{
+						_sp_name = "";
+						for (var _pw2 = 0; _pw2 < array_length(_sp_words); _pw2++)
+						{
+							var _w2 = tw_trim(_sp_words[_pw2]);
+							if (_w2 == "" || _w2 == _w || string_digits(_w2) == _w2) continue;
+							if (_w2 == "blue" || _w2 == "strong" || _w2 == "hard" || _w2 == "big" || _w2 == "red" || _w2 == "orange" || _w2 == "weak" || _w2 == "easy") continue;
+							if (string_length(_w2) == 2 && string_char_at(_w2, 1) == "v" && string_digits(_w2) != "") continue;
+							_sp_name = _w2; break;
+						}
+					}
+				}
+				var _sp_rand = (_sp_name == "random" || _sp_name == "any" || _sp_name == "rng");
+				var _row = _sp_rand ? tw_spawn_table_random() : tw_spawn_row(string_lower(_sp_name));
+				if (is_undefined(_row))
+				{
+					global.tw_toast       = _who_s + " -> unknown enemy. !help mobs lists them, or !spawn random";
 					global.tw_toast_timer = 300;
 					global.tw_apply_refused = true;
 					break;
 				}
+				var _obj  = _row[0];
+				var _nver = _row[1];
+				var _ver  = 1;
+				if (_sp_rand)            _ver = 1 + irandom(max(0, _nver - 1));
+				else if (_sp_ver >= 99)  _ver = _nver;
+				else if (_sp_ver >= 1)   _ver = clamp(_sp_ver, 1, _nver);
 				var _face = (global.pc.xScale < 0) ? -1 : 1;
 				for (var _sc = 0; _sc < _sp_cnt; _sc++)
-				{   GameObject_create(global.pc.xl + (24 + 16 * _sc) * _face, global.pc.yt, _obj, 1);  }
+				{
+					var _sid = GameObject_create(global.pc.xl + (24 + 16 * _sc) * _face, global.pc.yt, _obj, _ver);
+					if (_sid != noone && instance_exists(_sid)) _sid.tw_spawned = true;
+				}
+				if (_sp_rand) _sp_name = _row[2];
+				if (_nver > 1) _sp_name += " v" + string(_ver);
 				// MOD: brief i-frames so mobs spawned on top of the PC can't hit him before he reacts.
 				// NOT frames -- this field only decrements when timer_b wraps (~21 frames, see
 				// update_game_timers:18), so 48 was ~16 SECONDS of invulnerability, which is what
@@ -1352,6 +1391,75 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			break;
 
 		// ghost (twitchvin): every non-boss enemy on screen is nearly invisible for a while
+		// ---- 10-24 chat !suggest round (asm0deus), approved by the owner 10-28 --------------
+		// slimed: "Rains down slimes by X intensity and for X duration, i.e. !slimed 3 60 would do
+		// rank 3 rain of slimes for 60 seconds" (2:45:45). Lane (2:35:49): "like a speedrun with
+		// tower defense in it ... good idea". Bots drop in from the top edge of the view at a pace
+		// set by the rank; the SWARM CAP is the ceiling, and nothing drops mid-cutscene/menu.
+		case "slimed":
+			if (!tw_spawn_window_ok(_v, _who_s)) break;
+			{
+				var _sl_rank = 1, _sl_secs = 0, _sl_n = 0;
+				var _sl_parts = string_split(string(_arg), " ", true);
+				for (var _si = 0; _si < array_length(_sl_parts); _si++)
+				{
+					var _tok = tw_trim(_sl_parts[_si]);
+					if (_tok == "" || string_digits(_tok) != _tok) continue;
+					if (_sl_n == 0)      _sl_rank = floor(tw_num(_tok, 1));
+					else if (_sl_n == 1) _sl_secs = floor(tw_num(_tok, 0));
+					_sl_n++;
+				}
+				_sl_rank = clamp(_sl_rank, 1, 3);
+				// the generic "!verb N" parse read the RANK as seconds; the duration is the second number
+				if (_sl_secs > 0) _frames = clamp(_sl_secs, 1, 60) * 60;
+				else              _frames = ((variable_global_exists("tw_effect_secs") && global.tw_effect_secs > 0) ? global.tw_effect_secs : 5) * 60;
+				var _sl_every = (_sl_rank >= 3) ? 25 : ((_sl_rank == 2) ? 50 : 90);
+				array_push(global.tw_active, {
+					frames  : _frames, every : _sl_every, tick : 0,
+					reapply : function() {
+						self.tick++;
+						if ((self.tick mod self.every) != 0) return;
+						if (!instance_exists(g) || !instance_exists(global.pc)) return;
+						if (g.room_type != "A" || g.cutscene || g.gui_state != g.gui_state_NONE || g.ChangeRoom_timer > 0 || g.FallScene_timer) return;
+						var _cap = variable_global_exists("tw_swarm_cap") ? global.tw_swarm_cap : 14;
+						if (instance_number(Enemy) >= _cap) return;
+						var _span = max(16, viewXR() - viewXL() - 32);
+						var _sx   = viewXL() + 16 + irandom(_span);
+						var _sid  = GameObject_create(_sx, viewYT() + 4, Bot_A, 1);
+						if (_sid != noone && instance_exists(_sid)) _sid.tw_spawned = true;
+					},
+					restore : function() { }
+				});
+				global.tw_toast       = _who_s + " -> SLIME RAIN rank " + string(_sl_rank) + " for " + string(round(_frames / 60)) + "s";
+				global.tw_toast_timer = 240;
+			}
+			break;
+		// rust: "degrades links wep by 2 levels" (2:49:19). The damage lookup runs two attack levels
+		// lower (tw_pc_atk_level) for the effect length; the HUD level and the XP table are untouched.
+		case "rust":
+			global.tw_rust_lvls = 2;
+			array_push(global.tw_active, {
+				frames  : _frames,
+				reapply : function() { global.tw_rust_lvls = 2; },
+				restore : function() { global.tw_rust_lvls = 0; }
+			});
+			global.tw_toast       = _who_s + " -> RUST: sword hits 2 levels lower for " + string(round(_frames / 60)) + "s";
+			global.tw_toast_timer = 240;
+			break;
+		// adhd: "unable to stop moving for X seconds" (2:52:50); Gainey: "forced walk the last
+		// direction you walked". Input_update2a holds the last horizontal direction whenever the
+		// player lets go. Starts toward the way Link faces.
+		case "adhd":
+			global.tw_adhd     = true;
+			global.tw_adhd_dir = (instance_exists(global.pc) && global.pc.xScale < 0) ? -1 : 1;
+			array_push(global.tw_active, {
+				frames  : _frames,
+				reapply : function() { global.tw_adhd = true;  },
+				restore : function() { global.tw_adhd = false; }
+			});
+			global.tw_toast       = _who_s + " -> ADHD: can't stop walking for " + string(round(_frames / 60)) + "s";
+			global.tw_toast_timer = 240;
+			break;
 		case "ghost":
 			global.tw_ghost = true;
 			array_push(global.tw_active, {
@@ -1591,6 +1699,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "attrition": case "curse": case "spawn": case "swarm": case "steal": case "rob": case "thief":
 			case "pickpocket": case "slow": case "confuse": case "disorient": case "dark": case "flip": case "root":
 			case "deny": case "ice": case "icefloor": case "shrink": case "challenge": case "meth": case "stasis": case "ghost": case "crush": case "reshuffle":
+			case "slimed": case "rust": case "adhd": // 10-24 !suggest round
 				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; global.tw_last_hurt_verb = _v; break;
 		}
 
@@ -1838,20 +1947,75 @@ function tw_clean_command(_verb) {
 /// valid version-1 ("01") objver property data. Empty name -> a sensible default (Daira).
 /// A NON-empty unknown name returns undefined -- the caller fizzles with the valid list
 /// (lane himself hit this with "!spawn fire"; silent default-spawn read as a broken verb).
-function tw_spawn_obj(_name) {
-
+/// 10-24 (Gainey): the whole free-standing enemy table. Each row = [object, versions, name]. Versions
+/// are the data table's "01".."0N" entries in GameObjectData_Create (colour / strength variants).
+/// Left out on purpose: bosses, spawner-driven mobs (Bago, Boggnipp, Tyell), shoreline/sand/
+/// placement-bound ones (Zora is kept because it was always here; Moa, Leever, Geldarm, Growkke,
+/// Stallakk, Snaraa, Wheep, Fenser, BossBot are not) and anything that is a projectile or hazard.
+function tw_spawn_table() {
+	static _t = [
+		[DairA,     2, "daira"],      [MoblA,     3, "moblin"],   [MoblB, 1, "grunt"],      [GoriA,    3, "goriya"],
+		[ZoraA,     1, "zora"],       [StalA,     2, "stalfos"],  [StfnA, 1, "stalfoon"],   [Ache01,   2, "bat"],
+		[Atta01,    1, "atta"],       [Myu_A,     1, "myu"],      [Bot_A, 4, "bot"],        [Aneru01,  3, "aneru"],
+		[Aruroda01, 1, "aruroda"],    [Bagin01,   2, "bagin"],    [Blooby, 2, "blooby"],    [Boon01,   1, "boon"],
+		[BubbA,     5, "bubble"],     [CappA,     2, "capper"],   [DeelA, 2, "deeler"],     [DoomA,    1, "doomknocker"],
+		[FokkA,     2, "fokka"],      [FokuA,     1, "fokkeru"],  [GlzmA, 2, "gellzem"],    [GeruA,    3, "geru"],
+		[GeruB,     2, "rockgeru"],   [GiruA,     1, "girubokku"],[GumaA, 1, "guma"],       [IrKnA,    3, "ironknuckle"],
+		[LowdA,     2, "lowder"],     [MagnA,     2, "magnot"],   [MagoA, 1, "mago"],       [Mau_A,    2, "mau"],
+		[MegmA,     1, "megmat"],     [MobyA,     1, "moby"],     [Octorok01, 3, "octorok"],[Ra__A,    4, "ra"],
+		[TektA,     1, "tektite"],    [WizaA,     1, "wizard"],   [WosuA, 2, "wosu"],       [Eyenocc,  1, "eyenocc"]
+	];
+	return _t;
+}
+function tw_spawn_table_random() {
+	var _t = tw_spawn_table();
+	return _t[irandom(array_length(_t) - 1)];
+}
+/// name -> [object, versions, name], or undefined. "" = the default Daira.
+function tw_spawn_row(_name) {
+	if (_name == "") return [DairA, 2, "daira"];
+	// chat spellings that are not the table name
 	switch (_name)
 	{
-		case "daira":   case "dair":               return DairA;   // ground mob
-		case "moblin":  case "mobl":  case "mob":  return MoblA;   // walker (spear)
-		case "goriya":  case "gori":               return GoriA;   // walker (boomerang)
-		case "zora":                               return ZoraA;   // shoreline shooter
-		case "stalfos": case "stal":               return StalA;   // sword skeleton
-		case "bat":     case "ache":               return Ache01;  // flyer (bat)
-		case "atta":                               return Atta01;  // flyer (bat)
-		case "myu":                                return Myu_A;   // weak crawler
-		default:                                   return (_name == "") ? DairA : undefined;
+		case "dair":                       _name = "daira";       break;
+		case "mobl":  case "mob":          _name = "moblin";      break;
+		case "gori":                       _name = "goriya";      break;
+		case "stal":  case "skeleton":     _name = "stalfos";     break;
+		case "ache":                       _name = "bat";         break;
+		case "slime": case "slimes":       _name = "bot";         break;
+		case "eye":   case "eyeball":      _name = "eyenocc";     break;
+		case "knight": case "iron": case "ironknuckles": case "darknut": _name = "ironknuckle"; break;
+		case "lizard": case "lizalfos":    _name = "daira";       break;
+		case "spider":                     _name = "deeler";      break;
+		case "wiz": case "wizzrobe":       _name = "wizard";      break;
+		case "octo":                       _name = "octorok";     break;
+		case "rock": case "rockthrower":   _name = "rockgeru";    break;
+		case "bird": case "fokker":        _name = "fokka";       break;
+		case "bubbles":                    _name = "bubble";      break;
 	}
+	var _t = tw_spawn_table();
+	for (var _i = 0; _i < array_length(_t); _i++) if (_t[_i][2] == _name) return _t[_i];
+	return undefined;
+}
+
+/// name -> object index, or undefined. Kept for !bounty / !vote (twitch_vote.gml), which count
+/// instances by object; the spawn verb itself uses tw_spawn_row for the version count.
+function tw_spawn_obj(_name) {
+	var _r = tw_spawn_row(string_lower(string(_name)));
+	return is_undefined(_r) ? undefined : _r[0];
+}
+
+/// @description  tw_pc_atk_level() -- the attack level the sword damage is looked up at: f.level_atk,
+/// lowered by !rust while it runs (never below 1).
+function tw_pc_atk_level() {
+	var _l = f.level_atk;
+	if (variable_global_exists("tw_rust_lvls") && global.tw_rust_lvls > 0) _l = max(1, _l - global.tw_rust_lvls);
+	return _l;
+}
+
+/// (nothing calls this; it only keeps the original closing brace below attached to a function)
+function tw_spawn_obj_legacy_() {
+	return undefined;
 }
 
 

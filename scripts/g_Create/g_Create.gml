@@ -4388,7 +4388,10 @@ function g_Create() {
 	global.tw_autosave            = true;      // rolling checkpoints (tw_checkpoint_tick); autosave= in twitch_config.txt
 	global.tw_ckpt_due            = "";        // "levelup" etc. -> checkpoint on the next live frame
 	global.tw_last_dungeon_seen   = 0;         // reflect hint fires once per palace entry
-	global.tw_ghost               = false;     // !ghost: enemies drawn at 12% alpha (GameObject_draw_1a)
+	global.tw_ghost               = false;     // !ghost: enemies drawn at 12% alpha (draw_sprite_)
+	global.tw_rust_lvls           = 0;         // !rust: sword damage looked up this many attack levels lower (get_pc_attack_damage)
+	global.tw_adhd                = false;     // !adhd: Link keeps walking the last direction he walked (Input_update2a)
+	global.tw_adhd_dir            = 1;
 	global.tw_crush_count         = 0;         // enemies crushed by falling blocks this session
 	global.tw_loz_jingle          = true;      // main items play the Zelda 1 treasure fanfare (item_get_jingle)
 	// ROCKET LEAGUE QUICK-CHAT (round 11): game events throw RL plates through the toast

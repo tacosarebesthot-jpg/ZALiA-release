@@ -2037,6 +2037,50 @@ function Dev_TwSelftest_Step() {
 			var _sc = instance_exists(global.pc) && variable_instance_exists(global.pc, "tw_scale_mul") ? global.pc.tw_scale_mul : -1;
 			tws_feat("!babality shrinks Link to 0.45 on a timer once its queue step runs", _hit && _sc == 0.45, "entry=" + string(_hit) + "  scale=" + string(_sc));
 		}
+		// 10-24: the whole !spawn table, every version, in batches of 10 rows (then !smite clears the
+		// room). A version with no data table entry would throw in the object's init -> the run dies
+		// here instead of on Lane's stream.
+		if (global.tws_t == 545 || global.tws_t == 585 || global.tws_t == 625 || global.tws_t == 665)
+		{
+			// the bet checks above turned the points economy on; these are harness spawns, not chat
+			global.tw_points_on = false;
+			var _tb = tw_spawn_table();
+			var _b  = (global.tws_t - 545) div 40;
+			var _lo = _b * 10, _hi = min(array_length(_tb), _lo + 10);
+			var _made = 0, _want = 0;
+			for (var _ti = _lo; _ti < _hi; _ti++)
+			{
+				var _r  = _tb[_ti];
+				var _s1 = GameObject_create(global.pc.xl + 32, global.pc.yt, _r[0], 1);     _want++; if (_s1 != noone && instance_exists(_s1)) _made++;
+				if (_r[1] > 1)
+				{   var _s2 = GameObject_create(global.pc.xl + 48, global.pc.yt, _r[0], _r[1]); _want++; if (_s2 != noone && instance_exists(_s2)) _made++;  }
+			}
+			tws_feat("spawn table batch " + string(_b) + " (rows " + string(_lo) + "-" + string(_hi - 1) + "): first and last version create", _made == _want, string(_made) + "/" + string(_want));
+			tws_line("tstchatter", "!smite");
+		}
+		if (global.tws_t == 700)
+		{
+			global.tw_points_on = false; // free commands for the harness chatter
+			// the vote check at 720 reads who hurt Link last; these hostile verbs must not change that
+			var _lh = global.tw_last_hurter, _lht = global.tw_last_hurter_t, _lhv = global.tw_last_hurt_verb;
+			var _l0 = tw_pc_atk_level();
+			var _t  = tws_line("tstchatter", "!rust");
+			tws_feat("!rust lowers the sword lookup level by 2 (floor 1)", tw_pc_atk_level() == max(1, f.level_atk - 2) && global.tw_rust_lvls == 2,
+			         "level " + string(_l0) + " -> " + string(tw_pc_atk_level()) + "   " + _t);
+			var _t2 = tws_line("tstchatter", "!adhd 3");
+			tws_feat("!adhd arms the forced walk", global.tw_adhd, _t2);
+			var _t3 = tws_line("tstchatter", "!slimed 3 2");
+			var _sl = false;
+			for (var _bi = 0; _bi < array_length(global.tw_active); _bi++)
+			{   var _be = global.tw_active[_bi]; if (is_struct(_be) && variable_struct_exists(_be, "verb") && _be.verb == "slimed") _sl = true;  }
+			tws_feat("!slimed 3 2 arms a 2 s rank-3 rain", _sl && string_pos("rank 3", _t3) > 0 && string_pos("2s", _t3) > 0, _t3);
+			var _t4 = tws_line("tstchatter", "!spawn blue goriya 2");
+			tws_feat("!spawn blue goriya 2 picks the top Goriya version", string_pos("goriya v3", _t4) > 0, _t4);
+			var _t5 = tws_line("tstchatter", "!spawn random");
+			tws_feat("!spawn random spawns something", string_pos("spawn 1", _t5) > 0 && string_pos("unknown", _t5) == 0, _t5);
+			tws_line("tstchatter", "!smite");
+			global.tw_last_hurter = _lh; global.tw_last_hurter_t = _lht; global.tw_last_hurt_verb = _lhv;
+		}
 		if (global.tws_t == 420)
 		{
 			if (!ds_exists(global.tw_bets, ds_type_map)) global.tw_bets = ds_map_create();
@@ -2877,6 +2921,11 @@ function tw_selftest_cases() {
 		["points",     "toast", "balance or off"],
 		["ghost",      "toast", ""],
 		["crush",      "toast", "needs-a-palace outside palaces"],
+		["slimed 2 3", "toast", "10-24 suggest: slime rain, rank 2 for 3 s"],
+		["rust",       "toast", "10-24 suggest: sword -2 levels"],
+		["adhd 3",     "toast", "10-24 suggest: forced walk 3 s"],
+		["spawn blue goriya 2", "toast", "10-24: colour versions"],
+		["spawn random",        "toast", "10-24: random enemy from the whole table"],
 		["reshuffle",  "toast", "ok or refused-with-reason"],
 		["suggest test idea from selftest", "toast", "writes _tw_selftest_suggestions.txt (never the real inbox)"],
 		// -- rocket league quick chat (plates OFF in the harness) -----------------
