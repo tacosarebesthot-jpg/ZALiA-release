@@ -98,13 +98,19 @@ function twitch_tick() {
 			global.tw_boss_frames++;
 			if (global.tw_boss_frames == 1 || (global.tw_boss_frames mod 30) == 0) // CHAT JOKES {boss}: remember who this was
 			{   with (Boss) { global.tw_last_boss = object_get_name(object_index); break; }  }
-			// announcer pack (10-14): FIGHT! once the boss has been up a second, FINISH HIM at a quarter bar
+			// announcer pack (10-14): FIGHT! once the boss has been up a second.
 			if (!global.tw_boss_fight_said && global.tw_boss_frames == 60) { global.tw_boss_fight_said = true; tw_announce("snd_mk2_fight"); }
-			if (!global.tw_boss_finishhim_said && global.tw_boss_frames > 120)
+			// FINISH HIM. Lane 10-24 (1:52:10, 2:25:15, 2:45:50 ...): it fired right after FIGHT at
+			// EVERY boss entry. Boss_init_1 sets HPBar_units_full = 0 and only the boss's own battle
+			// update fills it through Boss_HPBar_udp(), so at frame 121 the "quarter bar" test read 0.
+			// HPBar_can_draw is what udp flips on, so it is the "bar is live" gate. Gainey's ruling
+			// (chat 2:26:40): only when Link has taken 0 hits and the boss is one hit from dead -- the
+			// last bar unit (udp clamps units_full to >= 1 while hp > 0, so 1 == last unit).
+			if (!global.tw_boss_finishhim_said && global.tw_boss_frames > 120 && !global.tw_boss_damaged)
 			{
 				var _low = false;
-				with (Boss) { if (variable_instance_exists(id, "HPBar_units_full") && variable_instance_exists(id, "HPBar_unit_COUNT")
-				              && HPBar_units_full <= max(1, HPBar_unit_COUNT div 4)) _low = true; }
+				with (Boss) { if (variable_instance_exists(id, "HPBar_can_draw") && HPBar_can_draw
+				              && variable_instance_exists(id, "HPBar_units_full") && HPBar_units_full == 1 && hp > 0) _low = true; }
 				if (_low) { global.tw_boss_finishhim_said = true; tw_announce("snd_mk2_finishhim"); }
 			}
 		}
@@ -214,9 +220,11 @@ function tw_nowplaying_set(_snd, _is_intro) {
 /// @description  tw_splash_enqueue(sprite, sound, wait_frames, toast) -- queue one splash step.
 /// sprite/sound may be -1 (sound-only step, or silent sprite). wait = frames to hold before
 /// this step starts (after the previous one ends). toast = "" or a line for the small toast.
-function tw_splash_enqueue(_spr, _snd, _wait, _toast, _dur = 0, _y = -1, _corner = false) {
+/// fn = optional method run the frame this step STARTS (10-24: Babality rides the queue so its
+/// jingle and shrink land after FLAWLESS VICTORY instead of over it).
+function tw_splash_enqueue(_spr, _snd, _wait, _toast, _dur = 0, _y = -1, _corner = false, _fn = undefined) {
 	if (!variable_global_exists("tw_splash_queue") || !is_array(global.tw_splash_queue)) global.tw_splash_queue = [];
-	array_push(global.tw_splash_queue, { spr : _spr, snd : _snd, wait : _wait, toast : _toast, dur : _dur, y : _y, corner : _corner });
+	array_push(global.tw_splash_queue, { spr : _spr, snd : _snd, wait : _wait, toast : _toast, dur : _dur, y : _y, corner : _corner, fn : _fn });
 }
 
 /// @description  tw_oneup_nudge_tick() -- 10-09 VOD 2:22:55, Lane: "I want my lives back, I've been
@@ -273,7 +281,8 @@ function tw_splash_step() {
 		// hold first, then start: re-queue at the front with wait cleared
 		global.tw_splash_wait = _e.wait;
 		array_insert(global.tw_splash_queue, 0, { spr : _e.spr, snd : _e.snd, wait : 0, toast : _e.toast, dur : _e.dur, y : _e.y,
-		                                          corner : (variable_struct_exists(_e, "corner") && _e.corner) });
+		                                          corner : (variable_struct_exists(_e, "corner") && _e.corner),
+		                                          fn     : (variable_struct_exists(_e, "fn") ? _e.fn : undefined) });
 		return;
 	}
 	if (is_string(_e.toast) && _e.toast != "")
@@ -281,6 +290,7 @@ function tw_splash_step() {
 		global.tw_toast       = _e.toast;
 		global.tw_toast_timer = 240;
 	}
+	if (variable_struct_exists(_e, "fn") && is_method(_e.fn)) _e.fn();
 	// Toasty (10-09 VOD): a corner pop instead of a centre banner. The draw block slides it in
 	// from the right edge and back out, no screen dim; dur_total is what the slide is timed from.
 	global.tw_splash_corner    = (variable_struct_exists(_e, "corner") && _e.corner);
@@ -326,7 +336,17 @@ function tw_flawless_event(_which) {
 		var _pct   = variable_global_exists("tw_babality_pct") ? global.tw_babality_pct : 15;
 		if (asset_get_index("snd_mk2_babality") >= 0 && (_small || irandom(99) < _pct)) _which = "babality";
 	}
-	if (_which == "babality") { tw_babality(); return; }
+	// 10-24 (Lane 2:25:34 "you did it at the same time as Flawless Victory"): the Babality used to
+	// fire the instant the fight ended, over the queued FLAWLESS line. Now it is a queue step like
+	// Fatality/Friendship: same 20-frame gap, the jingle is the step's sound, the plate and the
+	// shrink start with it. tw_announce's announcer gate is kept.
+	if (_which == "babality")
+	{
+		var _s_bab = asset_get_index("snd_mk2_babality");
+		if (variable_global_exists("tw_announcer") && !global.tw_announcer) _s_bab = -1;
+		tw_splash_enqueue(-1, _s_bab, 20, "", 0, -1, false, function() { tw_babality(); });
+		return;
+	}
 	if (_which == "") _which = (irandom(1) == 0) ? "fatality" : "friendship";
 	if (_which == "friendship" && _p_frd >= 0) tw_splash_enqueue(_p_frd, _s_frd, 20, "");
 	else if (_p_fat >= 0)                       tw_splash_enqueue(_p_fat, _s_fat, 20, "");
@@ -361,11 +381,11 @@ function tw_announce(_name) {
 	if (_s >= 0 && audio_exists(_s)) aud_play_sound(_s);
 }
 
-/// @description  tw_babality() -- the finisher variant: FLAWLESS text has already been queued by
-/// tw_flawless_event; this adds the BABALITY jingle, the plate, and shrinks Link to 0.45 for 180
-/// frames through a tw_active entry (same levers as !shrink, so it reverts and clears on death).
+/// @description  tw_babality() -- the finisher variant, run by the splash queue step that
+/// tw_flawless_event enqueues after the FLAWLESS line (the step plays the jingle); this adds the
+/// plate and shrinks Link to 0.45 for 180 frames through a tw_active entry (same levers as
+/// !shrink, so it reverts and clears on death).
 function tw_babality() {
-	tw_announce("snd_mk2_babality");
 	tw_toast_push("BABALITY", "", "win");
 	if (!instance_exists(global.pc)) return;
 	global.pc.tw_scale_mul = 0.45;

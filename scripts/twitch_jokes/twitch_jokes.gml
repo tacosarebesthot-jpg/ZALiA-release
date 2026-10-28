@@ -768,7 +768,7 @@ function tw_help_rows(_cat) {
 		];
 		case "fun": return [
 			"FUN / META               (!HELP RL NEXT)",
-			"!MUSIC NAME  PLAY IT    !SONG  WHATS ON",
+			"!MUSIC NAME  PLAY IT    !NP  WHATS ON",
 			"!METH  MOON+JUMP+SPEED  !QUANTUMENTANGLE",
 			"!FATALITY !FRIENDSHIP !FLAWLESS  SPLASH",
 			"!SUGGEST IDEA  LOG IT FOR THE DEV",
@@ -809,7 +809,7 @@ function tw_help_rows(_cat) {
 		"      !FLASHBANG",
 		"MOBS  !SPAWN !SWARM !FREEZE !SMITE !PARTY",
 		"      !FLAME !ARISE !CUCCO !CHALLENGE",
-		"FUN   !SONG !SUGGEST !METH !FATALITY",
+		"FUN   !NP !SUGGEST !METH !FATALITY",
 		"      !QUANTUMENTANGLE !HELP !POINTS",
 		"      !GHOST !CRUSH !RESHUFFLE",
 		"      !VOTE A B !KILLS !TOP !IGNORE (MODS)",

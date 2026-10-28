@@ -293,7 +293,7 @@ function OptionsMenu_Twitch_update() {
 	    case Twitch.CMD_SOUND:{ if (timer) break;
 	    if (_InputConfirm_pressed2)
 	    {
-	        if (!variable_global_exists("tw_cmd_sound")) global.tw_cmd_sound = true;
+	        if (!variable_global_exists("tw_cmd_sound")) global.tw_cmd_sound = false;
 	        global.tw_cmd_sound = !global.tw_cmd_sound;
 	        twitch_config_save();
 	        aud_play_sound(_SOUND2);

@@ -44,9 +44,11 @@ function options_reset_to_defaults() {
 	global.tw_user_cooldown_frames = 1800;
 	global.tw_mod_bypass           = true;
 	global.tw_effects_hud          = true;
-	global.tw_cmd_sound            = true; // COMMAND SOUND (10-09 VOD round)
+	global.tw_cmd_sound            = false; // COMMAND SOUND (10-09 VOD round; OFF since 2.1.10, Lane 10-24)
 	// CHAT EXTRAS page (10-14, defaults per Lane)
 	global.tw_first_use_hint       = false;
+	global.tw_help_card            = false; // 10-24: the !help card over the game
+	global.tw_cmd_prices           = true;  // 10-24: commands cost points
 	global.tw_oneup_nudge_min      = 0;
 	global.tw_swarm_cap            = 14;
 	global.tw_toasty_pct           = 50;

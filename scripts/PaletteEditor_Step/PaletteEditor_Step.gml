@@ -42,12 +42,13 @@ function PaletteEditor_Step() {
 	// inside the very tool this is meant to keep them out of.
 	var _EDIT_ALLOWED = dev_avail();
 
-	var _EDIT_REQUESTED_PAL = _EDIT_ALLOWED
-	                      && ( (CTL0 && PP)
-	                       ||  (Input.GP_Other6_held && Input.GP_Other4_held && Input.GP_Other2_pressed) ); // Hold trigR + bumpR, press Y
+	// 10-24 VOD 2:29:08 (Lane, on a PS4 pad, mid-palace): "What did I push? ... It's a palette."
+	// The trigger+bumper+Y chords opened the editor on the dev-unlocked playtest build the moment
+	// his hand slipped in a fight. Both chords are gone: the editor opens from the keyboard
+	// (CTRL+P) or from OPTIONS > DEV TOOLS > COLOR, where both modes already have a menu row.
+	var _EDIT_REQUESTED_PAL = _EDIT_ALLOWED && (CTL0 && PP);
 	//
-	var _EDIT_REQUESTED_BGR = _EDIT_ALLOWED
-	                      &&  (Input.GP_Other5_held && Input.GP_Other3_held && Input.GP_Other2_pressed);   // Hold trigL + bumpL, press Y
+	var _EDIT_REQUESTED_BGR = false; // menu only (OptionsMenu_Color_update / OptionsMenu_Other_update)
 
 	//var _Input_COLOR_SELECTED = Input.Jump_pressed;
 	var _Input_COLOR_SELECTED = Input.Jump_pressed || Input.Pause_pressed;

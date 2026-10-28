@@ -95,7 +95,10 @@ function twitch_irc_load_config() {
 			case "mod_bypass":    global.tw_mod_bypass  = (tw_num(_val, 1) != 0); break;
 			case "effects_hud":   global.tw_effects_hud = (tw_num(_val, 1) != 0); break;
 			// 10-09 VOD round: Lane's on-air asks (sound cue, first-use hint, 1up reminder), the swarm cap, Toasty
-			case "cmd_sound":      global.tw_cmd_sound       = (tw_num(_val, 1) != 0); break;
+			case "cmd_sound":      global.tw_cmd_sound       = (tw_num(_val, 0) != 0); break; // default OFF since 2.1.10 (Lane 10-24 0:15:33)
+			// 10-24: the two new CHAT EXTRAS rows
+			case "help_card":      global.tw_help_card       = (tw_num(_val, 0) != 0); break;
+			case "cmd_prices":     global.tw_cmd_prices      = (tw_num(_val, 1) != 0); break;
 			case "cmd_sound_name": if (string(_val) != "") global.tw_cmd_sound_name = string(_val); break;
 			case "first_use_hint": global.tw_first_use_hint  = (tw_num(_val, 0) != 0); break;
 			case "oneup_nudge":    global.tw_oneup_nudge_min = clamp(floor(tw_num(_val, 0)), 0, 60); break;
@@ -208,6 +211,7 @@ function tw_alias_verb(_v) {
 		case "up":                        return "1up";      // Gainey 09-11 1:15:24
 		case "rupees": case "rupeesteal": case "xpsteal": case "xp": case "taxes": return "tax"; // Z3 names, Z2 taxes XP
 		case "doubledamage": case "dmg2": case "damageup": return "dmgup";
+		case "beef": case "beefup":       return "dmgup";    // Lane 10-24 0:37:58 "!beef ... beefs up the monsters. Just change it to beef, that's funnier"
 		case "bleed":  case "hunger":     return "attrition";
 		case "cmds": case "commands": case "howto": case "howtoplay": return "help";
 		case "entangle": case "quantum": case "qe": return "quantumentangle";
@@ -250,7 +254,7 @@ function tw_verb_all() {
 		"fire","thunder","thun","enigma","spel","jump","life","summon","summ",
 		"ice","icefloor","moon","root","deny","undeny",
 		"poison","catslap","flashbang","suggest","steal","rob","thief","pickpocket",
-		"fatality","friendship","flawless","finisher","babality","song","np","nowplaying","track",
+		"fatality","friendship","flawless","finisher","babality","np","nowplaying","track",
 		"link","unchicken","donothing","rip","blip","coincidence","getfed",
 		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
 		"stasis","points","pts","bal","ghost","crush",

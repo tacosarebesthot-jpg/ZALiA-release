@@ -4354,9 +4354,11 @@ function g_Create() {
 	global.tw_user_cooldown_frames = 1800;             // one chatter: 30 s between accepted commands (user_cooldown= in twitch_config.txt)
 	global.tw_mod_bypass          = true;              // mods + broadcaster skip both cooldowns (mod_bypass=)
 	// 10-09 VOD round (Lane's on-air asks, see vod_transcripts/lane_2026-10-09_feedback.md).
-	// All read from twitch_config.txt by twitch_irc_load_config; every one is a no-op at its default
-	// except the sound cue and the first-use hint, which are ON because that is what he asked for.
-	global.tw_cmd_sound           = true;              // one short cue when a chat command lands (cmd_sound=)
+	// All read from twitch_config.txt by twitch_irc_load_config; every one is a no-op at its default.
+	// The sound cue shipped ON in 2.1.9 and Lane turned it off inside 15 minutes (10-24 0:15:33), so OFF.
+	global.tw_cmd_sound           = false;             // one short cue when a chat command lands (cmd_sound=)
+	global.tw_help_card           = false;             // !help / !commands draw the full card over the game (help_card=); 10-24 it blocked Lane's screen
+	global.tw_cmd_prices          = true;              // chat commands cost points when the economy is on (cmd_prices=); off = free commands, bets still work
 	global.tw_cmd_sound_name      = "snd_Cursor_Move_2a"; // which sound asset (cmd_sound_name=); missing name = silent
 	global.tw_first_use_hint      = false;             // first time a verb lands this session: toast its !help line (first_use_hint=)
 	global.tw_seen_verbs          = {};                // verbs already hinted this session

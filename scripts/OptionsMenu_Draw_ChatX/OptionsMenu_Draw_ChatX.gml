@@ -94,6 +94,14 @@ function OptionsMenu_Draw_ChatX() {
 	        _text = (!variable_global_exists("tw_bets_on") || global.tw_bets_on) ? _ON : _OFF;
 	    break;
 
+	    case ChatX.HELPCARD:
+	        _text = (variable_global_exists("tw_help_card") && global.tw_help_card) ? _ON : _OFF;
+	    break;
+
+	    case ChatX.PRICES:
+	        _text = (!variable_global_exists("tw_cmd_prices") || global.tw_cmd_prices) ? _ON : _OFF;
+	    break;
+
 	    case ChatX.BOUNTY:
 	        _text = (variable_global_exists("tw_bounty_on") && global.tw_bounty_on) ? _ON : _OFF;
 	    break;

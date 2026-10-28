@@ -14,6 +14,20 @@ function PC_take_damage() {
 	    exit; // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	}
 
+	// PORT (10-24 VOD 2:47:03, Lane: "so I didn't get to level up from that?"): the crystal
+	// cutscene (CrystalHolder counter 2..4: rise, fanfare, HP/MP refill) locks Link in place and
+	// only awards the level-up XP at its end, while the crystal bit was set at its start. Stock
+	// Zelda II has nothing alive in a boss room then; chat !swarm mobs are, and one killed him
+	// mid-cutscene -> crystal counted, XP gone, 25% XP game-over penalty on top. Link cannot be
+	// hurt while the sequence runs.
+	// (the object asset is CrHoA; "CrystalHolder" is only the data-table name)
+	if (instance_exists(CrHoA))
+	{
+		var _cs = false;
+		with (CrHoA) { if (variable_instance_exists(id, "counter") && counter >= 2) _cs = true; }
+		if (_cs) exit;
+	}
+
 	if (global.pc.HoldItem_timer)
 	{
 	    exit; // invincible while holding item overhead

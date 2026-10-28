@@ -148,6 +148,32 @@ function OptionsMenu_ChatX_update() {
 	    }
 	    break;}
 
+	    // HELP CARD: !help / !commands draw the full card over the game (help_card=), off by default
+	    // (10-24 VOD 0:55:51, the card blocked Lane's screen mid-fight)
+	    case ChatX.HELPCARD:{ if (timer) break;
+	    if (_InputConfirm_pressed)
+	    {
+	        if (!variable_global_exists("tw_help_card")) global.tw_help_card = false;
+	        global.tw_help_card = !global.tw_help_card;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
+	    // COMMAND PRICES: chat commands cost points when the economy is on (cmd_prices=), on by default
+	    // (10-24 VOD 0:13:18, Lane: "I don't want them to cost anything" -- but he wants the bets)
+	    case ChatX.PRICES:{ if (timer) break;
+	    if (_InputConfirm_pressed)
+	    {
+	        if (!variable_global_exists("tw_cmd_prices")) global.tw_cmd_prices = true;
+	        global.tw_cmd_prices = !global.tw_cmd_prices;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    case ChatX.BACK:{ break;} // handled above with Backout_requested
 	}
 

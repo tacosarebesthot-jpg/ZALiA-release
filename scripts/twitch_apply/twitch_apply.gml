@@ -302,7 +302,25 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 
 			if (!variable_global_exists("tw_stolen")) global.tw_stolen = 0;
 
-			var _bit  = _held[irandom(array_length(_held) - 1)];
+			// 10-24 VOD: "!steal candle" (2:11:08) and "!steal boots" (2:12:33) -- the word was
+			// ignored and a random held item went. Honor a named item when Link holds it (and no
+			// steal already has it); anything else, or no word, stays random.
+			var _bit  = -1;
+			var _want = string_lower(string(_arg));
+			if (_want != "")
+			{
+			    var _steal_names = [
+			        ["candle", ITM_CAND], ["glove", ITM_GLOV], ["raft", ITM_RAFT], ["boot", ITM_BOOT], ["flute", ITM_FLUT],
+			        ["hammer", ITM_HAMM], ["brac", ITM_BRAC], ["sword", ITM_SWRD], ["shield", ITM_SHLD], ["ring", ITM_RING]
+			    ];
+			    for (var _sn = 0; _sn < array_length(_steal_names) && _bit == -1; _sn++)
+			    {
+			        if (string_pos(_steal_names[_sn][0], _want) <= 0) continue;
+			        for (var _sh = 0; _sh < array_length(_held); _sh++)
+			        {   if (_held[_sh] == _steal_names[_sn][1]) { _bit = _held[_sh]; break; }  }
+			    }
+			}
+			if (_bit == -1) _bit = _held[irandom(array_length(_held) - 1)];
 
 			// Readable name for the toast. There is NO bit->name key in dm_ITEM, so go
 			// bit -> object -> object name -> item TYPE, which is the display word
@@ -319,6 +337,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			    _name = string_delete(_name, 1, 1);
 			f.items       &= ~_bit;
 			global.tw_stolen |= _bit;
+			// 10-24 (owner): "!steal boots" did not stop Lane walking on water. The overworld
+			// converts the boots water tiles into walkable tiles when it loads (g_Room_Start ->
+			// Overworld_tile_change_2a), so Overworld_Step never looks at the bit again. Undo the
+			// conversion now, redo it on restore (tw_boots_tiles).
+			if (_bit == ITM_BOOT) tw_boots_tiles(false);
 
 			array_push(global.tw_active, {
 			    frames  : _frames,
@@ -328,6 +351,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			    restore : function() {
 			        f.items          |=  self.bit;
 			        global.tw_stolen &= ~self.bit;
+			        if (self.bit == ITM_BOOT) tw_boots_tiles(true);
 			    }
 			});
 
@@ -379,6 +403,15 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				// "bloody tears", "BloodyTears" and "bloodytears" are now equivalent.
 				var _names = global.jukebox_names;
 				var _q     = tw_slug(_arg);
+				// 10-24 VOD 3:03-3:05 (Dave): "!music mario2", "!music mario 2" found nothing. The
+				// asset is mus_Super_Mario_Bros_2_..., slug "supermariobros2...", and "mario2" is not
+				// a substring of "mariobros2". Short names chat actually types -> the slug they mean.
+				switch (_q)
+				{
+					case "mario2": case "smb2": case "supermario2": case "mariobros2": _q = "supermariobros2"; break;
+					case "mm2":    case "mega2":                                    _q = "megaman2";        break;
+					case "drmario": case "dr":                                      _q = "drmario";         break;
+				}
 				var _hit   = -1;
 				if (_q != "")
 				{
@@ -408,6 +441,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					global.jukebox_idx = _hit;
 					global.jukebox_on  = true;
 					jukebox_play();
+					// 10-24 (Gainey 1:16:39 "rip megaman tunes", 1:36:25 "still did not play the whole
+					// song damnit claude"): the request ran for the EFFECT LENGTH setting (5-60 s) and
+					// then handed the room music back. A request is a song: it plays once through, the
+					// track's own length (looping tracks: one pass), then the room music returns.
+					var _ta   = (is_array(global.jukebox_assets) && _hit < array_length(global.jukebox_assets)) ? global.jukebox_assets[_hit] : -1;
+					var _tsec = (_ta != -1 && audio_exists(_ta)) ? audio_sound_length(_ta) : 0;
+					if (_tsec > 0) _frames = ceil(_tsec * 60) + 30;
 					array_push(global.tw_active, {
 						frames  : _frames,
 						restore : function() {
@@ -542,7 +582,12 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				if (_spellbit != 0)
 				{
 					var _was_active = (g.spells_active & _spellbit) != 0;
+					// 10-24 VOD 2:24:13, Lane: "I tried to do jump, and then he did spell fire, and it
+					// actually changed my menu." cast_spell() also writes g.spell_selected (the player's
+					// cursor), so a chat cast moved his selection. Put it back after the cast.
+					var _sel_keep = g.spell_selected;
 					cast_spell(_spellbit);
+					g.spell_selected = _sel_keep;
 					array_push(global.tw_active, {
 						frames  : _frames,
 						bit     : _spellbit,
@@ -1029,7 +1074,6 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			global.tw_toast_timer = 120;
 			break;
 
-		case "song":
 		case "np":
 		case "nowplaying":
 		case "track":
@@ -1077,6 +1121,17 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			{
 				global.tw_toast       = "!help hurt / chaos / mobs / fun / rl / mods  (or just !help)";
 				global.tw_toast_timer = 300;
+				break;
+			}
+			// 10-24 VOD 0:55:51, Lane: "that whole thing that blocked my screen right then, that was
+			// from chat, that's the biggest troll" (asm0deus typed !commands). The card is now behind
+			// the HELP CARD row (CHAT EXTRAS, off by default); off = a one-line toast pointing at the
+			// pinned list instead of 8 s of full-screen text.
+			if (!variable_global_exists("tw_help_card") || !global.tw_help_card)
+			{
+				global.tw_toast       = _who_s + " -> commands: see the pinned list, or !help <verb>";
+				global.tw_toast_timer = 240;
+				global.tw_apply_refused = true; // nothing drawn, nothing charged
 				break;
 			}
 			tw_help_show(_hc);
@@ -1603,10 +1658,11 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 		}
 
-		// RARE Navi "HEY LISTEN" easter egg: 1 in 10,000 commands. GUARDED asset lookup
-		// so it stays a harmless no-op until the user imports a clip named
-		// snd_navi_heylisten -- then it just starts working, no code change needed.
-		if (irandom(9999) == 0)
+		// Navi "HEY LISTEN" easter egg. Was 1 in 10,000 commands: Gainey 10-24 (2:03:11) "not once
+		// have I ever heard her say hey listen" -- a 300-command stream had a 3% chance. Now 1 in 150
+		// (about twice a stream). GUARDED asset lookup: it stays a no-op until a clip named
+		// snd_navi_heylisten is imported (there is none in the project as of 2.1.10).
+		if (irandom(149) == 0)
 		{
 			var _s = asset_get_index("snd_navi_heylisten");
 			if (_s != -1 && audio_exists(_s)) aud_play_sound(_s);
@@ -1653,6 +1709,55 @@ function tw_slug(_s) {
 		if ((_o >= 48 && _o <= 57) || (_o >= 97 && _o <= 122)) _out += _c; // 0-9, a-z
 	}
 	return _out;
+}
+
+
+/// @description  tw_boots_tiles(have) -- make the overworld agree with whether Link holds the boots
+/// RIGHT NOW. 10-24 (owner, after Lane's stream): "!steal boots" never stopped him walking on water.
+/// g_Room_Start converts the boots water tiles to walkable tiles (dg_solid/dg_tsrc) once, when the
+/// overworld loads, so clearing f.items&ITM_BOOT later changes nothing until the room reloads.
+/// have=false puts those cells back to the default grids; have=true redoes the conversion (the same
+/// call the boots pickup makes). Both continents. The drawn layer is rebuilt only when the overworld
+/// is the live room and Link is standing still (mid-step the layer is being pixel-shifted; a rebuild
+/// then would snap it, and the edge refresh picks the new cells up anyway).
+function tw_boots_tiles(_have) {
+	if (!variable_global_exists("OVERWORLD") || !instance_exists(global.OVERWORLD)) return;
+	if (_have)
+	{
+		Overworld_tile_change_2a(global.OVERWORLD.TileChangeEvent_TYPE_BOOT1);
+	}
+	else
+	{
+		with (global.OVERWORLD)
+		{
+			for (var _k = ds_grid_width(dg_ChangeTiles_Boots) - 1; _k >= 0; _k--)
+			{
+				var _c = (dg_ChangeTiles_Boots[#_k,0] >> 0) & $FF;
+				var _r = (dg_ChangeTiles_Boots[#_k,0] >> 8) & $FF;
+				dg_solid[#_c,_r] = dg_solid_def[#_c,_r];
+				dg_tsrc[#_c,_r]  = dg_tsrc_def[#_c,_r];
+			}
+		}
+	}
+	with (global.OVERWORLD)
+	{
+		if (instance_exists(g) && g.anarkhyaOverworld_MAIN && variable_instance_exists(id, "dg_anarkhya_tsrc_boots"))
+		{
+			for (var _k = ds_grid_width(dg_anarkhya_tsrc_boots) - 1; _k >= 0; _k--)
+			{
+				var _owrc = dg_anarkhya_tsrc_boots[#_k,0];
+				var _c = (_owrc >> 0) & $FF;
+				var _r = (_owrc >> 8) & $FF;
+				dg_anarkhya_tsrc[#_c,_r] = _have ? dg_anarkhya_tsrc_boots[#_k,1] : dg_anarkhya_tsrc_def[#_c,_r];
+			}
+		}
+		if (instance_exists(g) && g.room_type == "C" && !dest_dist)
+		{
+			var _ox = (((pcrc >> 0) & $FF) << SHIFT) + (T_SIZE >> 1) - DRAW_W_;
+			var _oy = (((pcrc >> 8) & $FF) << SHIFT) + (T_SIZE >> 1) - DRAW_H_;
+			Overworld_refresh_tiles(_ox, _oy);
+		}
+	}
 }
 
 

@@ -78,7 +78,10 @@ function twitch_config_save() {
         ["announcer",      (!variable_global_exists("tw_announcer") || global.tw_announcer) ? "1" : "0"],
         ["babality",       string(variable_global_exists("tw_babality_pct")   ? global.tw_babality_pct   : 15)],
         ["bets",           (!variable_global_exists("tw_bets_on")   || global.tw_bets_on)   ? "1" : "0"],
-        ["bounty",         (variable_global_exists("tw_bounty_on") && global.tw_bounty_on)   ? "1" : "0"]
+        ["bounty",         (variable_global_exists("tw_bounty_on") && global.tw_bounty_on)   ? "1" : "0"],
+        // 10-24: HELP CARD (off by default) and COMMAND PRICES (on by default)
+        ["help_card",      (variable_global_exists("tw_help_card")  && global.tw_help_card)   ? "1" : "0"],
+        ["cmd_prices",     (!variable_global_exists("tw_cmd_prices") || global.tw_cmd_prices) ? "1" : "0"]
     ];
     var _own_wrote = array_create(array_length(_own), false);
 

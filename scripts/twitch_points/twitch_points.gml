@@ -72,9 +72,12 @@ function tw_points_is_free(_who) {
 
 /// @description  tw_points_cost(verb) -- after the alias map. 0 = free.
 function tw_points_cost(_v) {
+	// COMMAND PRICES row (10-24): off = every verb is free while chat still earns points for
+	// !bet / !bounty (their stakes are taken inside the verb, not here).
+	if (variable_global_exists("tw_cmd_prices") && !global.tw_cmd_prices) return 0;
 	switch (string(_v))
 	{
-		case "points": case "pts": case "bal": case "help": case "song": case "np": case "nowplaying": case "track":
+		case "points": case "pts": case "bal": case "help": case "np": case "nowplaying": case "track":
 		case "suggest": case "donothing": case "rip": case "blip": case "coincidence": case "getfed": case "link": case "unchicken":
 		case "version": case "ver": case "build": case "vote": case "kills": case "top":
 		case "bet": case "bounty": // the stake is taken inside the verb, not as a fee

@@ -121,7 +121,15 @@ function GameObjectB_step() {
 	                vspd = 0;
                 
 	                var _y = yb-1;
-	                if (global.dg_solid[#x>>3,_y>>3]&$FF==TID_SOLID1)
+	                // PORT (selftest 2026-10-28, full matrix): a mob killed past the room grid (x>>3 = 130
+	                // in a 128-wide grid, e.g. by !flashbang/!smite after it wandered off-screen) read
+	                // dg_solid out of bounds. GM1.4 returned 0 there; GMS2 returns undefined and the `&`
+	                // throws "illegal undefined/null use" -- a hard crash on stream. Bounds-check first.
+	                var _dc = x >> 3, _dr = _y >> 3;
+	                var _on_solid = (_dc >= 0 && _dr >= 0
+	                              && _dc < ds_grid_width(global.dg_solid) && _dr < ds_grid_height(global.dg_solid)
+	                              && (global.dg_solid[#_dc,_dr] & $FF) == TID_SOLID1);
+	                if (_on_solid)
 	                {
 	                    _y = ((_y>>3)-1)<<3;
 	                    _y = get_ground_y(x,yb, -1, _y);

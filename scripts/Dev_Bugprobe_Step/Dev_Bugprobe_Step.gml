@@ -1550,7 +1550,9 @@ function tws_chatx_tests(_om) {
 		[ChatX.HINT,      "FIRST-USE HINT", "first_use_hint", function() { return global.tw_first_use_hint; }],
 		[ChatX.ANNOUNCER, "MK2 ANNOUNCER",  "announcer",      function() { return global.tw_announcer; }],
 		[ChatX.BETS,      "CHAT BETS",      "bets",           function() { return global.tw_bets_on; }],
-		[ChatX.BOUNTY,    "BOUNTIES",       "bounty",         function() { return global.tw_bounty_on; }]
+		[ChatX.BOUNTY,    "BOUNTIES",       "bounty",         function() { return global.tw_bounty_on; }],
+		[ChatX.HELPCARD,  "HELP CARD",      "help_card",      function() { return global.tw_help_card; }],
+		[ChatX.PRICES,    "COMMAND PRICES", "cmd_prices",     function() { return global.tw_cmd_prices; }]
 	];
 	for (var _i = 0; _i < array_length(_tog); _i++)
 	{
@@ -1972,13 +1974,20 @@ function Dev_TwSelftest_Step() {
 		}
 		if (global.tws_t == 100)
 		{
+			// 10-24: HELP CARD row (off by default since the card blocked Lane's screen). Off = a
+			// toast and no card; on = the page as before.
+			global.tw_help_card = false; global.tw_help_timer = 0;
+			var _t0 = tws_line("tstchatter", "!help hurt");
+			tws_feat("!help with HELP CARD off is a one-line toast, no card", global.tw_help_timer == 0 && string_pos("pinned", string(global.tw_toast)) > 0,
+			         "help timer=" + string(global.tw_help_timer) + "  toast=" + string(global.tw_toast) + "   " + _t0);
+			global.tw_help_card = true;
 			tws_line("tstchatter", "!help hurt");
-			tws_feat("!help hurt puts a page up", global.tw_help_timer > 0, "help timer=" + string(global.tw_help_timer));
+			tws_feat("!help hurt puts a page up (HELP CARD on)", global.tw_help_timer > 0, "help timer=" + string(global.tw_help_timer));
 		}
 		if (global.tws_t == 140) tws_shot("help_hurt");
 		if (global.tws_t == 150) tws_line("tstchatter", "!help mods");
 		if (global.tws_t == 190) tws_shot("help_mods");
-		if (global.tws_t == 200) global.tw_help_timer = 0;
+		if (global.tws_t == 200) { global.tw_help_timer = 0; global.tw_help_card = false; }
 		// 10-14 fun round: !bet / !bounty / !babality through the real chat entry (no boss on a town screen)
 		if (global.tws_t == 300)
 		{
@@ -2006,12 +2015,27 @@ function Dev_TwSelftest_Step() {
 		}
 		if (global.tws_t == 390)
 		{
+			// 10-24: the Babality is a splash-queue step now (it used to fire over the FLAWLESS line).
+			// At send time only the queue entry exists; the shrink lands once the FLAWLESS text
+			// (100 frames) and the 20-frame gap have run -> checked at 520.
 			var _t = tws_line("tstgamb", "!babality");
+			var _queued = false;
+			if (is_array(global.tw_splash_queue))
+			{   for (var _qi = 0; _qi < array_length(global.tw_splash_queue); _qi++)
+			    {   var _qe = global.tw_splash_queue[_qi]; if (is_struct(_qe) && variable_struct_exists(_qe, "fn") && is_method(_qe.fn)) _queued = true;  }
+			}
+			var _hit0 = false;
+			for (var _bi = 0; _bi < array_length(global.tw_active); _bi++)
+			{   var _be = global.tw_active[_bi]; if (is_struct(_be) && variable_struct_exists(_be, "verb") && _be.verb == "babality") _hit0 = true;  }
+			tws_feat("!babality queues the Babality behind FLAWLESS instead of firing over it", _queued && !_hit0, "queued=" + string(_queued) + "  shrunk already=" + string(_hit0) + "   " + _t);
+		}
+		if (global.tws_t == 520)
+		{
 			var _hit = false;
 			for (var _bi = 0; _bi < array_length(global.tw_active); _bi++)
 			{   var _be = global.tw_active[_bi]; if (is_struct(_be) && variable_struct_exists(_be, "verb") && _be.verb == "babality") _hit = true;  }
 			var _sc = instance_exists(global.pc) && variable_instance_exists(global.pc, "tw_scale_mul") ? global.pc.tw_scale_mul : -1;
-			tws_feat("!babality shrinks Link to 0.45 on a timer", _hit && _sc == 0.45, "entry=" + string(_hit) + "  scale=" + string(_sc) + "   " + _t);
+			tws_feat("!babality shrinks Link to 0.45 on a timer once its queue step runs", _hit && _sc == 0.45, "entry=" + string(_hit) + "  scale=" + string(_sc));
 		}
 		if (global.tws_t == 420)
 		{
@@ -2628,6 +2652,21 @@ function Dev_TwSelftest_Step() {
 		break;
 
 	case "expire":
+		// 2.1.10: !music plays the whole track by design (minutes, not the 5 s effect window). Stop
+		// it here the way its own restore would, so the 35 s rule and the leak check grade the
+		// verb's cleanup, not the length of the song.
+		var _ce = global.tws_cases[global.tws_ci];
+		if (string_pos("music", _ce[0]) == 1 && is_array(global.tw_active))
+		{
+			var _stopped = 0;
+			for (var _mi = array_length(global.tw_active) - 1; _mi >= 0; _mi--)
+			{
+				var _me = global.tw_active[_mi];
+				if (is_struct(_me) && variable_struct_exists(_me, "verb") && _me.verb == "music")
+				{   if (variable_struct_exists(_me, "restore")) _me.restore(); array_delete(global.tw_active, _mi, 1); _stopped++;  }
+			}
+			if (_stopped > 0) tws_log("   (music plays the whole track by design -- stopped by the harness)");
+		}
 		var _n = tws_active_count();
 		var _splash = (variable_global_exists("tw_splash_spr") && global.tw_splash_spr >= 0)
 		           || (variable_global_exists("tw_flash_timer") && global.tw_flash_timer > 0);
@@ -2831,7 +2870,7 @@ function tw_selftest_cases() {
 		["quantumentangle", "toast", ""],
 		["help",       "toast", "help card"],
 		["challenge",  "toast", "needs-a-palace outside palaces"],
-		["song",       "toast", ""],
+		["track",      "toast", "song alias (!song itself is gone: Streamlabs owns it)"],
 		["np",         "toast", "song alias"],
 		["fatality",   "toast", "MK2 splash on demand"],
 		["version",    "toast", ""],

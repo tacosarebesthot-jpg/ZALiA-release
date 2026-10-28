@@ -896,7 +896,7 @@ function OptionsMenu_Create() {
 	             _i=Twitch.AUTOSAVE;
 	Twitch_dg[#_i,0]="CHECKPOINTS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="A COPY OF YOUR SAVE EVERY 60 SECONDS, EVERY ITEM AND EVERY LEVEL UP, IN THE CHECKPOINTS FOLDER NEXT TO YOUR SAVES. YOUR REAL SAVE IS NOT TOUCHED.";
 	             _i=Twitch.POINTS;
-	Twitch_dg[#_i,0]="POINTS ECONOMY";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="VIEWERS EARN POINTS BY CHATTING (1 A MESSAGE, 5 EVERY 5 MINUTES) AND EVERY COMMAND COSTS SOME. !POINTS SHOWS A BALANCE, !TOP THE LEADERBOARD. OFF = EVERYTHING IS FREE.";
+	Twitch_dg[#_i,0]="POINTS ECONOMY";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="VIEWERS EARN POINTS BY CHATTING (1 A MESSAGE, 5 EVERY 5 MINUTES) FOR !BET AND !BOUNTY. WHETHER COMMANDS COST POINTS IS THE COMMAND PRICES ROW UNDER CHAT EXTRAS. OFF = NO POINTS, NO BETS.";
 	             _i=Twitch.RL;
 	Twitch_dg[#_i,0]="ROCKET LEAGUE";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="QUICK-CHAT PLATES ON SAVES, WHIFFS, DEMOS AND DEATHS, AND !NICESHOT !WHATASAVE !GG IN CHAT. OFF HIDES ALL OF IT.";
 	// v2.1.4 player options (owner 09-14: "give the user options"). Toast rows: OFF or seconds.
@@ -923,7 +923,7 @@ function OptionsMenu_Create() {
 	             _i=Twitch.EXTRAS;
 	Twitch_dg[#_i,0]="CHAT EXTRAS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="MORE CHAT SWITCHES: FIRST-USE HINTS, 1UP REMINDER, SWARM CAP, TOASTY, MK2 ANNOUNCER, BABALITY, BETS AND BOUNTIES.";
 	             _i=Twitch.COMMANDS;
-	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP !TAX !DMGUP !VOTE !KILLS !SONG - !HELP IN CHAT FOR ALL";
+	Twitch_dg[#_i,0]="COMMANDS";  Twitch_dg[#_i,1]=_font; Twitch_dg[#_i,2]="!HEAL !HURT !SLOW !SPEED !FLIP !CONFUSE !DARK !SPAWN !SWARM !PARTY !FREEZE !CUCCO !1UP !TAX !DMGUP !VOTE !KILLS !NP - !HELP IN CHAT FOR ALL";
 	             _i=Twitch.SETUP;
 	// Was "HOW TO SET UP", pointing at a .bat and a text file. The setup is a web page
 	// served by the game now, so this row OPENS it instead of describing homework.
@@ -938,7 +938,7 @@ function OptionsMenu_Create() {
 	// twitch_config_save() writes them, so the file and the menu never disagree.
 	enum ChatX
 	{
-	    HINT, ONEUP, SWARM_CAP, TOASTY, ANNOUNCER, BABALITY, BETS, BOUNTY,
+	    HINT, ONEUP, SWARM_CAP, TOASTY, ANNOUNCER, BABALITY, BETS, BOUNTY, HELPCARD, PRICES,
 	    BACK,
 	    COUNT
 	}
@@ -955,13 +955,17 @@ function OptionsMenu_Create() {
 	             _i=ChatX.TOASTY;
 	ChatX_dg[#_i,0]="TOASTY";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="CHANCE THE MK2 TOASTY HEAD POPS AFTER A FLAWLESS FINISHER. LEFT/RIGHT: OFF, OR 10-100 PERCENT. NEEDS MK2 SPLASH ON.";
 	             _i=ChatX.ANNOUNCER;
-	ChatX_dg[#_i,0]="MK2 ANNOUNCER";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="FIGHT WHEN A BOSS STARTS, FINISH HIM AT A QUARTER BAR, EXCELLENT WHEN A CHAT SWARM IS WIPED CLEAN. NEEDS MK2 SPLASH ON.";
+	ChatX_dg[#_i,0]="MK2 ANNOUNCER";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="FIGHT WHEN A BOSS STARTS, FINISH HIM WHEN A HITLESS BOSS IS ON ITS LAST BAR, EXCELLENT WHEN A CHAT SWARM IS WIPED CLEAN. NEEDS MK2 SPLASH ON.";
 	             _i=ChatX.BABALITY;
 	ChatX_dg[#_i,0]="BABALITY";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="CHANCE A FLAWLESS FINISHER IS A BABALITY INSTEAD OF A FATALITY. A SHRUNK LINK ALWAYS GETS ONE. LEFT/RIGHT: OFF, OR 5-100 PERCENT.";
 	             _i=ChatX.BETS;
 	ChatX_dg[#_i,0]="CHAT BETS";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="!BET WIN / FLAWLESS / DEATH WHILE A BOSS IS UP. CHAT STAKES POINTS, PAID WHEN THE FIGHT ENDS. NEEDS THE POINTS ECONOMY ON.";
 	             _i=ChatX.BOUNTY;
 	ChatX_dg[#_i,0]="BOUNTIES";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="!BOUNTY MOBLIN 30 - POINTS ON YOUR NEXT KILL OF THAT ENEMY, PAID 2X TO WHOEVER POSTED IT. NEEDS THE POINTS ECONOMY ON.";
+	             _i=ChatX.HELPCARD;
+	ChatX_dg[#_i,0]="HELP CARD";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="!HELP AND !COMMANDS DRAW THE FULL COMMAND CARD OVER THE GAME FOR 8 SECONDS. OFF = CHAT GETS A ONE-LINE TOAST INSTEAD AND YOUR SCREEN STAYS CLEAR.";
+	             _i=ChatX.PRICES;
+	ChatX_dg[#_i,0]="COMMAND PRICES";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="WITH THE POINTS ECONOMY ON, EACH CHAT COMMAND COSTS POINTS. OFF = EVERY COMMAND IS FREE BUT CHAT STILL EARNS POINTS FOR !BET AND !BOUNTY.";
 	             _i=ChatX.BACK;
 	ChatX_dg[#_i,0]="BACK";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="RETURN TO TWITCH OPTIONS.";
 

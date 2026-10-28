@@ -28,6 +28,9 @@ function tw_vote_start(_arg, _who) {
 	{
 		var _p = _parts[_i];
 		if (_p == "") continue;
+		// 10-24 0:43:07 Gainey "!vote smite or 1up" -> "rip that dont work": the "or" counted as a
+		// third effect and the vote was refused. Filler between the two options is skipped.
+		if (_p == "or" || _p == "vs" || _p == "v" || _p == "/" || _p == "|" || _p == "versus") continue;
 		if (string_digits(_p) == _p) { _secs = tw_num(_p, 20); continue; }
 		if (string_char_at(_p, 1) == "!") _p = string_delete(_p, 1, 1);
 		array_push(_verbs, tw_alias_verb(tw_clean_command(_p)));
@@ -72,7 +75,7 @@ function tw_vote_verb_blocked(_v) {
 	switch (_v)
 	{
 		case "vote": case "help": case "points": case "pts": case "bal": case "top": case "kills":
-		case "suggest": case "version": case "ver": case "build": case "song": case "np":
+		case "suggest": case "version": case "ver": case "build": case "np":
 		case "nowplaying": case "track": case "donothing": case "rip": case "blip":
 		case "coincidence": case "getfed": case "reshuffle": case "challenge":
 			return true;
