@@ -2,7 +2,7 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
-## 2.1.10 — 2026-10-28
+## 2.1.10 — 2026-10-29
 
 Everything Lane's first 2.1.9 stream (2026-10-24) turned up.
 
