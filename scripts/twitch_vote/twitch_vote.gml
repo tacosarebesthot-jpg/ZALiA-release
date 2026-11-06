@@ -239,7 +239,7 @@ function tw_bounty_place(_arg, _who) {
 	}
 	var _obj = (_name == "") ? undefined : tw_spawn_obj(_name);
 	if (is_undefined(_obj) || _obj == noone)
-	{   global.tw_toast = "!bounty daira 20  (daira moblin goriya zora stalfos bat atta myu)"; global.tw_toast_timer = 300; return false;  }
+	{   global.tw_toast = "!bounty daira 20  (any !spawn name, see !help mobs)"; global.tw_toast_timer = 300; return false;  }
 	_amt = clamp(floor(_amt), 5, 100);
 	if (!ds_exists(global.tw_bounties, ds_type_map)) global.tw_bounties = ds_map_create();
 	if (!ds_exists(global.tw_bounty_prev, ds_type_map)) global.tw_bounty_prev = ds_map_create();

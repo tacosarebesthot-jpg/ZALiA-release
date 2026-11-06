@@ -34,6 +34,10 @@ HURT THE RUNNER
   !steal (!rob !thief !pickpocket)  borrow one of your items         [timed]
   !catslap [n]       three slaps that knock Link around, no damage  (Tangia "Cat Slap")
                      n = frames to wait before the first slap (60 = 1 s, max 300); always 3 slaps
+  !rust              the sword hits two attack levels lower (HUD level unchanged)   [timed]
+  !adhd [s]          can't stop moving: Link keeps walking the last direction       [timed]
+  !beef [s]          every non-boss mob on screen (and new ones) gets double HP, double
+                     damage and a 1.5x sprite. 40 points                             [timed]
 
 CHAOS / SCREEN (all timed)
   !speed [s]  !slow        fast / marsh-slow legs
@@ -51,7 +55,17 @@ CHAOS / SCREEN (all timed)
   !flashbang (!flash)      one white flash; every non-boss enemy on screen takes the smite hit
 
 MOBS / DUNGEON MASTER
-  !spawn <enemy> [n]  spawn n (max 6) of: daira moblin goriya zora stalfos bat(ache) atta myu
+  !spawn <enemy> [n]  spawn n (max 6) of the whole free-standing roster (since 2.1.10):
+                      daira moblin grunt goriya zora stalfos stalfoon bat atta myu bot aneru
+                      aruroda bagin blooby boon bubble capper deeler doomknocker fokka fokkeru
+                      gellzem geru rockgeru girubokku guma ironknuckle lowder magnot mago mau
+                      megmat moby octorok ra tektite wizard wosu eyenocc
+                      Chat spellings: knight/iron/darknut=ironknuckle  wiz=wizard  bird=fokka
+                      lizard=daira  spider=deeler  slime=bot  eye=eyenocc  rock=rockgeru  octo=octorok
+                      Add a colour word for the version: !spawn blue goriya 2 (blue/strong = hard,
+                      red/orange = weak, v2 = version 2).  !spawn random rolls enemy and version.
+  !slimed [rank] [s]  slime rain: Bots drop from the top of the screen for s seconds, rank 1-3
+                      sets the pace (bare !slimed = rank 1, effect length). Respects the SWARM CAP
   !swarm [1-6]        a pack of RANDOM enemies (default 3). Typed on the overworld or in a
                       cutscene it is QUEUED (up to 3) and lands on the next battle screen
   !flame (!heckler)   a jumping flame with the chatter's name over it
@@ -75,6 +89,10 @@ FUN / META
                       While it runs, type  x  or  y  (or 1 / 2) in chat to vote. Starting a vote
                       and voting are both free, and so is the winner. It fires in the starter's
                       name; a tie fires both.     e.g. !vote dark flip 30
+  !bet <win|flawless|death> <n>   wager on the boss on screen (needs POINTS on, CHAT BETS row).
+                      Pays 2x / 5x / 3x.  e.g. !bet flawless 50
+  !bounty <enemy> <n> (5-100) 2x back when the runner next kills that enemy. Any !spawn name.
+                      Needs POINTS on and the BOUNTIES row (off by default)
   !help (!cmds)       cheat sheet on stream        !version         build info
   !donothing  !rip  !blip  !coincidence  !getfed   just toasts
 
