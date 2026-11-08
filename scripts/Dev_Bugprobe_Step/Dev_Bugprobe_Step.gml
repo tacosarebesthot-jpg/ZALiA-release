@@ -1409,6 +1409,8 @@ function tws_zone_cases() {
 		["crush",      "toast", ""],
 		["challenge",  "toast", ""],
 		["catslap",    "catslap", "TANGIA knocked around, no damage"],
+		["catslap",    "catslapcucco", "chicken first: Lane 11-06 0:35, slap did nothing on a chicken"],
+		["catslap",    "catslapcucco2", "TIER-2 chicken first (Lane had his own spell, \"chicken two\")"],
 		["flashbang",  "toast", "SHOT TANGIA white flash + smite"],
 		["flawless",   "toast", "SHOT MK2 FLAWLESS VICTORY text"],
 		["fatality",   "toast", "SHOT LATE MK2 fatality art, nothing drawn over it"],
@@ -1762,6 +1764,7 @@ function Dev_TwSelftest_Step() {
 	if (variable_global_exists("tws_cs_x0") && variable_global_exists("tws_cs_maxd") && instance_exists(global.pc))
 	{   // catslap: track the peak every frame
 		global.tws_cs_maxd = max(global.tws_cs_maxd, abs(global.pc.x - global.tws_cs_x0));
+		if (variable_global_exists("tws_cs_f")) { global.tws_cs_f++; if (global.tws_cs_f == 85) global.tws_cs_cucco85 = pc_is_cucco(); }
 		if (variable_global_exists("tws_cs_maxh") && variable_instance_exists(global.pc, "hspd")) global.tws_cs_maxh = max(global.tws_cs_maxh, global.pc.hspd);
 	}
 	global.tw_autosave            = false; // the harness mangles slot 1 (XP cap, forced death): no checkpoints of that, and no pruning the owner's real ones
@@ -2140,6 +2143,39 @@ function Dev_TwSelftest_Step() {
 			tw_bets_resolve("flawless");
 			tws_feat("a flawless pays the win bettor 2x and clears the book", tw_points_get("tstgamb") == _b0 + 40 && ds_map_size(global.tw_bets) == 0,
 			         "balance " + string(_b0) + " -> " + string(tw_points_get("tstgamb")) + "  book=" + string(ds_map_size(global.tw_bets)));
+		}
+		// ---- 11-08: NO MERCY + FAST MUSIC rows (Lane's 11-06 stream). Direct twitch_apply, so cooldowns
+		// and prices can't refuse them and fake a result.
+		if (global.tws_t == 440)
+		{
+			var _cm0 = global.tw_challenge_on;
+			global.tw_challenge_on = false; global.tw_apply_refused = false; global.tw_toast = "";
+			twitch_apply("challenge", "", "tstfeat", 0);
+			tws_feat("NO MERCY off refuses !challenge", !global.tw_challenge && string_pos("turned off", string(global.tw_toast)) > 0, string(global.tw_toast));
+			global.tw_challenge_on = _cm0;
+			global.tws_fm0 = global.tw_fast_music;
+			global.tw_fast_music = true;
+			twitch_apply("speed", "5", "tstfeat", 0);
+		}
+		if (global.tws_t == 460)
+		{
+			var _mi = Audio.mus_rm_inst, _mp = (_mi > 0 && audio_is_playing(_mi));
+			if (!_mp) tws_log("   FAST MUSIC: no room music playing here, pitch checks skipped");
+			else tws_feat("FAST MUSIC: music plays at 1.25x while !speed runs", abs(audio_sound_get_pitch(_mi) - 1.25) < 0.01, "pitch=" + string(audio_sound_get_pitch(_mi)) + " speed_mul=" + string(global.pc.tw_speed_mul));
+			global.tw_fast_music = false;
+		}
+		if (global.tws_t == 470)
+		{
+			var _mi = Audio.mus_rm_inst;
+			if (_mi > 0 && audio_is_playing(_mi)) tws_feat("FAST MUSIC off puts the pitch back mid-!speed", abs(audio_sound_get_pitch(_mi) - 1) < 0.01, "pitch=" + string(audio_sound_get_pitch(_mi)));
+			global.tw_fast_music = true;
+			tw_effects_clear_all(false);
+		}
+		if (global.tws_t == 490)
+		{
+			var _mi = Audio.mus_rm_inst;
+			if (_mi > 0 && audio_is_playing(_mi)) tws_feat("FAST MUSIC: pitch is back to 1 when !speed ends", abs(audio_sound_get_pitch(_mi) - 1) < 0.01 && global.pc.tw_speed_mul == 1, "pitch=" + string(audio_sound_get_pitch(_mi)));
+			global.tw_fast_music = global.tws_fm0;
 		}
 		if (global.tws_t >= 720)
 		{
@@ -2612,7 +2648,7 @@ function Dev_TwSelftest_Step() {
 				{
 					var _wv = string_trim(_want[_wi]);
 					for (var _mi = 0; _mi < array_length(global.tws_cases); _mi++)
-					{   if (global.tws_cases[_mi][0] == _wv) { array_push(_mk, global.tws_cases[_mi]); break; }  }
+					{   if (global.tws_cases[_mi][0] == _wv || global.tws_cases[_mi][1] == _wv) { array_push(_mk, global.tws_cases[_mi]); break; }  }  // name, or the row kind (pick:catslapcucco)
 				}
 			}
 			else
@@ -2709,6 +2745,20 @@ function Dev_TwSelftest_Step() {
 			tws_go("during");
 			break;
 		}
+		if (_c[1] == "catslapcucco2")
+		{   // tier 2: chat !arise gives the tier-2 bird when the player has earned it; fake "earned" for this row only
+			global.tws_t2_save = [g.CuccoSpell2_Acquired, g.CuccoSpell2_Option];
+			g.CuccoSpell2_Acquired = 1; g.CuccoSpell2_Option = 1;
+		}
+		if (_c[1] == "catslapcucco" || _c[1] == "catslapcucco2")
+		{   // 11-08: turn Link into a chicken in the SAME frame, then slap (the harness clears effects between rows)
+			global.tw_irc_last_cmd = -999999;
+			tws_say("arise");
+			global.tws_cs_cucco = pc_is_cucco();
+			global.tws_cs_t2 = g.CuccoSpell2_Active;
+			global.tw_toast = ""; global.tw_toast_timer = 0; global.tw_apply_refused = false;
+			global.tw_irc_last_cmd = -999999;
+		}
 		tws_say(_c[0]);
 		var _ok = false, _got = string(global.tw_toast), _expect = _c[1];
 		var _held = 0;
@@ -2725,8 +2775,10 @@ function Dev_TwSelftest_Step() {
 			case "arise":      _ok = _tst && (pc_is_cucco() || string_pos("OFF", _got) > 0)
 			                        && (!pc_is_cucco() || !(g.CuccoSpell2_Acquired && g.CuccoSpell2_Option) || g.CuccoSpell2_Active); break;
 			case "toast":      _ok = _tst; break;
+			case "catslapcucco":
+			case "catslapcucco2":
 			case "catslap":    _ok = _tst; global.tws_cs_x0 = global.pc.x; global.tws_cs_hp0 = f.hp; global.tws_cs_maxd = 0;
-			                   global.tws_cs_cs0 = variable_instance_exists(global.pc, "cs") ? global.pc.cs : -1; global.tws_cs_maxh = 0; break; // graded in "after" on PEAK displacement
+			                   global.tws_cs_f = 0; global.tws_cs_cucco85 = -1; global.tws_cs_cs0 = variable_instance_exists(global.pc, "cs") ? global.pc.cs : -1; global.tws_cs_maxh = 0; break; // graded in "after" on PEAK displacement
 			case "silent":     _ok = (global.tw_toast_timer <= 0 || _got == ""); break;
 			case "mean":       _ok = (string_pos("did you mean", _got) > 0); break;
 			case "nomatch":    _ok = (string_pos("no match", _got) > 0); break;
@@ -2786,7 +2838,12 @@ function Dev_TwSelftest_Step() {
 			_leak = string_replace(_leak, " tw_flip", "");
 			tws_log("   (challenge is ON and persistent by design -- cleared by the harness before the next verb)");
 		}
-		if (_ca[1] == "catslap" && string_pos("PASS", global.tws_row) == 1)
+		if (_ca[1] == "catslapcucco2" && variable_global_exists("tws_t2_save"))
+		{   tws_log("   tier-2 active AT THE SLAP: " + string(global.tws_cs_t2));
+			g.CuccoSpell2_Acquired = global.tws_t2_save[0]; g.CuccoSpell2_Option = global.tws_t2_save[1];  }
+		if (_ca[1] == "catslapcucco" || _ca[1] == "catslapcucco2") tws_log("   catslap on a chicken: was chicken at the slap = " + string(variable_global_exists("tws_cs_cucco") ? global.tws_cs_cucco : "?")
+		                                    + "  still chicken after the 3rd slap (frame 85) = " + string(variable_global_exists("tws_cs_cucco85") ? global.tws_cs_cucco85 : "?") + (variable_global_exists("tws_cs_cucco") && !global.tws_cs_cucco ? "  (NOT a chicken: CUCCO mode off on this save? result says nothing about the bug)" : ""));
+		if ((_ca[1] == "catslap" || _ca[1] == "catslapcucco" || _ca[1] == "catslapcucco2") && string_pos("PASS", global.tws_row) == 1)
 		{   // the slap must have MOVED Link (or fizzled with a reason off a battle screen) and cost no HP
 			// peak, not net: the three slaps alternate sides, so the net move can be ~0 against a wall
 			var _moved_px = max(abs(global.pc.x - global.tws_cs_x0), variable_global_exists("tws_cs_maxd") ? global.tws_cs_maxd : 0);
