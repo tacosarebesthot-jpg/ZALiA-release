@@ -1401,6 +1401,7 @@ function tws_zone_cases() {
 		["heckler",    "toast", "SHOT name tag"],
 		["spawn goriya", "toast", ""],
 		["swarm",      "toast", ""],
+		["ambush 4 30", "ambush", "overworld only: blobs hunt Link (11-08)"],
 		["freeze",     "toast", ""],
 		["root 3",     "toast", ""],
 		["deny all",   "denyall",  ""],
@@ -1574,7 +1575,7 @@ function tws_chatx_tests(_om) {
 	var _val = [
 		[ChatX.ONEUP,     "1UP REMINDER", "oneup_nudge", function() { return global.tw_oneup_nudge_min; }, 1],
 		[ChatX.SWARM_CAP, "SWARM CAP",    "swarm_cap",   function() { return global.tw_swarm_cap; },       2],
-		[ChatX.TOASTY,    "TOASTY",       "toasty",      function() { return global.tw_toasty_pct; },      10],
+		[ChatX.TOASTY,    "TOASTY",       "toasty_1in",  function() { return global.tw_toasty_1in; },      1],
 		[ChatX.BABALITY,  "BABALITY",     "babality",    function() { return global.tw_babality_pct; },    5]
 	];
 	for (var _j = 0; _j < array_length(_val); _j++)
@@ -1582,7 +1583,8 @@ function tws_chatx_tests(_om) {
 		var _r = _val[_j]; var _g = _r[3];
 		var _w0 = _g();
 		// step away from a clamp edge first so one press in each direction is visible
-		var _dir = (_w0 >= 100 || (_r[0] == ChatX.SWARM_CAP && _w0 >= 40) || (_r[0] == ChatX.ONEUP && _w0 >= 30)) ? -1 : 1;
+		if (_r[0] == ChatX.TOASTY && _w0 <= 2) { global.tw_toasty_1in = 10; _w0 = 10; } // 0 and 2 jump over 1 in 1
+		var _dir = (_w0 >= 100 || (_r[0] == ChatX.SWARM_CAP && _w0 >= 40) || (_r[0] == ChatX.ONEUP && _w0 >= 30) || (_r[0] == ChatX.TOASTY && _w0 >= 50)) ? -1 : 1;
 		tws_chatx_press_h(_om, _r[0], _dir);
 		var _w1 = _g(); var _h1 = tws_cfg_read(_r[2]);
 		tws_chatx_press_h(_om, _r[0], -_dir);
@@ -1591,13 +1593,16 @@ function tws_chatx_tests(_om) {
 		         _w1 == _w0 + _dir * _r[4] && _w2 == _w0 && _h1 == string(_w1) && _h2 == string(_w2),
 		         string(_w0) + " -> " + string(_w1) + " (file " + _h1 + ") -> " + string(_w2) + " (file " + _h2 + ")");
 	}
-	// clamps: TOASTY cannot pass 100 or drop below 0; SWARM CAP floor is 4
-	var _tp0 = global.tw_toasty_pct; global.tw_toasty_pct = 100; tws_chatx_press_h(_om, ChatX.TOASTY, 1);
-	var _tp_hi = global.tw_toasty_pct; global.tw_toasty_pct = 0; tws_chatx_press_h(_om, ChatX.TOASTY, -1);
-	var _tp_lo = global.tw_toasty_pct; global.tw_toasty_pct = _tp0;
+	// clamps: TOASTY stays in 0 (off) .. 1 in 50 and never lands on 1 in 1; SWARM CAP floor is 4
+	var _tp0 = global.tw_toasty_1in; global.tw_toasty_1in = 50; tws_chatx_press_h(_om, ChatX.TOASTY, 1);
+	var _tp_hi = global.tw_toasty_1in; global.tw_toasty_1in = 0; tws_chatx_press_h(_om, ChatX.TOASTY, -1);
+	var _tp_lo = global.tw_toasty_1in; global.tw_toasty_1in = 0; tws_chatx_press_h(_om, ChatX.TOASTY, 1);
+	var _tp_up = global.tw_toasty_1in; global.tw_toasty_1in = 2; tws_chatx_press_h(_om, ChatX.TOASTY, -1);
+	var _tp_dn = global.tw_toasty_1in; global.tw_toasty_1in = _tp0;
+	_tp_lo = (_tp_lo == 0 && _tp_up == 2 && _tp_dn == 0) ? 0 : -99;
 	var _sc0 = global.tw_swarm_cap; global.tw_swarm_cap = 4; tws_chatx_press_h(_om, ChatX.SWARM_CAP, -1);
 	var _sc_lo = global.tw_swarm_cap; global.tw_swarm_cap = _sc0;
-	tws_feat("value rows clamp (TOASTY 0..100, SWARM CAP floor 4)", _tp_hi == 100 && _tp_lo == 0 && _sc_lo == 4, "toasty hi=" + string(_tp_hi) + " lo=" + string(_tp_lo) + " swarm lo=" + string(_sc_lo));
+	tws_feat("value rows clamp (TOASTY off..1 in 50, skips 1 in 1; SWARM CAP floor 4)", _tp_hi == 50 && _tp_lo == 0 && _sc_lo == 4, "toasty hi=" + string(_tp_hi) + " lo=" + string(_tp_lo) + " swarm lo=" + string(_sc_lo));
 	twitch_config_save(); // leave the file matching the restored globals
 	with (_om) { ChatX_cursor = ChatX.BOUNTY; timer = 0; }
 }
@@ -2775,6 +2780,15 @@ function Dev_TwSelftest_Step() {
 			case "arise":      _ok = _tst && (pc_is_cucco() || string_pos("OFF", _got) > 0)
 			                        && (!pc_is_cucco() || !(g.CuccoSpell2_Acquired && g.CuccoSpell2_Option) || g.CuccoSpell2_Active); break;
 			case "toast":      _ok = _tst; break;
+			case "ambush":
+			{
+				var _owc = (g.room_type == "C" && instance_exists(global.OVERWORLD));
+				var _bl = 0, _btm = 0;
+				if (_owc) with (global.OVERWORLD) for (var _bi = 0; _bi < ds_grid_width(dg_enc_inst); _bi++) if (dg_enc_inst[#_bi,0]) { _bl++; _btm = max(_btm, dg_enc_inst[#_bi,ENC_INST_TMR_IDX]); }
+				_ok = _tst && (_owc ? (string_pos("AMBUSH!", _got) > 0 && _bl >= 4 && _btm >= 80) : (string_pos("only works on the overworld", _got) > 0));
+				tws_log("   ambush: overworld=" + string(_owc) + " blobs=" + string(_bl) + " longest timer=" + string(_btm) + " ticks");
+				break;
+			}
 			case "catslapcucco":
 			case "catslapcucco2":
 			case "catslap":    _ok = _tst; global.tws_cs_x0 = global.pc.x; global.tws_cs_hp0 = f.hp; global.tws_cs_maxd = 0;

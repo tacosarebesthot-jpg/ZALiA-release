@@ -97,7 +97,7 @@ function tw_points_cost(_v) {
 		case "freeze": case "stun": return 25;   case "smite": case "clearscreen": return 60;
 		case "hurt": case "drain": return 10;    case "poison": return 30;   case "catslap": return 15;   case "flashbang": return 60;
 		case "curse": return 20;  case "steal": case "rob": case "thief": case "pickpocket": return 30;
-		case "slow": return 15;   case "root": return 20;  case "spawn": return 15;  case "swarm": return 25;
+		case "slow": return 15;   case "root": return 20;  case "spawn": return 15;  case "swarm": return 25;  case "ambush": return 25;
 		case "slimed": return 25; case "rust": return 20;  case "adhd": return 15; // 10-24 !suggest round
 		case "beef": return 40; // dmgup (30) plus the HP and the size
 		case "flame": case "heckler": return 5;  case "deny": case "undeny": return 25;

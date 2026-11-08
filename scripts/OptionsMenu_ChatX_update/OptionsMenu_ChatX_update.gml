@@ -88,12 +88,15 @@ function OptionsMenu_ChatX_update() {
 	    }
 	    break;}
 
-	    // TOASTY: percent chance after a flawless finisher, 0 = off, steps of 10 (toasty=)
+	    // TOASTY: 1 in N finishers (toasty_1in=), 0 = off, 2..50. Owner 11-08: "should be 1 in X,
+	    // not every play of the MK things" -- the old 50% read as nearly every time.
 	    case ChatX.TOASTY:{
 	    if (_HORIZONTAL != 0)
 	    {
-	        if (!variable_global_exists("tw_toasty_pct")) global.tw_toasty_pct = 50;
-	        global.tw_toasty_pct = clamp(global.tw_toasty_pct + _HORIZONTAL * 10, 0, 100);
+	        if (!variable_global_exists("tw_toasty_1in")) global.tw_toasty_1in = 10;
+	        var _t1 = global.tw_toasty_1in + _HORIZONTAL;
+	        if (_t1 == 1) _t1 = (_HORIZONTAL > 0) ? 2 : 0; // 1 in 1 would be every time: OFF <-> 1 IN 2
+	        global.tw_toasty_1in = clamp(_t1, 0, 50);
 	        twitch_config_save();
 	        aud_play_sound(_SOUND1);
 	        timer = DURATION0;

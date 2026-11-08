@@ -4365,7 +4365,7 @@ function g_Create() {
 	global.tw_oneup_nudge_min     = 0;                 // minutes on the last life before a "!1up" reminder toast; 0 = off (oneup_nudge=)
 	global.tw_oneup_nudge_frames  = 0;                 // frames spent on the last life since the last reminder
 	global.tw_swarm_cap           = 14;                // live enemies on screen at which !swarm refuses (swarm_cap=)
-	global.tw_toasty_pct          = 50;                // chance the MK2 Toasty pops after a flawless finisher (toasty=)
+	global.tw_toasty_1in          = 10;                // the MK2 Toasty pops on 1 in N finishers, 0 = off (toasty_1in=), owner 11-08
 	global.tw_splash_corner       = false;             // the current splash is the bottom-right Toasty pop, not a centre banner
 	global.tw_splash_dur_total    = 0;                 // length of the current looping splash, for the corner slide
 	// 10-14 fun round (owner-approved): MK2 announcer pack, Babality, !bet on the boss, !bounty (off)

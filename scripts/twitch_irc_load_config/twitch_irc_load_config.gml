@@ -105,7 +105,10 @@ function twitch_irc_load_config() {
 			case "first_use_hint": global.tw_first_use_hint  = (tw_num(_val, 0) != 0); break;
 			case "oneup_nudge":    global.tw_oneup_nudge_min = clamp(floor(tw_num(_val, 0)), 0, 60); break;
 			case "swarm_cap":      global.tw_swarm_cap       = clamp(floor(tw_num(_val, 14)), 4, 40); break;
-			case "toasty":         global.tw_toasty_pct      = clamp(floor(tw_num(_val, 50)), 0, 100); break;
+			// 11-08: Toasty is 1 in N now (toasty_1in=, 0 off, 2..50). An old toasty= percent line only
+			// carries over as OFF (0); any other old percent is ignored and the 1-in-10 default stands.
+			case "toasty":         if (floor(tw_num(_val, 50)) <= 0) global.tw_toasty_1in = 0; break;
+			case "toasty_1in":     { var _t1n = clamp(floor(tw_num(_val, 10)), 0, 50); global.tw_toasty_1in = (_t1n == 1) ? 2 : _t1n; } break;
 			// 10-14 fun round
 			case "announcer":      global.tw_announcer       = (tw_num(_val, 1) != 0); break;
 			case "bets": case "bet": global.tw_bets_on       = (tw_num(_val, 1) != 0); break;
@@ -236,6 +239,7 @@ function tw_alias_verb(_v) {
 		case "killers": case "blame": case "deaths": case "killcount":  return "kills";
 		// round 11 RL quick chat -- the short forms chat will actually type. Deliberately NO
 		// "np" alias for "noproblem": !np is already NOW PLAYING and every stream uses it.
+		case "hunt": case "blobs": case "owmobs": case "overworldmobs": case "ow": return "ambush"; // 11-08 overworld blobs
 		case "slap": case "catslaps": case "cat_slap": return "catslap";     // Tangia's "Cat Slap"
 		case "flash": case "flashbag": case "flash_bang": return "flashbang"; // Tedw3rd typed !flashbang 09-25
 		case "nice":                      return "niceshot";
@@ -270,6 +274,7 @@ function tw_verb_all() {
 		"slimed","rust","adhd", // 10-24 chat !suggest round (asm0deus), approved by the owner 10-28
 		"trickortreat","haunt", // Halloween week 2026
 		"beef", // Lane 10-24 / 10-28: beefed-up mobs
+		"ambush", // owner 11-06/11-08: overworld blobs hunt Link
 		"version","ver","build","reshuffle","gorilla",
 		"vote","top","kills","bet","bounty",
 		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",

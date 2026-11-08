@@ -52,7 +52,7 @@ function options_reset_to_defaults() {
 	global.tw_inf_lives            = false; // Lane 10-28: INFINITE LIVES off
 	global.tw_oneup_nudge_min      = 0;
 	global.tw_swarm_cap            = 14;
-	global.tw_toasty_pct           = 50;
+	global.tw_toasty_1in           = 10;
 	global.tw_announcer            = true;
 	global.tw_babality_pct         = 15;
 	global.tw_bets_on              = true;

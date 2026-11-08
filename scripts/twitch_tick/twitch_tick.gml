@@ -365,8 +365,10 @@ function tw_toasty_enqueue() {
 	if (variable_global_exists("tw_splash_enabled") && !global.tw_splash_enabled) return;
 	var _p = asset_get_index("spr_mk2_toasty");
 	if (_p < 0 || !sprite_exists(_p)) return;
-	var _pct = variable_global_exists("tw_toasty_pct") ? global.tw_toasty_pct : 50;
-	if (irandom(99) >= _pct) return;
+	// 11-08 owner: 1 in X, not every play of the MK things -- toasty_1in= (0 off, 2..50, default 10)
+	var _n1 = variable_global_exists("tw_toasty_1in") ? global.tw_toasty_1in : 10;
+	var _shot = variable_global_exists("tw_selftest_mode") && global.tw_selftest_mode == "splash"; // the splash selftest screenshots it every time
+	if (!_shot && (_n1 <= 0 || irandom(_n1 - 1) != 0)) return;
 	var _s = asset_get_index("snd_mk2_toasty");
 	// wait 30 frames after the finisher ends, show for 60 frames (7 in / 35 hold / 18 out, see the
 	// draw block); looping mode on a 1-frame sprite. The sound plays as the head starts sliding in.

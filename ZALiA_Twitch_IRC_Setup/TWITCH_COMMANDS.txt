@@ -68,6 +68,9 @@ MOBS / DUNGEON MASTER
                       sets the pace (bare !slimed = rank 1, effect length). Respects the SWARM CAP
   !swarm [1-6]        a pack of RANDOM enemies (default 3). Typed on the overworld or in a
                       cutscene it is QUEUED (up to 3) and lands on the next battle screen
+  !ambush [1-6] [s] (!hunt !blobs)  OVERWORLD ONLY: big encounter blobs appear around Link and
+                      hunt him (default 3 blobs, 20 s, max 60). Touching one starts the fight, same
+                      as a normal overworld encounter. Add "weak" for the small ones: !ambush 4 30 weak
   !flame (!heckler)   a jumping flame with the chatter's name over it
   !freeze (!stun)     freeze on-screen non-boss mobs [timed]
   !smite (!clearscreen)  kill all on-screen non-boss mobs
@@ -101,6 +104,11 @@ MODS AND THE BROADCASTER
                       no votes, no points. Survives a restart (ignored.txt).
   !unignore <name>    (!unmute) let them play again
   Mods skip both cooldowns (the MODS SKIP COOLDOWN row, mod_bypass= in twitch_config.txt).
+
+STREAMER SWITCHES (Options > Twitch options > Chat extras)
+  NO MERCY    on/off (challenge=)  off = !challenge is refused, and a running one ends. With
+              INFINITE LIVES on, a challenge only ends when you leave the palace.
+  FAST MUSIC  on/off (fast_music=) the music plays faster while !speed or !meth is on you.
 
 ROCKET LEAGUE QUICK CHAT (plates only, always free; needs the ROCKET LEAGUE row on)
   !niceshot  !whatasave  !calculated  !savage  !closeone  !okay  !faking

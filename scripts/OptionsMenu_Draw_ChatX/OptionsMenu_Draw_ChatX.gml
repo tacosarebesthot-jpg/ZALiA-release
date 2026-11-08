@@ -77,8 +77,8 @@ function OptionsMenu_Draw_ChatX() {
 	    break;
 
 	    case ChatX.TOASTY:
-	        var _tp = variable_global_exists("tw_toasty_pct") ? global.tw_toasty_pct : 50;
-	        _text = (_tp <= 0) ? _OFF : (string(_tp) + "%");
+	        var _tp = variable_global_exists("tw_toasty_1in") ? global.tw_toasty_1in : 10;
+	        _text = (_tp <= 0) ? _OFF : ("1 IN " + string(_tp));
 	    break;
 
 	    case ChatX.ANNOUNCER:

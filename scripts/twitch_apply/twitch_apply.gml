@@ -1447,6 +1447,73 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		// rank 3 rain of slimes for 60 seconds" (2:45:45). Lane (2:35:49): "like a speedrun with
 		// tower defense in it ... good idea". Bots drop in from the top edge of the view at a pace
 		// set by the rank; the SWARM CAP is the ceiling, and nothing drops mid-cutscene/menu.
+		case "ambush":
+			// OVERWORLD AMBUSH (owner in chat 11-06 1:10:51: "we need a way to spawn overworld mobs and/or
+			// something to fuck with Lane when he's on the overworld"; 11-08: "make it dangerous for him to
+			// walk the overworld"). Every other hostile verb is battle-screen only, so the map was a safe zone.
+			// Fills FREE encounter slots in Overworld.dg_enc_inst -- the same rows Overworld_enc_spawn_update
+			// writes -- with blobs around Link. The game's own Overworld_enc_inst_update chases him with them
+			// and starts the battle on contact, so nothing here touches movement or the fight itself. Like the
+			// natural ones, a blob only pulls him into a fight on a tile that HAS an encounter scene (not on a
+			// road or in a town). The life timer ticks every 21 frames (update_game_timers, timer_b).
+			// !ambush [1-6] [secs] [weak|strong]: 3 blobs, 20 s, strong by default; max 6 (the grid), 60 s.
+			if (!instance_exists(g) || g.room_type != "C" || !variable_global_exists("OVERWORLD") || !instance_exists(global.OVERWORLD))
+			{
+				global.tw_toast         = _who_s + " -> ambush only works on the overworld";
+				global.tw_toast_timer   = 240;
+				global.tw_apply_refused = true;
+				break;
+			}
+			{
+				var _am_n = 3, _am_secs = 20, _am_k = 0, _am_type = g.ENC_STRG;
+				var _am_parts = string_split(string(_arg), " ", true);
+				for (var _ai = 0; _ai < array_length(_am_parts); _ai++)
+				{
+					var _atok = string_lower(tw_trim(_am_parts[_ai]));
+					if (_atok == "weak" || _atok == "small")   { _am_type = g.ENC_WEAK; continue; }
+					if (_atok == "strong" || _atok == "big")   { _am_type = g.ENC_STRG; continue; }
+					if (_atok == "" || string_digits(_atok) != _atok) continue;
+					if (_am_k == 0)      _am_n    = floor(tw_num(_atok, 3));
+					else if (_am_k == 1) _am_secs = floor(tw_num(_atok, 20));
+					_am_k++;
+				}
+				_am_n    = clamp(_am_n, 1, 6);
+				_am_secs = clamp(_am_secs, 5, 60);
+				var _am_ticks = ceil(_am_secs * 60 / 21);
+				// spots around Link: 3-4 tiles out on each side, then the diagonals
+				var _am_off = [[48,0], [-48,0], [0,48], [0,-48], [64,64], [-64,-64]]; // decimal: "[$" opens a struct accessor in GML
+				var _am_made = 0;
+				with (global.OVERWORLD)
+				{
+					if (flute_timer) break; // mid-flute: the encounter code is paused anyway
+					var _am_px = ow_pc_xy(0), _am_py = ow_pc_xy(1);
+					var _am_w  = ds_grid_width(dg_enc_inst), _am_h = ds_grid_height(dg_enc_inst);
+					for (var _as = 0; _as < _am_w && _am_made < _am_n; _as++)
+					{
+						if (dg_enc_inst[#_as,0]) continue; // a natural blob is using this slot
+						for (var _aj = 0; _aj < _am_h; _aj++) dg_enc_inst[#_as,_aj] = 0;
+						var _ao = _am_off[_am_made mod array_length(_am_off)];
+						dg_enc_inst[#_as,0] = _am_type;
+						dg_enc_inst[#_as,1] = _am_px + _ao[0];
+						dg_enc_inst[#_as,2] = _am_py + _ao[1];
+						dg_enc_inst[#_as,3] = 0;
+						dg_enc_inst[#_as,4] = 0;
+						dg_enc_inst[#_as,ENC_INST_TMR_IDX] = _am_ticks;
+						_am_made++;
+					}
+				}
+				if (_am_made <= 0)
+				{
+					global.tw_toast         = _who_s + " -> ambush refused: the overworld is full of blobs already";
+					global.tw_toast_timer   = 240;
+					global.tw_apply_refused = true;
+					break;
+				}
+				global.tw_toast       = _who_s + " -> AMBUSH! " + string(_am_made) + ((_am_type == g.ENC_WEAK) ? " small" : " big") + " blob" + ((_am_made == 1) ? "" : "s") + " hunting you for " + string(_am_secs) + "s";
+				global.tw_toast_timer = 240;
+			}
+			break;
+
 		case "slimed":
 			if (!tw_spawn_window_ok(_v, _who_s)) break;
 			{
@@ -1867,6 +1934,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "slimed": case "rust": case "adhd": // 10-24 !suggest round
 			case "haunt": // Halloween week
 			case "beef": // Lane 10-28
+			case "ambush": // 11-08 overworld blobs
 				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; global.tw_last_hurt_verb = _v; break;
 		}
 

@@ -74,7 +74,7 @@ function twitch_config_save() {
         ["first_use_hint", (variable_global_exists("tw_first_use_hint") && global.tw_first_use_hint) ? "1" : "0"],
         ["oneup_nudge",    string(variable_global_exists("tw_oneup_nudge_min") ? global.tw_oneup_nudge_min : 0)],
         ["swarm_cap",      string(variable_global_exists("tw_swarm_cap")      ? global.tw_swarm_cap      : 14)],
-        ["toasty",         string(variable_global_exists("tw_toasty_pct")     ? global.tw_toasty_pct     : 50)],
+        ["toasty_1in",     string(variable_global_exists("tw_toasty_1in")     ? global.tw_toasty_1in     : 10)], // 11-08: was toasty= percent
         ["announcer",      (!variable_global_exists("tw_announcer") || global.tw_announcer) ? "1" : "0"],
         ["babality",       string(variable_global_exists("tw_babality_pct")   ? global.tw_babality_pct   : 15)],
         ["bets",           (!variable_global_exists("tw_bets_on")   || global.tw_bets_on)   ? "1" : "0"],
