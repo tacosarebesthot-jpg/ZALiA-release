@@ -1228,6 +1228,13 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		// the palace (twitch_tick clears it); it SURVIVES a death (keep_on_death -- the old
 		// DeathScreen_Step clear fought that flag and won). Only in a palace.
 		case "challenge":
+			if (variable_global_exists("tw_challenge_on") && !global.tw_challenge_on)
+			{   // NO MERCY row off (Lane 11-06: with infinite lives a challenge never ends on its own)
+				global.tw_toast       = _who_s + " -> challenge is turned off by the streamer";
+				global.tw_toast_timer = 240;
+				global.tw_apply_refused = true;
+				break;
+			}
 			if (!instance_exists(g) || g.dungeon_num <= 0)
 			{
 				global.tw_toast       = _who_s + " -> challenge needs a palace";

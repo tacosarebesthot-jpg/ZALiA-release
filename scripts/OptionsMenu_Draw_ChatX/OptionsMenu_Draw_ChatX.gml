@@ -110,6 +110,10 @@ function OptionsMenu_Draw_ChatX() {
 	        _text = (variable_global_exists("tw_bounty_on") && global.tw_bounty_on) ? _ON : _OFF;
 	    break;
 
+	    case ChatX.CHALLENGE:
+	        _text = (!variable_global_exists("tw_challenge_on") || global.tw_challenge_on) ? _ON : _OFF;
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

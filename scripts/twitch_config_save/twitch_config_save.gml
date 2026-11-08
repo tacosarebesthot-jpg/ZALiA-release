@@ -83,7 +83,9 @@ function twitch_config_save() {
         ["help_card",      (variable_global_exists("tw_help_card")  && global.tw_help_card)   ? "1" : "0"],
         ["cmd_prices",     (!variable_global_exists("tw_cmd_prices") || global.tw_cmd_prices) ? "1" : "0"],
         // Lane 10-28: INFINITE LIVES (off by default)
-        ["inf_lives",      (variable_global_exists("tw_inf_lives")  && global.tw_inf_lives)   ? "1" : "0"]
+        ["inf_lives",      (variable_global_exists("tw_inf_lives")  && global.tw_inf_lives)   ? "1" : "0"],
+        // Lane 11-06: NO MERCY (!challenge allowed, on by default)
+        ["challenge",      (!variable_global_exists("tw_challenge_on") || global.tw_challenge_on) ? "1" : "0"]
     ];
     var _own_wrote = array_create(array_length(_own), false);
 

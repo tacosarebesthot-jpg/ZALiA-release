@@ -57,6 +57,7 @@ function options_reset_to_defaults() {
 	global.tw_babality_pct         = 15;
 	global.tw_bets_on              = true;
 	global.tw_bounty_on            = false;
+	global.tw_challenge_on         = true;
 	global.tw_points_on            = true; // POINTS ECONOMY (written by twitch_config_save below)
 	global.tw_autosave             = true;
 	global.tw_rl                   = true;

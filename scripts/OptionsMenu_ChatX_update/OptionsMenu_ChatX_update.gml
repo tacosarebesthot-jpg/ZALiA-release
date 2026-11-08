@@ -148,6 +148,22 @@ function OptionsMenu_ChatX_update() {
 	    }
 	    break;}
 
+	    // NO MERCY: chat may use !challenge (challenge=), on by default. Lane 11-06 1:31: with INFINITE
+	    // LIVES on there is no game over, so a challenge only ends when he leaves the palace. Owner
+	    // 11-08: give him a setting to disable it. Turning it OFF also ends a running challenge.
+	    case ChatX.CHALLENGE:{ if (timer) break;
+	    if (_InputConfirm_pressed)
+	    {
+	        if (!variable_global_exists("tw_challenge_on")) global.tw_challenge_on = true;
+	        global.tw_challenge_on = !global.tw_challenge_on;
+	        if (!global.tw_challenge_on && variable_global_exists("tw_challenge") && global.tw_challenge)
+	        {   global.tw_challenge = false;  } // its tw_active entry sees this, ends, and its restore clears the flip
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // HELP CARD: !help / !commands draw the full card over the game (help_card=), off by default
 	    // (10-24 VOD 0:55:51, the card blocked Lane's screen mid-fight)
 	    case ChatX.HELPCARD:{ if (timer) break;
