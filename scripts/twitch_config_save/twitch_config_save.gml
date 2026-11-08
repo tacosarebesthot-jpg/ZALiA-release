@@ -85,7 +85,9 @@ function twitch_config_save() {
         // Lane 10-28: INFINITE LIVES (off by default)
         ["inf_lives",      (variable_global_exists("tw_inf_lives")  && global.tw_inf_lives)   ? "1" : "0"],
         // Lane 11-06: NO MERCY (!challenge allowed, on by default)
-        ["challenge",      (!variable_global_exists("tw_challenge_on") || global.tw_challenge_on) ? "1" : "0"]
+        ["challenge",      (!variable_global_exists("tw_challenge_on") || global.tw_challenge_on) ? "1" : "0"],
+        // 11-08: FAST MUSIC (music speeds up during !speed / !meth, on by default)
+        ["fast_music",     (!variable_global_exists("tw_fast_music") || global.tw_fast_music) ? "1" : "0"]
     ];
     var _own_wrote = array_create(array_length(_own), false);
 

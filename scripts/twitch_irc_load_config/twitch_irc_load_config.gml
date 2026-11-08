@@ -111,6 +111,7 @@ function twitch_irc_load_config() {
 			case "bets": case "bet": global.tw_bets_on       = (tw_num(_val, 1) != 0); break;
 			case "bounty":         global.tw_bounty_on       = (tw_num(_val, 0) != 0); break;
 			case "challenge": case "nomercy": global.tw_challenge_on = (tw_num(_val, 1) != 0); break; // NO MERCY row, Lane 11-06
+			case "fast_music": case "fastmusic": global.tw_fast_music = (tw_num(_val, 1) != 0); break; // FAST MUSIC row, 11-08
 			case "babality":       global.tw_babality_pct    = clamp(floor(tw_num(_val, 15)), 0, 100); break;
 			// tls=1: the token crosses the wire inside TLS (wss://irc-ws.chat.twitch.tv:443). Still
 			// opt-in; plaintext 6667 is the default. Checked 2026-10-01 on LTS 2026: the WebSocket

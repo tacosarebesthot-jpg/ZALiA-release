@@ -4379,6 +4379,7 @@ function g_Create() {
 	global.tw_bets                = -1;                // ds_map chatter -> "outcome,amount", made on first bet
 	global.tw_bounty_on           = false;             // !bounty <enemy> N, OFF by default (bounty=)
 	global.tw_challenge_on        = true;              // NO MERCY row: chat may use !challenge (challenge=), Lane 11-06
+	global.tw_fast_music          = true;              // FAST MUSIC row: music speeds up during !speed / !meth (fast_music=), 11-08
 	global.tw_bounties            = -1;                // ds_map enemy name -> "chatter,amount"
 	global.tw_bounty_prev         = -1;                // ds_map enemy name -> live count last frame
 	global.tw_bounty_room         = -1;                // room those counts belong to

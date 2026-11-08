@@ -25,6 +25,7 @@ function twitch_tick() {
 	tw_oneup_nudge_tick();  // "!1up" reminder after N minutes on the last life (10-09 VOD round)
 	tw_swarm_tick();        // announcer: EXCELLENT when a chat pack is wiped clean (10-14 fun round)
 	tw_bounty_tick();       // !bounty payouts (twitch_vote.gml), off unless bounty=1
+	tw_fast_music_tick();   // FAST MUSIC: room music plays faster while !speed / !meth runs (11-08)
 
 	if (!variable_global_exists("tw_active")) return;
 
@@ -409,4 +410,30 @@ function tw_swarm_tick() {
 	if (_left > 0) return;
 	global.tw_swarm_armed = false;
 	if (!global.tw_swarm_hit) tw_announce("snd_mk2_excellent");
+}
+
+/// @description  tw_fast_music_tick() -- FAST MUSIC (owner 11-08; HungSo1o 11-06 1:57:21 "speed should
+/// speed up the music too", Lane loved it). Like Super Mario Bros 1 and 3 under 100 seconds: while
+/// chat's !speed runs (and !meth, which fires !speed), the room music plays faster. Every track, chat's
+/// !music picks included, plays through Audio.mus_rm_inst (aud_play_sound), so one pitch call covers
+/// them. GameMaker pitch raises tempo AND key together, like a sped-up tape.
+/// Toggle: CHAT EXTRAS > FAST MUSIC (fast_music=1/0 in twitch_config.txt), on by default. The pitch
+/// is re-sent only when the track instance or the wanted pitch changes, never every frame.
+function tw_fast_music_tick() {
+	var _want = 1;
+	if (variable_global_exists("tw_fast_music") && global.tw_fast_music
+	&&  instance_exists(global.pc) && variable_instance_exists(global.pc, "tw_speed_mul")
+	&&  global.pc.tw_speed_mul > 1)
+	{   _want = 1.25;  }
+
+	if (!variable_global_exists("tw_fast_music_inst")) { global.tw_fast_music_inst = noone; global.tw_fast_music_p = 1; }
+	if (!instance_exists(Audio)) return;
+	var _inst = Audio.mus_rm_inst;
+	if (is_undefined(_inst) || _inst <= 0 || !audio_is_playing(_inst)) return;
+	if (_inst != global.tw_fast_music_inst || _want != global.tw_fast_music_p)
+	{
+		audio_sound_pitch(_inst, _want);
+		global.tw_fast_music_inst = _inst;
+		global.tw_fast_music_p    = _want;
+	}
 }

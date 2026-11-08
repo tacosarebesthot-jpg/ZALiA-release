@@ -938,7 +938,7 @@ function OptionsMenu_Create() {
 	// twitch_config_save() writes them, so the file and the menu never disagree.
 	enum ChatX
 	{
-	    HINT, ONEUP, SWARM_CAP, TOASTY, ANNOUNCER, BABALITY, BETS, BOUNTY, HELPCARD, PRICES, INFLIVES, CHALLENGE,
+	    HINT, ONEUP, SWARM_CAP, TOASTY, ANNOUNCER, BABALITY, BETS, BOUNTY, HELPCARD, PRICES, INFLIVES, CHALLENGE, FASTMUSIC,
 	    BACK,
 	    COUNT
 	}
@@ -970,6 +970,8 @@ function OptionsMenu_Create() {
 	ChatX_dg[#_i,0]="INFINITE LIVES";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="LINK STILL DIES AND RESTARTS THE AREA, BUT THE LIFE COUNT NEVER DROPS: NO GAME OVER, NO XP PENALTY. FOR CHAT-VS-LINK STREAMS. OFF = NORMAL LIVES.";
 	             _i=ChatX.CHALLENGE;
 	ChatX_dg[#_i,0]="NO MERCY";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="CHAT CAN USE !CHALLENGE: FLIPPED SCREEN, 4 HEARTS, NO HELP UNTIL YOU LEAVE THE PALACE. WITH INFINITE LIVES IT NEVER ENDS ON ITS OWN. OFF = REFUSED, AND ENDS ONE THAT IS RUNNING.";
+	             _i=ChatX.FASTMUSIC;
+	ChatX_dg[#_i,0]="FAST MUSIC";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="WHILE CHAT'S !SPEED OR !METH IS ON YOU, THE MUSIC PLAYS FASTER, LIKE MARIO UNDER 100 SECONDS. OFF = MUSIC STAYS NORMAL.";
 	             _i=ChatX.BACK;
 	ChatX_dg[#_i,0]="BACK";  ChatX_dg[#_i,1]=_font; ChatX_dg[#_i,2]="RETURN TO TWITCH OPTIONS.";
 

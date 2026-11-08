@@ -114,6 +114,10 @@ function OptionsMenu_Draw_ChatX() {
 	        _text = (!variable_global_exists("tw_challenge_on") || global.tw_challenge_on) ? _ON : _OFF;
 	    break;
 
+	    case ChatX.FASTMUSIC:
+	        _text = (!variable_global_exists("tw_fast_music") || global.tw_fast_music) ? _ON : _OFF;
+	    break;
+
 	    }//switch(_enum)
 
 	    if (_text != 0)

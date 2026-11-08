@@ -164,6 +164,20 @@ function OptionsMenu_ChatX_update() {
 	    }
 	    break;}
 
+	    // FAST MUSIC: music speeds up while !speed / !meth runs (fast_music=), on by default.
+	    // Owner 11-08: "needs a toggleable option, I know it would annoy me". tw_fast_music_tick
+	    // puts the pitch back to normal on the next frame when this goes OFF mid-effect.
+	    case ChatX.FASTMUSIC:{ if (timer) break;
+	    if (_InputConfirm_pressed)
+	    {
+	        if (!variable_global_exists("tw_fast_music")) global.tw_fast_music = true;
+	        global.tw_fast_music = !global.tw_fast_music;
+	        twitch_config_save();
+	        aud_play_sound(_SOUND2);
+	        timer = DURATION1;
+	    }
+	    break;}
+
 	    // HELP CARD: !help / !commands draw the full card over the game (help_card=), off by default
 	    // (10-24 VOD 0:55:51, the card blocked Lane's screen mid-fight)
 	    case ChatX.HELPCARD:{ if (timer) break;
