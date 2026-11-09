@@ -309,4 +309,11 @@ function twitch_irc_handle_line(_line) {
 		var _qe = global.tw_swarm_queue[array_length(global.tw_swarm_queue) - 1];
 		_qe.paid = _paid;  _qe.payer = _sender;
 	}
+	// same for a !flute waiting for the overworld
+	if (variable_global_exists("tw_flute_pending") && is_struct(global.tw_flute_pending) && global.tw_flute_pending.fresh)
+	{
+		global.tw_flute_pending.fresh = false;
+		global.tw_flute_pending.paid  = max(0, _paid);
+		global.tw_flute_pending.payer = _sender;
+	}
 }

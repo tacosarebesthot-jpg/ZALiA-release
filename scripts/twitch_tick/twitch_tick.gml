@@ -26,6 +26,8 @@ function twitch_tick() {
 	tw_swarm_tick();        // announcer: EXCELLENT when a chat pack is wiped clean (10-14 fun round)
 	tw_bounty_tick();       // !bounty payouts (twitch_vote.gml), off unless bounty=1
 	tw_fast_music_tick();   // FAST MUSIC: room music plays faster while !speed / !meth runs (11-08)
+	tw_flute_tick();        // !flute waiting for the overworld (Lane 11-09)
+	tw_boulder_tick();      // !boulder: drop when Link stops, clear when he leaves the map (Lane 11-09)
 
 	if (!variable_global_exists("tw_active")) return;
 
@@ -427,6 +429,9 @@ function tw_fast_music_tick() {
 	&&  instance_exists(global.pc) && variable_instance_exists(global.pc, "tw_speed_mul")
 	&&  global.pc.tw_speed_mul > 1)
 	{   _want = 1.25;  }
+	// !prison: the last wave plays fast (owner 11-09), same switch
+	if (variable_global_exists("tw_fast_music") && global.tw_fast_music
+	&&  variable_global_exists("tw_prison_fast") && global.tw_prison_fast) {   _want = 1.25;  }
 
 	if (!variable_global_exists("tw_fast_music_inst")) { global.tw_fast_music_inst = noone; global.tw_fast_music_p = 1; }
 	if (!instance_exists(Audio)) return;

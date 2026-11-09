@@ -1447,6 +1447,120 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		// rank 3 rain of slimes for 60 seconds" (2:45:45). Lane (2:35:49): "like a speedrun with
 		// tower defense in it ... good idea". Bots drop in from the top edge of the view at a pace
 		// set by the rank; the SWARM CAP is the ceiling, and nothing drops mid-cutscene/menu.
+		case "flute":
+			// !FLUTE (HungSo1o 11-06 1:26:54, Lane's rules 11-09): warp Link to a RANDOM town he has already been
+			// in, the other continent included once he has been there. Works without the flute item. Typed off
+			// the overworld it waits until he is back on the map ("make sure it doesn't trigger until I exit
+			// the screen"). One per 10 minutes for all of chat, its own clock (not !prison's). Uses the game's
+			// own rando flute-warp (Overworld Warp_state): the tune, the spin, the black screen, the landing.
+			if (!variable_global_exists("tw_flute_next")) global.tw_flute_next = 0;
+			if (current_time < global.tw_flute_next)
+			{
+				var _fl_left = ceil((global.tw_flute_next - current_time) / 1000);
+				global.tw_toast = _who_s + " -> flute cooldown: " + string(_fl_left div 60) + "m " + string(_fl_left mod 60) + "s left";
+				global.tw_toast_timer = 240; global.tw_apply_refused = true; break;
+			}
+			if (variable_global_exists("tw_flute_pending") && is_struct(global.tw_flute_pending))
+			{
+				global.tw_toast = _who_s + " -> a flute is already on the way"; global.tw_toast_timer = 180;
+				global.tw_apply_refused = true; break;
+			}
+			if (array_length(tw_flute_towns()) == 0)
+			{
+				global.tw_toast = _who_s + " -> flute: Link hasn't been in a town yet"; global.tw_toast_timer = 240;
+				global.tw_apply_refused = true; break;
+			}
+			global.tw_flute_next    = current_time + TW_FLUTE_COOLDOWN_MS;
+			global.tw_flute_pending = { who : _who_s, fresh : true, paid : 0, payer : "" };
+			if (tw_flute_try_fire())
+			{
+				global.tw_toast = _who_s + " -> FLUTE! off to " + global.tw_flute_last_town; global.tw_toast_timer = 300;
+			}
+			else
+			{
+				global.tw_toast = _who_s + " -> flute QUEUED: it plays when you're back on the overworld"; global.tw_toast_timer = 300;
+				global.tw_apply_queued = true; // nothing has touched Link yet
+			}
+			break;
+
+		case "boulder":
+			// !BOULDER [1-5] (owner 11-06 1:12:24 + Lane 1:11:49, Lane's rules 11-09): a wall of the game's own
+			// hammer boulders right in front of Link on the overworld ("a viewer makes me step out of the way
+			// into enemies"). Dropped even without the hammer. They stay until he leaves the overworld (an
+			// encounter, a town, a cave), then every one is put back. The hammer breaks them like any boulder
+			// and leaves the ground that was there. Default 3 (a wall), 1 = a single rock.
+			if (!instance_exists(g) || g.room_type != "C" || !variable_global_exists("OVERWORLD") || !instance_exists(global.OVERWORLD))
+			{
+				global.tw_toast = _who_s + " -> boulders only drop on the overworld"; global.tw_toast_timer = 240;
+				global.tw_apply_refused = true; break;
+			}
+			if (!variable_global_exists("tw_boulders")) global.tw_boulders = [];
+			if (array_length(global.tw_boulders) >= TW_BOULDER_MAX)
+			{
+				global.tw_toast = _who_s + " -> boulder refused: " + string(TW_BOULDER_MAX) + " on the map already"; global.tw_toast_timer = 240;
+				global.tw_apply_refused = true; break;
+			}
+			{
+				var _bo_n = clamp(floor(tw_num(_arg, 3)), 1, 5);
+				var _bo_made = tw_boulder_drop(_bo_n);
+				if (_bo_made < 0)
+				{   // Link is mid-step: drop it the moment he stops (a frame or two)
+					global.tw_boulder_pending = { n : _bo_n, who : _who_s };
+					global.tw_toast = _who_s + " -> BOULDER! incoming"; global.tw_toast_timer = 240;
+				}
+				else if (_bo_made == 0)
+				{
+					global.tw_toast = _who_s + ((variable_global_exists("tw_boulder_sealed") && global.tw_boulder_sealed)
+					                ? " -> no boulder: it would seal Link in (no hammer)" : " -> no room for a boulder in front of Link"); global.tw_toast_timer = 240;
+					global.tw_apply_refused = true;
+				}
+				else
+				{
+					global.tw_toast = _who_s + " -> BOULDER! " + ((_bo_made == 1) ? "a rock" : string(_bo_made) + " rocks") + " in your way"; global.tw_toast_timer = 240;
+				}
+			}
+			break;
+
+		case "prison":
+			// !PRISON (Lane 11-06 1:54:13 idea, his rules on Discord 11-09): the room's exits lock and chat's
+			// prison sends 3 waves of 3 random mobs, harder each wave; clear all 3 and he walks free. Not in a
+			// boss room. Dying ends it (tw_effects_clear_all runs restore). Falling down a pit is the one way out
+			// that stays open (a pit with no floor below would otherwise hold him off screen), and leaving the
+			// room that way ends it too. One prison per 10 minutes for ALL of chat, so a seed can't be
+			// stun-locked (owner 11-09: chat-wide). The exits are held shut by tw_prison_blocks_exit in
+			// PC_update_1c; nothing here changes an Exit's own open flag, so nothing needs putting back.
+			if (!tw_spawn_window_ok(_v, _who_s)) break;
+			if (instance_exists(Boss))
+			{
+				global.tw_toast = _who_s + " -> no prison in a boss room"; global.tw_toast_timer = 240;
+				global.tw_apply_refused = true; break;
+			}
+			if (variable_global_exists("tw_prison_on") && global.tw_prison_on)
+			{
+				global.tw_toast = _who_s + " -> already in prison"; global.tw_toast_timer = 180;
+				global.tw_apply_refused = true; break;
+			}
+			if (!variable_global_exists("tw_prison_next")) global.tw_prison_next = 0;
+			if (current_time < global.tw_prison_next)
+			{
+				var _pr_left = ceil((global.tw_prison_next - current_time) / 1000);
+				global.tw_toast = _who_s + " -> prison cooldown: " + string(_pr_left div 60) + "m " + string(_pr_left mod 60) + "s left";
+				global.tw_toast_timer = 240; global.tw_apply_refused = true; break;
+			}
+			if (!instance_exists(global.pc)) { global.tw_apply_refused = true; break; }
+			global.tw_prison_next = current_time + TW_PRISON_COOLDOWN_MS;
+			global.tw_prison_on   = true;
+			global.tw_prison_fast = false;
+			global.tw_prison      = { rm : room, wave : 0, ids : [], wave_frames : 0, gap : 60, who : _who_s };
+			array_push(global.tw_active, {
+				frames  : 999999,
+				reapply : function() { if (!tw_prison_step()) self.frames = 0; },
+				restore : function() { tw_prison_end(); }
+			});
+			global.tw_toast       = _who_s + " -> PRISON! exits locked: clear 3 waves to get out";
+			global.tw_toast_timer = 300;
+			break;
+
 		case "ambush":
 			// OVERWORLD AMBUSH (owner in chat 11-06 1:10:51: "we need a way to spawn overworld mobs and/or
 			// something to fuck with Lane when he's on the overworld"; 11-08: "make it dangerous for him to
@@ -1935,6 +2049,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			case "haunt": // Halloween week
 			case "beef": // Lane 10-28
 			case "ambush": // 11-08 overworld blobs
+			case "prison": // Lane 11-09
+			case "boulder": // Lane 11-09
 				global.tw_last_hurter = _who_s; global.tw_last_hurter_t = current_time; global.tw_last_hurt_verb = _v; break;
 		}
 
@@ -2391,6 +2507,13 @@ function tw_effects_clear_all(_on_death) {
 		global.tw_swarm_queue = [];
 	}
 
+	// !flute waiting for the overworld: a death keeps it, a file load hands the points back
+	if (!_on_death && variable_global_exists("tw_flute_pending") && is_struct(global.tw_flute_pending))
+	{
+		if (global.tw_flute_pending.paid > 0) tw_points_add(global.tw_flute_pending.payer, global.tw_flute_pending.paid);
+		global.tw_flute_pending = undefined;
+	}
+
 	if (!variable_global_exists("tw_active") || !is_array(global.tw_active)) return 0;
 	var _n = 0;
 	for (var _i = array_length(global.tw_active) - 1; _i >= 0; _i--) // newest first: had_fary chains unwind in order
@@ -2431,4 +2554,280 @@ function tw_kills_add(_who) {
 	_n = (is_undefined(_n) ? 0 : _n) + 1;
 	global.tw_kills[? _k] = _n;
 	return _n;
+}
+
+
+// ---- !PRISON (Lane 11-09) ---------------------------------------------------------------
+#macro TW_PRISON_COOLDOWN_MS 600000 // 10 minutes, chat-wide (Lane: "so you can't stun lock a seed")
+#macro TW_PRISON_WAVES       3
+#macro TW_PRISON_PER_WAVE    3
+#macro TW_PRISON_WAVE_MAX_F  3600   // 60 s: a wave mob that flew off or got stuck can't hold him forever
+
+/// @description  tw_prison_blocks_exit(exit) -- true while a prison holds this exit shut. Only a plain
+/// pit (down side, not an elevator) stays usable; see case "prison" in twitch_apply.
+function tw_prison_blocks_exit(_ex) {
+	if (!variable_global_exists("tw_prison_on") || !global.tw_prison_on) return false;
+	if (!instance_exists(_ex)) return false;
+	if ((_ex.side & $4) && (_ex.exit_type & $F0) != g.EXIT_TYPE_ELEVATOR) return false;
+	return true;
+}
+
+/// @description  tw_prison_step() -- one frame of a running prison (the tw_active reapply).
+/// Returns false when the prison is over (the entry's restore then calls tw_prison_end).
+function tw_prison_step() {
+	if (!variable_global_exists("tw_prison") || !is_struct(global.tw_prison)) return false;
+	var _p = global.tw_prison;
+	if (!instance_exists(g) || room != _p.rm || g.room_type != "A") return false; // left by a pit / file load
+	if (instance_exists(Boss)) return false;
+	if (!instance_exists(global.pc)) return true;
+
+	// the walls: the room's own edges (no exit fires while locked, so without this he walks off screen)
+	with (global.pc)
+	{
+		var _lo = cam_xl_min() + 8, _hi = cam_xr_max() - 8;
+		if (x < _lo || x > _hi) { set_xy(id, clamp(x, _lo, _hi), y); hspd = 0; }
+	}
+
+	// paused / menu / cutscene: the waves wait
+	if (g.gui_state != g.gui_state_NONE || g.cutscene || g.FallScene_timer || g.ChangeRoom_timer > 0) return true;
+
+	if (_p.wave > 0)
+	{
+		_p.wave_frames++;
+		var _alive = 0;
+		for (var _i = 0; _i < array_length(_p.ids); _i++) if (instance_exists(_p.ids[_i])) _alive++;
+		if (_alive > 0 && _p.wave_frames < TW_PRISON_WAVE_MAX_F) return true;
+		if (_p.wave >= TW_PRISON_WAVES)
+		{
+			tw_toast_push("PRISON BREAK!", "you walk free", "win");
+			return false;
+		}
+	}
+	if (_p.gap > 0) { _p.gap--; return true; }
+
+	// next wave: random mobs from the !spawn table, harder each wave (version 1, then middle, then the top one)
+	_p.wave++;
+	_p.ids = [];
+	_p.wave_frames = 0;
+	_p.gap = 90;
+	var _face = (global.pc.xScale < 0) ? -1 : 1;
+	for (var _k = 0; _k < TW_PRISON_PER_WAVE; _k++)
+	{
+		var _row = tw_spawn_table_random();
+		var _tries = 0;
+		// waves 2 and 3 only draw mobs that HAVE a stronger version, or "harder" was often the same
+		// one-version mob (zones selftest 11-09: half of wave 3 was v1)
+		while ((_row[0] == ZoraA || (_p.wave >= 2 && _row[1] < 2)) && _tries < 30) { _row = tw_spawn_table_random(); _tries++; } // Zora wants water
+		var _nv  = _row[1];
+		var _ver = (_p.wave <= 1) ? 1 : ((_p.wave >= TW_PRISON_WAVES) ? _nv : 1 + floor((_nv - 1) / 2));
+		var _ox  = (((_k & 1) == 0) ? 1 : -1) * _face * (32 + 16 * _k);
+		var _sid = GameObject_create(global.pc.xl + _ox, global.pc.yt, _row[0], _ver);
+		if (_sid != noone && instance_exists(_sid)) { _sid.tw_spawned = true; array_push(_p.ids, _sid); }
+	}
+	global.pc.iframes_timer = max(global.pc.iframes_timer, 4);
+	global.tw_prison_fast = (_p.wave >= TW_PRISON_WAVES); // FAST MUSIC on the last wave (owner 11-09)
+	tw_toast_push("PRISON WAVE " + string(_p.wave) + "/" + string(TW_PRISON_WAVES), "", "chat");
+	return true;
+}
+
+/// @description  tw_prison_end() -- unlock (the exits read tw_prison_on) and stop the fast music.
+/// The cooldown keeps running from when the prison started.
+function tw_prison_end() {
+	global.tw_prison_on   = false;
+	global.tw_prison_fast = false;
+	global.tw_prison      = undefined;
+}
+
+
+// ---- !FLUTE (Lane 11-09) -----------------------------------------------------------------
+#macro TW_FLUTE_COOLDOWN_MS 600000 // 10 minutes, chat-wide, separate from !prison (owner 11-09)
+
+/// @description  tw_flute_towns() -- column indexes into Overworld.Warp_dg_DESTINATIONS of every town Link
+/// has been IN (g_Room_Start sets f.dm_quests[?STR_Warp+STR_Qualified+town] on entry; saved with the file).
+/// The town he is standing on is left out when there is anywhere else to go.
+function tw_flute_towns() {
+	var _out = [];
+	if (!variable_global_exists("OVERWORLD") || !instance_exists(global.OVERWORLD) || !instance_exists(f)) return _out;
+	var _here = -1;
+	with (global.OVERWORLD)
+	{
+		for (var _i = 0; _i < ds_grid_width(Warp_dg_DESTINATIONS); _i++)
+		{
+			if (!val(f.dm_quests[? STR_Warp + STR_Qualified + string(Warp_dg_DESTINATIONS[# _i, 0])])) continue;
+			if (Warp_dg_DESTINATIONS[# _i, 1] == pcrc && g.room_type == "C") { _here = _i; continue; }
+			array_push(_out, _i);
+		}
+	}
+	if (array_length(_out) == 0 && _here >= 0) array_push(_out, _here);
+	return _out;
+}
+
+/// @description  tw_flute_try_fire() -- start the warp now if Link is standing still on the overworld with
+/// nothing else running. Returns true when it started (the pending flute is then used up).
+function tw_flute_try_fire() {
+	if (!variable_global_exists("tw_flute_pending") || !is_struct(global.tw_flute_pending)) return false;
+	if (!instance_exists(g) || g.room_type != "C" || !variable_global_exists("OVERWORLD") || !instance_exists(global.OVERWORLD)) return false;
+	if (g.gui_state != g.gui_state_NONE || g.ChangeRoom_timer > 0) return false;
+	var _ok = false;
+	with (global.OVERWORLD) _ok = (!dest_dist && !exit_owrc && !flute_timer && !Warp_state && !Warp_is_warping);
+	if (!_ok) return false;
+	var _list = tw_flute_towns();
+	if (array_length(_list) == 0) { global.tw_flute_pending = undefined; return false; }
+	var _idx = _list[irandom(array_length(_list) - 1)];
+	with (global.OVERWORLD)
+	{
+		var _inst   = aud_play_sound(get_audio_theme_track(Warp_FLUTE_THEME));
+		flute_timer = round(audio_sound_length(_inst) * game_get_speed(gamespeed_fps)) + 8;
+		Warp_timer  = flute_timer;
+		Warp_owrc   = pcrc;
+		Warp_state  = Warp_state_FLUTE;
+		Warp_destination_num = _idx + 1;
+		Warp_is_warping = true; // chat's warp: walking off the tile does not cancel it (it also holds him still)
+		global.tw_flute_last_town = string_upper(tw_trim(string_replace_all(string(Warp_dg_DESTINATIONS[# _idx, 0]), "_", " "))); // "_Ruto" -> "RUTO"
+		global.tw_flute_last_owrc = Warp_dg_DESTINATIONS[# _idx, 1];
+	}
+	global.tw_flute_pending = undefined;
+	return true;
+}
+
+/// @description  tw_flute_tick() -- a queued flute plays the moment Link is back on the overworld, still.
+function tw_flute_tick() {
+	if (!variable_global_exists("tw_flute_pending") || !is_struct(global.tw_flute_pending)) return;
+	if (tw_flute_try_fire()) tw_toast_push("FLUTE!", "off to " + global.tw_flute_last_town, "chat");
+}
+
+// ---- !BOULDER (Lane 11-09) ---------------------------------------------------------------
+#macro TW_BOULDER_MAX 15
+
+/// @description  tw_boulder_drop(n) -- up to n boulders in a line across the tile in front of Link.
+/// Returns how many were placed, or -1 when Link is mid-step (the screen cells only line up when he is still).
+function tw_boulder_drop(_n) {
+	if (!variable_global_exists("tw_boulders")) global.tw_boulders = [];
+	if (!instance_exists(g) || g.room_type != "C" || !variable_global_exists("OVERWORLD") || !instance_exists(global.OVERWORLD)) return 0;
+	var _busy = false;
+	with (global.OVERWORLD) _busy = (dest_dist || exit_owrc || Warp_state || Warp_is_warping);
+	if (_busy) return -1;
+	var _made = 0, _cand = [];
+	global.tw_boulder_sealed = false;
+	with (global.OVERWORLD)
+	{
+		var _dx  = bit_dir(pc_dir & $3), _dy = bit_dir(pc_dir & $C);
+		if (_dx == 0 && _dy == 0) _dy = 1;
+		var _pc_c = pcrc & $FF, _pc_r = (pcrc >> 8) & $FF;
+		var _ox  = (_dx != 0) ? 0 : 1, _oy = (_dx != 0) ? 1 : 0; // the wall runs across his path
+		var _steps = [0, 1, -1, 2, -2];
+		for (var _s = 0; _s < array_length(_steps) && _made < _n; _s++)
+		{
+			if (array_length(global.tw_boulders) + _made >= TW_BOULDER_MAX) break;
+			var _c = _pc_c + _dx + _ox * _steps[_s];
+			var _r = _pc_r + _dy + _oy * _steps[_s];
+			if (_c < 0 || _r < 0 || _c >= ds_grid_width(dg_tsrc) || _r >= ds_grid_height(dg_tsrc)) continue;
+			var _owrc = (_r << 8) | _c;
+			if (_owrc == pcrc) continue;
+			if (dg_solid[# _c, _r]) continue;                                   // water, rock, trees, another boulder
+			if (!is_undefined(dm[? hex_str(_owrc) + STR_RmName])) continue;     // a town / cave / palace entrance
+			var _rm_c = (DRAW_CLMS >> 1) + _dx + _ox * _steps[_s];
+			var _rm_r = (DRAW_ROWS >> 1) + _dy + _oy * _steps[_s];
+			if (!is_in_grid(_rm_c, _rm_r, DRAW_CLMS, DRAW_ROWS)) continue;
+			array_push(_cand, [_c, _r, _rm_c, _rm_r]);
+			_made++;
+		}
+		// No hammer: Lane said drop it anyway (11-09), but never seal him in. Only when he can still walk
+		// to open ground or an entrance (every entrance leaves the map, which clears the boulders) does the
+		// wall go down (selftest 11-09: a wall on the start island closed its only bridge).
+		if (_made > 0 && !(f.items & ITM_HAMM) && !tw_boulder_way_out(_cand)) { _cand = []; _made = 0; global.tw_boulder_sealed = true; }
+		for (var _q = 0; _q < array_length(_cand); _q++)
+		{
+			var _c = _cand[_q][0], _r = _cand[_q][1], _rm_c = _cand[_q][2], _rm_r = _cand[_q][3];
+			var _owrc = (_r << 8) | _c;
+			var _ukey = hex_str(_owrc) + STR_TSRC + STR_Under + STR_Boulder;
+			var _rec = { c : _c, r : _r, tsrc : dg_tsrc[# _c, _r], solid : dg_solid[# _c, _r],
+			             ukey : _ukey, uold : dm[? _ukey], ark : -1 };
+			dm[? _ukey] = _rec.tsrc; // the hammer puts back what was here, not a path tile
+			Overworld_tile_change_1a(_rm_c, _rm_r, _c, _r, (TILESET1_TS_IDX << 8) | TSRC_BOUL01, OST_SOLID1);
+			if (g.anarkhyaOverworld_MAIN && g.anarkhyaOverworld_enabled)
+			{
+				_rec.ark = dg_anarkhya_tsrc_detail[# _c, _r];
+				Overworld_tile_change_3(anarkhya_TSRC_BOULDER, _rm_c << SHIFT, _rm_r << SHIFT, anarkhya_TILE_DEPTH2, 0);
+				dg_anarkhya_tsrc_detail[# _c, _r] = anarkhya_TSRC_BOULDER;
+			}
+			array_push(global.tw_boulders, _rec);
+		}
+	}
+	if (_made > 0) aud_play_sound(get_audio_theme_track(dk_BlockBreak));
+	return _made;
+}
+
+/// @description  tw_boulder_way_out(cells) -- with these [c,r,..] cells blocked too, can Link still walk to an
+/// entrance or to open ground (300+ tiles)? A small flood fill from his tile, inside the Overworld.
+function tw_boulder_way_out(_cells) {
+	var _ok = false;
+	with (global.OVERWORLD)
+	{
+		var _w = ds_grid_width(dg_solid), _h = ds_grid_height(dg_solid);
+		var _seen = ds_map_create();
+		for (var _i = 0; _i < array_length(_cells); _i++) _seen[? (_cells[_i][1] << 8) | _cells[_i][0]] = 1;
+		var _boots = (f.items & ITM_BOOT) != 0;
+		var _q = [pcrc], _head = 0;
+		_seen[? pcrc] = 1;
+		while (_head < array_length(_q))
+		{
+			var _o = _q[_head++];
+			if (!is_undefined(dm[? hex_str(_o) + STR_RmName])) { _ok = true; break; } // an entrance (his own tile counts)
+			if (_head >= 300) { _ok = true; break; }
+			var _c0 = _o & $FF, _r0 = (_o >> 8) & $FF;
+			var _nb = [[1,0],[-1,0],[0,1],[0,-1]];
+			for (var _k = 0; _k < 4; _k++)
+			{
+				var _c = _c0 + _nb[_k][0], _r = _r0 + _nb[_k][1];
+				if (_c < 0 || _r < 0 || _c >= _w || _r >= _h) continue;
+				var _n = (_r << 8) | _c;
+				if (!is_undefined(_seen[? _n])) continue;
+				_seen[? _n] = 1;
+				var _s = dg_solid[# _c, _r];
+				if (_s == OST_SOLID1 || _s == OST_SOLID2) continue;
+				if ((_s == OST_BOOTS1 || _s == OST_BOOTS2) && !_boots) continue;
+				array_push(_q, _n);
+			}
+		}
+		ds_map_destroy(_seen);
+	}
+	return _ok;
+}
+
+/// @description  tw_boulder_restore() -- put every chat boulder's cell back the way it was. Called once
+/// Link is off the overworld; the map's grids outlive the room, so leaving alone would not clear them.
+function tw_boulder_restore() {
+	if (!variable_global_exists("tw_boulders") || !is_array(global.tw_boulders)) return 0;
+	var _n = array_length(global.tw_boulders);
+	if (_n == 0 || !variable_global_exists("OVERWORLD") || !instance_exists(global.OVERWORLD)) { global.tw_boulders = []; return 0; }
+	with (global.OVERWORLD)
+	{
+		for (var _i = _n - 1; _i >= 0; _i--)
+		{
+			var _b = global.tw_boulders[_i];
+			dg_tsrc[#  _b.c, _b.r] = _b.tsrc;
+			dg_solid[# _b.c, _b.r] = _b.solid;
+			if (is_undefined(_b.uold)) ds_map_delete(dm, _b.ukey); else dm[? _b.ukey] = _b.uold;
+			if (_b.ark != -1) dg_anarkhya_tsrc_detail[# _b.c, _b.r] = _b.ark;
+		}
+	}
+	global.tw_boulders = [];
+	return _n;
+}
+
+/// @description  tw_boulder_tick() -- drop a boulder that waited for Link to stop; clear them all once he is off the map.
+function tw_boulder_tick() {
+	if (!instance_exists(g)) return;
+	if (g.room_type != "C")
+	{
+		global.tw_boulder_pending = undefined;
+		if (variable_global_exists("tw_boulders") && is_array(global.tw_boulders) && array_length(global.tw_boulders) > 0) tw_boulder_restore();
+		return;
+	}
+	if (variable_global_exists("tw_boulder_pending") && is_struct(global.tw_boulder_pending))
+	{
+		var _m = tw_boulder_drop(global.tw_boulder_pending.n);
+		if (_m >= 0) global.tw_boulder_pending = undefined;
+	}
 }

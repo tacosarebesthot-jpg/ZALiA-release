@@ -240,6 +240,9 @@ function tw_alias_verb(_v) {
 		// round 11 RL quick chat -- the short forms chat will actually type. Deliberately NO
 		// "np" alias for "noproblem": !np is already NOW PLAYING and every stream uses it.
 		case "hunt": case "blobs": case "owmobs": case "overworldmobs": case "ow": return "ambush"; // 11-08 overworld blobs
+		case "jail": case "lockdown": return "prison"; // Lane 11-09
+		case "warp": case "teleport": case "tp": return "flute"; // Lane 11-09
+		case "boulders": case "rocks": case "roadblock": case "rockwall": return "boulder"; // Lane 11-09
 		case "slap": case "catslaps": case "cat_slap": return "catslap";     // Tangia's "Cat Slap"
 		case "flash": case "flashbag": case "flash_bang": return "flashbang"; // Tedw3rd typed !flashbang 09-25
 		case "nice":                      return "niceshot";
@@ -275,6 +278,9 @@ function tw_verb_all() {
 		"trickortreat","haunt", // Halloween week 2026
 		"beef", // Lane 10-24 / 10-28: beefed-up mobs
 		"ambush", // owner 11-06/11-08: overworld blobs hunt Link
+		"prison", // Lane 11-09: locked room, 3 waves
+		"flute", // Lane 11-09: warp to a visited town
+		"boulder", // Lane 11-09: rock wall on the overworld
 		"version","ver","build","reshuffle","gorilla",
 		"vote","top","kills","bet","bounty",
 		"niceshot","whatasave","calculated","savage","closeone","okay","faking","gg",

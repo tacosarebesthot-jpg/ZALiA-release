@@ -71,6 +71,13 @@ MOBS / DUNGEON MASTER
   !ambush [1-6] [s] (!hunt !blobs)  OVERWORLD ONLY: big encounter blobs appear around Link and
                       hunt him (default 3 blobs, 20 s, max 60). Touching one starts the fight, same
                       as a normal overworld encounter. Add "weak" for the small ones: !ambush 4 30 weak
+  !boulder [1-5] (!rocks !roadblock)  OVERWORLD ONLY: a wall of boulders right in front of Link
+                      (default 3). The hammer breaks them; they all vanish when he leaves the overworld.
+  !flute (!warp !tp)  warp Link to a random town he has already been in (either continent). Typed off
+                      the overworld it waits until he is back on the map. 10 min cooldown for all of chat.
+  !prison (!jail !lockdown)  the room's exits lock: 3 waves of 3 random mobs, harder each wave. Clear
+                      them to walk free. Not in boss rooms; dying or falling down a pit ends it.
+                      Last wave plays the fast music. 10 min cooldown for all of chat.
   !flame (!heckler)   a jumping flame with the chatter's name over it
   !freeze (!stun)     freeze on-screen non-boss mobs [timed]
   !smite (!clearscreen)  kill all on-screen non-boss mobs

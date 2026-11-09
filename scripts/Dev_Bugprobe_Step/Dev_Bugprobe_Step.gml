@@ -1402,6 +1402,9 @@ function tws_zone_cases() {
 		["spawn goriya", "toast", ""],
 		["swarm",      "toast", ""],
 		["ambush 4 30", "ambush", "overworld only: blobs hunt Link (11-08)"],
+		["prison",     "prison", "Lane 11-09: exits locked, 3 waves of 3, chat-wide cooldown"],
+		["boulder 3",  "boulder", "Lane 11-09: rock wall in front of Link, overworld only"],
+		["flute",      "flute",  "Lane 11-09: warp to a visited town; queued off the overworld"],
 		["freeze",     "toast", ""],
 		["root 3",     "toast", ""],
 		["deny all",   "denyall",  ""],
@@ -2626,7 +2629,9 @@ function Dev_TwSelftest_Step() {
 		if (global.tw_selftest_mode == "death") global.tws_zi = array_length(_zs);            // death test only
 		// "pick:spawn goriya,swarm,catslap" = just those zone rows, in that order, town zone only.
 		// For bisecting a row that passes alone and fails after other verbs.
-		var _pick = (string_pos("pick:", global.tw_selftest_mode) == 1);
+		var _pickow = (string_pos("pickow:", global.tw_selftest_mode) == 1); // 11-09: same, overworld zone only
+		var _pick = (string_pos("pick:", global.tw_selftest_mode) == 1) || _pickow;
+		if (_pickow && global.tws_zi == 0) { global.tws_zi = array_length(_zs) - 1; global.tws_death_stage = 3; }
 		if ((global.tw_selftest_mode == "zones" || global.tw_selftest_mode == "splash" || global.tw_selftest_mode == "tangia" || _pick) && global.tws_zi == 0) global.tws_zi = 1; // skip the full matrix
 		if (global.tws_zi >= array_length(_zs))
 		{
@@ -2643,12 +2648,12 @@ function Dev_TwSelftest_Step() {
 		global.tws_cases      = (_z[2] == "all") ? tw_selftest_cases() : tws_zone_cases();
 		if (global.tw_selftest_mode == "splash" || global.tw_selftest_mode == "tangia" || _pick)
 		{   // quick look at one family only (MK2 splash / Tangia verbs): town zone, no death test
-			if (global.tws_zi >= 2) { tws_finish((_pick ? "pick" : global.tw_selftest_mode) + " only"); exit; }
+			if (global.tws_zi >= 2 && !_pickow) { tws_finish((_pick ? "pick" : global.tw_selftest_mode) + " only"); exit; }
 			var _tag = (global.tw_selftest_mode == "splash") ? "MK2" : "TANGIA";
 			var _mk = [];
 			if (_pick)
 			{
-				var _want = string_split(string_delete(global.tw_selftest_mode, 1, 5), ",");
+				var _want = string_split(string_delete(global.tw_selftest_mode, 1, _pickow ? 7 : 5), ",");
 				for (var _wi = 0; _wi < array_length(_want); _wi++)
 				{
 					var _wv = string_trim(_want[_wi]);
@@ -2750,6 +2755,13 @@ function Dev_TwSelftest_Step() {
 			tws_go("during");
 			break;
 		}
+		if (_c[1] == "flute")
+		{   // fresh clock; on the map with no town visited yet (pickow skips the town zone) lend it Ruto for this row
+			global.tw_flute_next = 0; global.tw_flute_pending = undefined; global.tw_flute_last_town = ""; global.tw_flute_last_owrc = -1;
+			global.tws_fl_lent = false;
+			if (g.room_type == "C" && array_length(tw_flute_towns()) == 0)
+			{   f.dm_quests[? STR_Warp + STR_Qualified + STR_Ruto] = 1; global.tws_fl_lent = true;  }
+		}
 		if (_c[1] == "catslapcucco2")
 		{   // tier 2: chat !arise gives the tier-2 bird when the player has earned it; fake "earned" for this row only
 			global.tws_t2_save = [g.CuccoSpell2_Acquired, g.CuccoSpell2_Option];
@@ -2789,6 +2801,100 @@ function Dev_TwSelftest_Step() {
 				tws_log("   ambush: overworld=" + string(_owc) + " blobs=" + string(_bl) + " longest timer=" + string(_btm) + " ticks");
 				break;
 			}
+			case "prison":
+			{
+				// Runs the whole prison inside this one frame: the wave logic only counts its own steps.
+				var _pr_ok_room = (g.room_type == "A" && !instance_exists(Boss));
+				if (!_pr_ok_room)
+				{
+					_ok = _tst && (string_pos("needs a battle screen", _got) > 0 || string_pos("no prison in a boss room", _got) > 0);
+					tws_log("   prison: refused here as expected? " + string(_ok) + "  room_type=" + g.room_type + " boss=" + string(instance_exists(Boss)));
+					global.tw_prison_next = 0;
+					break;
+				}
+				var _pr_on = variable_global_exists("tw_prison_on") && global.tw_prison_on;
+				// exits: everything but a plain pit must be held shut
+				var _ex_n = 0, _ex_blk = 0, _ex_pit = 0;
+				with (Exit) { _ex_n++; if (tw_prison_blocks_exit(id)) _ex_blk++; else _ex_pit++; }
+				// wall: push Link past the right edge, one step must pull him back in
+				var _pr_x0 = global.pc.x;
+				set_xy(global.pc, cam_xr_max() + 20, global.pc.y);
+				tw_prison_step();
+				var _pr_wall = (global.pc.x <= cam_xr_max() - 8);
+				set_xy(global.pc, _pr_x0, global.pc.y);
+				// waves: step until it ends, killing each wave as it lands
+				var _pr_waves = 0, _pr_mobs = "", _pr_fast3 = false, _pr_fast_early = false, _pr_steps = 0, _pr_end = false;
+				while (_pr_steps < 2000)
+				{
+					_pr_steps++;
+					if (!tw_prison_step()) { _pr_end = true; break; }
+					var _pp = global.tw_prison;
+					if (_pp.wave > _pr_waves)
+					{
+						_pr_waves = _pp.wave;
+						_pr_mobs += " w" + string(_pp.wave) + "=" + string(array_length(_pp.ids));
+						for (var _pk = 0; _pk < array_length(_pp.ids); _pk++) if (instance_exists(_pp.ids[_pk])) _pr_mobs += ":" + object_get_name(_pp.ids[_pk].object_index) + "v" + string(_pp.ids[_pk].ver);
+						if (_pp.wave >= 3) _pr_fast3 = global.tw_prison_fast; else if (global.tw_prison_fast) _pr_fast_early = true;
+						for (var _pk2 = 0; _pk2 < array_length(_pp.ids); _pk2++) if (instance_exists(_pp.ids[_pk2])) instance_destroy(_pp.ids[_pk2]);
+					}
+				}
+				// retire the tw_active entry the way the tick would
+				for (var _pa = 0; _pa < array_length(global.tw_active); _pa++) { var _pe = global.tw_active[_pa]; if (variable_struct_exists(_pe, "verb") && _pe.verb == "prison") _pe.frames = 1; }
+				tw_prison_end();
+				var _pr_free = !global.tw_prison_on;
+				// cooldown: a second prison right away is refused, chat-wide
+				global.tw_toast = ""; global.tw_toast_timer = 0; global.tw_irc_last_cmd = -999999;
+				tws_say("prison");
+				var _pr_cd = (string_pos("prison cooldown", string(global.tw_toast)) > 0) && !global.tw_prison_on;
+				global.tw_prison_next = 0;
+				_ok = _tst && _pr_on && string_pos("PRISON!", _got) > 0 && _ex_blk == _ex_n - _ex_pit && _pr_wall
+				   && _pr_end && _pr_waves == 3 && _pr_fast3 && !_pr_fast_early && _pr_free && _pr_cd;
+				tws_log("   prison: on=" + string(_pr_on) + " exits=" + string(_ex_n) + " held=" + string(_ex_blk) + " pit-open=" + string(_ex_pit)
+				      + " wall=" + string(_pr_wall) + " waves=" + string(_pr_waves) + _pr_mobs + " fast@3=" + string(_pr_fast3)
+				      + " fast-early=" + string(_pr_fast_early) + " ended=" + string(_pr_end) + " steps=" + string(_pr_steps)
+				      + " free=" + string(_pr_free) + " cooldown-refusal=" + string(_pr_cd));
+				break;
+			}
+			case "boulder":
+			{
+				var _bow = (g.room_type == "C" && instance_exists(global.OVERWORLD));
+				if (!_bow) { _ok = _tst && string_pos("only drop on the overworld", _got) > 0; tws_log("   boulder: off the map, refused=" + string(_ok)); break; }
+				var _bl = global.tw_boulders, _bn = array_length(_bl), _bgood = 0, _bkey = 0;
+				with (global.OVERWORLD)
+				{
+					for (var _bi = 0; _bi < _bn; _bi++)
+					{
+						var _bb = _bl[_bi];
+						if (dg_solid[# _bb.c, _bb.r] == OST_SOLID1 && (dg_tsrc[# _bb.c, _bb.r] & $FF) == TSRC_BOUL01) _bgood++;
+						if (dm[? _bb.ukey] == _bb.tsrc) _bkey++;
+					}
+				}
+				var _bdir = global.OVERWORLD.pc_dir, _bpc = global.OVERWORLD.pcrc;
+				_ok = _tst && string_pos("BOULDER!", _got) > 0 && _bn >= 1 && _bgood == _bn && _bkey == _bn;
+				global.tws_bo_wait = _ok; // "during" shoots the wall, then restores and grades the restore
+				var _bcells = "";
+				for (var _bi4 = 0; _bi4 < _bn; _bi4++) _bcells += " " + string(_bl[_bi4].c) + "," + string(_bl[_bi4].r);
+				tws_log("   boulder: link=" + string(_bpc & $FF) + "," + string((_bpc >> 8) & $FF) + " dir=" + string(_bdir) + " placed=" + string(_bn) + " cells:" + _bcells
+				      + " solid+tile ok=" + string(_bgood) + " hammer-key ok=" + string(_bkey));
+				break;
+			}
+			case "flute":
+			{
+				var _fow = (g.room_type == "C" && instance_exists(global.OVERWORLD));
+				var _ftowns = array_length(tw_flute_towns());
+				if (!_fow)
+				{
+					_ok = _tst && ((string_pos("QUEUED", _got) > 0 && is_struct(global.tw_flute_pending)) || (_ftowns == 0 && string_pos("hasn't been in a town", _got) > 0));
+					tws_log("   flute: off the map, queued=" + string(is_struct(global.tw_flute_pending)) + " towns visited=" + string(_ftowns));
+					global.tw_flute_pending = undefined; global.tw_flute_next = 0;
+					break;
+				}
+				var _fst = global.OVERWORLD.Warp_state, _fww = global.OVERWORLD.Warp_is_warping;
+				_ok = _tst && string_pos("FLUTE!", _got) > 0 && _fst == global.OVERWORLD.Warp_state_FLUTE && _fww;
+				global.tws_fl_wait = _ok; // "during" waits for the landing and grades it
+				tws_log("   flute: towns visited=" + string(_ftowns) + " warp_state=" + string(_fst) + " locked=" + string(_fww) + " going to " + string(global.tw_flute_last_town));
+				break;
+			}
 			case "catslapcucco":
 			case "catslapcucco2":
 			case "catslap":    _ok = _tst; global.tws_cs_x0 = global.pc.x; global.tws_cs_hp0 = f.hp; global.tws_cs_maxd = 0;
@@ -2806,6 +2912,48 @@ function Dev_TwSelftest_Step() {
 		var _cd = global.tws_cases[global.tws_ci];
 		// LATE rows: the finisher art starts ~1.3 s after the FLAWLESS VICTORY text, so shoot at 3.5 s
 		if (global.tws_t < ((string_pos("LATE", _cd[2]) > 0) ? 210 : 40)) exit;
+		if (_cd[1] == "boulder" && variable_global_exists("tws_bo_wait") && global.tws_bo_wait)
+		{
+			global.tws_bo_wait = false;
+			tws_shot("boulder_wall");
+			var _bsnap = [];
+			for (var _bi2 = 0; _bi2 < array_length(global.tw_boulders); _bi2++) array_push(_bsnap, global.tw_boulders[_bi2]);
+			var _brest = tw_boulder_restore(), _bback = 0;
+			with (global.OVERWORLD)
+			{
+				for (var _bi3 = 0; _bi3 < array_length(_bsnap); _bi3++)
+				{
+					var _bs = _bsnap[_bi3];
+					if (dg_tsrc[# _bs.c, _bs.r] == _bs.tsrc && dg_solid[# _bs.c, _bs.r] == _bs.solid && dm[? _bs.ukey] == _bs.uold) _bback++;
+				}
+				Overworld_refresh_tiles(((pcrc & $FF) << SHIFT) + (T_SIZE >> 1) - DRAW_W_, (((pcrc >> 8) & $FF) << SHIFT) + (T_SIZE >> 1) - DRAW_H_);
+			}
+			var _bfine = (_brest == array_length(_bsnap) && _bback == array_length(_bsnap) && _brest > 0);
+			// seal guard (no hammer): the start island is a 2x3 sand pocket, palace at 63,91, bridge out at 64,91.
+			// From the sand at 62,91: block the column 64 and the palace -> no way out; block only column 64 -> the palace.
+			if (instance_exists(global.OVERWORLD) && global.OVERWORLD.pcrc == ((91 << 8) | 63))
+			{
+				var _spc = global.OVERWORLD.pcrc;
+				global.OVERWORLD.pcrc = (91 << 8) | 62;
+				var _sealed = !tw_boulder_way_out([[64,90],[64,91],[64,92],[63,91]]);
+				var _open   =  tw_boulder_way_out([[64,90],[64,91],[64,92]]);
+				global.OVERWORLD.pcrc = _spc;
+				if (!(_sealed && _open)) _bfine = false;
+				global.tws_row += "   seal-guard: boxed-in=" + string(_sealed) + " palace-reachable=" + string(_open);
+			}
+			if (!_bfine) global.tws_row = string_replace(global.tws_row, "PASS", "FAIL");
+			global.tws_row += "   restored=" + string(_brest) + " back-as-before=" + string(_bback);
+		}
+		if (_cd[1] == "flute" && variable_global_exists("tws_fl_wait") && global.tws_fl_wait)
+		{   // the whole warp: tune, spin, black screen, landing (~8 s)
+			if (instance_exists(global.OVERWORLD) && global.OVERWORLD.Warp_state != 0 && global.tws_t < 1500) exit;
+			global.tws_fl_wait = false;
+			var _fland = instance_exists(global.OVERWORLD) && global.OVERWORLD.Warp_state == 0 && global.OVERWORLD.pcrc == global.tw_flute_last_owrc && g.room_type == "C";
+			if (!_fland) global.tws_row = string_replace(global.tws_row, "PASS", "FAIL");
+			global.tws_row += "   landed=" + string(_fland) + " after " + string(global.tws_t) + " frames";
+			tws_shot("flute_landed");
+			if (global.tws_fl_lent) { ds_map_delete(f.dm_quests, STR_Warp + STR_Qualified + STR_Ruto); global.tws_fl_lent = false; }
+		}
 		tws_log(global.tws_row);
 		if (string_pos("SHOT", _cd[2]) > 0) tws_shot(tw_slug(_cd[0]) + "_during");
 		tws_go("expire");

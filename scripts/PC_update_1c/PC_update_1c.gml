@@ -273,6 +273,7 @@ function PC_update_1c() {
 	with(Exit)
 	{
 	    if (open
+	    && !tw_prison_blocks_exit(id) // !prison (Lane 11-09): exits locked, pits stay open
 	    &&  rectInRect(BodyHB_xl,BodyHB_yt,BodyHB_w,BodyHB_h, _XL,_YT,_W,_H) )
 	    {
 	        // EXIT-FIX: record first overlap (old behavior / fallback), don't break
@@ -300,6 +301,7 @@ function PC_update_1c() {
 
 
 	if(!_exit 
+	&& !(variable_global_exists("tw_prison_on") && global.tw_prison_on) // !prison: no walk-out shortcut
 	&&  g.in_safe_encounter 
 	&&  g.exit_enter.exitNum&$F0==g.EXIT_DIR_MID )
 	{   // Shorter walk distance to get back to ow
