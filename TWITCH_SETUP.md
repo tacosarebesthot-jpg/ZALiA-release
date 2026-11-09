@@ -126,7 +126,7 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | CHAT EXTRAS > FIRST-USE HINT | first time a verb hits you in a session, a toast says what it does (off by default) | `first_use_hint=1/0` |
 | CHAT EXTRAS > 1UP REMINDER | minutes on your last life before a toast reminds chat that `!1up` exists: OFF (default) or 1-30 | `oneup_nudge=0-30` |
 | CHAT EXTRAS > SWARM CAP | `!swarm` is refused once this many enemies are on screen, 4-40 (default 14) | `swarm_cap=4-40` |
-| CHAT EXTRAS > TOASTY | chance the MK2 Toasty pops after a flawless: OFF or 10-100% (default 50) | `toasty=0-100` |
+| CHAT EXTRAS > TOASTY | how often the MK2 Toasty pops after a flawless: OFF or 1 in 2 to 1 in 50 (default 1 in 10) | `toasty_1in=0,2-50` |
 | CHAT EXTRAS > MK2 ANNOUNCER | FIGHT / FINISH HIM / EXCELLENT voice samples | `announcer=1/0` |
 | CHAT EXTRAS > BABALITY | chance a flawless is a Babality when Link is not shrunk: OFF or 5-100% (default 15) | `babality=0-100` |
 | CHAT EXTRAS > CHAT BETS | `!bet` on the boss fight (needs points on) | `bets=1/0` |
@@ -134,6 +134,8 @@ Press **O** in game and pick **TWITCH OPTIONS**. Everything here is saved to `%L
 | CHAT EXTRAS > HELP CARD | `!help` / `!commands` draw the full command card over the game for 8 s. Off (default) = chat gets a one-line toast instead; `!help <verb>` still answers | `help_card=1/0` |
 | CHAT EXTRAS > COMMAND PRICES | with the points economy on, each command costs points. Off = every command is free, chat still earns points for `!bet` / `!bounty` | `cmd_prices=1/0` |
 | CHAT EXTRAS > INFINITE LIVES | Link still dies and restarts the area, but the life count never drops: no game over, no XP penalty. For chat-vs-Link streams (Lane's ask). Off by default | `inf_lives=1/0` |
+| CHAT EXTRAS > NO MERCY | `!challenge` allowed (default on). Off refuses it and ends a running one; with INFINITE LIVES a challenge never ends on its own | `challenge=1/0` |
+| CHAT EXTRAS > FAST MUSIC | the music speeds up while `!speed` or `!meth` runs (default on) | `fast_music=1/0` |
 | MUSIC TOASTS | NOW PLAYING plate: OFF (default) or 1-30 seconds on screen | `toast_music=0-30` |
 | CHAT TOASTS | plates for what chat did: OFF or 1-30 seconds (default 4) | `toast_chat=0-30` |
 | GAME TOASTS | killed by, crushed, level up, hints: OFF (default) or 1-30 seconds | `toast_game=0-30` |
@@ -152,7 +154,7 @@ A few more keys have no menu row and live only in `twitch_config.txt` (one per l
 | `first_use_hint=1/0` | 0 | the first time a verb lands in a session, its `!help` line is toasted so you know what just hit you |
 | `oneup_nudge=` | 0 | minutes on your last life before a toast reminds chat that `!1up` exists; 0 turns it off |
 | `swarm_cap=` | 14 | live enemies on screen at which `!swarm` is refused (mods skip cooldowns, so this is the real limit) |
-| `toasty=` | 50 | percent chance the MK2 Toasty pops after a flawless finisher |
+| `toasty_1in=` | 10 | the MK2 Toasty pops 1 time in N after a flawless finisher; 0 = never (an old `toasty=0` line also turns it off) |
 | `announcer=1/0` | 1 | the MK2 announcer: FIGHT! on a boss, FINISH HIM when a hitless boss is on its last bar, EXCELLENT for a clean `!swarm` wipe |
 | `halloween=` | (calendar) | `1` forces Halloween week on (title line, Vampire Killer, purple Link, dimmer dark rooms, `!trickortreat`, free `!haunt`, Castlevania shuffle), `0` forces it off; anything else = Oct 24 to Nov 1 |
 | `babality=` | 15 | percent chance a flawless ends in a Babality when Link is not shrunk; shrunk is always |
@@ -230,6 +232,10 @@ without one it runs for the duration you set. Typos auto-correct where it matter
 | `!stasis <secs>` | Link freezes in place, mid-air included (1–10s) |
 | `!challenge` | inside a palace only: screen stays flipped until you leave, life capped at 4 hearts, no helpful commands. A death does not end it; leaving the palace or a game over does |
 | `!crush` | drops a palace block from above you. Falling blocks kill whatever they land on now, you included |
+| `!prison` `!jail` | the room's exits lock: 3 waves of 3 random enemies, harder each wave (last wave fast music). Clear them to walk free. Not in boss rooms; dying or falling down a pit ends it. One per 10 minutes for the whole chat. 50 points |
+| `!ambush [1-6] [secs]` `!hunt` | overworld only: big encounter blobs appear around you and hunt you (default 3 for 20 s, max 60 s); touching one starts the fight. Add `weak` for small ones. 25 points |
+| `!boulder [1-5]` `!rocks` | overworld only: a wall of boulders right in front of you (default 3). The hammer breaks them; they all vanish when you leave the overworld. Without the hammer it only drops if you can still walk out. 20 points |
+| `!flute` `!warp` | warps you to a random town you have already been in (either continent). Typed off the overworld, it waits until you are back on the map. One per 10 minutes for the whole chat. 40 points |
 
 ### Mess with your head
 

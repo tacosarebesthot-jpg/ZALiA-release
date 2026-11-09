@@ -2,6 +2,27 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
+## 2.1.11 — 2026-11-09
+
+Lane's 2026-11-06 stream and his Discord answers (2026-11-09). Chat finally has ways to bother Link on the overworld.
+
+**New for chat**
+
+- **`!prison`** (`!jail`, `!lockdown`; Lane's idea, his rules): the room's exits lock and chat sends 3 waves of 3 random enemies, harder each wave (the last wave is every enemy's strongest version and plays the fast music). Clear all three to walk free. Not in boss rooms, not on the overworld. Dying ends it, and so does falling down a pit (the one exit that stays open). A wave that can't be finished (an enemy flew off) moves on after 60 seconds. One prison per 10 minutes for the whole chat. 50 points.
+- **`!flute`** (`!warp`, `!tp`): warps Link to a random town he has already been in, the other continent included once he has been there, with the game's own flute-warp (the tune, the spin, the landing). Works without the flute. Typed off the overworld, it waits until Link is back on the map. One per 10 minutes for the whole chat, its own clock. 40 points.
+- **`!boulder [1-5]`** (`!rocks`, `!roadblock`): a wall of boulders right in front of Link on the overworld (default 3). The hammer breaks them like any boulder; they all go away when Link leaves the overworld. Never on an entrance. Without the hammer, the wall only drops if Link can still walk out. 20 points.
+- **`!ambush [1-6] [secs]`** (`!hunt`, `!blobs`; Gainey's ask): big encounter blobs appear around Link on the overworld and hunt him (default 3 for 20 s, up to 60 s). Touching one starts the fight like a normal encounter. `weak` for the small ones. 25 points.
+
+**Streamer switches (CHAT EXTRAS)**
+
+- **NO MERCY** (on by default): with it off, `!challenge` is refused, and turning it off ends a running one. Lane, 11-06: with INFINITE LIVES on, a challenge never ends on its own. `challenge=1/0`.
+- **FAST MUSIC** (on by default): the music speeds up while `!speed` or `!meth` runs, Super Mario Bros under-100-seconds style. `fast_music=1/0`.
+- **TOASTY** is now "1 in N": OFF or 1 in 2 to 1 in 50 (default 1 in 10), instead of a percent on every flawless. `toasty_1in=` (an old `toasty=0` still turns it off).
+
+**Fixes**
+
+- The Toasty head had the top of the hair cut off. Re-cut from the arcade sheet, 8 pixels taller.
+
 ## 2.1.10 — 2026-10-29
 
 Everything Lane's first 2.1.9 stream (2026-10-24) turned up.
