@@ -181,6 +181,8 @@ behaves.
 
 ## What chat can do
 
+> **For viewers:** the short, always-current list is **[COMMANDS.md](COMMANDS.md)**. Link that in chat.
+
 Syntax is `!verb [amount]`. Unknown commands are ignored. Every **timed** effect
 takes an explicit duration in seconds — `!flip 100`, `!dark 45` — capped at 60s;
 without one it runs for the duration you set. Typos auto-correct where it matters

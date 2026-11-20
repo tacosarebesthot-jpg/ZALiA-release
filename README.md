@@ -32,8 +32,9 @@ losing progress.
 items, palaces, and how the randomizer works.
 
 - **[What this port adds](FEATURES.md)** — everything on top of HoverBat's original
-- **[Twitch chat setup](TWITCH_SETUP.md)** — every command, VS CHAT mode, and which
+- **[Twitch chat setup](TWITCH_SETUP.md)** — VS CHAT mode, options, and which
   account to connect
+- **[Chat command list](COMMANDS.md)** — the page to link your viewers; always matches the current build
 
 ---
 
@@ -98,7 +99,9 @@ Viewers type commands in your chat to affect your run — healing, hindering, or
 stealing an item and giving it back a while later. Effect duration and cooldown
 are configurable on the setup page. The same OPTIONS → TWITCH OPTIONS page also holds
 **CHAT JOKES** (town folk talk like chat) and **CHECKPOINTS** (rolling save copies).
-See [TWITCH_SETUP.md](TWITCH_SETUP.md) for the full command list.
+**[COMMANDS.md](COMMANDS.md)** is the full command list, written for viewers: link it in your
+chat or panels. It is checked against the game code before every release, so it is never
+behind the build. [TWITCH_SETUP.md](TWITCH_SETUP.md) covers connecting and the options.
 
 Sending a bug report? Double-click **GRAB_LOGS.bat** in the game folder: it zips your
 logs, saves and marked spots to your desktop. That is the folder we need, not the game.
@@ -230,4 +233,4 @@ required.
 
 ---
 
-**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [What this port adds](FEATURES.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Discord](https://discord.gg/FSphHEsu8D) &middot; [Patreon](https://www.patreon.com/cw/gainey666) &middot; [Changelog](CHANGELOG.md)
+**ZALiA 2.0** &middot; [Download](https://github.com/tacosarebesthot-jpg/ZALiA-release/releases/latest) &middot; [Manual](MANUAL.md) &middot; [What this port adds](FEATURES.md) &middot; [Twitch setup](TWITCH_SETUP.md) &middot; [Chat commands](COMMANDS.md) &middot; [Discord](https://discord.gg/FSphHEsu8D) &middot; [Patreon](https://www.patreon.com/cw/gainey666) &middot; [Changelog](CHANGELOG.md)
