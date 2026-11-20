@@ -18,7 +18,7 @@ by default; the POINTS ECONOMY row turns them off.
 
 HELP THE RUNNER
   !heal [n]          full HP, or n quarter-boxes        !mp [n]     full MP, or n points
-  !refill (!fairy)   full HP + MP                        !1up        +1 life
+  !refill (!fairy !fary)  full HP + MP                        !1up        +1 life
   !invuln [s]        invincible for the effect length    !link (!unchicken)  end a chat chicken early
   !protect  !reflect !jump  !life  !fire  !thunder  !enigma  !summon
                      cast that spell for real (its visual plays)   -- also  !spell <name>
@@ -62,6 +62,9 @@ MOBS / DUNGEON MASTER
                       megmat moby octorok ra tektite wizard wosu eyenocc
                       Chat spellings: knight/iron/darknut=ironknuckle  wiz=wizard  bird=fokka
                       lizard=daira  spider=deeler  slime=bot  eye=eyenocc  rock=rockgeru  octo=octorok
+                      !gorilla = !spawn goriya (autocorrect alias)
+                      More spellings: dair mobl/mob gori stal/skeleton ache(bat) slimes bubbles eyeball
+                      fokker ironknuckles lizalfos rockthrower wizzrobe
                       Add a colour word for the version: !spawn blue goriya 2 (blue/strong = hard,
                       red/orange = weak, v2 = version 2).  !spawn random rolls enemy and version.
   !slimed [rank] [s]  slime rain: Bots drop from the top of the screen for s seconds, rank 1-3
@@ -92,8 +95,13 @@ FUN / META
                       Timed: the room's own music comes back when the effect length runs out
   !song (!np !nowplaying !track)   what's playing
   !meth               moon + jump + speed          !quantumentangle (!qe)   a joke, tiny side effect
-  !fatality  !friendship  !flawless  !finisher     fire the MK2 splash (no gameplay effect)
-  !suggest <idea>     log an idea for the dev      !points (!bal)   your balance
+  !fatality  !friendship  !flawless  !finisher  !babality
+                      fire the MK2 splash (no gameplay effect; !babality = jingle + baby Link)
+  !trickortreat       Halloween week only (Oct 24-31): heads = full HP + MP, tails = -2 hearts and
+                      3 Bubble skulls at the door. One knock per chatter per 5 min
+  !haunt              20 s of !dark + !ghost, 3 skulls, Castlevania boss track. Any day; free during
+                      Halloween week
+  !suggest <idea>     log an idea for the dev      !points (!bal !pts)  your balance
   !top (!leaderboard) richest chatters             !kills (!blame)  who has killed the runner most
   !vote <x> <y> [s]   (!poll) chat picks between two effects, 20 s default (10-60).
                       While it runs, type  x  or  y  (or 1 / 2) in chat to vote. Starting a vote
@@ -103,7 +111,7 @@ FUN / META
                       Pays 2x / 5x / 3x.  e.g. !bet flawless 50
   !bounty <enemy> <n> (5-100) 2x back when the runner next kills that enemy. Any !spawn name.
                       Needs POINTS on and the BOUNTIES row (off by default)
-  !help (!cmds)       cheat sheet on stream        !version         build info
+  !help (!cmds)       cheat sheet on stream        !version (!ver !build)  build info
   !donothing  !rip  !blip  !coincidence  !getfed   just toasts
 
 MODS AND THE BROADCASTER
