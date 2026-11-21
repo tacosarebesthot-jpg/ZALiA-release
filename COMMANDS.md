@@ -30,7 +30,7 @@ with a `z2` prefix, so type `!z2bet`, `!z2points`, `!z2top` (or `!z2anything`) a
 - `!tax [pct]` (`!xp` `!taxes`) take 10% of XP, or 1-50%. This one is permanent.
 - `!dmgup` (`!doubledamage`) every hit on Link does double damage (timed). `!steal` (`!rob` `!thief` `!pickpocket`) borrow one item (timed).
 - `!catslap [n]` three slaps that knock Link around, no damage. n = frames before the first slap (60 = 1 s, max 300).
-- `!rust` the sword hits two attack levels lower (timed). `!adhd [s]` can't stop moving (timed).
+- `!rust` the sword hits two attack levels lower (timed). `!adhd [s]` can't stop moving, and Up/Down do nothing (no crouch, no elevators) (timed).
 - `!beef [s]` every mob on screen, bosses included, gets double HP, double damage and a 1.5x sprite. 40 points (timed).
 
 ## Chaos / screen (all timed)
@@ -67,7 +67,7 @@ with a `z2` prefix, so type `!z2bet`, `!z2points`, `!z2top` (or `!z2anything`) a
 
 - `!music <track>` play a jukebox track, part of the name is enough; `!music` alone shuffles. One song: the room's own music comes back when it ends.
 - `!song` (`!np` `!nowplaying` `!track`) what's playing.
-- `!meth` moon plus jump plus speed. `!quantumentangle` (`!qe`) a joke with a tiny side effect.
+- `!meth` moon plus jump plus speed. `!quantumentangle [s]` (`!qe`) one random effect (shake, disco, moon, shrink or grow); 3 s unless you give seconds.
 - `!fatality` `!friendship` `!flawless` `!finisher` `!babality` fire the MK2 splash, no gameplay effect (`!babality` = jingle plus baby Link, `!finisher` = random).
 - `!toasty` the FLAWLESS splash with the Toasty pop guaranteed. 30 points. Refused if the streamer has Toasty off.
 - `!trickortreat` Halloween week only (Oct 24-31): heads = full HP and MP, tails = two hearts gone and three Bubble skulls at the door. One knock per chatter per 5 min.
