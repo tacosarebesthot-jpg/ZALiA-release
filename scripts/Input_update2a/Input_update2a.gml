@@ -197,6 +197,11 @@ function Input_update2a() {
 	        if (global.tw_adhd_dir >= 0) Right_held = true;
 	        else                         Left_held  = true;
 	    }
+	    // 11-20 VOD 2:22 (Lane: "as long as I'm pushing down I won't go anywhere... I can always just duck
+	    // to stop"; owner: "they get out of walking by getting on an elevator or crouching"): while it runs,
+	    // Up and Down are not his to press. Crouch, elevators, up/down stabs all wait until it wears off.
+	    Down_held = 0; Down_pressed = 0; Down_released = 0;
+	    Up_held   = 0; Up_pressed   = 0; Up_released   = 0;
 	}
 
 	// Pack the FINAL resolved input (post dev-inject + twitch-confuse) into the 10-bit

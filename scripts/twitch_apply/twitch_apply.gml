@@ -1216,7 +1216,8 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 		case "quantumentangle":
 			{
 				var _qe = choose("shake", "disco", "moon", "shrink", "grow");
-				twitch_apply(_qe, "3", _who_s, "");
+				// 11-20 VOD 1:27 (Lane: "!qe 60" -> "it lasted like seconds"): the seconds now count, 3 s without one
+				twitch_apply(_qe, string((_arg_secs > 0) ? clamp(_arg_secs, 1, 60) : 3), _who_s, "");
 				global.tw_toast       = _who_s + " -> quantum entangled. observed: " + _qe + ". elsewhere: unknown.";
 				global.tw_toast_timer = 240;
 			}
@@ -1733,7 +1734,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 				reapply : function() { global.tw_adhd = true;  },
 				restore : function() { global.tw_adhd = false; }
 			});
-			global.tw_toast       = _who_s + " -> ADHD: can't stop walking for " + string(round(_frames / 60)) + "s";
+			global.tw_toast       = _who_s + " -> ADHD: can't stop walking (no crouch, no elevators) for " + string(round(_frames / 60)) + "s";
 			global.tw_toast_timer = 240;
 			break;
 		// ---- HALLOWEEN WEEK 2026 (owner 10-28: "add some of our own dark Halloween easter eggs") ----

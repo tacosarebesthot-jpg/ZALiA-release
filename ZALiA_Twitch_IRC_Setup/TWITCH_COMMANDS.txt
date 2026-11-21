@@ -37,7 +37,8 @@ HURT THE RUNNER
   !catslap [n]       three slaps that knock Link around, no damage  (Tangia "Cat Slap")
                      n = frames to wait before the first slap (60 = 1 s, max 300); always 3 slaps
   !rust              the sword hits two attack levels lower (HUD level unchanged)   [timed]
-  !adhd [s]          can't stop moving: Link keeps walking the last direction       [timed]
+  !adhd [s]          can't stop moving: Link keeps walking the last direction; Up and Down
+                     do nothing (no crouch, no elevators) while it runs                [timed]
   !beef [s]          every mob on screen, bosses included, (and new ones) gets double HP, double
                      damage and a 1.5x sprite. 40 points                             [timed]
 
@@ -97,7 +98,7 @@ FUN / META
   !music <track>      play a jukebox track (part of the name is enough); !music alone shuffles.
                       Timed: the room's own music comes back when the effect length runs out
   !song (!np !nowplaying !track)   what's playing
-  !meth               moon + jump + speed          !quantumentangle (!qe)   a joke, tiny side effect
+  !meth               moon + jump + speed          !quantumentangle [s] (!qe)  one random effect, 3 s unless you give seconds
   !toasty             the FLAWLESS splash with the Toasty pop guaranteed (30 points; refused if TOASTY is off)
   !fatality  !friendship  !flawless  !finisher  !babality
                       fire the MK2 splash (no gameplay effect; !babality = jingle + baby Link)
