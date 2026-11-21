@@ -499,6 +499,7 @@ function Surface_Draw_GUI_End() {
 	    // skip the very first track.
 	    var _jb_mode = variable_global_exists("jukebox_mode") ? global.jukebox_mode : JB_ADVANCE;
 	    if (_jb_mode != JB_REPEAT
+	    && !(variable_global_exists("tw_music_hold") && global.tw_music_hold) // a chat !music is one track, then the room music (11-20 VOD)
 	    &&  variable_global_exists("jukebox_inst") && global.jukebox_inst)
 	    {
 	        // A PAUSED track is not finished. audio_is_playing() is false while paused,

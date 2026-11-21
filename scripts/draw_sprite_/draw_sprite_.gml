@@ -23,8 +23,9 @@ function draw_sprite_() {
 	var _gh = variable_global_exists("tw_ghost") && global.tw_ghost;
 	var _bf = variable_global_exists("tw_beef")  && global.tw_beef;
 	if ((_gh || _bf) && argument_count >= 4 && !is_struct(self)
-	&&  is_ancestor(object_index, Enemy) && !is_ancestor(object_index, Boss))
+	&&  is_ancestor(object_index, Enemy) && (_bf || !is_ancestor(object_index, Boss)))
 	{
+		if (_gh && is_ancestor(object_index, Boss)) _gh = false; // ghost never hides a boss; beef (11-21) does scale one
 		var _gp = (argument_count > 4) ? argument[4] : 0;
 		if (_gp && _gp < global.palette_image_w) pal_swap_set(global.palette_image, _gp);
 		var _gsc = _bf ? 1.5 : 1;

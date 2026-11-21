@@ -467,6 +467,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					// room music, so the song died and silence followed until the timer ran out. The
 					// reapply below remembers the track position every frame and, once the room change
 					// or jingle is over, starts the same track again from that spot.
+					global.tw_music_hold = true; // chat owns the jukebox for ONE track: no auto-advance (Surface_Draw_GUI_End)
 					array_push(global.tw_active, {
 						frames  : _frames,
 						idx     : _hit,
@@ -475,6 +476,12 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 						hold    : 0,
 						reapply : function() {
 							if (!variable_global_exists("jukebox_on") || !global.jukebox_on) { self.frames = 0; return; } // the player toggled the jukebox off: let go
+							// 11-20 VOD (Lane 1:32 "every time it changes songs it restarts"; Gainey "!music is fucked"):
+							// when the requested track ended, the jukebox's own auto-advance (JB_ADVANCE, the
+							// default) started the NEXT track the same frame, and this reapply saw "still playing"
+							// and kept extending the clock, so one !music became a permanent jukebox session.
+							// The request is for ONE track: the moment the jukebox is on any other index, let go.
+							if (!variable_global_exists("jukebox_idx") || global.jukebox_idx != self.idx) { self.frames = 0; return; }
 							var _ji = variable_global_exists("jukebox_inst") ? global.jukebox_inst : 0;
 							if (_ji && audio_exists(_ji) && audio_is_playing(_ji))
 							{
@@ -484,7 +491,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 								if (self.len > 0) self.frames = max(self.frames, ceil((self.len - self.pos) * 60) + 30);
 								return;
 							}
-							// stopped under us: wait for the room change / the other music to finish, then resume
+							// stopped under us. If it reached its own end, the request is done: hand the room music back.
+							if (self.len > 0 && self.pos >= self.len - 1) { self.frames = 0; return; }
+							// otherwise wait for the room change / the other music to finish, then resume
 							if (!instance_exists(g) || g.ChangeRoom_timer > 0 || g.cutscene) return;
 							if (instance_exists(Audio) && Audio.mus_rm_inst && audio_exists(Audio.mus_rm_inst) && audio_is_playing(Audio.mus_rm_inst)) return;
 							if (self.hold > 0) { self.hold--; return; }
@@ -495,6 +504,9 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 							if (_nj && audio_exists(_nj) && self.pos > 0 && self.pos < self.len) audio_sound_set_track_position(_nj, self.pos);
 						},
 						restore : function() {
+							// a later !music took the jukebox over: leave it to that request
+							if (variable_global_exists("jukebox_idx") && global.jukebox_idx != self.idx && global.jukebox_on) return;
+							global.tw_music_hold = false;
 							// mirror the jukebox toggle-OFF path: stop our track so
 							// Audio_update_2 re-plays the normal room music next frame.
 							global.jukebox_on = false;
@@ -1146,6 +1158,21 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			}
 			break;
 
+		case "toasty": // 11-20 VOD: zero Toastys all stream at 1 in 10 (Lane 1:54, 2:06, 2:23); asm0deus typed "!toasty",
+			// owner "i was hoping for it to toasty rng". A paid, guaranteed one: the FLAWLESS splash with Toasty forced.
+			if (variable_global_exists("tw_toasty_1in") && global.tw_toasty_1in <= 0)
+			{
+				global.tw_toast       = _who_s + " -> Toasty is switched off (TOASTY row)";
+				global.tw_toast_timer = 240;
+				global.tw_apply_refused = true;
+				break;
+			}
+			global.tw_toasty_force = true; // tw_toasty_enqueue skips the 1-in-N roll once
+			tw_flawless_event("flawless");
+			global.tw_toast       = _who_s + " -> TOASTY!";
+			global.tw_toast_timer = 120;
+			break;
+
 		case "fatality":
 		case "friendship":
 		case "flawless":
@@ -1623,7 +1650,18 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					global.tw_apply_refused = true;
 					break;
 				}
-				global.tw_toast       = _who_s + " -> AMBUSH! " + string(_am_made) + ((_am_type == g.ENC_WEAK) ? " small" : " big") + " blob" + ((_am_made == 1) ? "" : "s") + " hunting you for " + string(_am_secs) + "s";
+				// 11-20 VOD 0:22:54, Lane: "if Ambush is only in the overworld and we have Boulder, just combine
+				// the two: it ambushes me AND puts boulders in front of me so it's easier for you to get me."
+				// Owner in chat: "will do, combine as Lane said". Same rules as !boulder (never sealed in,
+				// never on an entrance, map cap); a refused wall never refuses the ambush.
+				var _am_rocks = 0;
+				if (!variable_global_exists("tw_boulders")) global.tw_boulders = [];
+				if (array_length(global.tw_boulders) < TW_BOULDER_MAX)
+				{
+					_am_rocks = tw_boulder_drop(3);
+					if (_am_rocks < 0) { global.tw_boulder_pending = { n : 3, who : _who_s }; _am_rocks = 3; } // mid-step: lands when he stops
+				}
+				global.tw_toast       = _who_s + " -> AMBUSH! " + string(_am_made) + ((_am_type == g.ENC_WEAK) ? " small" : " big") + " blob" + ((_am_made == 1) ? "" : "s") + " hunting you for " + string(_am_secs) + "s" + ((_am_rocks > 0) ? " + boulders" : "");
 				global.tw_toast_timer = 240;
 			}
 			break;
@@ -1829,7 +1867,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 			global.tw_dmg_mult = 2;
 			with (Enemy)
 			{
-				if (is_ancestor(object_index, Boss)) continue;
+				// 11-20 VOD 1:09 (Lane: "what happens if you type beef on the boss?"), owner 11-21: bosses too
 				if (variable_instance_exists(id, "tw_beef") && tw_beef) continue;
 				if (variable_instance_exists(id, "hp") && hp > 0) { hp *= 2; tw_beef = true; }
 			}
@@ -1839,7 +1877,6 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					global.tw_beef = true; global.tw_dmg_mult = 2;
 					with (Enemy)
 					{
-						if (is_ancestor(object_index, Boss)) continue;
 						if (variable_instance_exists(id, "tw_beef") && tw_beef) continue;
 						if (variable_instance_exists(id, "hp") && hp > 0) { hp *= 2; tw_beef = true; }
 					}
@@ -1852,7 +1889,7 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					}
 				}
 			});
-			global.tw_toast       = _who_s + " -> BEEF: double HP, double damage, big mobs " + string(round(_frames / 60)) + "s";
+			global.tw_toast       = _who_s + " -> BEEF: double HP, double damage, big mobs (bosses too) " + string(round(_frames / 60)) + "s";
 			global.tw_toast_timer = 240;
 			break;
 		case "dmgup":

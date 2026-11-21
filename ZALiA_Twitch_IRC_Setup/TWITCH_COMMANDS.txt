@@ -11,6 +11,8 @@ A shared cooldown throttles all of chat, and each chatter also has their own
 on, most verbs have a price and !points shows your balance; the broadcaster is free.
 (Free for everyone: !help !points !top !kills !song !version !suggest !link !vote,
 the joke plates and the Rocket League plates.)
+Every verb also works with a z2 prefix (!z2bet !z2points !z2top ...) for channels where a chat bot
+such as StreamElements answers the plain name first.
 The EFFECT TIMERS row on the TWITCH OPTIONS page shows what is running, top-right.
 !help in chat puts a one-screen cheat sheet on stream; !help hurt (or chaos,
 mobs, fun, rl, mods) shows one page with what each verb does. Points are ON
@@ -36,7 +38,7 @@ HURT THE RUNNER
                      n = frames to wait before the first slap (60 = 1 s, max 300); always 3 slaps
   !rust              the sword hits two attack levels lower (HUD level unchanged)   [timed]
   !adhd [s]          can't stop moving: Link keeps walking the last direction       [timed]
-  !beef [s]          every non-boss mob on screen (and new ones) gets double HP, double
+  !beef [s]          every mob on screen, bosses included, (and new ones) gets double HP, double
                      damage and a 1.5x sprite. 40 points                             [timed]
 
 CHAOS / SCREEN (all timed)
@@ -73,7 +75,8 @@ MOBS / DUNGEON MASTER
                       cutscene it is QUEUED (up to 3) and lands on the next battle screen
   !ambush [1-6] [s] (!hunt !blobs)  OVERWORLD ONLY: big encounter blobs appear around Link and
                       hunt him (default 3 blobs, 20 s, max 60). Touching one starts the fight, same
-                      as a normal overworld encounter. Add "weak" for the small ones: !ambush 4 30 weak
+                      as a normal overworld encounter. Add "weak" for the small ones: !ambush 4 30 weak.
+                      Also drops a 3-boulder wall in front of Link (Lane: ambush + boulder together). 35 points
   !boulder [1-5] (!rocks !roadblock)  OVERWORLD ONLY: a wall of boulders right in front of Link
                       (default 3). The hammer breaks them; they all vanish when he leaves the overworld.
   !flute (!warp !tp)  warp Link to a random town he has already been in (either continent). Typed off
@@ -95,6 +98,7 @@ FUN / META
                       Timed: the room's own music comes back when the effect length runs out
   !song (!np !nowplaying !track)   what's playing
   !meth               moon + jump + speed          !quantumentangle (!qe)   a joke, tiny side effect
+  !toasty             the FLAWLESS splash with the Toasty pop guaranteed (30 points; refused if TOASTY is off)
   !fatality  !friendship  !flawless  !finisher  !babality
                       fire the MK2 splash (no gameplay effect; !babality = jingle + baby Link)
   !trickortreat       Halloween week only (Oct 24-31): heads = full HP + MP, tails = -2 hearts and

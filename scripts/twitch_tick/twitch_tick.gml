@@ -370,7 +370,9 @@ function tw_toasty_enqueue() {
 	// 11-08 owner: 1 in X, not every play of the MK things -- toasty_1in= (0 off, 2..50, default 10)
 	var _n1 = variable_global_exists("tw_toasty_1in") ? global.tw_toasty_1in : 10;
 	var _shot = variable_global_exists("tw_selftest_mode") && global.tw_selftest_mode == "splash"; // the splash selftest screenshots it every time
-	if (!_shot && (_n1 <= 0 || irandom(_n1 - 1) != 0)) return;
+	var _force = variable_global_exists("tw_toasty_force") && global.tw_toasty_force; // !toasty (11-20): one guaranteed pop
+	global.tw_toasty_force = false;
+	if (!_shot && !_force && (_n1 <= 0 || irandom(_n1 - 1) != 0)) return;
 	var _s = asset_get_index("snd_mk2_toasty");
 	// wait 30 frames after the finisher ends, show for 60 frames (7 in / 35 hold / 18 out, see the
 	// draw block); looping mode on a 1-frame sprite. The sound plays as the head starts sliding in.

@@ -270,7 +270,7 @@ function tw_verb_all() {
 		"fire","thunder","thun","enigma","spel","jump","life","summon","summ",
 		"ice","icefloor","moon","root","deny","undeny",
 		"poison","catslap","flashbang","suggest","steal","rob","thief","pickpocket",
-		"fatality","friendship","flawless","finisher","babality","np","nowplaying","track",
+		"fatality","friendship","flawless","finisher","babality","toasty","np","nowplaying","track",
 		"link","unchicken","donothing","rip","blip","coincidence","getfed",
 		"tax","dmgup","attrition","meth","quantumentangle","help","challenge","disorient",
 		"stasis","points","pts","bal","ghost","crush",

@@ -156,6 +156,11 @@ function twitch_irc_handle_line(_line) {
 	// in the VOD rips (CHAT_IDEAS_2026-09-10.md).
 	_verb = tw_clean_command(string_delete(string(_verb), 1, 1)); // strip "!", then clean
 	if (_verb == "") return;
+	// 11-20 VOD (owner): StreamElements on Lane's channel answers !bet / !points / !top / !commands
+	// before the game can, so every verb also works with a z2 prefix: !z2bet !z2points !z2top, and
+	// !z2<anything> for the rest. The prefix comes off here, before the typo hint and the dispatcher.
+	if (string_length(_verb) > 2 && string_copy(_verb, 1, 2) == "z2" && tw_irc_is_verb(string_delete(_verb, 1, 2)))
+		_verb = string_delete(_verb, 1, 2);
 
 	// ---- MOD VERBS: handled here because only this layer knows who is a mod --------
 	// !ignore <name> / !unignore <name> (aliases !mute / !unmute). Never cost points, never
