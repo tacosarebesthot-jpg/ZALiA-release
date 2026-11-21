@@ -21,7 +21,7 @@ with a `z2` prefix, so type `!z2bet`, `!z2points`, `!z2top` (or `!z2anything`) a
 
 - `!heal [n]` full HP, or n quarter-boxes. `!mp [n]` full MP, or n points. `!refill` (`!fairy` `!fary`) both.
 - `!1up` +1 life. `!invuln [s]` invincible. `!link` (`!unchicken`) end a chat chicken early.
-- `!protect` `!reflect` `!jump` `!life` `!fire` `!thunder` `!enigma` `!summon` cast that spell for real. Also `!spell <name>`.
+- `!protect` `!reflect` `!jump` `!life` `!fire` `!thunder` `!enigma` `!summon` cast that spell for real, and like a real cast it lasts until the screen changes. Also `!spell <name>`.
 
 ## Hurt the runner
 
