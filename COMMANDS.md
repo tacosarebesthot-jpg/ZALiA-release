@@ -14,6 +14,9 @@ Free for everyone: `!help` `!points` `!top` `!kills` `!song` `!version` `!sugges
 `!vote`, the joke plates and the Rocket League plates. `!help` puts a cheat sheet on stream;
 `!help hurt` (or `chaos`, `mobs`, `fun`, `rl`, `mods`) shows one page.
 
+**StreamElements grabs some of these on Lane's channel** (!bet !points !top !commands). Every verb also works
+with a `z2` prefix, so type `!z2bet`, `!z2points`, `!z2top` (or `!z2anything`) and the game answers.
+
 ## Help the runner
 
 - `!heal [n]` full HP, or n quarter-boxes. `!mp [n]` full MP, or n points. `!refill` (`!fairy` `!fary`) both.
@@ -28,7 +31,7 @@ Free for everyone: `!help` `!points` `!top` `!kills` `!song` `!version` `!sugges
 - `!dmgup` (`!doubledamage`) every hit on Link does double damage (timed). `!steal` (`!rob` `!thief` `!pickpocket`) borrow one item (timed).
 - `!catslap [n]` three slaps that knock Link around, no damage. n = frames before the first slap (60 = 1 s, max 300).
 - `!rust` the sword hits two attack levels lower (timed). `!adhd [s]` can't stop moving (timed).
-- `!beef [s]` every non-boss mob gets double HP, double damage and a 1.5x sprite. 40 points (timed).
+- `!beef [s]` every mob on screen, bosses included, gets double HP, double damage and a 1.5x sprite. 40 points (timed).
 
 ## Chaos / screen (all timed)
 
@@ -49,7 +52,7 @@ Free for everyone: `!help` `!points` `!top` `!kills` `!song` `!version` `!sugges
   Add a colour word for the version: `!spawn blue goriya 2` (blue/strong = hard, red/orange = weak, v2 = version 2). `!spawn random` rolls enemy and version.
 - `!slimed [rank] [s]` slime rain: Bots drop from the top for s seconds, rank 1-3 sets the pace.
 - `!swarm [1-6]` a pack of random enemies (default 3). Typed on the overworld or in a cutscene it is queued (up to 3) for the next battle screen.
-- `!ambush [1-6] [s]` (`!hunt` `!blobs`) OVERWORLD ONLY: encounter blobs appear around Link and hunt him (default 3 blobs, 20 s, max 60). Add `weak` for small ones: `!ambush 4 30 weak`.
+- `!ambush [1-6] [s]` (`!hunt` `!blobs`) OVERWORLD ONLY: encounter blobs appear around Link and hunt him (default 3 blobs, 20 s, max 60), and a 3-boulder wall drops in front of him (Lane's rule: ambush and boulder together). Add `weak` for small ones: `!ambush 4 30 weak`. 35 points.
 - `!boulder [1-5]` (`!rocks` `!roadblock`) OVERWORLD ONLY: a wall of boulders in front of Link (default 3). The hammer breaks them; they vanish when he leaves the overworld.
 - `!flute` (`!warp` `!tp`) warp Link to a random town he has already visited. Off the overworld it waits until he is back on the map. 10 min cooldown for all of chat.
 - `!prison` (`!jail` `!lockdown`) the room's exits lock: 3 waves of 3 random mobs, harder each wave. Not in boss rooms; dying or falling down a pit ends it. 10 min cooldown for all of chat.
@@ -62,10 +65,11 @@ Free for everyone: `!help` `!points` `!top` `!kills` `!song` `!version` `!sugges
 
 ## Fun / meta
 
-- `!music <track>` play a jukebox track, part of the name is enough; `!music` alone shuffles. Timed: the room's own music comes back after.
+- `!music <track>` play a jukebox track, part of the name is enough; `!music` alone shuffles. One song: the room's own music comes back when it ends.
 - `!song` (`!np` `!nowplaying` `!track`) what's playing.
 - `!meth` moon plus jump plus speed. `!quantumentangle` (`!qe`) a joke with a tiny side effect.
 - `!fatality` `!friendship` `!flawless` `!finisher` `!babality` fire the MK2 splash, no gameplay effect (`!babality` = jingle plus baby Link, `!finisher` = random).
+- `!toasty` the FLAWLESS splash with the Toasty pop guaranteed. 30 points. Refused if the streamer has Toasty off.
 - `!trickortreat` Halloween week only (Oct 24-31): heads = full HP and MP, tails = two hearts gone and three Bubble skulls at the door. One knock per chatter per 5 min.
 - `!haunt` 20 s of `!dark` plus `!ghost`, three skulls and the Castlevania boss track. Any day; free during Halloween week.
 - `!suggest <idea>` log an idea for the dev. `!points` (`!bal` `!pts`) your balance. `!top` (`!leaderboard`) richest chatters. `!kills` (`!blame`) who has killed the runner most.
