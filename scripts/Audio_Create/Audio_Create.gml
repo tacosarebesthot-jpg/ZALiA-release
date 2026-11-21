@@ -1632,6 +1632,7 @@ function Audio_Create() {
 	timing_sound_position_prev = 0;
 	timing_sound_position_curr = 0;
 	timing_sound_inst = 0;
+	timing_sound_asset = -1; // which timing track was started last (intro / loop / Halloween); -1 = none
 
 	add_sound_data(snd_Default_Title_Intro_no_volume,0);
 	add_sound_data(snd_Default_Title_no_volume,0);

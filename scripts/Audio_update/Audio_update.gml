@@ -34,19 +34,26 @@ function Audio_update() {
 	        if (tw_halloween())
 	        {
 	            if (_ts_name!=audio_get_name(mus_Castlevania_Stage_01_Vampire_Killer))
-	            {   timing_sound_inst = aud_play_sound(mus_Castlevania_Stage_01_Vampire_Killer, 1,true);  }
-	        }
-	        else if (_ts_name!=audio_get_name(snd_Default_Title_Intro_no_volume)
-	        &&  _ts_name!=audio_get_name(snd_Default_Title_no_volume) )
-	        {
-	            timing_sound_inst = aud_play_sound(snd_Default_Title_Intro_no_volume, 1,false);
-	        }
-	        else
-	        {
-	            if (_ts_name==audio_get_name(snd_Default_Title_Intro_no_volume)
-	            && !_ts_playing )
 	            {
-	                timing_sound_inst = aud_play_sound(snd_Default_Title_no_volume, 1,true);
+	                timing_sound_inst  = aud_play_sound(mus_Castlevania_Stage_01_Vampire_Killer, 1,true);
+	                timing_sound_asset = mus_Castlevania_Stage_01_Vampire_Killer;
+	            }
+	        }
+	        else if (!_ts_playing)
+	        {
+	            // TITLE SCROLL FIX (2026-11-21, GitHub issue #2): the dead-instance guard above
+	            // returns "" once the 8.5 s intro ends, so the old name test replayed the intro
+	            // forever and the 60 s loop (the clock for the logo reveal + story crawl) never
+	            // started. Hand off by the asset we remember, not by the finished instance.
+	            if (timing_sound_asset==snd_Default_Title_Intro_no_volume)
+	            {
+	                timing_sound_inst  = aud_play_sound(snd_Default_Title_no_volume, 1,true);
+	                timing_sound_asset = snd_Default_Title_no_volume;
+	            }
+	            else
+	            {
+	                timing_sound_inst  = aud_play_sound(snd_Default_Title_Intro_no_volume, 1,false);
+	                timing_sound_asset = snd_Default_Title_Intro_no_volume;
 	            }
 	        }
 	    }
