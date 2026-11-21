@@ -644,10 +644,16 @@ function twitch_apply(_verb, _arg, _who, _dur) {
 					var _sel_keep = g.spell_selected;
 					cast_spell(_spellbit);
 					g.spell_selected = _sel_keep;
+					// 11-20 VOD 1:17 (Lane: "the jump will wear off, huh? ... regular spells in the game last
+					// the whole screen"), owner 11-21: a chat cast lasts like a real cast. The game itself clears
+					// spells_active on every screen change (g_Room_Start), and instant spells clear their own
+					// bit, so the entry simply ends the moment the bit is gone. FAIRY keeps the effect length
+					// (the chicken has its own rules, see !arise).
 					array_push(global.tw_active, {
-						frames  : _frames,
+						frames  : (_spellbit == SPL_FARY) ? _frames : 60 * 60 * 10,
 						bit     : _spellbit,
 						was_act : _was_active,
+						reapply : function() { if (!instance_exists(g) || !(g.spells_active & self.bit)) self.frames = 0; },
 						restore : function() { if (instance_exists(g) && !self.was_act) g.spells_active &= ~self.bit; }
 					});
 

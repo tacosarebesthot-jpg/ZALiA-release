@@ -23,7 +23,7 @@ HELP THE RUNNER
   !refill (!fairy !fary)  full HP + MP                        !1up        +1 life
   !invuln [s]        invincible for the effect length    !link (!unchicken)  end a chat chicken early
   !protect  !reflect !jump  !life  !fire  !thunder  !enigma  !summon
-                     cast that spell for real (its visual plays)   -- also  !spell <name>
+                     cast that spell for real; lasts until the screen changes  -- also  !spell <name>
 
 HURT THE RUNNER
   !hurt [n]          chip damage: n quarter-boxes (1-8), never lethal (stops at 1 HP)
