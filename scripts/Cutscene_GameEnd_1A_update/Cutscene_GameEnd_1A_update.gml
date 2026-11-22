@@ -203,6 +203,16 @@ function Cutscene_GameEnd_1A_update() {
     
     
 	    g.cutscene_timer = DUR1; // DUR1: $5F 1.583s. Delay change rm.
+	    // TOAD CARD (Lane 11-20 2:48 "they should put Toad in there: you gotta do it again"; owner: "to let
+	    // ppl know there is more in the 2nd quest", "replace the princess with Toadstool"): after the first
+	    // quest only, a Mario-style plate before the credits. Drawn by Cutscene_GameEnd_1A_draw.
+	    toad_card_timer = (f.quest_num == 1) ? 420 : 0; // 7 s, skipped on the second quest onward
+	    g.cutscene_part++;
+	    break;}
+	    // ------------------------------------------------------------------------
+	    case 7:{ // TOAD CARD (first quest only)
+	    if (g.cutscene_timer) break;
+	    if (toad_card_timer > 0) { toad_card_timer--; break; }
 	    g.cutscene_part++;
 	    break;}
     
@@ -214,7 +224,7 @@ function Cutscene_GameEnd_1A_update() {
     
 	    // ===================================================================================
 	    // ------------------------------------------------------------------------
-	    case 7:{ // CHANGE RM
+	    case 8:{ // CHANGE RM
 	    if (g.cutscene_timer) break;
     
     

@@ -11,8 +11,8 @@ function g_Room_Start_1a() {
 	var _SCENE_IS_RANDOMIZED = argument[_arg++];
 
 
-	var _obj = val(dm_spawn[?_SPAWN_DATAKEY+STR_obj_idx]);
-	if(!_obj)
+	var _obj = dm_spawn[?_SPAWN_DATAKEY+STR_obj_idx];
+	if (is_undefined(_obj) || !object_exists(_obj)) // PORT FIX 2026-11-22: Ache01 is object_index 0, `!_obj` dropped every bat
 	{
 	    return _dg_encoded;
 	}

@@ -308,8 +308,12 @@ function g_Room_Start_1() {
 	            break;}
 	        }
         
-	            _obj  = val(dm_spawn[?_spawn_datakey+STR_obj_idx]);
-	        if(!_obj)
+	            _obj  = dm_spawn[?_spawn_datakey+STR_obj_idx];
+	        // PORT FIX 2026-11-22 (Lane 11-06 "no bats all seed", 11-20 "the bats are gone again", owner:
+	        // 3 runs, nothing in _WestA_21): Ache01 is the FIRST object in the GMS2 project, so its
+	        // object_index is 0 and the old `if(!_obj)` threw away every bat the room data places,
+	        // PRIO and PRXM alike, in every scene. Test for a missing entry, not for zero.
+	        if (is_undefined(_obj) || !object_exists(_obj))
 	        {
 	            continue;//_j
 	        }
