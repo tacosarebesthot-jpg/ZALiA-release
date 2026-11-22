@@ -2,6 +2,34 @@
 
 Version shows bottom-right of the title screen and answers `!version` in chat. Playtest zips are named after it. Dates are the day the build went out.
 
+## 2.1.12 — 2026-11-22
+
+Lane's 2026-11-20 stream (his first on 2.1.11; seed completed) plus two long-standing port bugs found the same week.
+
+**Fixed (port bugs)**
+
+- **Bats never spawned.** In every 2.x build, every bat the room data places (caves, palaces, the Tantari Desert cave Lane kept asking about) was silently dropped when the screen loaded: the bat is the first object in the GameMaker project, so its object index is 0 and the loader read "0" as "no object". Lane's "no bats all seed" from 11-06 was this, not the randomizer.
+- **Title screen.** The ZELDA II logo and the story crawl never played in any 2.x build (GitHub issue #2): the silent track that clocks the title scroll restarted its 8 second intro forever instead of handing off to the 60 second loop. Logo at about 9 s, crawl from about 35 s, then it repeats.
+- **`!music` never ended** and changed songs every screen. The jukebox's own auto-advance kept the chat request alive. A request is now one song: it resumes across a screen change and the room music comes back when it ends.
+- **`!adhd` could be cancelled** by crouching or riding an elevator. Up and Down do nothing while it runs.
+- **`!qe` ignored its seconds.** `!quantumentangle 60` now lasts 60 s (3 s without a number, cap 60).
+
+**New for chat**
+
+- **`!toasty`**: the FLAWLESS splash with the Toasty pop guaranteed. 30 points. Refused if the TOASTY row is off.
+- **z2 prefix**: every verb also works as `!z2<verb>` (`!z2bet`, `!z2points`, `!z2top`) for channels where StreamElements answers the plain name first.
+- **`!ambush` drops a 3-boulder wall too** (Lane: "just combine the two"). 35 points.
+- **`!beef` hits bosses** as well: double HP, double damage, drawn 1.5x.
+- **Chat-cast spells last the whole screen** like a real cast (`!jump`, `!shield`, `!reflect`, `!spell <name>`). Fairy keeps the effect length.
+
+**Ending**
+
+- After the **first quest** a Mario-style card: "Thank you Link! But our princess is in another castle... the second quest awaits." (Lane and Gainey, 11-20.)
+
+**Docs**
+
+- [COMMANDS.md](COMMANDS.md): the viewer-facing command list, checked against the game before every release.
+
 ## 2.1.11 — 2026-11-09
 
 Lane's 2026-11-06 stream and his Discord answers (2026-11-09). Chat finally has ways to bother Link on the overworld.

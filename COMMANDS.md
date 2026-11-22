@@ -1,7 +1,7 @@
 # ZALiA chat commands
 
-<!-- VERSION: 2.1.11 -->
-**Current for ZALiA 2.1.11.** This page is checked against the game code before every
+<!-- VERSION: 2.1.12 -->
+**Current for ZALiA 2.1.12.** This page is checked against the game code before every
 release (`_scripts/check_commands_doc.py`), so if the game has a command, it is on this page.
 `!version` in chat tells you which build the streamer is running.
 
